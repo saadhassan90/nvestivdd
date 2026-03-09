@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { TrendingUp, DollarSign } from "lucide-react";
+import { TrendingUp, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface PerformanceMetric {
   id: string;
@@ -32,6 +33,7 @@ interface FeeItem {
 interface PerformanceTabProps {
   metrics: PerformanceMetric[];
   fees: FeeItem[];
+  reportSections?: { section_title: string | null; content: string | null; section_key: string }[];
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
