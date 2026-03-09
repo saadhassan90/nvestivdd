@@ -4,6 +4,7 @@ import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
 import { ChatEmptyState } from "./ChatEmptyState";
+import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
 
 const MODELS = [
@@ -109,8 +110,9 @@ export function ChatSidebar() {
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
-            className="absolute inset-0 overflow-y-auto px-4 py-4 pb-28 space-y-4"
+            className="absolute inset-0 overflow-y-auto px-4 py-4 pb-28 space-y-4 bg-muted/40"
           >
+            <DotPattern className="fill-muted-foreground/15" />
             {messages.length === 0 ? (
               <ChatEmptyState
                 onPrompt={(p) => {
