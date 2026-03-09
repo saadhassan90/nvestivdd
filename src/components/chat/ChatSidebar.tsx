@@ -157,9 +157,11 @@ export function ChatSidebar() {
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
               </button>
             </div>
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
-              {currentModel.label} · {projectScope ? `Scoped to ${projectScope.name}` : "Global mode"}
-            </p>
+            {projectScope && (
+              <p className="mt-1.5 text-[10px] text-muted-foreground">
+                Scoped to {projectScope.name}
+              </p>
+            )}
           </div>
         </>
       )}
