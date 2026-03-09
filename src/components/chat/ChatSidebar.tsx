@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { X, SquarePen, Menu, ChevronDown, Check, Paperclip, ArrowUp, Loader2 } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
@@ -11,6 +11,35 @@ import { cn } from "@/lib/utils";
 const MODELS = [
 { id: "sonnet-4", label: "Sonnet 4", desc: "Default" },
 { id: "haiku-3.5", label: "Haiku 3.5", desc: "Fast" }];
+
+function getSuggestedPrompts(lastAssistantMsg: ChatMessage | undefined, isScoped: boolean): string[] {
+  if (!lastAssistantMsg?.content) return [];
+  const c = lastAssistantMsg.content.toLowerCase();
+
+  const suggestions: string[] = [];
+
+  if (c.includes("risk") || c.includes("flag"))
+    suggestions.push("How can these risks be mitigated?", "Which risk is most critical?");
+  if (c.includes("fee") || c.includes("expense") || c.includes("cost"))
+    suggestions.push("How do these fees compare to market?", "Break down the fee waterfall");
+  if (c.includes("score") || c.includes("rating"))
+    suggestions.push("What's driving the score?", "How can the score improve?");
+  if (c.includes("memo") || c.includes("summary") || c.includes("overview"))
+    suggestions.push("Add more detail on track record", "What are the key concerns?");
+  if (c.includes("term") || c.includes("structure"))
+    suggestions.push("Are these terms market-standard?", "What terms should I negotiate?");
+
+  // Always offer these general follow-ups
+  if (suggestions.length < 3) {
+    if (isScoped) {
+      suggestions.push("Draft an IC memo for this deal", "What should I ask the GP?", "Compare to similar funds");
+    } else {
+      suggestions.push("Which deal needs attention first?", "Summarize my portfolio risks", "What deals should I avoid?");
+    }
+  }
+
+  return suggestions.slice(0, 4);
+}
 
 
 export function ChatSidebar() {
@@ -65,6 +94,15 @@ export function ChatSidebar() {
   };
 
   const currentModel = MODELS.find((m) => m.id === selectedModel) || MODELS[0];
+
+  const lastAssistantMsg = useMemo(
+    () => [...messages].reverse().find((m) => m.role === "assistant" && m.content && !m.isStreaming),
+    [messages]
+  );
+  const suggestedPrompts = useMemo(
+    () => getSuggestedPrompts(lastAssistantMsg, !!projectScope),
+    [lastAssistantMsg, projectScope]
+  );
 
   if (!isOpen) return null;
 
@@ -135,7 +173,25 @@ export function ChatSidebar() {
           </div>
 
           {/* Floating Input */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+              {/* Suggested follow-up prompts */}
+              {suggestedPrompts.length > 0 && !isLoading && (
+                <div className="pointer-events-auto flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
+                  {suggestedPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => {
+                        setInput(prompt);
+                        setUserScrolled(false);
+                        setTimeout(() => sendMessage(prompt), 0);
+                      }}
+                      className="shrink-0 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              )}
             <div className="pointer-events-auto rounded-2xl border border-border bg-card shadow-lg p-3">
               <textarea
               ref={textareaRef}
