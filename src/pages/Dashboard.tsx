@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { NewDealModal } from "@/components/dashboard/NewDealModal";
 import { FilterBar, type FilterState } from "@/components/dashboard/FilterBar";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+
 import { supabase } from "@/integrations/supabase/client";
 import { getScoreTier } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
