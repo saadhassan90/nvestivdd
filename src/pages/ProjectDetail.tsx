@@ -208,9 +208,6 @@ export default function ProjectDetail() {
               {activeTab === "strategy" && (
                 <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_key === 'module_c_strategy' || s.section_key === 'module_c')} />
               )}
-              {activeTab === "operations" && (
-                <TeamTab teamMembers={[]} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_key === 'module_e_operations' || s.section_key === 'module_e')} />
-              )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab redFlags={redFlags} />
               )}
