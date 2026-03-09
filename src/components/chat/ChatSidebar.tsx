@@ -74,16 +74,16 @@ export function ChatSidebar() {
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
+            <button onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
+              <Menu className="h-4 w-4 text-muted-foreground" />
+            </button>
             <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
-            <span className="text-sm font-semibold text-foreground">Iris</span>
+            <span className="text-sm font-semibold text-foreground">Ask Iris</span>
           </div>
 
           <div className="flex items-center gap-1">
             <button onClick={() => {startNewConversation();setShowHistory(false);}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
               <SquarePen className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <button onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
-              <History className="h-4 w-4 text-muted-foreground" />
             </button>
             <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Close">
               <X className="h-4 w-4 text-muted-foreground" />
