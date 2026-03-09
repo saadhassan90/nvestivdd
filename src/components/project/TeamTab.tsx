@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
+
 
 interface TeamMember {
   id: string;
