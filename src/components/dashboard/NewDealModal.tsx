@@ -35,6 +35,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   const [assetClass, setAssetClass] = useState("");
   const [submitterName, setSubmitterName] = useState("");
   const [submitterCompany, setSubmitterCompany] = useState("");
+  const [submitterEmail, setSubmitterEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -56,7 +57,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   };
 
   const handleSubmit = async () => {
-    if (!fundName.trim() || files.length === 0) return;
+    if (!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
     setLoading(true);
 
     try {
@@ -66,7 +67,10 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           fund_name: fundName.trim(),
           asset_class: assetClass || null,
           status: 'uploading',
-        })
+          submitter_name: submitterName.trim(),
+          submitter_company: submitterCompany.trim(),
+          submitter_email: submitterEmail.trim(),
+        } as any)
         .select()
         .single();
 
@@ -209,7 +213,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Your Name</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Your Name <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     placeholder="e.g. Jane Smith"
@@ -219,7 +223,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Company</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Company <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     placeholder="e.g. Meridian Capital"
@@ -228,6 +232,16 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
                     className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
+              </div>
+              <div className="mt-3">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Email <span className="text-destructive">*</span></label>
+                <input
+                  type="email"
+                  placeholder="e.g. jane@meridian.com"
+                  value={submitterEmail}
+                  onChange={(e) => setSubmitterEmail(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
               </div>
             </div>
           </div>
@@ -240,7 +254,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </button>
           <ShimmerButton
             onClick={handleSubmit}
-            disabled={!fundName.trim() || files.length === 0 || loading}
+            disabled={!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim() || loading}
           >
             {loading ? "Submitting..." : "Begin Analysis"}
             <Zap className="h-4 w-4" />

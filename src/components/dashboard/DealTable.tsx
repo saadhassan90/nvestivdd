@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
@@ -10,6 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface DealTableProps {
@@ -117,12 +123,15 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Flags</th>
+              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</th>
               <th className="px-3 lg:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12"></th>
             </tr>
           </thead>
           <tbody>
             {projects.map((project) => {
               const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+              const submitter = (project as any).submitter_name;
+              const submitterCompany = (project as any).submitter_company;
               return (
                 <tr
                   key={project.id}
@@ -148,6 +157,36 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   </td>
                   <td className="px-3 lg:px-4 py-2">
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
+                  </td>
+                  <td className="px-3 lg:px-4 py-2">
+                    {submitter ? (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm text-foreground cursor-default hover:text-primary transition-colors">
+                              {submitter}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="p-0 border-0 bg-transparent shadow-none">
+                            <div className="rounded-xl border border-border bg-card p-4 shadow-lg min-w-[200px]">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                  <User className="h-4 w-4 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-foreground">{submitter}</p>
+                                  {submitterCompany && (
+                                    <p className="text-xs text-muted-foreground">{submitterCompany}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-3 lg:px-4 py-2 text-right">
                     <DropdownMenu>
