@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X, SquarePen, History, ChevronDown, Check, Sparkles, Paperclip, ArrowUp, Loader2 } from "lucide-react";
+import { X, SquarePen, History, ChevronDown, Check, Paperclip, ArrowUp, Loader2 } from "lucide-react";
+import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
@@ -73,8 +74,8 @@ export function ChatSidebar() {
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Nvestiv AI</span>
+            <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
+            <span className="text-sm font-semibold text-foreground">Iris</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -107,13 +108,15 @@ export function ChatSidebar() {
         <ChatHistory onBack={() => setShowHistory(false)} />
       ) : (
         <div className="relative flex-1 min-h-0">
+          {/* Vignette fade overlay */}
+          <div className="pointer-events-none absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse at center, transparent 20%, hsl(var(--muted)) 80%)" }} />
           {/* Messages */}
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
             className="absolute inset-0 overflow-y-auto px-4 pt-3 pb-28 space-y-3 bg-muted"
           >
-            <DotPattern className="fill-muted-foreground/30" />
+            <DotPattern className="fill-muted-foreground/10" />
             {messages.length === 0 ? (
               <ChatEmptyState
                 onPrompt={(p) => {
