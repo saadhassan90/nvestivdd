@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface DotPatternProps {
   className?: string;
+  style?: React.CSSProperties;
   width?: number;
   height?: number;
   cx?: number;
