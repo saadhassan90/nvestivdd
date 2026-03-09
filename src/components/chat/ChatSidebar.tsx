@@ -70,23 +70,36 @@ export function ChatSidebar() {
   return (
     <div className="flex flex-col h-full w-full bg-card border-l border-border">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Nvestiv AI</span>
-        </div>
+      <div className="border-b border-border bg-card shrink-0">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground">Nvestiv AI</span>
+          </div>
 
-        <div className="flex items-center gap-1">
-          <button onClick={() => { startNewConversation(); setShowHistory(false); }} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
-            <SquarePen className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <button onClick={() => { setShowHistory(!showHistory); if (!showHistory) loadConversations(); }} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
-            <History className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Close">
-            <X className="h-4 w-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => { startNewConversation(); setShowHistory(false); }} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
+              <SquarePen className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button onClick={() => { setShowHistory(!showHistory); if (!showHistory) loadConversations(); }} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
+              <History className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Close">
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
+        {projectScope && (
+          <div className="flex items-center gap-2 px-4 pb-2.5">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Current context</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground">
+              📎 {projectScope.name}
+              <button onClick={() => setProjectScope(null)} className="hover:text-destructive ml-0.5">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -98,20 +111,9 @@ export function ChatSidebar() {
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
-            className="absolute inset-0 overflow-y-auto px-4 pt-1 pb-28 space-y-3 bg-muted"
+            className="absolute inset-0 overflow-y-auto px-4 pt-3 pb-28 space-y-3 bg-muted"
           >
             <DotPattern className="fill-muted-foreground/30" />
-            {/* Scope pill */}
-            {projectScope && (
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[11px] font-medium text-foreground border border-border">
-                  📎 {projectScope.name}
-                  <button onClick={() => setProjectScope(null)} className="hover:text-destructive ml-0.5">
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              </div>
-            )}
             {messages.length === 0 ? (
               <ChatEmptyState
                 onPrompt={(p) => {
