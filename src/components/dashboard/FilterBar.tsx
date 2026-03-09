@@ -1,4 +1,3 @@
-import { useState, useMemo } from "react";
 import { Search, ArrowUpDown, X, ChevronDown } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import {
@@ -54,7 +53,7 @@ function FilterDropdown({ label, value, options, onSelect, onClear }: {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+        <button className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
           value
             ? 'bg-primary text-primary-foreground'
             : 'border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30'
@@ -92,7 +91,8 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
 
   return (
     <BlurFade delay={0.2}>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Filters row */}
         <div className="flex items-center gap-2 flex-wrap">
           <FilterDropdown
             label="Asset Class"
@@ -116,9 +116,8 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
             onClear={() => onChange({ ...filters, recommendation: null })}
           />
 
-          {/* Active filter chips */}
           {activeChips.map(chip => (
-            <span key={chip.key} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">
+            <span key={chip.key} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground">
               {chip.label}
               <button onClick={() => clearFilter(chip.key)} className="hover:text-severity-critical transition-colors">
                 <X className="h-3 w-3" />
@@ -127,23 +126,24 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
           ))}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="relative">
+        {/* Search + Sort */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Filter funds..."
               value={filters.search}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
-              className="w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full sm:w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <button className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0">
                 <ArrowUpDown className="h-3.5 w-3.5" />
-                Sort
+                <span className="hidden sm:inline">Sort</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
