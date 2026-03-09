@@ -73,9 +73,9 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
 
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         {[
+          { key: "market", label: "Market Factors", count: marketFactors.length, icon: Wind },
           { key: "thesis", label: "Thesis Validation", count: thesisValidations.length, icon: Target },
           { key: "competitors", label: "Competitors", count: competitors.length, icon: Swords },
-          { key: "market", label: "Market Factors", count: marketFactors.length, icon: Wind },
         ].map(s => (
           <button
             key={s.key}
