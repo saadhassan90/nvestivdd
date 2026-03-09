@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MarkdownContent } from "@/components/project/MarkdownContent";
