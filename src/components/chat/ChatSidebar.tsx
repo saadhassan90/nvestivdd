@@ -116,7 +116,7 @@ export function ChatSidebar() {
           >
             <DotPattern className="fill-muted-foreground/10" />
             {/* Vignette fade overlay */}
-            <div className="pointer-events-none fixed inset-0 z-10" style={{ background: "radial-gradient(ellipse at center, transparent 30%, hsl(var(--muted)) 85%)" }} />
+            <div className="pointer-events-none sticky top-0 left-0 right-0 -mt-3 h-full w-full z-10" style={{ position: "sticky", background: "radial-gradient(ellipse at center, transparent 20%, hsl(var(--muted)) 80%)", marginBottom: "-100%" }} />
             {messages.length === 0 ? (
               <ChatEmptyState
                 onPrompt={(p) => {
