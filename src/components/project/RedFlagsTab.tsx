@@ -5,6 +5,14 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { formatRelativeTime } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
+const MODULE_LABELS: Record<string, string> = {
+  module_a: "Financial & Performance",
+  module_b: "Team & Management",
+  module_c: "Strategy & Market",
+  module_d: "Terms & Structure",
+  module_e: "Operational",
+};
+
 interface RedFlagsTabProps {
   redFlags: Tables<"red_flags">[];
 }
