@@ -50,6 +50,7 @@ export default function ProjectDetail() {
     if (interrogatoryRes.data) setInterrogatoryItems(interrogatoryRes.data);
     if (dataRoomRes.data) setDataRoomItems(dataRoomRes.data);
     if (docsRes.data) setDocuments(docsRes.data);
+    if (sourcesRes.data) setResearchSources(sourcesRes.data);
     setLoading(false);
   }, [id]);
 
