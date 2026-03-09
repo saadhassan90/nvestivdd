@@ -150,6 +150,9 @@ export type Database = {
           recommendation: string | null
           score_tier: string | null
           status: string
+          submitter_company: string | null
+          submitter_email: string | null
+          submitter_name: string | null
           updated_at: string
           vintage: string | null
         }
@@ -165,6 +168,9 @@ export type Database = {
           recommendation?: string | null
           score_tier?: string | null
           status?: string
+          submitter_company?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
           updated_at?: string
           vintage?: string | null
         }
@@ -180,6 +186,9 @@ export type Database = {
           recommendation?: string | null
           score_tier?: string | null
           status?: string
+          submitter_company?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
           updated_at?: string
           vintage?: string | null
         }
