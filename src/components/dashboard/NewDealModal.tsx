@@ -1,25 +1,20 @@
 import { useState, useCallback } from "react";
-import { X, Upload, FileText, FileSpreadsheet, File, Zap } from "lucide-react";
+import { X, Upload, FileText, FileSpreadsheet, File, Zap, CheckCircle2 } from "lucide-react";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface NewDealModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const ASSET_CLASSES = [
-  "Private Equity", "Venture Capital", "Real Estate", "Hedge Fund",
-  "Credit", "Growth Equity", "Biotech", "Infrastructure", "Other"
+const RECOMMENDED_DOCS = [
+  "Pitch Deck / CIM",
+  "Performance History",
+  "Legal Documentation / Subscription Agreements",
+  "Financial Models / Pro Forma",
 ];
 
 function getFileIcon(name: string) {
@@ -31,8 +26,6 @@ function getFileIcon(name: string) {
 
 export function NewDealModal({ open, onClose }: NewDealModalProps) {
   const [files, setFiles] = useState<File[]>([]);
-  const [fundName, setFundName] = useState("");
-  const [assetClass, setAssetClass] = useState("");
   const [submitterName, setSubmitterName] = useState("");
   const [submitterCompany, setSubmitterCompany] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
@@ -57,15 +50,16 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   };
 
   const handleSubmit = async () => {
-    if (!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
+    if (files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
     setLoading(true);
+
+    const inferredName = files[0]?.name.replace(/\.[^.]+$/, '') || 'Untitled Deal';
 
     try {
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
-          fund_name: fundName.trim(),
-          asset_class: assetClass || null,
+          fund_name: inferredName,
           status: 'uploading',
           submitter_name: submitterName.trim(),
           submitter_company: submitterCompany.trim(),
@@ -109,7 +103,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
 
       await supabase.from('projects').update({ status: 'processing' }).eq('id', project.id);
 
-      toast({ title: "Analysis queued", description: `${fundName} has been submitted for analysis.` });
+      toast({ title: "Analysis queued", description: `Your deal has been submitted for analysis.` });
       onClose();
       navigate(`/project/${project.id}`);
     } catch (error) {
@@ -140,14 +134,14 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</span>
           </div>
           <div
-            className="rounded-xl border-2 border-dashed border-border p-6 sm:p-8 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
+            className="rounded-xl border-2 border-dashed border-border p-5 sm:p-6 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => document.getElementById('file-input')?.click()}
           >
-            <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+            <Upload className="mx-auto h-7 w-7 text-muted-foreground" />
             <p className="mt-2 text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-            <p className="mt-1 text-xs text-muted-foreground">LPA, CIM, or Financial Models (PDF, XLSX, DOCX)</p>
+            <p className="mt-1 text-xs text-muted-foreground">PDF, XLSX, DOCX</p>
             <input
               id="file-input"
               type="file"
@@ -156,6 +150,15 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
               className="hidden"
               onChange={handleFileInput}
             />
+          </div>
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recommended documents</p>
+            {RECOMMENDED_DOCS.map((doc) => (
+              <div key={doc} className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                <span className="text-xs text-muted-foreground">{doc}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -174,43 +177,10 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </div>
         )}
 
-        {/* Step 2: Deal Details */}
-        <div className="mt-5 sm:mt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deal Details</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Fund Name <span className="text-destructive">*</span></label>
-              <input
-                type="text"
-                placeholder="e.g. Blackstone Capital VIII"
-                value={fundName}
-                onChange={(e) => setFundName(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Asset Class</label>
-              <Select value={assetClass} onValueChange={setAssetClass}>
-                <SelectTrigger className="rounded-lg">
-                  <SelectValue placeholder="Select..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {ASSET_CLASSES.map(ac => (
-                    <SelectItem key={ac} value={ac}>{ac}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 3: Submitted By */}
+        {/* Step 2: Submitted By */}
         <div className="mt-5 sm:mt-6 pt-3 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">3</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -254,7 +224,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </button>
           <ShimmerButton
             onClick={handleSubmit}
-            disabled={!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim() || loading}
+            disabled={files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim() || loading}
           >
             {loading ? "Submitting..." : "Begin Analysis"}
             <Zap className="h-4 w-4" />
