@@ -3,6 +3,7 @@ import { Search, Sparkles, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import {
   Sheet,
   SheetContent,
   SheetHeader,
