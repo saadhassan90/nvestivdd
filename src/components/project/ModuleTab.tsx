@@ -19,7 +19,7 @@ const MODULES = [
   { key: "module_e", letter: "E", name: "Operational Quick-Check" },
 ];
 
-export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabProps) {
+export function ModuleTab({ sections, activeModule, onModuleChange, moduleScoresData = [] }: ModuleTabProps) {
   const section = sections.find(s => s.section_key === activeModule);
   const currentModule = MODULES.find(m => m.key === activeModule);
 
