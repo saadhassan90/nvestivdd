@@ -99,6 +99,13 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup 
 
       {activeSection === "performance" && (
         <div className="space-y-6">
+          {performanceWriteup?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={performanceWriteup.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {metrics.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No performance data available yet.</p>
