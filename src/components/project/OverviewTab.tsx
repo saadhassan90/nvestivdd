@@ -1,7 +1,8 @@
-import { CheckCircle2, AlertTriangle, Shield, TrendingUp, TrendingDown, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Shield, FileText, ChevronDown, ChevronUp, RefreshCw, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import type { Tables } from "@/integrations/supabase/types";
 import { getScoreTier, getScoreColor, formatRelativeTime } from "@/lib/score-utils";
@@ -10,6 +11,8 @@ interface OverviewTabProps {
   project: Tables<"projects">;
   redFlags: Tables<"red_flags">[];
   reportSections: Tables<"report_sections">[];
+  documents: Tables<"documents">[];
+  onRerunAnalysis: () => void;
 }
 
 const MODULE_META: Record<string, { label: string; weight: string }> = {
