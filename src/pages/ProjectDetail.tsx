@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { OverviewTab } from "@/components/project/OverviewTab";
-import { ModuleTab } from "@/components/project/ModuleTab";
 import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
 import { DataRoomTab } from "@/components/project/DataRoomTab";
