@@ -117,13 +117,15 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {/* Mobile: sidebar renders as horizontal nav here */}
-      <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Mobile only: horizontal nav */}
+      <div className="lg:hidden">
+        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
 
       <div className="flex flex-1 min-h-0">
-        {/* Desktop: sidebar is inside here via CSS (hidden on mobile) */}
-        <div className="hidden lg:contents">
-          {/* Sidebar already rendered above, but only shows on lg+ via its own CSS */}
+        {/* Desktop only: sidebar alongside content */}
+        <div className="hidden lg:flex">
+          <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
