@@ -105,7 +105,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
 
       await supabase.from('projects').update({ status: 'processing' }).eq('id', project.id);
 
-      toast({ title: "Analysis queued", description: `${fundName} has been submitted for analysis.` });
+      toast({ title: "Analysis queued", description: `Your deal has been submitted for analysis.` });
       onClose();
       navigate(`/project/${project.id}`);
     } catch (error) {
