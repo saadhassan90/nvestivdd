@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X, SquarePen, History, ChevronDown, Check, Sparkles, Paperclip, ArrowUp, Loader2 } from "lucide-react";
+import { X, SquarePen, History, ChevronDown, Check, Paperclip, ArrowUp, Loader2 } from "lucide-react";
+import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
