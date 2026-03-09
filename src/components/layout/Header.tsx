@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Search, Plus, User, Menu, X } from "lucide-react";
-import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { Search, Sparkles, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-interface HeaderProps {
-  onNewDeal?: () => void;
-}
-
-export function Header({ onNewDeal }: HeaderProps) {
+export function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   return (
@@ -39,25 +41,26 @@ export function Header({ onNewDeal }: HeaderProps) {
             {mobileSearchOpen ? <X className="h-4 w-4 text-muted-foreground" /> : <Search className="h-4 w-4 text-muted-foreground" />}
           </button>
 
-          {onNewDeal && (
-            <>
-              {/* Full button on sm+ */}
-              <ShimmerButton onClick={onNewDeal} className="hidden sm:inline-flex text-sm">
-                <Plus className="h-4 w-4" />
-                New Deal
-              </ShimmerButton>
-              {/* Icon-only on mobile */}
-              <button
-                onClick={onNewDeal}
-                className="sm:hidden flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground"
-              >
-                <Plus className="h-4 w-4" />
+          {/* Ask Iris */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">Ask Iris</span>
               </button>
-            </>
-          )}
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-border bg-muted">
-            <User className="h-4 w-4 text-muted-foreground" />
-          </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Iris AI Assistant
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-1 items-center justify-center py-20">
+                <p className="text-sm text-muted-foreground">Coming soon...</p>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

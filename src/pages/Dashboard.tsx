@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
 import { DealTable } from "@/components/dashboard/DealTable";
@@ -6,8 +7,8 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { NewDealModal } from "@/components/dashboard/NewDealModal";
 import { FilterBar, type FilterState } from "@/components/dashboard/FilterBar";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 import { getScoreTier } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -140,14 +141,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onNewDeal={() => setModalOpen(true)} />
+      <Header />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         <BlurFade>
-          <div className="mb-3 sm:mb-5 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Dashboard</span>
-            <span className="text-muted-foreground">&gt;</span>
-            <span className="font-medium text-foreground">Due Diligence</span>
+          <div className="mb-3 sm:mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Dashboard</span>
+              <span className="text-muted-foreground">&gt;</span>
+              <span className="font-medium text-foreground">Due Diligence</span>
+            </div>
+            <ShimmerButton onClick={() => setModalOpen(true)} className="text-sm">
+              <Plus className="h-4 w-4" />
+              New Deal
+            </ShimmerButton>
           </div>
         </BlurFade>
 
