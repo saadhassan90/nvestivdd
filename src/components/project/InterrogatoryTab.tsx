@@ -3,6 +3,14 @@ import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import type { Tables } from "@/integrations/supabase/types";
 
+const MODULE_LABELS: Record<string, string> = {
+  module_a: "Financial & Performance",
+  module_b: "Team & Management",
+  module_c: "Strategy & Market",
+  module_d: "Terms & Structure",
+  module_e: "Operational",
+};
+
 interface InterrogatoryTabProps {
   items: Tables<"interrogatory_items">[];
   fundName: string;
@@ -59,7 +67,7 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
             )}
             {item.module && (
               <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[9px] font-medium text-muted-foreground">
-                {item.module}
+                {MODULE_LABELS[item.module] || item.module}
               </span>
             )}
           </div>

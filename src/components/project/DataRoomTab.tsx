@@ -25,6 +25,14 @@ const TIER_META: Record<string, { label: string; desc: string; dot: string }> = 
   standard: { label: "Tier 4: Nice-to-Have", desc: "Enhances confidence; can supplement via interrogatory", dot: "bg-severity-monitor" },
 };
 
+const MODULE_LABELS: Record<string, string> = {
+  module_a: "Financial & Performance",
+  module_b: "Team & Management",
+  module_c: "Strategy & Market",
+  module_d: "Terms & Structure",
+  module_e: "Operational",
+};
+
 function getFileTypeInfo(name: string) {
   const ext = name.split('.').pop()?.toLowerCase();
   if (ext === 'pdf') return { label: "PDF", icon: FileText, color: "bg-severity-critical/10 text-severity-critical" };
@@ -88,7 +96,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
   const groupByModule = (groupItems: Tables<"data_room_items">[]) => {
     const modules: Record<string, Tables<"data_room_items">[]> = {};
     groupItems.forEach(item => {
-      const mod = item.module || 'General';
+      const mod = MODULE_LABELS[item.module || ''] || item.module || 'General';
       if (!modules[mod]) modules[mod] = [];
       modules[mod].push(item);
     });
