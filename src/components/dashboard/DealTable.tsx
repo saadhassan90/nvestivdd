@@ -15,9 +15,10 @@ import type { Tables } from "@/integrations/supabase/types";
 interface DealTableProps {
   projects: Tables<"projects">[];
   flagCounts: Record<string, { critical: number; elevated: number }>;
+  totalCount?: number;
 }
 
-export function DealTable({ projects, flagCounts }: DealTableProps) {
+export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) return null;
@@ -94,7 +95,7 @@ export function DealTable({ projects, flagCounts }: DealTableProps) {
         </table>
         <div className="flex items-center justify-between border-t border-border px-6 py-3">
           <p className="text-xs text-muted-foreground">
-            Showing {projects.length} of {projects.length} results
+            Showing {projects.length} of {totalCount ?? projects.length} results
           </p>
           <div className="flex items-center gap-1">
             <button className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">1</button>
