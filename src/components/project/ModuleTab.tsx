@@ -8,6 +8,7 @@ interface ModuleTabProps {
   sections: Tables<"report_sections">[];
   activeModule: string;
   onModuleChange: (module: string) => void;
+  moduleScoresData?: any[];
 }
 
 const MODULES = [
