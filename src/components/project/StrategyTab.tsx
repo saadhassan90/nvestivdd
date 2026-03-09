@@ -169,7 +169,16 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
 
       {activeSection === "market" && (
         <div className="space-y-6">
-          {marketFactors.length === 0 ? (
+          {/* Strategy & Market narrative from report */}
+          {reportSection?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={reportSection.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
+
+          {marketFactors.length === 0 && !reportSection?.content ? (
             <MagicCard><p className="text-sm text-muted-foreground text-center py-8">No market factor data yet.</p></MagicCard>
           ) : (
             <>
