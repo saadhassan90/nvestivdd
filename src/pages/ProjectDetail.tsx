@@ -206,7 +206,7 @@ export default function ProjectDetail() {
                 <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
               )}
               {activeTab === "strategy" && (
-                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_key === 'module_b' || s.section_key === 'module_c_strategy' || s.section_key === 'module_c')} />
+                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('strategy') || s.section_title?.toLowerCase().includes('market'))} />
               )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab redFlags={redFlags} />
