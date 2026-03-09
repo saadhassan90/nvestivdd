@@ -246,7 +246,7 @@ serve(async (req) => {
     const makeAnthropicCall = async (msgs: any[], pendingToolResults?: any[]) => {
       const body: any = {
         model: modelId,
-        max_tokens: 8192,
+        max_tokens: 16000,
         system: systemPrompt,
         messages: pendingToolResults ? [...msgs, ...pendingToolResults] : msgs,
         tools,
