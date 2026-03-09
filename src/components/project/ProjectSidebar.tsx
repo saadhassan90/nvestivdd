@@ -13,7 +13,7 @@ const navItems = [
   { key: "red_flags", label: "Red Flags", icon: MessageSquare },
   { key: "interrogatory", label: "Interrogatory", icon: MessageSquare },
   { key: "data_room", label: "Data Room", icon: FolderOpen },
-  { key: "documents", label: "Files", icon: FileText },
+  { key: "documents", label: "Research Sources", icon: FileText },
 ];
 
 const MODULE_NAMES: Record<string, string> = {
