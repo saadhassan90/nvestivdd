@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink } from "lucide-react";
+import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface TeamMember {
   id: string;
@@ -23,6 +24,7 @@ interface TeamMember {
 interface TeamTabProps {
   teamMembers: TeamMember[];
   serviceProviders: ServiceProvider[];
+  reportSection?: { section_title: string | null; content: string | null; score: number | null; confidence: string | null } | undefined;
 }
 
 interface ServiceProvider {
