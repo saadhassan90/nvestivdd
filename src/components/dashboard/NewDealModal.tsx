@@ -179,43 +179,10 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </div>
         )}
 
-        {/* Step 2: Deal Details */}
-        <div className="mt-5 sm:mt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deal Details</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Fund Name <span className="text-destructive">*</span></label>
-              <input
-                type="text"
-                placeholder="e.g. Blackstone Capital VIII"
-                value={fundName}
-                onChange={(e) => setFundName(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Asset Class</label>
-              <Select value={assetClass} onValueChange={setAssetClass}>
-                <SelectTrigger className="rounded-lg">
-                  <SelectValue placeholder="Select..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {ASSET_CLASSES.map(ac => (
-                    <SelectItem key={ac} value={ac}>{ac}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 3: Submitted By */}
+        {/* Step 2: Submitted By */}
         <div className="mt-5 sm:mt-6 pt-3 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">3</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
