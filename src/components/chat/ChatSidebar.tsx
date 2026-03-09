@@ -95,6 +95,15 @@ export function ChatSidebar() {
 
   const currentModel = MODELS.find((m) => m.id === selectedModel) || MODELS[0];
 
+  const lastAssistantMsg = useMemo(
+    () => [...messages].reverse().find((m) => m.role === "assistant" && m.content && !m.isStreaming),
+    [messages]
+  );
+  const suggestedPrompts = useMemo(
+    () => getSuggestedPrompts(lastAssistantMsg, !!projectScope),
+    [lastAssistantMsg, projectScope]
+  );
+
   if (!isOpen) return null;
 
   return (
