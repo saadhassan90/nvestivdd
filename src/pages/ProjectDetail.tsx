@@ -45,7 +45,6 @@ export default function ProjectDetail() {
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeModule, setActiveModule] = useState("module_a");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
