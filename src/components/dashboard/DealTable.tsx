@@ -158,6 +158,36 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   <td className="px-3 lg:px-4 py-2">
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
                   </td>
+                  <td className="px-3 lg:px-4 py-2">
+                    {submitter ? (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm text-foreground cursor-default hover:text-primary transition-colors">
+                              {submitter}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="p-0 border-0 bg-transparent shadow-none">
+                            <div className="rounded-xl border border-border bg-card p-4 shadow-lg min-w-[200px]">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                  <User className="h-4 w-4 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-foreground">{submitter}</p>
+                                  {submitterCompany && (
+                                    <p className="text-xs text-muted-foreground">{submitterCompany}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="px-3 lg:px-4 py-2 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
