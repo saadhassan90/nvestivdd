@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface ThesisValidation {
   id: string;
@@ -39,6 +40,7 @@ interface StrategyTabProps {
   thesisValidations: ThesisValidation[];
   competitors: Competitor[];
   marketFactors: MarketFactor[];
+  reportSection?: { section_title: string | null; content: string | null } | undefined;
 }
 
 const VALIDATION_ICONS: Record<string, { icon: typeof CheckCircle2; color: string }> = {

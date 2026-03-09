@@ -189,6 +189,23 @@ export function PerformanceTab({ metrics, fees, reportSections = [] }: Performan
           )}
         </div>
       )}
+
+      {/* Full Report Sections */}
+      {reportSections.filter(s => s.content).map(rs => (
+        <BlurFade key={rs.section_key} delay={0.1}>
+          <MagicCard>
+            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
+              <p className="text-sm font-semibold text-foreground">{rs.section_title || 'Full Analysis Report'}</p>
+              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+            {showReport && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <MarkdownContent content={rs.content!} />
+              </div>
+            )}
+          </MagicCard>
+        </BlurFade>
+      ))}
     </div>
   );
 }
