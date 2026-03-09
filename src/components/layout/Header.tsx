@@ -11,11 +11,8 @@ export function Header({ onNewDeal }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-6">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">N</span>
-          </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">Nvestiv</span>
+        <Link to="/dashboard" className="flex items-center">
+          <img src={logo} alt="Nvestiv" className="h-7" />
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-md mx-8">
