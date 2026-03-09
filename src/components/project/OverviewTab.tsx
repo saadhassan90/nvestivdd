@@ -23,7 +23,7 @@ const MODULE_META: Record<string, { label: string; weight: string }> = {
   e: { label: "Operational", weight: "8%" },
 };
 
-export function OverviewTab({ project, redFlags, reportSections }: OverviewTabProps) {
+export function OverviewTab({ project, redFlags, reportSections, documents, onRerunAnalysis }: OverviewTabProps) {
   const [showQuality, setShowQuality] = useState(false);
   const criticalFlags = redFlags.filter(f => f.severity === 'critical');
   const elevatedFlags = redFlags.filter(f => f.severity === 'elevated');
@@ -33,8 +33,55 @@ export function OverviewTab({ project, redFlags, reportSections }: OverviewTabPr
   const tierColor = getScoreColor(tier);
   const completionRate = reportSections.length > 0 ? Math.round((reportSections.length / 9) * 100) : 0;
 
+  // Analysis status
+  const isProcessing = project.status === 'processing';
+  const isComplete = project.status === 'complete';
+  const hasNewFiles = project.updated_at && documents.some(d => new Date(d.uploaded_at) > new Date(project.updated_at));
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Analysis Status Banner */}
+      {isProcessing && (
+        <BlurFade>
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Analysis Running</p>
+              <p className="text-[11px] text-muted-foreground">The L1 report is being generated. This may take a few minutes.</p>
+            </div>
+          </div>
+        </BlurFade>
+      )}
+
+      {isComplete && !hasNewFiles && (
+        <BlurFade>
+          <div className="flex items-center gap-3 rounded-xl border border-score-strong/20 bg-score-strong/5 px-4 py-2.5">
+            <CheckCircle className="h-4 w-4 text-score-strong shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Report Ready</span> — Last updated {formatRelativeTime(project.updated_at)}
+            </p>
+          </div>
+        </BlurFade>
+      )}
+
+      {hasNewFiles && !isProcessing && (
+        <BlurFade>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-severity-elevated/30 bg-severity-elevated/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-severity-elevated shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">New files added since last analysis</p>
+                <p className="text-[11px] text-muted-foreground">Re-run to incorporate the latest documents into the report.</p>
+              </div>
+            </div>
+            <ShimmerButton onClick={onRerunAnalysis} className="text-xs shrink-0">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Re-run Analysis
+            </ShimmerButton>
+          </div>
+        </BlurFade>
+      )}
+
       {/* Executive Summary Header */}
       <BlurFade>
         <MagicCard>
