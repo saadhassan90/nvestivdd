@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
 import { DealTable } from "@/components/dashboard/DealTable";
@@ -6,8 +7,8 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { NewDealModal } from "@/components/dashboard/NewDealModal";
 import { FilterBar, type FilterState } from "@/components/dashboard/FilterBar";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 import { getScoreTier } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
