@@ -164,11 +164,7 @@ export function ChatSidebar() {
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
                 </button>
               </div>
-              {projectScope
-
-
-
-            }
+            
             </div>
           </div>
         </div>
