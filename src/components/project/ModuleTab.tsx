@@ -1,4 +1,4 @@
-import { Card, CardBody, Button, Chip } from "@heroui/react";
+import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import { MarkdownContent } from "@/components/project/MarkdownContent";
@@ -26,7 +26,7 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Module selector */}
       <div className="lg:w-56 shrink-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-default-400 mb-3 hidden lg:block">Report Modules</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 hidden lg:block">Report Modules</p>
 
         {/* Mobile: horizontal pills */}
         <div className="lg:hidden overflow-x-auto -mx-4 px-4">
@@ -35,19 +35,20 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
               const modSection = sections.find(s => s.section_key === mod.key);
               const isActive = activeModule === mod.key;
               return (
-                <Button
+                <button
                   key={mod.key}
-                  size="sm"
-                  variant={isActive ? "solid" : "bordered"}
-                  color={isActive ? "primary" : "default"}
-                  onPress={() => onModuleChange(mod.key)}
-                  className="text-xs"
+                  onClick={() => onModuleChange(mod.key)}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-border text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   {mod.letter}: {mod.name}
                   {modSection?.score && (
-                    <span className="text-[9px] opacity-70 ml-1">{modSection.score}</span>
+                    <span className="text-[9px] opacity-70">{modSection.score}</span>
                   )}
-                </Button>
+                </button>
               );
             })}
           </div>
@@ -62,10 +63,10 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
               <button
                 key={mod.key}
                 onClick={() => onModuleChange(mod.key)}
-                className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm transition-colors text-left ${
+                className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors text-left ${
                   isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-default-500 hover:text-foreground hover:bg-default-100'
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 <span className="truncate">{mod.letter}: {mod.name}</span>
@@ -87,14 +88,14 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
                 Module {currentModule?.letter}: {currentModule?.name}
               </h2>
               {section?.confidence && (
-                <p className="text-xs text-default-400 mt-1">
-                  Confidence: <Chip size="sm" variant="flat" color={section.confidence === 'high' ? 'success' : section.confidence === 'medium' ? 'warning' : 'danger'}>{section.confidence.toUpperCase()}</Chip>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Confidence: <span className="font-medium text-foreground uppercase">{section.confidence}</span>
                 </p>
               )}
             </div>
             {section?.score != null && (
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-default-400">Module Score</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Module Score</span>
                 <ScoreBadge score={section.score} size="md" />
               </div>
             )}
@@ -103,18 +104,14 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
 
         {section?.content ? (
           <BlurFade delay={0.1}>
-            <Card shadow="sm">
-              <CardBody className="p-5">
-                <MarkdownContent content={section.content} />
-              </CardBody>
-            </Card>
+            <MagicCard>
+              <MarkdownContent content={section.content} />
+            </MagicCard>
           </BlurFade>
         ) : (
-          <Card shadow="sm">
-            <CardBody className="p-5">
-              <p className="text-sm text-default-400 text-center py-8">No analysis content available for this module yet.</p>
-            </CardBody>
-          </Card>
+          <MagicCard>
+            <p className="text-sm text-muted-foreground text-center py-8">No analysis content available for this module yet.</p>
+          </MagicCard>
         )}
       </div>
     </div>

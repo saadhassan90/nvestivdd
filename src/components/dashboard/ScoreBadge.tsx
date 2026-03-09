@@ -6,7 +6,7 @@ interface ScoreBadgeProps {
 }
 
 export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
-  if (score === null) return <span className="text-default-400">—</span>;
+  if (score === null) return <span className="text-muted-foreground">—</span>;
 
   const tier = getScoreTier(score);
   const colorMap: Record<string, string> = {
@@ -23,7 +23,7 @@ export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
   };
 
   return (
-    <div className={`inline-flex items-center justify-center rounded-xl border-2 font-bold ${colorMap[tier]} ${sizeMap[size]}`}>
+    <div className={`inline-flex items-center justify-center rounded-lg border-2 font-bold ${colorMap[tier]} ${sizeMap[size]}`}>
       {score}
     </div>
   );
