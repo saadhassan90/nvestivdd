@@ -74,6 +74,14 @@ export default function ProjectDetail() {
     return () => { supabase.removeChannel(channel); };
   }, [id, fetchData, toast]);
 
+  // Auto-scope chat to this project
+  useEffect(() => {
+    if (project) {
+      setProjectScope({ id: project.id, name: project.fund_name });
+    }
+    return () => { setProjectScope(null); };
+  }, [project?.id, project?.fund_name, setProjectScope]);
+
   const handleRerunAnalysis = async () => {
     if (!project) return;
     await supabase.from('task_queue').insert({
