@@ -18,7 +18,7 @@ interface DealTableProps {
   totalCount?: number;
 }
 
-export function DealTable({ projects, flagCounts }: DealTableProps) {
+export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) return null;
