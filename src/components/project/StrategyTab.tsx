@@ -223,6 +223,23 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
           )}
         </div>
       )}
+
+      {/* Full Report Section */}
+      {reportSection?.content && (
+        <BlurFade delay={0.1}>
+          <MagicCard>
+            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
+              <p className="text-sm font-semibold text-foreground">Full Analysis Report</p>
+              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+            {showReport && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <MarkdownContent content={reportSection.content} />
+              </div>
+            )}
+          </MagicCard>
+        </BlurFade>
+      )}
     </div>
   );
 }
