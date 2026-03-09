@@ -49,7 +49,7 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
                 </span>
               )}
               <span className="text-[10px] text-muted-foreground">
-                {formatRelativeTime(flag.logged_at)} • {flag.module || 'General'}
+                {formatRelativeTime(flag.logged_at)} • {MODULE_LABELS[flag.module || ''] || flag.module || 'General'}
               </span>
             </div>
             <p className="text-sm font-semibold text-foreground">{flag.title}</p>
