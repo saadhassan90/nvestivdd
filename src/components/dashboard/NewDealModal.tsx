@@ -28,8 +28,6 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [submitterName, setSubmitterName] = useState("");
   const [submitterCompany, setSubmitterCompany] = useState("");
-  const [submitterName, setSubmitterName] = useState("");
-  const [submitterCompany, setSubmitterCompany] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
