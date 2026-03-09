@@ -89,18 +89,6 @@ export function ChatSidebar() {
         </div>
       </div>
 
-      {/* Scope pill */}
-      {projectScope && (
-        <div className="px-4 py-2 shrink-0">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground">
-            📎 {projectScope.name}
-            <button onClick={() => setProjectScope(null)} className="hover:text-destructive ml-0.5">
-              <X className="h-3 w-3" />
-            </button>
-          </span>
-        </div>
-      )}
-
       {/* Content */}
       {showHistory ? (
         <ChatHistory onBack={() => setShowHistory(false)} />
@@ -113,6 +101,17 @@ export function ChatSidebar() {
             className="absolute inset-0 overflow-y-auto px-4 py-4 pb-28 space-y-4 bg-muted"
           >
             <DotPattern className="fill-muted-foreground/30" />
+            {/* Scope pill */}
+            {projectScope && (
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[11px] font-medium text-foreground border border-border">
+                  📎 {projectScope.name}
+                  <button onClick={() => setProjectScope(null)} className="hover:text-destructive ml-0.5">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              </div>
+            )}
             {messages.length === 0 ? (
               <ChatEmptyState
                 onPrompt={(p) => {
