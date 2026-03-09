@@ -37,16 +37,8 @@ export function Header() {
             {mobileSearchOpen ? <X className="h-4 w-4 text-muted-foreground" /> : <Search className="h-4 w-4 text-muted-foreground" />}
           </button>
 
-          {/* Ask AI / Close panel */}
-          {isOpen ? (
-            <button
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
-            >
-              <PanelRightClose className="h-4 w-4" />
-              <span className="hidden sm:inline">Close AI</span>
-            </button>
-          ) : (
+          {/* Ask Iris – hidden when chat is open */}
+          {!isOpen && (
             <ShimmerButton
               onClick={() => setIsOpen(true)}
               className="text-sm shadow-lg"
