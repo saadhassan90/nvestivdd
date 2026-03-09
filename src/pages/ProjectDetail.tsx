@@ -26,6 +26,7 @@ export default function ProjectDetail() {
   const [interrogatoryItems, setInterrogatoryItems] = useState<Tables<"interrogatory_items">[]>([]);
   const [dataRoomItems, setDataRoomItems] = useState<Tables<"data_room_items">[]>([]);
   const [documents, setDocuments] = useState<Tables<"documents">[]>([]);
+  const [researchSources, setResearchSources] = useState<Tables<"research_sources">[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [activeModule, setActiveModule] = useState("module_a");
   const [loading, setLoading] = useState(true);
