@@ -1,6 +1,7 @@
 import { Search, Plus, User } from "lucide-react";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.svg";
 
 interface HeaderProps {
   onNewDeal?: () => void;
