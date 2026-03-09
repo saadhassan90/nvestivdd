@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MarkdownContentProps {
   content: string;
@@ -24,7 +25,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
       prose-a:text-primary prose-a:underline-offset-2
       overflow-x-auto
     ">
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
 }
