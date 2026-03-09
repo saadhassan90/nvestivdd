@@ -15,6 +15,7 @@ import type { Tables } from "@/integrations/supabase/types";
 interface DealTableProps {
   projects: Tables<"projects">[];
   flagCounts: Record<string, { critical: number; elevated: number }>;
+  totalCount?: number;
 }
 
 export function DealTable({ projects, flagCounts }: DealTableProps) {
