@@ -1,17 +1,17 @@
-import { Sparkles } from "lucide-react";
+import irisHero from "@/assets/iris-hero.png";
 
 const GLOBAL_PROMPTS = [
-  "Summarize the key risks across my portfolio",
-  "Compare fee structures across my deals",
-  "What are the unresolved red flags?",
-  "Which deal has the strongest score?",
+  "What deals should I focus on?",
+  "What deals should I avoid?",
+  "Create an IC memo for a deal",
+  "Summarize unresolved red flags",
 ];
 
 const SCOPED_PROMPTS = [
   "Summarize the key risks for this fund",
-  "What are the main fee terms?",
+  "Draft an IC memo for this deal",
   "What are the unresolved red flags?",
-  "Draft a memo on the investment thesis",
+  "Break down the fee structure",
 ];
 
 export function ChatEmptyState({
@@ -25,9 +25,11 @@ export function ChatEmptyState({
 
   return (
     <div className="flex flex-col items-center justify-center h-full py-12">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-        <Sparkles className="h-6 w-6 text-muted-foreground/50" />
-      </div>
+      <img
+        src={irisHero}
+        alt="Iris"
+        className="h-16 w-16 rounded-2xl object-cover mb-4 shadow-md"
+      />
       <h3 className="text-sm font-semibold text-foreground mb-1">How can I help with your diligence?</h3>
       <p className="text-xs text-muted-foreground mb-6">Ask me anything about your deals</p>
       <div className="grid grid-cols-2 gap-2 max-w-xs">
