@@ -30,8 +30,15 @@ export function OverviewTab({ project, redFlags, reportSections, documents, modu
   const tierColor = getScoreColor(tier);
 
   // Use structured key_strengths/key_risks if available, else parse from markdown
-  const keyStrengths = (project as any).key_strengths as { category: string; detail: string }[] | null;
-  const keyRisks = (project as any).key_risks as { category: string; detail: string }[] | null;
+  // Data may be { category, detail }[] or plain string[]
+  const rawStrengths = (project as any).key_strengths as ({ category: string; detail: string } | string)[] | null;
+  const rawRisks = (project as any).key_risks as ({ category: string; detail: string } | string)[] | null;
+  const keyStrengths = rawStrengths?.map(s =>
+    typeof s === 'string' ? { category: s, detail: '' } : s
+  ) ?? null;
+  const keyRisks = rawRisks?.map(r =>
+    typeof r === 'string' ? { category: r, detail: '' } : r
+  ) ?? null;
   const execNarrative = (project as any).executive_summary_narrative as string | null;
   const finalNarrative = (project as any).final_assessment_narrative as string | null;
   const conditions = (project as any).conditions_for_advancement as string[] | null;
