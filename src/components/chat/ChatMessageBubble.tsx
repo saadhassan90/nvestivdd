@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ChevronRight, Check, Loader2, Sparkles, User } from "lucide-react";
+import { ChevronRight, Check, Loader2, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import irisAvatar from "@/assets/iris-avatar.png";
 import type { ChatMessage } from "@/contexts/ChatContext";
 
 const TOOL_LABELS: Record<string, string> = {
