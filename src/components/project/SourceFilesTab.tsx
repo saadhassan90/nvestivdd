@@ -28,7 +28,7 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
         </div>
       </BlurFade>
 
-      <div className="space-y-3">
+      <div className="space-y-1">
         {researchSources.length === 0 ? (
           <BlurFade>
             <MagicCard>
@@ -43,45 +43,31 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
           </BlurFade>
         ) : (
           researchSources.map((source, i) => (
-            <BlurFade key={source.id} delay={i * 0.05}>
-              <MagicCard className="group">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                    {source.favicon_url ? (
-                      <img src={source.favicon_url} alt="" className="h-5 w-5 rounded" />
-                    ) : (
-                      <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">{source.title}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{getDomainFromUrl(source.url)}</p>
-                      </div>
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 p-1.5 rounded-md hover:bg-muted transition-colors opacity-60 group-hover:opacity-100"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                      </a>
-                    </div>
-                    {source.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{source.description}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground uppercase">
-                        {source.source_type || 'web'}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatRelativeTime(source.added_at)}
-                      </span>
-                    </div>
-                  </div>
+            <BlurFade key={source.id} delay={i * 0.02}>
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 rounded-lg border border-border px-3 py-2 hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted">
+                  {source.favicon_url ? (
+                    <img src={source.favicon_url} alt="" className="h-4 w-4 rounded-sm" />
+                  ) : (
+                    <Globe className="h-3 w-3 text-muted-foreground" />
+                  )}
                 </div>
-              </MagicCard>
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                  <p className="text-xs font-medium text-foreground truncate">{source.title}</p>
+                  <span className="text-[10px] text-muted-foreground truncate shrink-0">{getDomainFromUrl(source.url)}</span>
+                </div>
+                {source.source_type && (
+                  <span className="shrink-0 rounded-full border border-border px-1.5 py-px text-[9px] font-medium text-muted-foreground uppercase">
+                    {source.source_type}
+                  </span>
+                )}
+                <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
+              </a>
             </BlurFade>
           ))
         )}
