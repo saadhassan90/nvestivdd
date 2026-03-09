@@ -200,10 +200,10 @@ export default function ProjectDetail() {
                 />
               )}
               {activeTab === "team" && (
-                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_key === 'module_b_team' || s.section_key === 'module_b')} />
+                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} />
               )}
               {activeTab === "performance" && (
-                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} reportSections={reportSections.filter(s => s.section_key === 'module_a_financial' || s.section_key === 'module_a' || s.section_key === 'module_d_terms' || s.section_key === 'module_d')} />
+                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
               )}
               {activeTab === "strategy" && (
                 <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_key === 'module_c_strategy' || s.section_key === 'module_c')} />
