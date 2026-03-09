@@ -26,6 +26,7 @@ export default function ProjectDetail() {
   const [interrogatoryItems, setInterrogatoryItems] = useState<Tables<"interrogatory_items">[]>([]);
   const [dataRoomItems, setDataRoomItems] = useState<Tables<"data_room_items">[]>([]);
   const [documents, setDocuments] = useState<Tables<"documents">[]>([]);
+  const [researchSources, setResearchSources] = useState<Tables<"research_sources">[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [activeModule, setActiveModule] = useState("module_a");
   const [loading, setLoading] = useState(true);
@@ -33,13 +34,14 @@ export default function ProjectDetail() {
   const fetchData = useCallback(async () => {
     if (!id) return;
 
-    const [projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes] = await Promise.all([
+    const [projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes] = await Promise.all([
       supabase.from('projects').select('*').eq('id', id).single(),
       supabase.from('report_sections').select('*').eq('project_id', id).order('order_index'),
       supabase.from('red_flags').select('*').eq('project_id', id).order('logged_at', { ascending: false }),
       supabase.from('interrogatory_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('data_room_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('documents').select('*').eq('project_id', id).order('uploaded_at', { ascending: false }),
+      supabase.from('research_sources').select('*').eq('project_id', id).order('added_at', { ascending: false }),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
@@ -48,6 +50,7 @@ export default function ProjectDetail() {
     if (interrogatoryRes.data) setInterrogatoryItems(interrogatoryRes.data);
     if (dataRoomRes.data) setDataRoomItems(dataRoomRes.data);
     if (docsRes.data) setDocuments(docsRes.data);
+    if (sourcesRes.data) setResearchSources(sourcesRes.data);
     setLoading(false);
   }, [id]);
 
@@ -152,7 +155,7 @@ export default function ProjectDetail() {
                 <DataRoomTab items={dataRoomItems} />
               )}
               {activeTab === "documents" && (
-                <SourceFilesTab documents={documents} projectId={project.id} onRefresh={fetchData} />
+                <SourceFilesTab documents={documents} researchSources={researchSources} projectId={project.id} onRefresh={fetchData} />
               )}
             </>
           )}

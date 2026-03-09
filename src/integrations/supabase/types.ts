@@ -276,6 +276,47 @@ export type Database = {
           },
         ]
       }
+      research_sources: {
+        Row: {
+          added_at: string
+          description: string | null
+          favicon_url: string | null
+          id: string
+          project_id: string
+          source_type: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          added_at?: string
+          description?: string | null
+          favicon_url?: string | null
+          id?: string
+          project_id: string
+          source_type?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          added_at?: string
+          description?: string | null
+          favicon_url?: string | null
+          id?: string
+          project_id?: string
+          source_type?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_queue: {
         Row: {
           completed_at: string | null
