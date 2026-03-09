@@ -55,6 +55,33 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
             <p className="text-sm font-semibold text-foreground">{flag.title}</p>
             <p className="text-xs text-muted-foreground mt-1">{flag.description}</p>
 
+            {/* Structured issue/implication/resolution */}
+            {(flag as any).issue && (
+              <div className="mt-2 space-y-1.5">
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Issue: </span>
+                  <span className="text-xs text-muted-foreground">{(flag as any).issue}</span>
+                </div>
+                {(flag as any).implication && (
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Implication: </span>
+                    <span className="text-xs text-muted-foreground">{(flag as any).implication}</span>
+                  </div>
+                )}
+                {(flag as any).resolution && (
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Resolution: </span>
+                    <span className="text-xs text-muted-foreground">{(flag as any).resolution}</span>
+                  </div>
+                )}
+                {(flag as any).timeline && (
+                  <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[9px] font-medium text-muted-foreground uppercase mt-1">
+                    {(flag as any).timeline.replace('_', ' ')}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Linked actions */}
             <div className="flex flex-wrap gap-3 mt-3">
               {flag.data_room_action && (
