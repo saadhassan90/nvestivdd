@@ -1,21 +1,16 @@
 import { useState } from "react";
-import { Search, Sparkles, X } from "lucide-react";
+import { Search, Sparkles, X, PanelRightClose } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { useChatContext } from "@/contexts/ChatContext";
 
 export function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const { isOpen, setIsOpen } = useChatContext();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
+    <header className="sticky top-0 z-30 border-b border-border bg-card">
       <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
         <Link to="/dashboard" className="flex items-center shrink-0">
           <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
@@ -42,26 +37,26 @@ export function Header() {
             {mobileSearchOpen ? <X className="h-4 w-4 text-muted-foreground" /> : <Search className="h-4 w-4 text-muted-foreground" />}
           </button>
 
-          {/* Ask Iris */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <ShimmerButton className="text-sm shadow-lg" shimmerColor="hsl(217, 91%, 60%)" background="hsl(0, 0%, 5%)">
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">Ask Iris</span>
-              </ShimmerButton>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Iris AI Assistant
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-1 items-center justify-center py-20">
-                <p className="text-sm text-muted-foreground">Coming soon...</p>
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* Ask AI / Close panel */}
+          {isOpen ? (
+            <button
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <PanelRightClose className="h-4 w-4" />
+              <span className="hidden sm:inline">Close AI</span>
+            </button>
+          ) : (
+            <ShimmerButton
+              onClick={() => setIsOpen(true)}
+              className="text-sm shadow-lg"
+              shimmerColor="hsl(217, 91%, 60%)"
+              background="hsl(0, 0%, 5%)"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">Ask Iris</span>
+            </ShimmerButton>
+          )}
         </div>
       </div>
 

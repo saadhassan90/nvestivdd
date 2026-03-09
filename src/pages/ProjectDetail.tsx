@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
+import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { OverviewTab } from "@/components/project/OverviewTab";
 import { ModuleTab } from "@/components/project/ModuleTab";
@@ -19,6 +20,7 @@ export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setProjectScope } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
@@ -71,6 +73,14 @@ export default function ProjectDetail() {
 
     return () => { supabase.removeChannel(channel); };
   }, [id, fetchData, toast]);
+
+  // Auto-scope chat to this project
+  useEffect(() => {
+    if (project) {
+      setProjectScope({ id: project.id, name: project.fund_name });
+    }
+    return () => { setProjectScope(null); };
+  }, [project?.id, project?.fund_name, setProjectScope]);
 
   const handleRerunAnalysis = async () => {
     if (!project) return;

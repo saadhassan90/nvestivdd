@@ -106,6 +106,10 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -113,6 +117,7 @@ export default {
         shimmer: "shimmer 8s ease-in-out infinite",
         "border-beam": "border-beam 4s linear infinite",
         "pulse-slow": "pulse 3s ease-in-out infinite",
+        "slide-in-right": "slide-in-right 0.3s ease-in-out",
       },
     },
   },
