@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink } from "lucide-react";
+import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface TeamMember {
   id: string;
@@ -23,6 +24,7 @@ interface TeamMember {
 interface TeamTabProps {
   teamMembers: TeamMember[];
   serviceProviders: ServiceProvider[];
+  reportSection?: { section_title: string | null; content: string | null; score: number | null; confidence: string | null } | undefined;
 }
 
 interface ServiceProvider {
@@ -57,8 +59,9 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   standard: "text-muted-foreground",
 };
 
-export function TeamTab({ teamMembers, serviceProviders }: TeamTabProps) {
-  const [activeSection, setActiveSection] = useState<"team" | "providers">("team");
+export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTabProps) {
+  const [activeSection, setActiveSection] = useState<"team" | "providers" | "report">(teamMembers.length > 0 ? "team" : "providers");
+  const [showReport, setShowReport] = useState(false);
 
   // Group team by role_category
   const grouped: Record<string, TeamMember[]> = {};
@@ -239,6 +242,23 @@ export function TeamTab({ teamMembers, serviceProviders }: TeamTabProps) {
             ))
           )}
         </div>
+      )}
+
+      {/* Full Report Section */}
+      {reportSection?.content && (
+        <BlurFade delay={0.1}>
+          <MagicCard>
+            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
+              <p className="text-sm font-semibold text-foreground">Full Analysis Report</p>
+              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+            {showReport && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <MarkdownContent content={reportSection.content} />
+              </div>
+            )}
+          </MagicCard>
+        </BlurFade>
       )}
     </div>
   );

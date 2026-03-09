@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { OverviewTab } from "@/components/project/OverviewTab";
-import { ModuleTab } from "@/components/project/ModuleTab";
 import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
 import { DataRoomTab } from "@/components/project/DataRoomTab";
@@ -46,7 +45,6 @@ export default function ProjectDetail() {
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeModule, setActiveModule] = useState("module_a");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -201,17 +199,14 @@ export default function ProjectDetail() {
                   onRerunAnalysis={handleRerunAnalysis}
                 />
               )}
-              {activeTab === "modules" && (
-                <ModuleTab sections={reportSections} activeModule={activeModule} onModuleChange={setActiveModule} moduleScoresData={moduleScores} />
-              )}
               {activeTab === "team" && (
-                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} />
+                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_key === 'module_b_team' || s.section_key === 'module_b')} />
               )}
               {activeTab === "performance" && (
-                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
+                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} reportSections={reportSections.filter(s => s.section_key === 'module_a_financial' || s.section_key === 'module_a' || s.section_key === 'module_d_terms' || s.section_key === 'module_d')} />
               )}
               {activeTab === "strategy" && (
-                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} />
+                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_key === 'module_c_strategy' || s.section_key === 'module_c')} />
               )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab redFlags={redFlags} />

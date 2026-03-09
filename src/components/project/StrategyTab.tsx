@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface ThesisValidation {
   id: string;
@@ -39,6 +40,7 @@ interface StrategyTabProps {
   thesisValidations: ThesisValidation[];
   competitors: Competitor[];
   marketFactors: MarketFactor[];
+  reportSection?: { section_title: string | null; content: string | null } | undefined;
 }
 
 const VALIDATION_ICONS: Record<string, { icon: typeof CheckCircle2; color: string }> = {
@@ -54,8 +56,9 @@ const TYPE_COLORS: Record<string, string> = {
   adjacent: "bg-muted text-muted-foreground",
 };
 
-export function StrategyTab({ thesisValidations, competitors, marketFactors }: StrategyTabProps) {
+export function StrategyTab({ thesisValidations, competitors, marketFactors, reportSection }: StrategyTabProps) {
   const [activeSection, setActiveSection] = useState<"thesis" | "competitors" | "market">("thesis");
+  const [showReport, setShowReport] = useState(false);
 
   const tailwinds = marketFactors.filter(f => f.factor_type === "tailwind");
   const headwinds = marketFactors.filter(f => f.factor_type === "headwind");
@@ -219,6 +222,23 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors }: S
             </>
           )}
         </div>
+      )}
+
+      {/* Full Report Section */}
+      {reportSection?.content && (
+        <BlurFade delay={0.1}>
+          <MagicCard>
+            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
+              <p className="text-sm font-semibold text-foreground">Full Analysis Report</p>
+              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+            {showReport && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <MarkdownContent content={reportSection.content} />
+              </div>
+            )}
+          </MagicCard>
+        </BlurFade>
       )}
     </div>
   );

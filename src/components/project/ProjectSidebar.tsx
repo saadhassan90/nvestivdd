@@ -1,4 +1,4 @@
-import { LayoutDashboard, Layers, Shield, MessageSquare, FolderOpen, FileText, Users, TrendingUp, Target } from "lucide-react";
+import { LayoutDashboard, Shield, MessageSquare, FolderOpen, FileText, Users, TrendingUp, Target, Settings } from "lucide-react";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -11,10 +11,9 @@ interface ProjectSidebarProps {
 
 const navItems = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
-  { key: "modules", label: "Modules", icon: Layers },
   { key: "team", label: "Team & Ops", icon: Users },
-  { key: "performance", label: "Performance", icon: TrendingUp },
-  { key: "strategy", label: "Strategy", icon: Target },
+  { key: "performance", label: "Performance & Fees", icon: TrendingUp },
+  { key: "strategy", label: "Strategy & Market", icon: Target },
   { key: "red_flags", label: "Red Flags", icon: Shield },
   { key: "interrogatory", label: "Interrogatory", icon: MessageSquare },
   { key: "data_room", label: "Data Room", icon: FolderOpen },
@@ -74,7 +73,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
         <div className="mb-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-              <Layers className="h-5 w-5 text-muted-foreground" />
+              <LayoutDashboard className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-foreground text-sm truncate">{project.fund_name}</p>
