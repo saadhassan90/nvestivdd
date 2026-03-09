@@ -9,6 +9,9 @@ import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
 import { DataRoomTab } from "@/components/project/DataRoomTab";
 import { SourceFilesTab } from "@/components/project/SourceFilesTab";
+import { TeamTab } from "@/components/project/TeamTab";
+import { PerformanceTab } from "@/components/project/PerformanceTab";
+import { StrategyTab } from "@/components/project/StrategyTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -29,6 +32,19 @@ export default function ProjectDetail() {
   const [dataRoomItems, setDataRoomItems] = useState<Tables<"data_room_items">[]>([]);
   const [documents, setDocuments] = useState<Tables<"documents">[]>([]);
   const [researchSources, setResearchSources] = useState<Tables<"research_sources">[]>([]);
+  // New data
+  const [moduleScores, setModuleScores] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([]);
+  const [feeStructure, setFeeStructure] = useState<any[]>([]);
+  const [thesisValidations, setThesisValidations] = useState<any[]>([]);
+  const [competitors, setCompetitors] = useState<any[]>([]);
+  const [marketFactors, setMarketFactors] = useState<any[]>([]);
+  const [serviceProviders, setServiceProviders] = useState<any[]>([]);
+  const [submissionQuality, setSubmissionQuality] = useState<any[]>([]);
+  const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
+  const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
+
   const [activeTab, setActiveTab] = useState("overview");
   const [activeModule, setActiveModule] = useState("module_a");
   const [loading, setLoading] = useState(true);
@@ -36,14 +52,28 @@ export default function ProjectDetail() {
   const fetchData = useCallback(async () => {
     if (!id) return;
 
-    const [projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes] = await Promise.all([
+    const [
+      projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes,
+      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes
+    ] = await Promise.all([
       supabase.from('projects').select('*').eq('id', id).single(),
       supabase.from('report_sections').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('red_flags').select('*').eq('project_id', id).order('logged_at', { ascending: false }),
+      supabase.from('red_flags').select('*').eq('project_id', id).order('order_index', { ascending: true }),
       supabase.from('interrogatory_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('data_room_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('documents').select('*').eq('project_id', id).order('uploaded_at', { ascending: false }),
       supabase.from('research_sources').select('*').eq('project_id', id).order('added_at', { ascending: false }),
+      supabase.from('module_scores').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('team_members').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('performance_metrics').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('fee_structure').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('thesis_validations').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('competitive_landscape').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('market_factors').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('service_providers').select('*').eq('project_id', id),
+      supabase.from('submission_quality').select('*').eq('project_id', id).order('order_index'),
+      supabase.from('document_quality_flags').select('*').eq('project_id', id),
+      supabase.from('critical_info_gaps').select('*').eq('project_id', id).order('order_index'),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
@@ -53,6 +83,17 @@ export default function ProjectDetail() {
     if (dataRoomRes.data) setDataRoomItems(dataRoomRes.data);
     if (docsRes.data) setDocuments(docsRes.data);
     if (sourcesRes.data) setResearchSources(sourcesRes.data);
+    if (moduleScoresRes.data) setModuleScores(moduleScoresRes.data);
+    if (teamRes.data) setTeamMembers(teamRes.data);
+    if (perfRes.data) setPerformanceMetrics(perfRes.data);
+    if (feesRes.data) setFeeStructure(feesRes.data);
+    if (thesisRes.data) setThesisValidations(thesisRes.data);
+    if (compRes.data) setCompetitors(compRes.data);
+    if (marketRes.data) setMarketFactors(marketRes.data);
+    if (spRes.data) setServiceProviders(spRes.data);
+    if (sqRes.data) setSubmissionQuality(sqRes.data);
+    if (dqRes.data) setDocQualityFlags(dqRes.data);
+    if (cigRes.data) setCriticalInfoGaps(cigRes.data);
     setLoading(false);
   }, [id]);
 
@@ -64,7 +105,7 @@ export default function ProjectDetail() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'projects', filter: `id=eq.${id}` }, (payload) => {
         const updated = payload.new as Tables<"projects">;
         setProject(updated);
-        if (updated.status === 'complete') {
+        if (updated.status === 'complete' || updated.status === 'completed') {
           toast({ title: "Analysis Complete", description: `Analysis complete for ${updated.fund_name}` });
           fetchData();
         }
@@ -74,7 +115,6 @@ export default function ProjectDetail() {
     return () => { supabase.removeChannel(channel); };
   }, [id, fetchData, toast]);
 
-  // Auto-scope chat to this project
   useEffect(() => {
     if (project) {
       setProjectScope({ id: project.id, name: project.fund_name });
@@ -116,7 +156,6 @@ export default function ProjectDetail() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      {/* Breadcrumbs */}
       <div className="border-b border-border bg-card px-4 sm:px-6 py-2 overflow-x-auto">
         <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
           <button onClick={() => navigate('/dashboard')} className="text-muted-foreground hover:text-foreground transition-colors">Projects</button>
@@ -127,15 +166,13 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {/* Mobile only: horizontal nav */}
       <div className="lg:hidden">
-        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
+        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
       </div>
 
       <div className="flex flex-1 min-h-0">
-        {/* Desktop only: sidebar alongside content */}
         <div className="hidden lg:flex">
-          <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
+          <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
         </div>
 
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
@@ -152,10 +189,29 @@ export default function ProjectDetail() {
           ) : (
             <>
               {activeTab === "overview" && (
-                <OverviewTab project={project} redFlags={redFlags} reportSections={reportSections} documents={documents} onRerunAnalysis={handleRerunAnalysis} />
+                <OverviewTab
+                  project={project}
+                  redFlags={redFlags}
+                  reportSections={reportSections}
+                  documents={documents}
+                  moduleScoresData={moduleScores}
+                  submissionQuality={submissionQuality}
+                  docQualityFlags={docQualityFlags}
+                  criticalInfoGaps={criticalInfoGaps}
+                  onRerunAnalysis={handleRerunAnalysis}
+                />
               )}
               {activeTab === "modules" && (
-                <ModuleTab sections={reportSections} activeModule={activeModule} onModuleChange={setActiveModule} />
+                <ModuleTab sections={reportSections} activeModule={activeModule} onModuleChange={setActiveModule} moduleScoresData={moduleScores} />
+              )}
+              {activeTab === "team" && (
+                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} />
+              )}
+              {activeTab === "performance" && (
+                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
+              )}
+              {activeTab === "strategy" && (
+                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} />
               )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab redFlags={redFlags} />
