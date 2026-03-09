@@ -1,7 +1,7 @@
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
-import ReactMarkdown from "react-markdown";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ModuleTabProps {
