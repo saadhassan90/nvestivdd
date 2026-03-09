@@ -159,93 +159,93 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </div>
         </div>
 
-        {/* Step 2: Settings */}
+        {/* Uploaded file chips */}
         {files.length > 0 && (
-          <div className="mt-5 sm:mt-6 space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deal Details</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-4">
-              {files.map((file, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs">
-                  {getFileIcon(file.name)}
-                  <span className="max-w-[120px] truncate">{file.name}</span>
-                  <button onClick={() => removeFile(i)} className="ml-1 hover:text-severity-critical">
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Fund Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Blackstone Capital VIII"
-                  value={fundName}
-                  onChange={(e) => setFundName(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Asset Class</label>
-                <Select value={assetClass} onValueChange={setAssetClass}>
-                  <SelectTrigger className="rounded-lg">
-                    <SelectValue placeholder="Select..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ASSET_CLASSES.map(ac => (
-                      <SelectItem key={ac} value={ac}>{ac}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Submitted By */}
-            <div className="pt-3 border-t border-border">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">3</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Your Name <span className="text-destructive">*</span></label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Jane Smith"
-                    value={submitterName}
-                    onChange={(e) => setSubmitterName(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Company <span className="text-destructive">*</span></label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Meridian Capital"
-                    value={submitterCompany}
-                    onChange={(e) => setSubmitterCompany(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              </div>
-              <div className="mt-3">
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Email <span className="text-destructive">*</span></label>
-                <input
-                  type="email"
-                  placeholder="e.g. jane@meridian.com"
-                  value={submitterEmail}
-                  onChange={(e) => setSubmitterEmail(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {files.map((file, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs">
+                {getFileIcon(file.name)}
+                <span className="max-w-[120px] truncate">{file.name}</span>
+                <button onClick={() => removeFile(i)} className="ml-1 hover:text-severity-critical">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
           </div>
         )}
+
+        {/* Step 2: Deal Details */}
+        <div className="mt-5 sm:mt-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deal Details</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Fund Name <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Blackstone Capital VIII"
+                value={fundName}
+                onChange={(e) => setFundName(e.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Asset Class</label>
+              <Select value={assetClass} onValueChange={setAssetClass}>
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {ASSET_CLASSES.map(ac => (
+                    <SelectItem key={ac} value={ac}>{ac}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Step 3: Submitted By */}
+        <div className="mt-5 sm:mt-6 pt-3 border-t border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">3</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Your Name <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Jane Smith"
+                value={submitterName}
+                onChange={(e) => setSubmitterName(e.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Company <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Meridian Capital"
+                value={submitterCompany}
+                onChange={(e) => setSubmitterCompany(e.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+          <div className="mt-3">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Email <span className="text-destructive">*</span></label>
+            <input
+              type="email"
+              placeholder="e.g. jane@meridian.com"
+              value={submitterEmail}
+              onChange={(e) => setSubmitterEmail(e.target.value)}
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="mt-6 sm:mt-8 flex items-center justify-between">
