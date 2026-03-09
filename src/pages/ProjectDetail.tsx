@@ -34,13 +34,14 @@ export default function ProjectDetail() {
   const fetchData = useCallback(async () => {
     if (!id) return;
 
-    const [projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes] = await Promise.all([
+    const [projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes] = await Promise.all([
       supabase.from('projects').select('*').eq('id', id).single(),
       supabase.from('report_sections').select('*').eq('project_id', id).order('order_index'),
       supabase.from('red_flags').select('*').eq('project_id', id).order('logged_at', { ascending: false }),
       supabase.from('interrogatory_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('data_room_items').select('*').eq('project_id', id).order('order_index'),
       supabase.from('documents').select('*').eq('project_id', id).order('uploaded_at', { ascending: false }),
+      supabase.from('research_sources').select('*').eq('project_id', id).order('added_at', { ascending: false }),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
