@@ -117,9 +117,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Header onNewDeal={() => setModalOpen(true)} />
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         <BlurFade>
-          <div className="mb-6 flex items-center gap-2 text-sm">
+          <div className="mb-4 sm:mb-6 flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Dashboard</span>
             <span className="text-muted-foreground">&gt;</span>
             <span className="font-medium text-foreground">Due Diligence</span>
@@ -133,7 +133,7 @@ export default function Dashboard() {
         ) : projects.length === 0 ? (
           <EmptyState onNewDeal={() => setModalOpen(true)} />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <AnalyticsCards projects={projects} flagCount={totalFlags} />
             <FilterBar filters={filters} onChange={setFilters} assetClasses={assetClasses} />
             <DealTable projects={filteredProjects} flagCounts={flagCounts} totalCount={projects.length} />
