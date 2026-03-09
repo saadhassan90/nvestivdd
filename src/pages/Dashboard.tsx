@@ -133,7 +133,7 @@ export default function Dashboard() {
         ) : projects.length === 0 ? (
           <EmptyState onNewDeal={() => setModalOpen(true)} />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <AnalyticsCards projects={projects} flagCount={totalFlags} />
             <FilterBar filters={filters} onChange={setFilters} assetClasses={assetClasses} />
             <DealTable projects={filteredProjects} flagCounts={flagCounts} totalCount={projects.length} />
