@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Plus, FileText, FileSpreadsheet, File, MoreVertical, Upload } from "lucide-react";
+import { Plus, FileText, FileSpreadsheet, File } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -58,10 +58,10 @@ export function SourceFilesTab({ documents, projectId, onRefresh }: SourceFilesT
   }, [projectId, onRefresh, toast]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BlurFade>
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-foreground">Source Files</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Source Files</h2>
           <label>
             <ShimmerButton className="text-sm cursor-pointer" disabled={uploading}>
               <Plus className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function SourceFilesTab({ documents, projectId, onRefresh }: SourceFilesT
         </div>
       </BlurFade>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {documents.map((doc, i) => {
           const info = getFileTypeInfo(doc.file_name);
           const Icon = info.icon;
@@ -80,8 +80,8 @@ export function SourceFilesTab({ documents, projectId, onRefresh }: SourceFilesT
             <BlurFade key={doc.id} delay={i * 0.05}>
               <MagicCard>
                 <div className="flex flex-col">
-                  <div className="flex h-24 items-center justify-center rounded-lg bg-muted mb-3">
-                    <Icon className="h-10 w-10 text-muted-foreground" />
+                  <div className="flex h-20 sm:h-24 items-center justify-center rounded-lg bg-muted mb-3">
+                    <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
                   </div>
                   <span className={`self-start inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${info.color} mb-2`}>
                     {info.label}
@@ -96,9 +96,8 @@ export function SourceFilesTab({ documents, projectId, onRefresh }: SourceFilesT
           );
         })}
 
-        {/* Add new file card */}
         <BlurFade delay={documents.length * 0.05}>
-          <label className="flex h-full min-h-[180px] cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border hover:border-muted-foreground/40 transition-colors">
+          <label className="flex h-full min-h-[140px] sm:min-h-[180px] cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border hover:border-muted-foreground/40 transition-colors">
             <div className="text-center">
               <Plus className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-2 text-xs text-muted-foreground">Add new file</p>

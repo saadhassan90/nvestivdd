@@ -58,7 +58,6 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
     setLoading(true);
 
     try {
-      // Create project
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
@@ -71,7 +70,6 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
 
       if (projectError || !project) throw projectError;
 
-      // Upload files to storage and create document records
       for (const file of files) {
         const filePath = `${project.id}/${Date.now()}-${file.name}`;
         const { error: uploadError } = await supabase.storage
@@ -97,14 +95,12 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         });
       }
 
-      // Create task queue entry
       await supabase.from('task_queue').insert({
         project_id: project.id,
         task_type: 'l1_analysis',
         status: 'pending',
       });
 
-      // Update project status to processing
       await supabase.from('projects').update({ status: 'processing' }).eq('id', project.id);
 
       toast({ title: "Analysis queued", description: `${fundName} has been submitted for analysis.` });
@@ -121,24 +117,24 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-xl">
+      <div className="relative z-10 w-full sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-xl">
         <button onClick={onClose} className="absolute right-4 top-4 p-1 rounded-md hover:bg-muted transition-colors">
           <X className="h-5 w-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-xl font-bold text-foreground">New Deal Analysis</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Upload documents and configure deal parameters to start AI extraction.</p>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground pr-8">New Deal Analysis</h2>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">Upload documents and configure deal parameters to start AI extraction.</p>
 
         {/* Step 1: Upload */}
-        <div className="mt-6">
+        <div className="mt-5 sm:mt-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">1</span>
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</span>
           </div>
           <div
-            className="rounded-xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
+            className="rounded-xl border-2 border-dashed border-border p-6 sm:p-8 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => document.getElementById('file-input')?.click()}
@@ -159,7 +155,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
 
         {/* Step 2: Settings */}
         {files.length > 0 && (
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Analysis Settings</span>
@@ -169,7 +165,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
               {files.map((file, i) => (
                 <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs">
                   {getFileIcon(file.name)}
-                  {file.name}
+                  <span className="max-w-[120px] truncate">{file.name}</span>
                   <button onClick={() => removeFile(i)} className="ml-1 hover:text-severity-critical">
                     <X className="h-3 w-3" />
                   </button>
@@ -177,7 +173,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Fund Name</label>
                 <input
@@ -206,7 +202,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         )}
 
         {/* Footer */}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-6 sm:mt-8 flex items-center justify-between">
           <button onClick={onClose} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Cancel
           </button>

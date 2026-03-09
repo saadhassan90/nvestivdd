@@ -4,6 +4,7 @@ import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MagicCard } from "@/components/magicui/MagicCard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +26,8 @@ export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) 
 
   return (
     <BlurFade delay={0.3}>
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
@@ -79,12 +81,8 @@ export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) 
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/project/${project.id}`); }}>
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Export Report
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Archive
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Export Report</DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Archive</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -101,6 +99,41 @@ export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) 
             <button className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">1</button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile card layout */}
+      <div className="md:hidden space-y-3">
+        {projects.map((project) => {
+          const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+          return (
+            <MagicCard
+              key={project.id}
+              className="cursor-pointer active:scale-[0.99] transition-transform"
+            >
+              <div onClick={() => navigate(`/project/${project.id}`)}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground text-sm truncate">{project.fund_name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Est. {project.established_year} • Vintage {project.vintage}
+                    </p>
+                  </div>
+                  <ScoreBadge score={project.composite_score} size="sm" />
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-3">
+                  <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+                    {project.asset_class}
+                  </span>
+                  <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                  <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
+                </div>
+              </div>
+            </MagicCard>
+          );
+        })}
+        <p className="text-xs text-muted-foreground text-center pt-2">
+          Showing {projects.length} of {totalCount ?? projects.length} results
+        </p>
       </div>
     </BlurFade>
   );
