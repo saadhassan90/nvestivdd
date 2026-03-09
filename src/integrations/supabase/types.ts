@@ -14,7 +14,315 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      data_room_items: {
+        Row: {
+          document_name: string
+          id: string
+          is_received: boolean
+          module: string | null
+          order_index: number | null
+          priority: string
+          project_id: string
+          purpose: string | null
+        }
+        Insert: {
+          document_name: string
+          id?: string
+          is_received?: boolean
+          module?: string | null
+          order_index?: number | null
+          priority: string
+          project_id: string
+          purpose?: string | null
+        }
+        Update: {
+          document_name?: string
+          id?: string
+          is_received?: boolean
+          module?: string | null
+          order_index?: number | null
+          priority?: string
+          project_id?: string
+          purpose?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          file_name: string
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          project_id: string
+          uploaded_at: string
+        }
+        Insert: {
+          file_name: string
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          project_id: string
+          uploaded_at?: string
+        }
+        Update: {
+          file_name?: string
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          project_id?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interrogatory_items: {
+        Row: {
+          id: string
+          module: string | null
+          order_index: number | null
+          priority: string
+          project_id: string
+          question: string
+          question_id: string | null
+          rationale: string | null
+          status: string
+        }
+        Insert: {
+          id?: string
+          module?: string | null
+          order_index?: number | null
+          priority: string
+          project_id: string
+          question: string
+          question_id?: string | null
+          rationale?: string | null
+          status?: string
+        }
+        Update: {
+          id?: string
+          module?: string | null
+          order_index?: number | null
+          priority?: string
+          project_id?: string
+          question?: string
+          question_id?: string | null
+          rationale?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interrogatory_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          asset_class: string | null
+          composite_score: number | null
+          created_at: string
+          error_message: string | null
+          established_year: string | null
+          fund_name: string
+          id: string
+          module_scores: Json | null
+          recommendation: string | null
+          score_tier: string | null
+          status: string
+          updated_at: string
+          vintage: string | null
+        }
+        Insert: {
+          asset_class?: string | null
+          composite_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          established_year?: string | null
+          fund_name: string
+          id?: string
+          module_scores?: Json | null
+          recommendation?: string | null
+          score_tier?: string | null
+          status?: string
+          updated_at?: string
+          vintage?: string | null
+        }
+        Update: {
+          asset_class?: string | null
+          composite_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          established_year?: string | null
+          fund_name?: string
+          id?: string
+          module_scores?: Json | null
+          recommendation?: string | null
+          score_tier?: string | null
+          status?: string
+          updated_at?: string
+          vintage?: string | null
+        }
+        Relationships: []
+      }
+      red_flags: {
+        Row: {
+          confidence: string | null
+          data_room_action: string | null
+          description: string | null
+          id: string
+          interrogatory_question: string | null
+          logged_at: string
+          module: string | null
+          project_id: string
+          severity: string
+          title: string
+        }
+        Insert: {
+          confidence?: string | null
+          data_room_action?: string | null
+          description?: string | null
+          id?: string
+          interrogatory_question?: string | null
+          logged_at?: string
+          module?: string | null
+          project_id: string
+          severity: string
+          title: string
+        }
+        Update: {
+          confidence?: string | null
+          data_room_action?: string | null
+          description?: string | null
+          id?: string
+          interrogatory_question?: string | null
+          logged_at?: string
+          module?: string | null
+          project_id?: string
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "red_flags_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_sections: {
+        Row: {
+          confidence: string | null
+          content: string | null
+          created_at: string
+          id: string
+          order_index: number | null
+          project_id: string
+          score: number | null
+          section_key: string
+          section_title: string | null
+        }
+        Insert: {
+          confidence?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_index?: number | null
+          project_id: string
+          score?: number | null
+          section_key: string
+          section_title?: string | null
+        }
+        Update: {
+          confidence?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          score?: number | null
+          section_key?: string
+          section_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_sections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_payload: Json | null
+          output_payload: Json | null
+          project_id: string
+          started_at: string | null
+          status: string
+          task_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_payload?: Json | null
+          output_payload?: Json | null
+          project_id: string
+          started_at?: string | null
+          status?: string
+          task_type?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_payload?: Json | null
+          output_payload?: Json | null
+          project_id?: string
+          started_at?: string | null
+          status?: string
+          task_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_queue_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
