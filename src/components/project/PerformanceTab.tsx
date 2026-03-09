@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TrendingUp, DollarSign } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface PerformanceMetric {
   id: string;
