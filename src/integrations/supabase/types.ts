@@ -186,6 +186,7 @@ export type Database = {
           document_name: string
           id: string
           is_received: boolean
+          is_reviewed: boolean
           module: string | null
           order_index: number | null
           priority: string
@@ -193,6 +194,8 @@ export type Database = {
           priority_tier: number | null
           project_id: string
           purpose: string | null
+          received_date: string | null
+          reviewer_notes: string | null
           source_module: string | null
           sub_items: Json | null
         }
@@ -200,6 +203,7 @@ export type Database = {
           document_name: string
           id?: string
           is_received?: boolean
+          is_reviewed?: boolean
           module?: string | null
           order_index?: number | null
           priority: string
@@ -207,6 +211,8 @@ export type Database = {
           priority_tier?: number | null
           project_id: string
           purpose?: string | null
+          received_date?: string | null
+          reviewer_notes?: string | null
           source_module?: string | null
           sub_items?: Json | null
         }
@@ -214,6 +220,7 @@ export type Database = {
           document_name?: string
           id?: string
           is_received?: boolean
+          is_reviewed?: boolean
           module?: string | null
           order_index?: number | null
           priority?: string
@@ -221,6 +228,8 @@ export type Database = {
           priority_tier?: number | null
           project_id?: string
           purpose?: string | null
+          received_date?: string | null
+          reviewer_notes?: string | null
           source_module?: string | null
           sub_items?: Json | null
         }
@@ -363,6 +372,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engagement_case_studies: {
+        Row: {
+          assessment_detail: string | null
+          assessment_rating: string | null
+          company_name: string
+          engagement_outcomes: Json | null
+          id: string
+          investment_thesis: string | null
+          market_validation: string | null
+          order_index: number | null
+          outcome_status: string | null
+          project_id: string
+          sector: string | null
+        }
+        Insert: {
+          assessment_detail?: string | null
+          assessment_rating?: string | null
+          company_name: string
+          engagement_outcomes?: Json | null
+          id?: string
+          investment_thesis?: string | null
+          market_validation?: string | null
+          order_index?: number | null
+          outcome_status?: string | null
+          project_id: string
+          sector?: string | null
+        }
+        Update: {
+          assessment_detail?: string | null
+          assessment_rating?: string | null
+          company_name?: string
+          engagement_outcomes?: Json | null
+          id?: string
+          investment_thesis?: string | null
+          market_validation?: string | null
+          order_index?: number | null
+          outcome_status?: string | null
+          project_id?: string
+          sector?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_case_studies_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -817,6 +876,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          module_key: string | null
           order_index: number | null
           project_id: string
           score: number | null
@@ -828,6 +888,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          module_key?: string | null
           order_index?: number | null
           project_id: string
           score?: number | null
@@ -839,6 +900,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          module_key?: string | null
           order_index?: number | null
           project_id?: string
           score?: number | null
@@ -857,34 +919,52 @@ export type Database = {
       }
       research_sources: {
         Row: {
+          accessed_date: string | null
           added_at: string
           citation_id: string | null
           description: string | null
+          excerpt: string | null
           favicon_url: string | null
           id: string
+          is_primary: boolean
+          linked_sections: Json | null
+          linked_team_member_names: Json | null
           project_id: string
+          source_category: string | null
           source_type: string | null
           title: string
           url: string
         }
         Insert: {
+          accessed_date?: string | null
           added_at?: string
           citation_id?: string | null
           description?: string | null
+          excerpt?: string | null
           favicon_url?: string | null
           id?: string
+          is_primary?: boolean
+          linked_sections?: Json | null
+          linked_team_member_names?: Json | null
           project_id: string
+          source_category?: string | null
           source_type?: string | null
           title: string
           url: string
         }
         Update: {
+          accessed_date?: string | null
           added_at?: string
           citation_id?: string | null
           description?: string | null
+          excerpt?: string | null
           favicon_url?: string | null
           id?: string
+          is_primary?: boolean
+          linked_sections?: Json | null
+          linked_team_member_names?: Json | null
           project_id?: string
+          source_category?: string | null
           source_type?: string | null
           title?: string
           url?: string
