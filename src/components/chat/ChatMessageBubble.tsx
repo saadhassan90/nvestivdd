@@ -36,8 +36,8 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   // Assistant message
   return (
     <div className="flex gap-2">
-      <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 mt-0.5">
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
+      <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full overflow-hidden mt-0.5">
+        <img src={irisAvatar} alt="Iris" className="h-full w-full object-cover" />
       </div>
       <div className="flex-1 min-w-0 space-y-2">
         {/* Thinking block */}
