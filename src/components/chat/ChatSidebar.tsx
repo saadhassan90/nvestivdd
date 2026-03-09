@@ -108,6 +108,8 @@ export function ChatSidebar() {
         <ChatHistory onBack={() => setShowHistory(false)} />
       ) : (
         <div className="relative flex-1 min-h-0">
+          {/* Vignette fade overlay */}
+          <div className="pointer-events-none absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse at center, transparent 20%, hsl(var(--muted)) 80%)" }} />
           {/* Messages */}
           <div
             ref={messagesContainerRef}
