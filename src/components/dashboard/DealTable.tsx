@@ -95,7 +95,8 @@ export function DealTable({ projects, flagCounts, totalCount }: DealTableProps) 
         </table>
         <div className="flex items-center justify-between border-t border-border px-6 py-3">
           <p className="text-xs text-muted-foreground">
-            Showing {projects.length} of {projects.length} results
+            Showing {projects.length} of {totalCount ?? projects.length} results
+          </p>
           </p>
           <div className="flex items-center gap-1">
             <button className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">1</button>
