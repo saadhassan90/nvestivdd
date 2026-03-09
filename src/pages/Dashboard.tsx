@@ -140,14 +140,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onNewDeal={() => setModalOpen(true)} />
+      <Header />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         <BlurFade>
-          <div className="mb-3 sm:mb-5 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Dashboard</span>
-            <span className="text-muted-foreground">&gt;</span>
-            <span className="font-medium text-foreground">Due Diligence</span>
+          <div className="mb-3 sm:mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Dashboard</span>
+              <span className="text-muted-foreground">&gt;</span>
+              <span className="font-medium text-foreground">Due Diligence</span>
+            </div>
+            <ShimmerButton onClick={() => setModalOpen(true)} className="text-sm">
+              <Plus className="h-4 w-4" />
+              New Deal
+            </ShimmerButton>
           </div>
         </BlurFade>
 
