@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +60,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        score: {
+          strong: "hsl(var(--score-strong))",
+          advance: "hsl(var(--score-advance))",
+          review: "hsl(var(--score-review))",
+          decline: "hsl(var(--score-decline))",
+        },
+        severity: {
+          critical: "hsl(var(--severity-critical))",
+          elevated: "hsl(var(--severity-elevated))",
+          monitor: "hsl(var(--severity-monitor))",
+        },
+        trend: {
+          positive: "hsl(var(--trend-positive))",
+          negative: "hsl(var(--trend-negative))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +83,36 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "number-tick": {
+          from: { transform: "translateY(100%)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+        shimmer: {
+          from: { backgroundPosition: "200% 0" },
+          to: { backgroundPosition: "-200% 0" },
+        },
+        "border-beam": {
+          "0%": { offsetDistance: "0%" },
+          "100%": { offsetDistance: "100%" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shimmer: "shimmer 8s ease-in-out infinite",
+        "border-beam": "border-beam 4s linear infinite",
+        "pulse-slow": "pulse 3s ease-in-out infinite",
       },
     },
   },
