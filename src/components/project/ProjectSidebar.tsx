@@ -11,10 +11,9 @@ interface ProjectSidebarProps {
 
 const navItems = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
-  { key: "modules", label: "Modules", icon: Layers },
   { key: "team", label: "Team & Ops", icon: Users },
-  { key: "performance", label: "Performance", icon: TrendingUp },
-  { key: "strategy", label: "Strategy", icon: Target },
+  { key: "performance", label: "Performance & Fees", icon: TrendingUp },
+  { key: "strategy", label: "Strategy & Market", icon: Target },
   { key: "red_flags", label: "Red Flags", icon: Shield },
   { key: "interrogatory", label: "Interrogatory", icon: MessageSquare },
   { key: "data_room", label: "Data Room", icon: FolderOpen },

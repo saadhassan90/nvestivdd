@@ -199,17 +199,17 @@ export default function ProjectDetail() {
                   onRerunAnalysis={handleRerunAnalysis}
                 />
               )}
-              {activeTab === "modules" && (
-                <ModuleTab sections={reportSections} activeModule={activeModule} onModuleChange={setActiveModule} moduleScoresData={moduleScores} />
-              )}
               {activeTab === "team" && (
-                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} />
+                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_key === 'module_b_team' || s.section_key === 'module_b')} />
               )}
               {activeTab === "performance" && (
-                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
+                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} reportSections={reportSections.filter(s => s.section_key === 'module_a_financial' || s.section_key === 'module_a' || s.section_key === 'module_d_terms' || s.section_key === 'module_d')} />
               )}
               {activeTab === "strategy" && (
-                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} />
+                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_key === 'module_c_strategy' || s.section_key === 'module_c')} />
+              )}
+              {activeTab === "operations" && (
+                <TeamTab teamMembers={[]} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_key === 'module_e_operations' || s.section_key === 'module_e')} />
               )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab redFlags={redFlags} />
