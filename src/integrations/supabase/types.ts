@@ -96,6 +96,91 @@ export type Database = {
           },
         ]
       }
+      competitive_landscape: {
+        Row: {
+          aum: string | null
+          citation_ids: Json | null
+          competitive_assessment: string | null
+          competitor_name: string
+          competitor_type: string
+          differentiation_vs_fund: string | null
+          id: string
+          order_index: number | null
+          project_id: string
+          strategy_description: string | null
+        }
+        Insert: {
+          aum?: string | null
+          citation_ids?: Json | null
+          competitive_assessment?: string | null
+          competitor_name: string
+          competitor_type: string
+          differentiation_vs_fund?: string | null
+          id?: string
+          order_index?: number | null
+          project_id: string
+          strategy_description?: string | null
+        }
+        Update: {
+          aum?: string | null
+          citation_ids?: Json | null
+          competitive_assessment?: string | null
+          competitor_name?: string
+          competitor_type?: string
+          differentiation_vs_fund?: string | null
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          strategy_description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitive_landscape_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      critical_info_gaps: {
+        Row: {
+          gap_description: string
+          gap_title: string
+          id: string
+          order_index: number | null
+          project_id: string
+          related_module: string | null
+          severity: string
+        }
+        Insert: {
+          gap_description: string
+          gap_title: string
+          id?: string
+          order_index?: number | null
+          project_id: string
+          related_module?: string | null
+          severity: string
+        }
+        Update: {
+          gap_description?: string
+          gap_title?: string
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          related_module?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "critical_info_gaps_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_room_items: {
         Row: {
           document_name: string
@@ -104,8 +189,12 @@ export type Database = {
           module: string | null
           order_index: number | null
           priority: string
+          priority_label: string | null
+          priority_tier: number | null
           project_id: string
           purpose: string | null
+          source_module: string | null
+          sub_items: Json | null
         }
         Insert: {
           document_name: string
@@ -114,8 +203,12 @@ export type Database = {
           module?: string | null
           order_index?: number | null
           priority: string
+          priority_label?: string | null
+          priority_tier?: number | null
           project_id: string
           purpose?: string | null
+          source_module?: string | null
+          sub_items?: Json | null
         }
         Update: {
           document_name?: string
@@ -124,8 +217,12 @@ export type Database = {
           module?: string | null
           order_index?: number | null
           priority?: string
+          priority_label?: string | null
+          priority_tier?: number | null
           project_id?: string
           purpose?: string | null
+          source_module?: string | null
+          sub_items?: Json | null
         }
         Relationships: [
           {
@@ -185,32 +282,82 @@ export type Database = {
           },
         ]
       }
+      document_quality_flags: {
+        Row: {
+          assessment: string
+          flag_key: string
+          flag_label: string
+          id: string
+          project_id: string
+          rating: string
+        }
+        Insert: {
+          assessment: string
+          flag_key: string
+          flag_label: string
+          id?: string
+          project_id: string
+          rating: string
+        }
+        Update: {
+          assessment?: string
+          flag_key?: string
+          flag_label?: string
+          id?: string
+          project_id?: string
+          rating?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_quality_flags_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
+          classification_confidence: string | null
+          document_date: string | null
+          document_type_classified: string | null
           file_name: string
           file_path: string | null
           file_size: number | null
           file_type: string | null
           id: string
+          page_count: number | null
           project_id: string
+          quality_notes: string | null
           uploaded_at: string
         }
         Insert: {
+          classification_confidence?: string | null
+          document_date?: string | null
+          document_type_classified?: string | null
           file_name: string
           file_path?: string | null
           file_size?: number | null
           file_type?: string | null
           id?: string
+          page_count?: number | null
           project_id: string
+          quality_notes?: string | null
           uploaded_at?: string
         }
         Update: {
+          classification_confidence?: string | null
+          document_date?: string | null
+          document_type_classified?: string | null
           file_name?: string
           file_path?: string | null
           file_size?: number | null
           file_type?: string | null
           id?: string
+          page_count?: number | null
           project_id?: string
+          quality_notes?: string | null
           uploaded_at?: string
         }
         Relationships: [
@@ -223,8 +370,57 @@ export type Database = {
           },
         ]
       }
+      fee_structure: {
+        Row: {
+          assessment: string | null
+          assessment_detail: string | null
+          asset_class_norm: string | null
+          component: string
+          id: string
+          is_disclosed: boolean
+          order_index: number | null
+          project_id: string
+          share_class: string
+          value: string
+        }
+        Insert: {
+          assessment?: string | null
+          assessment_detail?: string | null
+          asset_class_norm?: string | null
+          component: string
+          id?: string
+          is_disclosed?: boolean
+          order_index?: number | null
+          project_id: string
+          share_class: string
+          value: string
+        }
+        Update: {
+          assessment?: string | null
+          assessment_detail?: string | null
+          asset_class_norm?: string | null
+          component?: string
+          id?: string
+          is_disclosed?: boolean
+          order_index?: number | null
+          project_id?: string
+          share_class?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_structure_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interrogatory_items: {
         Row: {
+          gp_response_notes: string | null
+          gp_response_score: number | null
           id: string
           module: string | null
           order_index: number | null
@@ -233,9 +429,14 @@ export type Database = {
           question: string
           question_id: string | null
           rationale: string | null
+          related_red_flag_ids: Json | null
+          source_module: string | null
+          source_module_label: string | null
           status: string
         }
         Insert: {
+          gp_response_notes?: string | null
+          gp_response_score?: number | null
           id?: string
           module?: string | null
           order_index?: number | null
@@ -244,9 +445,14 @@ export type Database = {
           question: string
           question_id?: string | null
           rationale?: string | null
+          related_red_flag_ids?: Json | null
+          source_module?: string | null
+          source_module_label?: string | null
           status?: string
         }
         Update: {
+          gp_response_notes?: string | null
+          gp_response_score?: number | null
           id?: string
           module?: string | null
           order_index?: number | null
@@ -255,6 +461,9 @@ export type Database = {
           question?: string
           question_id?: string | null
           rationale?: string | null
+          related_red_flag_ids?: Json | null
+          source_module?: string | null
+          source_module_label?: string | null
           status?: string
         }
         Relationships: [
@@ -267,19 +476,191 @@ export type Database = {
           },
         ]
       }
-      projects: {
+      market_factors: {
         Row: {
-          asset_class: string | null
-          composite_score: number | null
-          created_at: string
-          error_message: string | null
-          established_year: string | null
+          citation_ids: Json | null
+          confidence: string
+          description: string
+          factor_type: string
+          id: string
+          order_index: number | null
+          project_id: string
+          supporting_data: string | null
+          time_horizon: string | null
+          title: string
+        }
+        Insert: {
+          citation_ids?: Json | null
+          confidence: string
+          description: string
+          factor_type: string
+          id?: string
+          order_index?: number | null
+          project_id: string
+          supporting_data?: string | null
+          time_horizon?: string | null
+          title: string
+        }
+        Update: {
+          citation_ids?: Json | null
+          confidence?: string
+          description?: string
+          factor_type?: string
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          supporting_data?: string | null
+          time_horizon?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_factors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_scores: {
+        Row: {
+          confidence: string | null
+          confidence_rationale: string | null
+          id: string
+          module_key: string
+          module_label: string
+          order_index: number | null
+          project_id: string
+          score: number
+          summary_assessment: string | null
+          weight: number | null
+          weighted_score: number | null
+        }
+        Insert: {
+          confidence?: string | null
+          confidence_rationale?: string | null
+          id?: string
+          module_key: string
+          module_label: string
+          order_index?: number | null
+          project_id: string
+          score?: number
+          summary_assessment?: string | null
+          weight?: number | null
+          weighted_score?: number | null
+        }
+        Update: {
+          confidence?: string | null
+          confidence_rationale?: string | null
+          id?: string
+          module_key?: string
+          module_label?: string
+          order_index?: number | null
+          project_id?: string
+          score?: number
+          summary_assessment?: string | null
+          weight?: number | null
+          weighted_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_scores_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_metrics: {
+        Row: {
+          alpha: string | null
+          as_of_date: string | null
+          benchmark_name: string | null
+          benchmark_value: string | null
+          benchmark_value_numeric: number | null
+          citation_ids: Json | null
           fund_name: string
           id: string
+          metric_category: string
+          metric_name: string
+          order_index: number | null
+          project_id: string
+          value: string
+          value_numeric: number | null
+        }
+        Insert: {
+          alpha?: string | null
+          as_of_date?: string | null
+          benchmark_name?: string | null
+          benchmark_value?: string | null
+          benchmark_value_numeric?: number | null
+          citation_ids?: Json | null
+          fund_name: string
+          id?: string
+          metric_category: string
+          metric_name: string
+          order_index?: number | null
+          project_id: string
+          value: string
+          value_numeric?: number | null
+        }
+        Update: {
+          alpha?: string | null
+          as_of_date?: string | null
+          benchmark_name?: string | null
+          benchmark_value?: string | null
+          benchmark_value_numeric?: number | null
+          citation_ids?: Json | null
+          fund_name?: string
+          id?: string
+          metric_category?: string
+          metric_name?: string
+          order_index?: number | null
+          project_id?: string
+          value?: string
+          value_numeric?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_metrics_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          analysis_date: string | null
+          asset_class: string | null
+          completeness_score: number | null
+          composite_score: number | null
+          conditions_for_advancement: Json | null
+          created_at: string
+          document_type: string | null
+          domicile: string | null
+          error_message: string | null
+          established_year: string | null
+          executive_summary_narrative: string | null
+          final_assessment_narrative: string | null
+          fund_inception_date: string | null
+          fund_name: string
+          fund_size_estimated: string | null
+          gp_entity_name: string | null
+          id: string
+          key_risks: Json | null
+          key_strengths: Json | null
+          market_validation_points: Json | null
           module_scores: Json | null
           recommendation: string | null
+          recommended_timeline: string | null
+          regulatory_status: string | null
           score_tier: string | null
           status: string
+          strategy: string | null
           submitter_company: string | null
           submitter_email: string | null
           submitter_name: string | null
@@ -287,17 +668,33 @@ export type Database = {
           vintage: string | null
         }
         Insert: {
+          analysis_date?: string | null
           asset_class?: string | null
+          completeness_score?: number | null
           composite_score?: number | null
+          conditions_for_advancement?: Json | null
           created_at?: string
+          document_type?: string | null
+          domicile?: string | null
           error_message?: string | null
           established_year?: string | null
+          executive_summary_narrative?: string | null
+          final_assessment_narrative?: string | null
+          fund_inception_date?: string | null
           fund_name: string
+          fund_size_estimated?: string | null
+          gp_entity_name?: string | null
           id?: string
+          key_risks?: Json | null
+          key_strengths?: Json | null
+          market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
+          recommended_timeline?: string | null
+          regulatory_status?: string | null
           score_tier?: string | null
           status?: string
+          strategy?: string | null
           submitter_company?: string | null
           submitter_email?: string | null
           submitter_name?: string | null
@@ -305,17 +702,33 @@ export type Database = {
           vintage?: string | null
         }
         Update: {
+          analysis_date?: string | null
           asset_class?: string | null
+          completeness_score?: number | null
           composite_score?: number | null
+          conditions_for_advancement?: Json | null
           created_at?: string
+          document_type?: string | null
+          domicile?: string | null
           error_message?: string | null
           established_year?: string | null
+          executive_summary_narrative?: string | null
+          final_assessment_narrative?: string | null
+          fund_inception_date?: string | null
           fund_name?: string
+          fund_size_estimated?: string | null
+          gp_entity_name?: string | null
           id?: string
+          key_risks?: Json | null
+          key_strengths?: Json | null
+          market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
+          recommended_timeline?: string | null
+          regulatory_status?: string | null
           score_tier?: string | null
           status?: string
+          strategy?: string | null
           submitter_company?: string | null
           submitter_email?: string | null
           submitter_name?: string | null
@@ -329,36 +742,63 @@ export type Database = {
           confidence: string | null
           data_room_action: string | null
           description: string | null
+          flag_number: number | null
           id: string
+          implication: string | null
           interrogatory_question: string | null
+          issue: string | null
           logged_at: string
           module: string | null
+          order_index: number | null
           project_id: string
+          related_data_room_ids: Json | null
+          related_interrogatory_ids: Json | null
+          resolution: string | null
           severity: string
+          source_module: string | null
+          timeline: string | null
           title: string
         }
         Insert: {
           confidence?: string | null
           data_room_action?: string | null
           description?: string | null
+          flag_number?: number | null
           id?: string
+          implication?: string | null
           interrogatory_question?: string | null
+          issue?: string | null
           logged_at?: string
           module?: string | null
+          order_index?: number | null
           project_id: string
+          related_data_room_ids?: Json | null
+          related_interrogatory_ids?: Json | null
+          resolution?: string | null
           severity: string
+          source_module?: string | null
+          timeline?: string | null
           title: string
         }
         Update: {
           confidence?: string | null
           data_room_action?: string | null
           description?: string | null
+          flag_number?: number | null
           id?: string
+          implication?: string | null
           interrogatory_question?: string | null
+          issue?: string | null
           logged_at?: string
           module?: string | null
+          order_index?: number | null
           project_id?: string
+          related_data_room_ids?: Json | null
+          related_interrogatory_ids?: Json | null
+          resolution?: string | null
           severity?: string
+          source_module?: string | null
+          timeline?: string | null
           title?: string
         }
         Relationships: [
@@ -418,6 +858,7 @@ export type Database = {
       research_sources: {
         Row: {
           added_at: string
+          citation_id: string | null
           description: string | null
           favicon_url: string | null
           id: string
@@ -428,6 +869,7 @@ export type Database = {
         }
         Insert: {
           added_at?: string
+          citation_id?: string | null
           description?: string | null
           favicon_url?: string | null
           id?: string
@@ -438,6 +880,7 @@ export type Database = {
         }
         Update: {
           added_at?: string
+          citation_id?: string | null
           description?: string | null
           favicon_url?: string | null
           id?: string
@@ -449,6 +892,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "research_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_providers: {
+        Row: {
+          id: string
+          importance: string
+          is_disclosed: boolean
+          is_verified: boolean | null
+          notes: string | null
+          project_id: string
+          provider_name: string | null
+          provider_type: string
+          verification_detail: string | null
+        }
+        Insert: {
+          id?: string
+          importance?: string
+          is_disclosed?: boolean
+          is_verified?: boolean | null
+          notes?: string | null
+          project_id: string
+          provider_name?: string | null
+          provider_type: string
+          verification_detail?: string | null
+        }
+        Update: {
+          id?: string
+          importance?: string
+          is_disclosed?: boolean
+          is_verified?: boolean | null
+          notes?: string | null
+          project_id?: string
+          provider_name?: string | null
+          provider_type?: string
+          verification_detail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_providers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_quality: {
+        Row: {
+          category: string
+          category_label: string
+          confidence: string
+          id: string
+          order_index: number | null
+          project_id: string
+          severity: string
+          status: string
+        }
+        Insert: {
+          category: string
+          category_label: string
+          confidence: string
+          id?: string
+          order_index?: number | null
+          project_id: string
+          severity?: string
+          status: string
+        }
+        Update: {
+          category?: string
+          category_label?: string
+          confidence?: string
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          severity?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_quality_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -496,6 +1024,115 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "task_queue_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          adverse_finding_severity: string | null
+          adverse_findings: string | null
+          assessment_rating: string | null
+          education: string | null
+          id: string
+          is_key_person: boolean
+          name: string
+          order_index: number | null
+          prior_affiliations: Json | null
+          project_id: string
+          role_category: string | null
+          title: string | null
+          verification_citation_ids: Json | null
+          verification_detail: string | null
+          verification_status: string
+          years_experience: number | null
+        }
+        Insert: {
+          adverse_finding_severity?: string | null
+          adverse_findings?: string | null
+          assessment_rating?: string | null
+          education?: string | null
+          id?: string
+          is_key_person?: boolean
+          name: string
+          order_index?: number | null
+          prior_affiliations?: Json | null
+          project_id: string
+          role_category?: string | null
+          title?: string | null
+          verification_citation_ids?: Json | null
+          verification_detail?: string | null
+          verification_status?: string
+          years_experience?: number | null
+        }
+        Update: {
+          adverse_finding_severity?: string | null
+          adverse_findings?: string | null
+          assessment_rating?: string | null
+          education?: string | null
+          id?: string
+          is_key_person?: boolean
+          name?: string
+          order_index?: number | null
+          prior_affiliations?: Json | null
+          project_id?: string
+          role_category?: string | null
+          title?: string | null
+          verification_citation_ids?: Json | null
+          verification_detail?: string | null
+          verification_status?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thesis_validations: {
+        Row: {
+          citation_ids: Json | null
+          claim: string
+          claim_source: string | null
+          confidence: string
+          id: string
+          order_index: number | null
+          project_id: string
+          validation_detail: string | null
+          validation_status: string
+        }
+        Insert: {
+          citation_ids?: Json | null
+          claim: string
+          claim_source?: string | null
+          confidence: string
+          id?: string
+          order_index?: number | null
+          project_id: string
+          validation_detail?: string | null
+          validation_status: string
+        }
+        Update: {
+          citation_ids?: Json | null
+          claim?: string
+          claim_source?: string | null
+          confidence?: string
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          validation_detail?: string | null
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thesis_validations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
