@@ -4,128 +4,46 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 97%;
-    --foreground: 215 25% 12%;
+:root {
+  /* Score tier colors */
+  --score-strong: 160 84% 39%;
+  --score-advance: 168 76% 42%;
+  --score-review: 38 92% 50%;
+  --score-decline: 0 84% 60%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 12%;
+  /* Severity colors */
+  --severity-critical: 0 84% 60%;
+  --severity-elevated: 38 92% 50%;
+  --severity-monitor: 217 91% 60%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 12%;
-
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 0 0% 0%;
-
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 14% 46%;
-
-    --accent: 210 20% 96%;
-    --accent-foreground: 215 25% 12%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 0 0% 0%;
-
-    --radius: 0.75rem;
-
-    /* Score tier colors */
-    --score-strong: 160 84% 39%;
-    --score-advance: 168 76% 42%;
-    --score-review: 38 92% 50%;
-    --score-decline: 0 84% 60%;
-
-    /* Severity colors */
-    --severity-critical: 0 84% 60%;
-    --severity-elevated: 38 92% 50%;
-    --severity-monitor: 217 91% 60%;
-
-    /* Trend colors */
-    --trend-positive: 160 84% 39%;
-    --trend-negative: 0 84% 60%;
-
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 14% 46%;
-    --sidebar-primary: 0 0% 0%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 96%;
-    --sidebar-accent-foreground: 215 25% 12%;
-    --sidebar-border: 214 20% 88%;
-    --sidebar-ring: 0 0% 0%;
-  }
+  /* Trend colors */
+  --trend-positive: 160 84% 39%;
+  --trend-negative: 0 84% 60%;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
-  .text-score-strong {
-    color: hsl(var(--score-strong));
-  }
-  .text-score-advance {
-    color: hsl(var(--score-advance));
-  }
-  .text-score-review {
-    color: hsl(var(--score-review));
-  }
-  .text-score-decline {
-    color: hsl(var(--score-decline));
-  }
-  .bg-score-strong {
-    background-color: hsl(var(--score-strong));
-  }
-  .bg-score-advance {
-    background-color: hsl(var(--score-advance));
-  }
-  .bg-score-review {
-    background-color: hsl(var(--score-review));
-  }
-  .bg-score-decline {
-    background-color: hsl(var(--score-decline));
-  }
-  .border-score-strong {
-    border-color: hsl(var(--score-strong));
-  }
-  .border-score-advance {
-    border-color: hsl(var(--score-advance));
-  }
-  .border-score-review {
-    border-color: hsl(var(--score-review));
-  }
-  .border-score-decline {
-    border-color: hsl(var(--score-decline));
-  }
-  .text-severity-critical {
-    color: hsl(var(--severity-critical));
-  }
-  .text-severity-elevated {
-    color: hsl(var(--severity-elevated));
-  }
-  .text-severity-monitor {
-    color: hsl(var(--severity-monitor));
-  }
-  .bg-severity-critical {
-    background-color: hsl(var(--severity-critical));
-  }
-  .bg-severity-elevated {
-    background-color: hsl(var(--severity-elevated));
-  }
-  .bg-severity-monitor {
-    background-color: hsl(var(--severity-monitor));
-  }
+  .text-score-strong { color: hsl(var(--score-strong)); }
+  .text-score-advance { color: hsl(var(--score-advance)); }
+  .text-score-review { color: hsl(var(--score-review)); }
+  .text-score-decline { color: hsl(var(--score-decline)); }
+  .bg-score-strong { background-color: hsl(var(--score-strong)); }
+  .bg-score-advance { background-color: hsl(var(--score-advance)); }
+  .bg-score-review { background-color: hsl(var(--score-review)); }
+  .bg-score-decline { background-color: hsl(var(--score-decline)); }
+  .border-score-strong { border-color: hsl(var(--score-strong)); }
+  .border-score-advance { border-color: hsl(var(--score-advance)); }
+  .border-score-review { border-color: hsl(var(--score-review)); }
+  .border-score-decline { border-color: hsl(var(--score-decline)); }
+  .text-severity-critical { color: hsl(var(--severity-critical)); }
+  .text-severity-elevated { color: hsl(var(--severity-elevated)); }
+  .text-severity-monitor { color: hsl(var(--severity-monitor)); }
+  .bg-severity-critical { background-color: hsl(var(--severity-critical)); }
+  .bg-severity-elevated { background-color: hsl(var(--severity-elevated)); }
+  .bg-severity-monitor { background-color: hsl(var(--severity-monitor)); }
 }

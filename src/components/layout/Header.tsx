@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Search, Plus, User, Menu, X } from "lucide-react";
-import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { Input, Button, Avatar, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/react";
+import { Search, Plus, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 
@@ -12,69 +12,64 @@ export function Header({ onNewDeal }: HeaderProps) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
-      <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
-        <Link to="/dashboard" className="flex items-center shrink-0">
+    <Navbar maxWidth="full" isBordered className="bg-white">
+      <NavbarBrand>
+        <Link to="/dashboard" className="flex items-center">
           <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
         </Link>
+      </NavbarBrand>
 
-        {/* Desktop search */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search platform..."
-              className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-        </div>
+      <NavbarContent className="hidden md:flex" justify="center">
+        <NavbarItem className="w-full max-w-md">
+          <Input
+            type="text"
+            placeholder="Search platform..."
+            size="sm"
+            startContent={<Search className="h-4 w-4 text-default-400" />}
+            classNames={{
+              inputWrapper: "bg-default-100 shadow-none",
+            }}
+          />
+        </NavbarItem>
+      </NavbarContent>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Mobile search toggle */}
-          <button
-            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
-          >
-            {mobileSearchOpen ? <X className="h-4 w-4 text-muted-foreground" /> : <Search className="h-4 w-4 text-muted-foreground" />}
-          </button>
-
-          {onNewDeal && (
-            <>
-              {/* Full button on sm+ */}
-              <ShimmerButton onClick={onNewDeal} className="hidden sm:inline-flex text-sm">
-                <Plus className="h-4 w-4" />
+      <NavbarContent justify="end">
+        <NavbarItem className="md:hidden">
+          <Button isIconOnly variant="light" size="sm" onPress={() => setMobileSearchOpen(!mobileSearchOpen)}>
+            {mobileSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+          </Button>
+        </NavbarItem>
+        {onNewDeal && (
+          <>
+            <NavbarItem className="hidden sm:flex">
+              <Button color="primary" size="sm" startContent={<Plus className="h-4 w-4" />} onPress={onNewDeal}>
                 New Deal
-              </ShimmerButton>
-              {/* Icon-only on mobile */}
-              <button
-                onClick={onNewDeal}
-                className="sm:hidden flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground"
-              >
+              </Button>
+            </NavbarItem>
+            <NavbarItem className="sm:hidden">
+              <Button isIconOnly color="primary" size="sm" onPress={onNewDeal}>
                 <Plus className="h-4 w-4" />
-              </button>
-            </>
-          )}
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-border bg-muted">
-            <User className="h-4 w-4 text-muted-foreground" />
-          </div>
-        </div>
-      </div>
+              </Button>
+            </NavbarItem>
+          </>
+        )}
+        <NavbarItem>
+          <Avatar size="sm" showFallback className="bg-default-100" />
+        </NavbarItem>
+      </NavbarContent>
 
-      {/* Mobile search bar */}
       {mobileSearchOpen && (
-        <div className="md:hidden border-t border-border px-4 py-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search platform..."
-              autoFocus
-              className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
+        <div className="md:hidden border-t border-divider px-4 py-2 w-full">
+          <Input
+            type="text"
+            placeholder="Search platform..."
+            size="sm"
+            autoFocus
+            startContent={<Search className="h-4 w-4 text-default-400" />}
+            classNames={{ inputWrapper: "bg-default-100 shadow-none" }}
+          />
         </div>
       )}
-    </header>
+    </Navbar>
   );
 }
