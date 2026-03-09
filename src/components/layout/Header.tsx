@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Search, Sparkles, Menu, X } from "lucide-react";
+import { Search, Sparkles, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import {
+import { ShimmerButton } from "@/components/magicui/ShimmerButton";
   Sheet,
   SheetContent,
   SheetHeader,
