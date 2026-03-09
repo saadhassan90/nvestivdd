@@ -57,7 +57,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export function StrategyTab({ thesisValidations, competitors, marketFactors, reportSection }: StrategyTabProps) {
-  const [activeSection, setActiveSection] = useState<"thesis" | "competitors" | "market">("thesis");
+  const [activeSection, setActiveSection] = useState<"thesis" | "competitors" | "market">("market");
 
   const tailwinds = marketFactors.filter(f => f.factor_type === "tailwind");
   const headwinds = marketFactors.filter(f => f.factor_type === "headwind");
