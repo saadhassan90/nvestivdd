@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MarkdownContent } from "@/components/project/MarkdownContent";
@@ -58,7 +58,6 @@ const TYPE_COLORS: Record<string, string> = {
 
 export function StrategyTab({ thesisValidations, competitors, marketFactors, reportSection }: StrategyTabProps) {
   const [activeSection, setActiveSection] = useState<"thesis" | "competitors" | "market">("thesis");
-  const [showReport, setShowReport] = useState(false);
 
   const tailwinds = marketFactors.filter(f => f.factor_type === "tailwind");
   const headwinds = marketFactors.filter(f => f.factor_type === "headwind");
@@ -169,7 +168,16 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
 
       {activeSection === "market" && (
         <div className="space-y-6">
-          {marketFactors.length === 0 ? (
+          {/* Strategy & Market narrative from report */}
+          {reportSection?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={reportSection.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
+
+          {marketFactors.length === 0 && !reportSection?.content ? (
             <MagicCard><p className="text-sm text-muted-foreground text-center py-8">No market factor data yet.</p></MagicCard>
           ) : (
             <>
@@ -224,22 +232,6 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
         </div>
       )}
 
-      {/* Full Report Section */}
-      {reportSection?.content && (
-        <BlurFade delay={0.1}>
-          <MagicCard>
-            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
-              <p className="text-sm font-semibold text-foreground">Full Analysis Report</p>
-              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-            </button>
-            {showReport && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <MarkdownContent content={reportSection.content} />
-              </div>
-            )}
-          </MagicCard>
-        </BlurFade>
-      )}
     </div>
   );
 }
