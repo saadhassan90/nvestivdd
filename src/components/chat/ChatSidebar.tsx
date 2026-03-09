@@ -104,13 +104,12 @@ export function ChatSidebar() {
       {showHistory ? (
         <ChatHistory onBack={() => setShowHistory(false)} />
       ) : (
-        <>
+        <div className="relative flex-1 min-h-0">
           {/* Messages */}
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
-            style={{ backgroundColor: "hsl(0 0% 98%)" }}
+            className="absolute inset-0 overflow-y-auto px-4 py-4 pb-28 space-y-4"
           >
             {messages.length === 0 ? (
               <ChatEmptyState
@@ -128,12 +127,9 @@ export function ChatSidebar() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="shrink-0 border-t border-border bg-card px-4 py-3">
-            <div className="flex items-end gap-2">
-              <button className="shrink-0 p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground" title="Attach file">
-                <Paperclip className="h-4 w-4" />
-              </button>
+          {/* Floating Input */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+            <div className="pointer-events-auto rounded-2xl border border-border bg-card shadow-lg p-3">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -141,29 +137,34 @@ export function ChatSidebar() {
                 onKeyDown={handleKeyDown}
                 placeholder={projectScope ? "Ask about this deal..." : "Ask anything..."}
                 rows={1}
-                className="flex-1 resize-none rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 style={{ maxHeight: 144 }}
               />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className={cn(
-                  "shrink-0 flex h-8 w-8 items-center justify-center rounded-full transition-all",
-                  input.trim() && !isLoading
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-muted-foreground opacity-50"
-                )}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
-              </button>
+              <div className="flex items-center justify-between mt-1.5">
+                <button className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground" title="Attach file">
+                  <Paperclip className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim() || isLoading}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full transition-all",
+                    input.trim() && !isLoading
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-muted-foreground opacity-50"
+                  )}
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+                </button>
+              </div>
+              {projectScope && (
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Scoped to {projectScope.name}
+                </p>
+              )}
             </div>
-            {projectScope && (
-              <p className="mt-1.5 text-[10px] text-muted-foreground">
-                Scoped to {projectScope.name}
-              </p>
-            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
