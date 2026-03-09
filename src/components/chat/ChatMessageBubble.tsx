@@ -23,7 +23,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end gap-2">
-        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-foreground px-4 py-2.5 text-sm text-background">
+        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-muted-foreground/15 px-4 py-2.5 text-sm text-foreground">
           {message.content}
         </div>
         <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-muted">
