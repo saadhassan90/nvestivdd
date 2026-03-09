@@ -61,7 +61,7 @@ export function SourceFilesTab({ documents, projectId, onRefresh }: SourceFilesT
     <div className="space-y-4 sm:space-y-6">
       <BlurFade>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">Source Files</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Research Sources</h2>
           <label>
             <ShimmerButton className="text-sm cursor-pointer" disabled={uploading}>
               <Plus className="h-4 w-4" />
