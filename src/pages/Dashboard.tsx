@@ -11,12 +11,15 @@ import { useEffect } from "react";
 import { getScoreTier } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
+const PAGE_SIZE = 100;
+
 export default function Dashboard() {
   const [projects, setProjects] = useState<Tables<"projects">[]>([]);
   const [flagCounts, setFlagCounts] = useState<Record<string, { critical: number; elevated: number }>>({});
   const [totalFlags, setTotalFlags] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
     assetClass: null,
     scoreTier: null,
@@ -27,27 +30,47 @@ export default function Dashboard() {
   });
 
   const fetchData = async () => {
-    const { data: projectsData } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (projectsData) {
-      setProjects(projectsData);
-
-      const { data: flags } = await supabase.from('red_flags').select('project_id, severity');
-      if (flags) {
-        const counts: Record<string, { critical: number; elevated: number }> = {};
-        let total = 0;
-        flags.forEach(f => {
-          if (!counts[f.project_id]) counts[f.project_id] = { critical: 0, elevated: 0 };
-          if (f.severity === 'critical') { counts[f.project_id].critical++; total++; }
-          if (f.severity === 'elevated') { counts[f.project_id].elevated++; total++; }
-        });
-        setFlagCounts(counts);
-        setTotalFlags(total);
-      }
+    // Fetch all projects (paginate through 1000-row limit)
+    let allProjects: Tables<"projects">[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    while (true) {
+      const { data } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, from + batchSize - 1);
+      if (!data || data.length === 0) break;
+      allProjects = [...allProjects, ...data];
+      if (data.length < batchSize) break;
+      from += batchSize;
     }
+
+    setProjects(allProjects);
+
+    // Fetch all flags (also paginate)
+    let allFlags: { project_id: string; severity: string }[] = [];
+    from = 0;
+    while (true) {
+      const { data } = await supabase
+        .from('red_flags')
+        .select('project_id, severity')
+        .range(from, from + batchSize - 1);
+      if (!data || data.length === 0) break;
+      allFlags = [...allFlags, ...data];
+      if (data.length < batchSize) break;
+      from += batchSize;
+    }
+
+    const counts: Record<string, { critical: number; elevated: number }> = {};
+    let total = 0;
+    allFlags.forEach(f => {
+      if (!counts[f.project_id]) counts[f.project_id] = { critical: 0, elevated: 0 };
+      if (f.severity === 'critical') { counts[f.project_id].critical++; total++; }
+      if (f.severity === 'elevated') { counts[f.project_id].elevated++; total++; }
+    });
+    setFlagCounts(counts);
+    setTotalFlags(total);
     setLoading(false);
   };
 
@@ -60,33 +83,33 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  // Reset to page 1 when filters change
+  const handleFiltersChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
   const assetClasses = useMemo(() => {
     const unique = new Set(projects.map(p => p.asset_class).filter(Boolean) as string[]);
     return Array.from(unique).sort();
   }, [projects]);
 
+  // Filter across ALL projects first, then paginate
   const filteredProjects = useMemo(() => {
     let result = [...projects];
 
-    // Filter by asset class
     if (filters.assetClass) {
       result = result.filter(p => p.asset_class === filters.assetClass);
     }
-
-    // Filter by score tier
     if (filters.scoreTier) {
       result = result.filter(p => {
         const tier = p.score_tier || getScoreTier(p.composite_score);
         return tier === filters.scoreTier;
       });
     }
-
-    // Filter by recommendation
     if (filters.recommendation) {
       result = result.filter(p => p.recommendation === filters.recommendation);
     }
-
-    // Search
     if (filters.search) {
       const q = filters.search.toLowerCase();
       result = result.filter(p =>
@@ -95,7 +118,6 @@ export default function Dashboard() {
       );
     }
 
-    // Sort
     result.sort((a, b) => {
       const dir = filters.sortDir === "asc" ? 1 : -1;
       switch (filters.sortBy) {
@@ -113,13 +135,16 @@ export default function Dashboard() {
     return result;
   }, [projects, filters]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE));
+  const paginatedProjects = filteredProjects.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div className="min-h-screen bg-background">
       <Header onNewDeal={() => setModalOpen(true)} />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         <BlurFade>
-          <div className="mb-4 sm:mb-6 flex items-center gap-2 text-sm">
+          <div className="mb-3 sm:mb-5 flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Dashboard</span>
             <span className="text-muted-foreground">&gt;</span>
             <span className="font-medium text-foreground">Due Diligence</span>
@@ -133,10 +158,17 @@ export default function Dashboard() {
         ) : projects.length === 0 ? (
           <EmptyState onNewDeal={() => setModalOpen(true)} />
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-2 sm:space-y-3">
             <AnalyticsCards projects={projects} flagCount={totalFlags} />
-            <FilterBar filters={filters} onChange={setFilters} assetClasses={assetClasses} />
-            <DealTable projects={filteredProjects} flagCounts={flagCounts} totalCount={projects.length} />
+            <FilterBar filters={filters} onChange={handleFiltersChange} assetClasses={assetClasses} />
+            <DealTable
+              projects={paginatedProjects}
+              flagCounts={flagCounts}
+              totalCount={filteredProjects.length}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </main>
