@@ -26,8 +26,8 @@ function getFileIcon(name: string) {
 
 export function NewDealModal({ open, onClose }: NewDealModalProps) {
   const [files, setFiles] = useState<File[]>([]);
-  const [fundName, setFundName] = useState("");
-  const [assetClass, setAssetClass] = useState("");
+  const [submitterName, setSubmitterName] = useState("");
+  const [submitterCompany, setSubmitterCompany] = useState("");
   const [submitterName, setSubmitterName] = useState("");
   const [submitterCompany, setSubmitterCompany] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
