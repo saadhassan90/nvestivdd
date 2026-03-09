@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { TrendingUp, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, DollarSign } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
+
 
 interface PerformanceMetric {
   id: string;
@@ -33,7 +33,6 @@ interface FeeItem {
 interface PerformanceTabProps {
   metrics: PerformanceMetric[];
   fees: FeeItem[];
-  reportSections?: { section_title: string | null; content: string | null; section_key: string }[];
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -52,9 +51,8 @@ const ASSESSMENT_COLORS: Record<string, string> = {
   critical_gap: "text-severity-critical bg-severity-critical/10",
 };
 
-export function PerformanceTab({ metrics, fees, reportSections = [] }: PerformanceTabProps) {
+export function PerformanceTab({ metrics, fees }: PerformanceTabProps) {
   const [activeSection, setActiveSection] = useState<"performance" | "fees">("performance");
-  const [showReport, setShowReport] = useState(false);
   // Group metrics by category
   const metricsByCategory: Record<string, PerformanceMetric[]> = {};
   metrics.forEach(m => {
@@ -190,22 +188,6 @@ export function PerformanceTab({ metrics, fees, reportSections = [] }: Performan
         </div>
       )}
 
-      {/* Full Report Sections */}
-      {reportSections.filter(s => s.content).map(rs => (
-        <BlurFade key={rs.section_key} delay={0.1}>
-          <MagicCard>
-            <button onClick={() => setShowReport(!showReport)} className="flex items-center justify-between w-full">
-              <p className="text-sm font-semibold text-foreground">{rs.section_title || 'Full Analysis Report'}</p>
-              {showReport ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-            </button>
-            {showReport && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <MarkdownContent content={rs.content!} />
-              </div>
-            )}
-          </MagicCard>
-        </BlurFade>
-      ))}
     </div>
   );
 }

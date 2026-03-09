@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertTriangle, Shield, FileText, ChevronDown, ChevronUp, RefreshCw, CheckCircle, Info, Building2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Shield, FileText, ChevronDown, ChevronUp, RefreshCw, CheckCircle, Info } from "lucide-react";
 import { useState } from "react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
@@ -258,43 +258,6 @@ export function OverviewTab({ project, redFlags, reportSections, documents, modu
         </BlurFade>
       </div>
 
-      {/* Market Validation */}
-      {marketValidation && marketValidation.length > 0 && (
-        <BlurFade delay={0.17}>
-          <MagicCard>
-            <div className="flex items-center gap-2 mb-3">
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold text-foreground">Market Validation</h3>
-            </div>
-            <div className="space-y-2">
-              {marketValidation.map((mv, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-score-advance mt-0.5 shrink-0" />
-                  <p className="text-xs text-muted-foreground">{mv.point}</p>
-                </div>
-              ))}
-            </div>
-          </MagicCard>
-        </BlurFade>
-      )}
-
-      {/* Red Flag Summary Counts */}
-      <BlurFade delay={0.2}>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-border bg-card p-3 sm:p-4 text-center">
-            <p className="text-2xl sm:text-3xl font-bold text-severity-critical">{criticalFlags.length}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">Critical</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3 sm:p-4 text-center">
-            <p className="text-2xl sm:text-3xl font-bold text-severity-elevated">{elevatedFlags.length}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">Elevated</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3 sm:p-4 text-center">
-            <p className="text-2xl sm:text-3xl font-bold text-severity-monitor">{monitorFlags.length}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">Monitor</p>
-          </div>
-        </div>
-      </BlurFade>
 
       {/* Submission Quality — Collapsible */}
       <BlurFade delay={0.25}>
