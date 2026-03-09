@@ -103,7 +103,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
           })}
         </nav>
 
-        <div className="mt-auto border-t border-border pt-4">
+        <div className="border-t border-border pt-4">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">L1 Score</p>
           <div className="flex items-center gap-2 mb-2">
             <ScoreBadge score={project.composite_score || 0} size="lg" />
