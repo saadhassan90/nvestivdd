@@ -74,8 +74,8 @@ export function ChatSidebar() {
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Nvestiv AI</span>
+            <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
+            <span className="text-sm font-semibold text-foreground">Iris</span>
           </div>
 
           <div className="flex items-center gap-1">
