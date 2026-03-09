@@ -98,7 +98,7 @@ export function ChatSidebar() {
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
-            className="absolute inset-0 overflow-y-auto px-4 pt-2 pb-28 space-y-4 bg-muted"
+            className="absolute inset-0 overflow-y-auto px-4 pt-1 pb-28 space-y-3 bg-muted"
           >
             <DotPattern className="fill-muted-foreground/30" />
             {/* Scope pill */}
