@@ -123,12 +123,15 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Flags</th>
+              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</th>
               <th className="px-3 lg:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12"></th>
             </tr>
           </thead>
           <tbody>
             {projects.map((project) => {
               const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+              const submitter = (project as any).submitter_name;
+              const submitterCompany = (project as any).submitter_company;
               return (
                 <tr
                   key={project.id}
