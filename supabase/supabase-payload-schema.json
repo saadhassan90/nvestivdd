@@ -1,0 +1,576 @@
+{
+  "$schema": "L1 Due Diligence Supabase Payload Schema v1.0",
+  "$description": "Complete JSON payload schema for delivering L1 Pre-Data Room Due Diligence results from Claude to Supabase via Edge Function. Every field maps directly to data produced by the L1 skill's 13-node process.",
+
+  "project": {
+    "$description": "The top-level fund analysis record. One per submission.",
+    "fund_name": { "type": "string", "required": true, "description": "Full legal fund name as it appears on the submission" },
+    "status": { "type": "string", "required": true, "enum": ["uploading", "classifying", "analyzing", "synthesizing", "completed", "error"], "description": "Pipeline status. 'classifying' = Node 0, 'analyzing' = Nodes 1-6, 'synthesizing' = Nodes 7-12" },
+    "asset_class": { "type": "string", "nullable": true, "description": "Primary asset class. E.g., 'Energy / Credit', 'Private Equity', 'Real Assets', 'Crypto / Digital Assets'" },
+    "strategy": { "type": "string", "nullable": true, "description": "Strategy description extracted from the deck. E.g., 'Event-Driven Distressed Credit with Climate Engagement'" },
+    "composite_score": { "type": "number", "nullable": true, "min": 0, "max": 100, "description": "Weighted composite L1 score across all modules" },
+    "score_tier": {
+      "type": "string",
+      "nullable": true,
+      "enum": ["strong_advance", "advance_with_diligence", "review_required", "decline"],
+      "description": "Recommendation tier mapped from composite_score. 85-100 = strong_advance, 70-84 = advance_with_diligence, 50-69 = review_required, <50 = decline"
+    },
+    "recommendation": { "type": "string", "nullable": true, "description": "Human-readable recommendation text. E.g., 'ADVANCE WITH DILIGENCE ITEMS'" },
+    "completeness_score": { "type": "number", "nullable": true, "min": 0, "max": 100, "description": "Submission completeness percentage from Node 1 triage. Deck-only typically 55-70%, deck+DDQ 75-90%" },
+    "document_type": {
+      "type": "string",
+      "nullable": true,
+      "description": "Summary of what was submitted. E.g., 'Pitch Deck Only (50 pages)', 'Pitch Deck + DDQ + Executive Summary (85 pages total)'"
+    },
+    "fund_size_estimated": { "type": "string", "nullable": true, "description": "Estimated or disclosed AUM. E.g., '$150M estimated', '$500M target'" },
+    "fund_inception_date": { "type": "string", "nullable": true, "format": "date", "description": "Fund inception date if disclosed" },
+    "vintage": { "type": "string", "nullable": true, "description": "Fund vintage year" },
+    "gp_entity_name": { "type": "string", "nullable": true, "description": "General partner legal entity name. E.g., 'DSC Meridian Capital LP'" },
+    "domicile": { "type": "string", "nullable": true, "description": "Fund domicile jurisdiction. E.g., 'Delaware LP + Cayman feeder'" },
+    "regulatory_status": { "type": "string", "nullable": true, "description": "Registration status. E.g., 'Exempt Reporting Adviser (SEC)', 'FCA Registered'" },
+    "submitter_name": { "type": "string", "nullable": true },
+    "submitter_company": { "type": "string", "nullable": true },
+    "submitter_email": { "type": "string", "nullable": true, "format": "email" },
+    "analysis_date": { "type": "string", "format": "date", "description": "Date the L1 analysis was completed" },
+    "error_message": { "type": "string", "nullable": true },
+    "executive_summary_narrative": { "type": "string", "nullable": true, "description": "The 2-3 sentence summary assessment paragraph from Section 1" },
+    "key_strengths": {
+      "type": "array",
+      "nullable": true,
+      "description": "4-6 key strengths from the Executive Summary, each as a structured object",
+      "items": {
+        "category": { "type": "string", "description": "Bold category label. E.g., 'Experienced leadership team'" },
+        "detail": { "type": "string", "description": "Supporting evidence. E.g., 'Founder managed $9B AUM at Paulson; Partners have 24+ years experience'" },
+        "citation_ids": { "type": "array", "items": "string", "description": "References to research_sources entries that support this claim" }
+      }
+    },
+    "key_risks": {
+      "type": "array",
+      "nullable": true,
+      "description": "4-6 key risks from the Executive Summary",
+      "items": {
+        "category": { "type": "string" },
+        "detail": { "type": "string" },
+        "red_flag_ids": { "type": "array", "items": "string", "description": "References to red_flags entries for drill-down" }
+      }
+    },
+    "market_validation_points": {
+      "type": "array",
+      "nullable": true,
+      "description": "2-3 market validation bullets from Executive Summary",
+      "items": {
+        "point": { "type": "string" },
+        "citation_ids": { "type": "array", "items": "string" }
+      }
+    },
+    "conditions_for_advancement": {
+      "type": "array",
+      "nullable": true,
+      "description": "Specific conditions from Section 11 that must be met before commitment",
+      "items": { "type": "string" }
+    },
+    "recommended_timeline": { "type": "string", "nullable": true, "description": "Timeline narrative from Section 11. E.g., '8-12 weeks to commitment stage with disciplined data room diligence'" },
+    "final_assessment_narrative": { "type": "string", "nullable": true, "description": "The full synthesis narrative from Section 11" }
+  },
+
+  "module_scores": {
+    "$description": "One record per analysis module. Always exactly 5 records (A-E).",
+    "$note": "Stored as separate rows, not a JSON blob, so you can query/filter/sort by module",
+    "items": [
+      {
+        "module_key": { "type": "string", "required": true, "enum": ["module_a_financial", "module_b_team", "module_c_strategy", "module_d_terms", "module_e_operations"] },
+        "module_label": { "type": "string", "required": true, "description": "Display name. E.g., 'Financial & Performance Assessment'" },
+        "score": { "type": "number", "required": true, "min": 0, "max": 100 },
+        "confidence": { "type": "string", "required": true, "enum": ["high", "medium_high", "medium", "medium_low", "low"] },
+        "weight": { "type": "number", "required": true, "min": 0, "max": 1, "description": "Weight used in composite calculation. E.g., 0.30 for 30%. All weights must sum to 1.0" },
+        "weighted_score": { "type": "number", "description": "score × weight. Stored for convenience." },
+        "confidence_rationale": { "type": "string", "nullable": true, "description": "1-sentence explanation. E.g., '3.25-year track record with no independent verification available'" },
+        "summary_assessment": { "type": "string", "nullable": true, "description": "2-3 sentence module conclusion" },
+        "order_index": { "type": "number", "description": "1-5 for display ordering" }
+      }
+    ]
+  },
+
+  "source_documents": {
+    "$description": "One record per uploaded file. Produced by Node 0.",
+    "items": [
+      {
+        "file_name": { "type": "string", "required": true },
+        "file_path": { "type": "string", "required": true, "description": "Storage path in Supabase Storage" },
+        "document_type": {
+          "type": "string",
+          "required": true,
+          "enum": ["pitch_deck", "ddq", "investor_letter", "quarterly_report", "factsheet", "term_sheet", "exec_summary", "monthly_report", "other"]
+        },
+        "page_count": { "type": "number", "nullable": true },
+        "document_date": { "type": "string", "nullable": true, "format": "date", "description": "Date of the document itself, not the upload date" },
+        "file_size_bytes": { "type": "number", "nullable": true },
+        "classification_confidence": { "type": "string", "nullable": true, "enum": ["high", "medium", "low"] },
+        "quality_notes": { "type": "string", "nullable": true, "description": "Flags like 'DRAFT watermark detected', 'Stale — dated 18 months ago'" }
+      }
+    ]
+  },
+
+  "submission_quality": {
+    "$description": "Structured data from Node 1 triage. One record per checklist category.",
+    "items": [
+      {
+        "category": {
+          "type": "string",
+          "required": true,
+          "enum": ["strategy_thesis", "team_bios", "performance_track_record", "fund_mechanics_terms", "risk_management", "operational_setup", "investor_base", "regulatory_filings", "financial_statements"]
+        },
+        "category_label": { "type": "string", "required": true, "description": "Display name. E.g., 'Strategy & Thesis'" },
+        "status": { "type": "string", "required": true, "enum": ["complete", "partial", "minimal", "not_provided"] },
+        "confidence": { "type": "string", "required": true, "enum": ["high", "medium", "low", "na"] },
+        "severity": { "type": "string", "required": true, "enum": ["none", "monitor", "elevated", "critical"], "description": "'none' when status is Complete" },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "document_quality_flags": {
+    "$description": "Six quality dimensions from Node 1. Always exactly 6 records.",
+    "items": [
+      {
+        "flag_key": {
+          "type": "string",
+          "required": true,
+          "enum": ["freshness", "completeness", "professionalism", "forward_looking_statements", "disclaimers", "performance_claims"]
+        },
+        "flag_label": { "type": "string", "required": true },
+        "rating": { "type": "string", "required": true, "description": "E.g., 'GOOD', 'MATERIAL GAPS', 'FLAGGED', 'PRESENT', 'VERIFIED'" },
+        "assessment": { "type": "string", "required": true, "description": "Brief explanation. E.g., 'December 2024 presentation is current'" }
+      }
+    ]
+  },
+
+  "critical_info_gaps": {
+    "$description": "5-10 specific information gaps from Node 1 triage.",
+    "items": [
+      {
+        "gap_title": { "type": "string", "required": true, "description": "E.g., 'Fund Economics'" },
+        "gap_description": { "type": "string", "required": true, "description": "What's missing and why it matters" },
+        "severity": { "type": "string", "required": true, "enum": ["critical", "elevated", "medium"] },
+        "related_module": { "type": "string", "nullable": true, "description": "Which module this gap most affects" },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "report_sections": {
+    "$description": "Full markdown content for each of the 13 report sections. The rich body of the report.",
+    "items": [
+      {
+        "section_key": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "executive_summary",
+            "submission_quality",
+            "module_a_financial",
+            "module_b_team",
+            "module_c_strategy",
+            "module_d_terms",
+            "module_e_operations",
+            "red_flag_summary",
+            "interrogatory_matrix",
+            "data_room_checklist",
+            "final_assessment",
+            "appendix_sources"
+          ]
+        },
+        "section_title": { "type": "string", "required": true },
+        "content": {
+          "type": "string",
+          "required": true,
+          "description": "Full markdown body of the section. Contains inline citation markers in the format [claim text](cite:SRC_XXX) where SRC_XXX is a citation_id from research_sources. The front-end renders these as clickable accordion elements."
+        },
+        "module_key": { "type": "string", "nullable": true, "description": "If this section corresponds to a module, reference it here for join" },
+        "order_index": { "type": "number", "required": true, "description": "1-12 canonical order" }
+      }
+    ]
+  },
+
+  "team_members": {
+    "$description": "Structured team roster from Module B (Node 3). One record per named individual.",
+    "items": [
+      {
+        "name": { "type": "string", "required": true },
+        "title": { "type": "string", "nullable": true },
+        "role_category": {
+          "type": "string",
+          "nullable": true,
+          "enum": ["leadership", "investment_team", "operations", "sustainability", "business_development", "other"],
+          "description": "Functional grouping for display"
+        },
+        "years_experience": { "type": "number", "nullable": true },
+        "prior_affiliations": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "List of prior firms. E.g., ['Paulson & Co', 'JP Morgan', 'DebtTraders Inc.']"
+        },
+        "education": { "type": "string", "nullable": true },
+        "verification_status": {
+          "type": "string",
+          "required": true,
+          "enum": ["verified", "partially_verified", "unverified"],
+          "description": "Result of autonomous research verification"
+        },
+        "verification_detail": {
+          "type": "string",
+          "nullable": true,
+          "description": "What was verified and how. E.g., 'Confirmed via LinkedIn, SEC Form ADV CRD 296590, Hedge Fund Journal feature'"
+        },
+        "verification_citation_ids": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "References to research_sources entries used for verification"
+        },
+        "is_key_person": { "type": "boolean", "default": false, "description": "Flagged if this person represents key person risk" },
+        "adverse_findings": { "type": "string", "nullable": true, "description": "Any adverse media, regulatory, or litigation findings. Null if clean." },
+        "adverse_finding_severity": { "type": "string", "nullable": true, "enum": ["critical", "elevated", "monitor", "none"] },
+        "assessment_rating": {
+          "type": "string",
+          "nullable": true,
+          "description": "Individual confidence rating. E.g., 'HIGH CONFIDENCE', 'MEDIUM-HIGH'"
+        },
+        "order_index": { "type": "number", "description": "Display order within role_category" }
+      }
+    ]
+  },
+
+  "performance_metrics": {
+    "$description": "Structured performance data from Module A (Node 2). One record per metric row.",
+    "items": [
+      {
+        "fund_name": { "type": "string", "required": true, "description": "Which fund within the GP. E.g., 'Climate Action Fund' vs 'Credit Opportunities Fund'" },
+        "metric_name": { "type": "string", "required": true, "description": "E.g., 'ITD Return (Net)', '1YR Return', 'Maximum Drawdown', 'Sharpe Ratio'" },
+        "metric_category": {
+          "type": "string",
+          "required": true,
+          "enum": ["return", "risk", "portfolio_characteristic", "fee"],
+          "description": "Grouping for display"
+        },
+        "value": { "type": "string", "required": true, "description": "The fund's value. String to handle mixed formats: '+30.70%', '4.1%', '2.9 years', '$1.50%'" },
+        "value_numeric": { "type": "number", "nullable": true, "description": "Numeric value where parseable, for charting. E.g., 30.70, 4.1" },
+        "benchmark_name": { "type": "string", "nullable": true, "description": "E.g., 'BAML HY Index', 'HY ETF'" },
+        "benchmark_value": { "type": "string", "nullable": true },
+        "benchmark_value_numeric": { "type": "number", "nullable": true },
+        "alpha": { "type": "string", "nullable": true, "description": "Difference or comparison. E.g., '+19.27%', 'Lower'" },
+        "as_of_date": { "type": "string", "nullable": true, "format": "date" },
+        "citation_ids": { "type": "array", "items": "string", "nullable": true },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "fee_structure": {
+    "$description": "Structured fee terms from Modules A and D. One record per share class per fee component.",
+    "items": [
+      {
+        "share_class": { "type": "string", "required": true, "description": "E.g., 'Founders Class', 'Standard Class', 'Class A'" },
+        "component": {
+          "type": "string",
+          "required": true,
+          "description": "E.g., 'Management Fee', 'Incentive Fee', 'Hurdle Rate', 'Lockup', 'Redemption Frequency', 'Gate'"
+        },
+        "value": { "type": "string", "required": true, "description": "The disclosed value. E.g., '1.50% (<$500M), 1.25% ($500M-$1B)', '17.5%', '1 Year Soft (5% penalty)'" },
+        "asset_class_norm": { "type": "string", "nullable": true, "description": "Typical range for this asset class. E.g., '1.0-1.5% for credit funds'" },
+        "assessment": {
+          "type": "string",
+          "nullable": true,
+          "enum": ["favorable", "at_market", "above_market", "below_market", "not_disclosed", "critical_gap"],
+          "description": "How this compares to norms"
+        },
+        "assessment_detail": { "type": "string", "nullable": true, "description": "Brief explanation of the assessment" },
+        "is_disclosed": { "type": "boolean", "required": true, "description": "False if this is a gap / not provided in the submission" },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "thesis_validations": {
+    "$description": "Structured thesis claim validation from Module C (Node 4). One record per claim tested.",
+    "items": [
+      {
+        "claim": { "type": "string", "required": true, "description": "The specific thesis claim from the deck. E.g., 'HY issuers = 3% of debt, 33% of emissions'" },
+        "claim_source": { "type": "string", "nullable": true, "description": "Where in the deck this claim appears. E.g., 'Deck, Pages 4-6'" },
+        "validation_status": {
+          "type": "string",
+          "required": true,
+          "enum": ["verified", "partially_verified", "unverified", "contradicted"]
+        },
+        "confidence": { "type": "string", "required": true, "enum": ["high", "medium_high", "medium", "medium_low", "low"] },
+        "validation_detail": { "type": "string", "nullable": true, "description": "How the claim was validated and what was found" },
+        "citation_ids": { "type": "array", "items": "string", "nullable": true, "description": "Research sources that validated or contradicted this claim" },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "competitive_landscape": {
+    "$description": "Competitors identified in Module C. One record per competitor.",
+    "items": [
+      {
+        "competitor_name": { "type": "string", "required": true },
+        "competitor_type": { "type": "string", "required": true, "enum": ["direct", "indirect", "adjacent"], "description": "How closely they compete" },
+        "aum": { "type": "string", "nullable": true, "description": "Assets under management. E.g., '~$10B', '~$500B total'" },
+        "strategy_description": { "type": "string", "nullable": true },
+        "differentiation_vs_fund": { "type": "string", "nullable": true, "description": "How the analyzed fund differs from this competitor" },
+        "competitive_assessment": { "type": "string", "nullable": true, "description": "E.g., 'Apollo can out-market but lacks specialized climate-credit thesis'" },
+        "citation_ids": { "type": "array", "items": "string", "nullable": true },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "market_factors": {
+    "$description": "Tailwinds and headwinds from Module C. One record per factor.",
+    "items": [
+      {
+        "factor_type": { "type": "string", "required": true, "enum": ["tailwind", "headwind"] },
+        "title": { "type": "string", "required": true, "description": "E.g., 'Institutional Climate Finance Demand (2025-2030)'" },
+        "description": { "type": "string", "required": true },
+        "confidence": { "type": "string", "required": true, "enum": ["high", "medium_high", "medium", "medium_low", "low"] },
+        "time_horizon": { "type": "string", "nullable": true, "description": "E.g., '2024-2027', 'Structural', 'Cyclical'" },
+        "supporting_data": { "type": "string", "nullable": true, "description": "Key data point. E.g., 'UNPRI signatories control ~$58T'" },
+        "citation_ids": { "type": "array", "items": "string", "nullable": true },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "service_providers": {
+    "$description": "Service provider status from Module E (Node 6). One record per provider type.",
+    "items": [
+      {
+        "provider_type": {
+          "type": "string",
+          "required": true,
+          "enum": ["auditor", "administrator", "custodian", "prime_broker", "legal_counsel", "compliance_officer", "fund_accountant"]
+        },
+        "provider_name": { "type": "string", "nullable": true, "description": "Null if not disclosed" },
+        "is_disclosed": { "type": "boolean", "required": true },
+        "is_verified": { "type": "boolean", "nullable": true, "description": "Null if not disclosed; true/false if verified via research" },
+        "verification_detail": { "type": "string", "nullable": true },
+        "importance": { "type": "string", "required": true, "enum": ["critical", "important", "standard"] },
+        "notes": { "type": "string", "nullable": true, "description": "E.g., 'David Gulkowitz holds CFO/COO/CCO simultaneously — concentration concern'" }
+      }
+    ]
+  },
+
+  "red_flags": {
+    "$description": "Aggregated red flags from Node 7. One record per flag.",
+    "items": [
+      {
+        "flag_number": { "type": "number", "required": true, "description": "Sequential number within severity tier. E.g., 1, 2, 3" },
+        "title": { "type": "string", "required": true, "description": "Descriptive title. E.g., 'Service Provider Gaps — Institutional Non-Starter'" },
+        "severity": { "type": "string", "required": true, "enum": ["critical", "elevated", "monitor"] },
+        "issue": { "type": "string", "required": true, "description": "What the problem is, specifically" },
+        "implication": { "type": "string", "required": true, "description": "Why this matters for the investment decision" },
+        "resolution": { "type": "string", "required": true, "description": "What needs to happen to address this flag" },
+        "timeline": {
+          "type": "string",
+          "required": true,
+          "enum": ["pre_commitment", "annual_review"],
+          "description": "When this must be resolved"
+        },
+        "source_module": { "type": "string", "nullable": true, "description": "Which module identified this flag. E.g., 'module_b_team'" },
+        "confidence": { "type": "string", "nullable": true, "enum": ["high", "medium", "low"] },
+        "related_interrogatory_ids": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "question_ids of interrogatory items that address this flag. E.g., ['B2', 'B3']"
+        },
+        "related_data_room_ids": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "References to data_room_items that would resolve this flag"
+        },
+        "order_index": { "type": "number", "description": "Global ordering: criticals first, then elevated, then monitor" }
+      }
+    ]
+  },
+
+  "interrogatory_items": {
+    "$description": "Questions for the GP meeting from Node 8. One record per question.",
+    "items": [
+      {
+        "question_id": { "type": "string", "required": true, "description": "Module-prefixed ID. E.g., 'A1', 'A2', 'B1', 'C3', 'D5', 'E2'" },
+        "question": { "type": "string", "required": true, "description": "The full question text, specific to this fund" },
+        "rationale": { "type": "string", "required": true, "description": "Why this question matters — what finding or gap prompted it" },
+        "priority": { "type": "string", "required": true, "enum": ["critical", "high", "medium"] },
+        "source_module": { "type": "string", "required": true, "description": "E.g., 'module_a_financial'" },
+        "source_module_label": { "type": "string", "required": true, "description": "Display label. E.g., 'Financial & Performance'" },
+        "status": {
+          "type": "string",
+          "required": true,
+          "default": "pending",
+          "enum": ["pending", "asked", "answered", "needs_followup", "resolved"],
+          "description": "Workflow status. Updated after GP meeting."
+        },
+        "gp_response_score": {
+          "type": "number",
+          "nullable": true,
+          "min": 0,
+          "max": 3,
+          "description": "GP meeting response quality. 3 = clear/documented, 2 = directional, 1 = vague/deflection, 0 = non-response"
+        },
+        "gp_response_notes": { "type": "string", "nullable": true, "description": "What the GP actually said. Filled in by analyst after meeting." },
+        "related_red_flag_ids": {
+          "type": "array",
+          "items": "number",
+          "nullable": true,
+          "description": "flag_numbers of red flags this question addresses"
+        },
+        "order_index": { "type": "number", "description": "Display order within module group" }
+      }
+    ]
+  },
+
+  "data_room_items": {
+    "$description": "Document request checklist from Node 9. One record per document.",
+    "items": [
+      {
+        "document_name": { "type": "string", "required": true, "description": "E.g., 'Limited Partnership Agreement (LPA)'" },
+        "priority_tier": {
+          "type": "number",
+          "required": true,
+          "enum": [1, 2, 3, 4],
+          "description": "1 = Deal-Breaker (required for any commitment), 2 = Essential (required pre-commitment), 3 = Supporting (full diligence), 4 = Nice-to-Have"
+        },
+        "priority_label": {
+          "type": "string",
+          "required": true,
+          "enum": ["deal_breaker", "essential", "supporting", "nice_to_have"]
+        },
+        "sub_items": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "Specific sub-documents needed. E.g., ['Full document including exhibits', 'All amendments to date', 'Side letters or investor-specific terms']"
+        },
+        "purpose": { "type": "string", "nullable": true, "description": "Why this document is needed" },
+        "source_module": { "type": "string", "nullable": true },
+        "is_received": { "type": "boolean", "default": false },
+        "received_date": { "type": "string", "nullable": true, "format": "date" },
+        "is_reviewed": { "type": "boolean", "default": false },
+        "reviewer_notes": { "type": "string", "nullable": true },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "research_sources": {
+    "$description": "All sources used in the analysis, from Node 11. The backbone of the citation system.",
+    "items": [
+      {
+        "citation_id": {
+          "type": "string",
+          "required": true,
+          "description": "Unique reference ID embedded in report markdown. Format: 'SRC_001', 'SRC_002', etc. This is what inline citations in report_sections.content reference via (cite:SRC_001)"
+        },
+        "title": { "type": "string", "required": true, "description": "Source display name. E.g., 'SEC Form ADV: DSC Meridian Capital LP (CRD 296590)'" },
+        "url": { "type": "string", "nullable": true, "description": "Full URL. Null for non-web sources like 'Bloomberg terminal data'" },
+        "source_category": {
+          "type": "string",
+          "required": true,
+          "enum": ["team_validation", "market_validation", "regulatory_compliance", "performance_data"],
+          "description": "Maps to the four groups in Appendix A"
+        },
+        "source_type": {
+          "type": "string",
+          "nullable": true,
+          "description": "Granular type within category. E.g., 'linkedin', 'sec_filing', 'finra_brokercheck', 'academic_paper', 'news_article', 'data_provider', 'industry_report'"
+        },
+        "excerpt": {
+          "type": "string",
+          "nullable": true,
+          "description": "The specific finding or data point extracted from this source. This is what renders in the accordion when an inline citation is clicked. E.g., 'Confirmed: Former Head of Credit Research at Paulson & Co. Vanderbilt MBA (2000), IIT Bombay B.Tech (1996).'"
+        },
+        "accessed_date": { "type": "string", "nullable": true, "format": "date", "description": "When this source was accessed during research" },
+        "linked_sections": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "Which report sections cite this source. E.g., ['module_b_team', 'executive_summary']"
+        },
+        "linked_team_member_names": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "If this source relates to team verification, which team members. E.g., ['Sheru Chowdhry']"
+        },
+        "favicon_url": { "type": "string", "nullable": true, "description": "For UI display next to source links" },
+        "is_primary": { "type": "boolean", "default": false, "description": "True if this is a primary/original source vs. secondary commentary" }
+      }
+    ]
+  },
+
+  "engagement_case_studies": {
+    "$description": "Optional. Structured engagement track record data when the fund has an engagement/ESG mandate. Extracted from Module C.",
+    "items": [
+      {
+        "company_name": { "type": "string", "required": true },
+        "sector": { "type": "string", "nullable": true },
+        "investment_thesis": { "type": "string", "nullable": true },
+        "engagement_outcomes": {
+          "type": "array",
+          "items": "string",
+          "nullable": true,
+          "description": "List of concrete outcomes. E.g., ['Net-zero announcement June 2021', 'New Head of ESG hired']"
+        },
+        "outcome_status": { "type": "string", "nullable": true, "enum": ["achieved", "in_progress", "partial", "ongoing", "failed"] },
+        "assessment_rating": { "type": "string", "nullable": true, "description": "E.g., 'STRONG', 'MEDIUM-HIGH', 'MEDIUM'" },
+        "assessment_detail": { "type": "string", "nullable": true },
+        "market_validation": { "type": "string", "nullable": true, "description": "E.g., 'Stock appreciated from $55 to $105 (+90%)'" },
+        "order_index": { "type": "number" }
+      }
+    ]
+  },
+
+  "$metadata": {
+    "schema_version": "1.0.0",
+    "produced_by": "l1-due-diligence skill",
+    "total_tables": 16,
+    "table_list": [
+      "project",
+      "module_scores",
+      "source_documents",
+      "submission_quality",
+      "document_quality_flags",
+      "critical_info_gaps",
+      "report_sections",
+      "team_members",
+      "performance_metrics",
+      "fee_structure",
+      "thesis_validations",
+      "competitive_landscape",
+      "market_factors",
+      "service_providers",
+      "red_flags",
+      "interrogatory_items",
+      "data_room_items",
+      "research_sources",
+      "engagement_case_studies"
+    ],
+    "citation_system": {
+      "description": "Inline citations work by embedding (cite:SRC_XXX) markers in report_sections.content markdown. The front-end matches SRC_XXX to research_sources.citation_id and renders a clickable accordion showing the source title, URL, excerpt, and accessed_date. End-of-report citations in appendix_sources section group research_sources by source_category.",
+      "inline_format": "[claim text](cite:SRC_001)",
+      "accordion_displays": ["title", "url", "excerpt", "accessed_date", "source_type"]
+    },
+    "cross_references": {
+      "red_flags → interrogatory_items": "red_flags.related_interrogatory_ids → interrogatory_items.question_id",
+      "red_flags → data_room_items": "red_flags.related_data_room_ids → data_room_items (by order_index or document_name)",
+      "interrogatory_items → red_flags": "interrogatory_items.related_red_flag_ids → red_flags.flag_number",
+      "team_members → research_sources": "team_members.verification_citation_ids → research_sources.citation_id",
+      "report_sections → research_sources": "inline (cite:SRC_XXX) markers in content → research_sources.citation_id",
+      "all tables → project": "All tables have an implicit project_id foreign key"
+    }
+  }
+}
