@@ -96,7 +96,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
   const groupByModule = (groupItems: Tables<"data_room_items">[]) => {
     const modules: Record<string, Tables<"data_room_items">[]> = {};
     groupItems.forEach(item => {
-      const mod = item.module || 'General';
+      const mod = MODULE_LABELS[item.module || ''] || item.module || 'General';
       if (!modules[mod]) modules[mod] = [];
       modules[mod].push(item);
     });
