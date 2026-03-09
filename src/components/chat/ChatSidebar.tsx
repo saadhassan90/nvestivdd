@@ -173,7 +173,25 @@ export function ChatSidebar() {
           </div>
 
           {/* Floating Input */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+              {/* Suggested follow-up prompts */}
+              {suggestedPrompts.length > 0 && !isLoading && (
+                <div className="pointer-events-auto flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
+                  {suggestedPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => {
+                        setInput(prompt);
+                        setUserScrolled(false);
+                        setTimeout(() => sendMessage(prompt), 0);
+                      }}
+                      className="shrink-0 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              )}
             <div className="pointer-events-auto rounded-2xl border border-border bg-card shadow-lg p-3">
               <textarea
               ref={textareaRef}
