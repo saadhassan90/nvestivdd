@@ -25,6 +25,7 @@ interface TeamMember {
 interface TeamTabProps {
   teamMembers: TeamMember[];
   serviceProviders: ServiceProvider[];
+  reportSection?: { section_title: string | null; content: string | null };
 }
 
 interface ServiceProvider {
