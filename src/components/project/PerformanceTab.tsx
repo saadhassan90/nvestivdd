@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TrendingUp, DollarSign } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 interface PerformanceMetric {
   id: string;
@@ -33,6 +33,8 @@ interface FeeItem {
 interface PerformanceTabProps {
   metrics: PerformanceMetric[];
   fees: FeeItem[];
+  performanceWriteup?: { section_title: string | null; content: string | null };
+  feesWriteup?: { section_title: string | null; content: string | null };
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -51,7 +53,7 @@ const ASSESSMENT_COLORS: Record<string, string> = {
   critical_gap: "text-severity-critical bg-severity-critical/10",
 };
 
-export function PerformanceTab({ metrics, fees }: PerformanceTabProps) {
+export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup }: PerformanceTabProps) {
   const [activeSection, setActiveSection] = useState<"performance" | "fees">("performance");
   // Group metrics by category
   const metricsByCategory: Record<string, PerformanceMetric[]> = {};
@@ -97,6 +99,13 @@ export function PerformanceTab({ metrics, fees }: PerformanceTabProps) {
 
       {activeSection === "performance" && (
         <div className="space-y-6">
+          {performanceWriteup?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={performanceWriteup.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {metrics.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No performance data available yet.</p>
@@ -149,6 +158,13 @@ export function PerformanceTab({ metrics, fees }: PerformanceTabProps) {
 
       {activeSection === "fees" && (
         <div className="space-y-6">
+          {feesWriteup?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={feesWriteup.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {fees.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No fee structure data available yet.</p>

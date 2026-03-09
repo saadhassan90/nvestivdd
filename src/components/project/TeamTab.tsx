@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 
 interface TeamMember {
@@ -24,6 +25,7 @@ interface TeamMember {
 interface TeamTabProps {
   teamMembers: TeamMember[];
   serviceProviders: ServiceProvider[];
+  reportSection?: { section_title: string | null; content: string | null };
 }
 
 interface ServiceProvider {
@@ -58,7 +60,7 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   standard: "text-muted-foreground",
 };
 
-export function TeamTab({ teamMembers, serviceProviders }: TeamTabProps) {
+export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTabProps) {
   const [activeSection, setActiveSection] = useState<"team" | "providers">(teamMembers.length > 0 ? "team" : "providers");
 
   // Group team by role_category
@@ -101,6 +103,13 @@ export function TeamTab({ teamMembers, serviceProviders }: TeamTabProps) {
 
       {activeSection === "team" && (
         <div className="space-y-6">
+          {reportSection?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={reportSection.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {teamMembers.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No team member data available yet.</p>

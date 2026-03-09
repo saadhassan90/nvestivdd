@@ -200,10 +200,10 @@ export default function ProjectDetail() {
                 />
               )}
               {activeTab === "team" && (
-                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} />
+                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('team') || s.section_title?.toLowerCase().includes('leadership'))} />
               )}
               {activeTab === "performance" && (
-                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} />
+                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} performanceWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('performance') || s.section_title?.toLowerCase().includes('track record'))} feesWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('fee') || s.section_title?.toLowerCase().includes('economics'))} />
               )}
               {activeTab === "strategy" && (
                 <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('strategy') || s.section_title?.toLowerCase().includes('market'))} />
