@@ -10,9 +10,11 @@ interface NewDealModalProps {
   onClose: () => void;
 }
 
-const ASSET_CLASSES = [
-  "Private Equity", "Venture Capital", "Real Estate", "Hedge Fund",
-  "Credit", "Growth Equity", "Biotech", "Infrastructure", "Other"
+const RECOMMENDED_DOCS = [
+  "Pitch Deck / CIM",
+  "Performance History",
+  "Legal Documentation / Subscription Agreements",
+  "Financial Models / Pro Forma",
 ];
 
 function getFileIcon(name: string) {
