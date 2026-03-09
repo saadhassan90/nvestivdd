@@ -53,7 +53,7 @@ const ASSESSMENT_COLORS: Record<string, string> = {
   critical_gap: "text-severity-critical bg-severity-critical/10",
 };
 
-export function PerformanceTab({ metrics, fees }: PerformanceTabProps) {
+export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup }: PerformanceTabProps) {
   const [activeSection, setActiveSection] = useState<"performance" | "fees">("performance");
   // Group metrics by category
   const metricsByCategory: Record<string, PerformanceMetric[]> = {};

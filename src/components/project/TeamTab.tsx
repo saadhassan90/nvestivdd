@@ -60,7 +60,7 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   standard: "text-muted-foreground",
 };
 
-export function TeamTab({ teamMembers, serviceProviders }: TeamTabProps) {
+export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTabProps) {
   const [activeSection, setActiveSection] = useState<"team" | "providers">(teamMembers.length > 0 ? "team" : "providers");
 
   // Group team by role_category
