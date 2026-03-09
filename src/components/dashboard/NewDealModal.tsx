@@ -1,16 +1,9 @@
 import { useState, useCallback } from "react";
-import { X, Upload, FileText, FileSpreadsheet, File, Zap } from "lucide-react";
+import { X, Upload, FileText, FileSpreadsheet, File, Zap, CheckCircle2 } from "lucide-react";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface NewDealModalProps {
   open: boolean;
