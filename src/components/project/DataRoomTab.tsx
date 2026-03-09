@@ -29,7 +29,7 @@ export function DataRoomTab({ items }: DataRoomTabProps) {
         <span className={`h-2 w-2 rounded-full ${dotColor}`} />
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {groupItems.map((item) => (
           <MagicCard
             key={item.id}
@@ -48,7 +48,7 @@ export function DataRoomTab({ items }: DataRoomTabProps) {
               >
                 {(selected.has(item.id) || item.is_received) && <Check className="h-3 w-3" />}
               </button>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">{item.document_name}</p>
                 <p className="text-xs text-muted-foreground mt-1">{item.purpose}</p>
                 {item.module && (
@@ -65,22 +65,22 @@ export function DataRoomTab({ items }: DataRoomTabProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BlurFade>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Data Room Requests</h2>
-            <p className="text-sm text-muted-foreground mt-1">Select missing documentation items to generate a formal request email to the target company.</p>
+            <h2 className="text-lg sm:text-xl font-bold text-foreground">Data Room Requests</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Select missing documentation to generate a request email.</p>
           </div>
-          <button className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors">
+          <button className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted transition-colors self-start sm:self-auto">
             <Mail className="h-4 w-4" />
-            Generate Request Email
+            Generate Email
           </button>
         </div>
       </BlurFade>
 
       <BlurFade delay={0.1}>
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {critical.length > 0 && renderGroup("Critical Priority", critical, "bg-severity-critical")}
           {high.length > 0 && renderGroup("High Priority", high, "bg-severity-elevated")}
           {standard.length > 0 && renderGroup("Standard Priority", standard, "bg-severity-monitor")}

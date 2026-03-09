@@ -54,7 +54,6 @@ export default function ProjectDetail() {
   useEffect(() => {
     fetchData();
 
-    // Realtime subscription for project status
     const channel = supabase
       .channel(`project-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'projects', filter: `id=eq.${id}` }, (payload) => {
@@ -105,27 +104,33 @@ export default function ProjectDetail() {
       <Header />
 
       {/* Breadcrumbs */}
-      <div className="border-b border-border bg-card px-6 py-2">
-        <div className="flex items-center gap-2 text-sm">
+      <div className="border-b border-border bg-card px-4 sm:px-6 py-2 overflow-x-auto">
+        <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
           <button onClick={() => navigate('/dashboard')} className="text-muted-foreground hover:text-foreground transition-colors">Projects</button>
           <span className="text-muted-foreground">&gt;</span>
-          <span className="text-muted-foreground">{project.asset_class}</span>
-          <span className="text-muted-foreground">&gt;</span>
-          <span className="font-medium text-foreground">{project.fund_name}</span>
+          <span className="text-muted-foreground hidden sm:inline">{project.asset_class}</span>
+          <span className="text-muted-foreground hidden sm:inline">&gt;</span>
+          <span className="font-medium text-foreground truncate">{project.fund_name}</span>
         </div>
       </div>
 
-      <div className="flex flex-1">
-        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Mobile: sidebar renders as horizontal nav here */}
+      <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <main className="flex-1 p-6 overflow-auto">
+      <div className="flex flex-1 min-h-0">
+        {/* Desktop: sidebar is inside here via CSS (hidden on mobile) */}
+        <div className="hidden lg:contents">
+          {/* Sidebar already rendered above, but only shows on lg+ via its own CSS */}
+        </div>
+
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">
           {project.status === 'processing' ? (
             <ProcessingState />
           ) : project.status === 'error' ? (
             <BlurFade>
               <div className="flex flex-col items-center justify-center py-20">
                 <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
-                <p className="text-sm text-muted-foreground mb-4">{project.error_message || 'An unexpected error occurred.'}</p>
+                <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || 'An unexpected error occurred.'}</p>
                 <ShimmerButton onClick={handleRetry}>Retry Analysis</ShimmerButton>
               </div>
             </BlurFade>

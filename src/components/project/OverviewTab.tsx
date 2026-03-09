@@ -16,16 +16,16 @@ export function OverviewTab({ project, redFlags, reportSections }: OverviewTabPr
   const completionRate = reportSections.length > 0 ? Math.round((reportSections.length / 9) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Submission Quality */}
       <BlurFade>
         <MagicCard>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submission Quality</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Consistency and accuracy across latest batch</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Consistency and accuracy across latest batch</p>
             </div>
-            <span className="text-3xl font-bold text-foreground">{completionRate}%</span>
+            <span className="text-2xl sm:text-3xl font-bold text-foreground">{completionRate}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted">
             <div className="h-full rounded-full bg-primary" style={{ width: `${completionRate}%` }} />
@@ -45,7 +45,7 @@ export function OverviewTab({ project, redFlags, reportSections }: OverviewTabPr
               <CheckCircle2 className="h-5 w-5 text-score-strong" />
               <h3 className="font-semibold text-foreground">Key Strengths</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[
                 { title: "Data Integrity", desc: "Cross-referencing accuracy exceeding 98% benchmarks" },
                 { title: "Metadata Completeness", desc: "All required fields populated across submissions" },
@@ -69,7 +69,7 @@ export function OverviewTab({ project, redFlags, reportSections }: OverviewTabPr
               <AlertTriangle className="h-5 w-5 text-severity-elevated" />
               <h3 className="font-semibold text-foreground">Critical Risks</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {redFlags.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No critical risks identified</p>
               ) : (
@@ -92,31 +92,31 @@ export function OverviewTab({ project, redFlags, reportSections }: OverviewTabPr
       {redFlags.length > 0 && (
         <BlurFade delay={0.3}>
           <MagicCard>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-severity-critical" />
                 <h3 className="font-semibold text-foreground">Red Flag Summary</h3>
               </div>
-              <span className="inline-flex items-center rounded-full bg-severity-critical/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-severity-critical">
+              <span className="inline-flex self-start sm:self-auto items-center rounded-full bg-severity-critical/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-severity-critical">
                 {criticalFlags.length + elevatedFlags.length} Attention Required
               </span>
             </div>
             <div className="space-y-3">
               {redFlags.map((flag) => (
-                <div key={flag.id} className="flex items-start justify-between rounded-lg border border-border p-4">
-                  <div className="flex items-start gap-3">
-                    <span className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-primary-foreground ${flag.severity === 'critical' ? 'bg-severity-critical' : flag.severity === 'elevated' ? 'bg-severity-elevated' : 'bg-severity-monitor'}`}>
+                <div key={flag.id} className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 rounded-lg border border-border p-3 sm:p-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-primary-foreground shrink-0 ${flag.severity === 'critical' ? 'bg-severity-critical' : flag.severity === 'elevated' ? 'bg-severity-elevated' : 'bg-severity-monitor'}`}>
                       {flag.severity === 'critical' ? 'H' : flag.severity === 'elevated' ? 'M' : 'L'}
                     </span>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">
-                        Logged {formatRelativeTime(flag.logged_at)} • {flag.module || 'General'}
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground mb-0.5">
+                        {formatRelativeTime(flag.logged_at)} • {flag.module || 'General'}
                       </p>
                       <p className="text-sm font-semibold text-foreground">{flag.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{flag.description}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                  <div className="flex items-center gap-2 shrink-0 ml-9 sm:ml-0">
                     <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Assign</button>
                     <button className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">Review</button>
                   </div>

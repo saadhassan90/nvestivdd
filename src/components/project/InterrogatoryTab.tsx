@@ -9,7 +9,7 @@ interface InterrogatoryTabProps {
 }
 
 const PRIORITY_FILTERS = [
-  { key: "all", label: "All Questions", dot: "" },
+  { key: "all", label: "All", dot: "" },
   { key: "critical", label: "Critical", dot: "bg-severity-critical" },
   { key: "high", label: "High", dot: "bg-severity-elevated" },
   { key: "medium", label: "Medium", dot: "bg-score-strong" },
@@ -31,21 +31,21 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
     : items.filter(i => i.priority === activeFilter);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BlurFade>
         <div>
-          <h2 className="text-xl font-bold text-foreground">Interrogatory Matrix</h2>
-          <p className="text-sm text-muted-foreground mt-1">Review and manage technical inquiries for {fundName}.</p>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Interrogatory Matrix</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Review and manage technical inquiries for {fundName}.</p>
         </div>
       </BlurFade>
 
       {/* Filter pills */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         {PRIORITY_FILTERS.map(f => (
           <button
             key={f.key}
             onClick={() => setActiveFilter(f.key)}
-            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
               activeFilter === f.key
                 ? 'bg-primary text-primary-foreground'
                 : 'border border-border text-muted-foreground hover:text-foreground'
@@ -62,34 +62,32 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
         {filtered.map((item, i) => (
           <BlurFade key={item.id} delay={i * 0.05}>
             <MagicCard className={`border-l-4 ${BORDER_COLORS[item.priority] || ''}`}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-muted-foreground">ID: {item.question_id}</span>
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                      item.priority === 'critical' ? 'text-severity-critical' :
-                      item.priority === 'high' ? 'text-severity-elevated' :
-                      item.priority === 'medium' ? 'text-score-strong' : 'text-severity-monitor'
-                    }`}>
-                      {item.priority}
-                    </span>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-muted-foreground">{item.question_id}</span>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    item.priority === 'critical' ? 'text-severity-critical' :
+                    item.priority === 'high' ? 'text-severity-elevated' :
+                    item.priority === 'medium' ? 'text-score-strong' : 'text-severity-monitor'
+                  }`}>
+                    {item.priority}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-foreground">{item.question}</p>
+                {item.rationale && (
+                  <div className="mt-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Rationale</p>
+                    <p className="text-xs text-muted-foreground">{item.rationale}</p>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{item.question}</p>
-                  {item.rationale && (
-                    <div className="mt-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Rationale</p>
-                      <p className="text-xs text-muted-foreground">{item.rationale}</p>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-muted" />
-                      <span className="text-xs text-muted-foreground">Unassigned</span>
-                    </div>
-                    <button className="text-xs font-medium text-foreground hover:text-muted-foreground transition-colors">
-                      RESOLVE →
-                    </button>
+                )}
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-muted" />
+                    <span className="text-[11px] text-muted-foreground">Unassigned</span>
                   </div>
+                  <button className="text-xs font-medium text-foreground hover:text-muted-foreground transition-colors">
+                    RESOLVE →
+                  </button>
                 </div>
               </div>
             </MagicCard>
@@ -97,8 +95,8 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
         ))}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>Showing {filtered.length} of {items.length} inquiries</span>
+      <div className="text-xs text-muted-foreground text-center sm:text-left">
+        Showing {filtered.length} of {items.length} inquiries
       </div>
     </div>
   );
