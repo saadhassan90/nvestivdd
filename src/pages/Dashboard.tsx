@@ -117,9 +117,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Header onNewDeal={() => setModalOpen(true)} />
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
         <BlurFade>
-          <div className="mb-6 flex items-center gap-2 text-sm">
+          <div className="mb-4 sm:mb-6 flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Dashboard</span>
             <span className="text-muted-foreground">&gt;</span>
             <span className="font-medium text-foreground">Due Diligence</span>
