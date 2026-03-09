@@ -143,31 +143,32 @@ export function OverviewTab({ project, redFlags, reportSections, documents, onRe
             </div>
             <div className="space-y-3">
               {reportSections.length > 0 ? (
-                reportSections.filter(s => s.section_key === 'strengths').length > 0 ? (
-                  reportSections.filter(s => s.section_key === 'strengths').map((s) => (
-                    <div key={s.id} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-4 w-4 text-score-strong mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{s.section_title}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{s.content}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  /* Fallback: show sections with high scores */
-                  reportSections
-                    .filter(s => (s.score || 0) >= 70)
-                    .slice(0, 3)
-                    .map((s) => (
-                      <div key={s.id} className="flex items-start gap-3">
+                (() => {
+                  const execSummary = reportSections.find(s => s.section_key === 'executive_summary');
+                  const strengths = execSummary?.content
+                    ?.split('\n')
+                    .filter(line => line.trim().startsWith('- **'))
+                    .slice(0, 5)
+                    .map(line => {
+                      const match = line.match(/- \*\*(.+?)\*\*[:\s]*(.+)/);
+                      return match ? { title: match[1], desc: match[2] } : null;
+                    })
+                    .filter(Boolean) || [];
+
+                  return strengths.length > 0 ? (
+                    strengths.map((s, i) => (
+                      <div key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="h-4 w-4 text-score-strong mt-0.5 shrink-0" />
                         <div>
-                          <p className="text-sm font-medium text-foreground">{s.section_title || s.section_key}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{s.content?.slice(0, 200)}</p>
+                          <p className="text-sm font-medium text-foreground">{s!.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{s!.desc}</p>
                         </div>
                       </div>
                     ))
-                )
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Awaiting analysis results</p>
+                  );
+                })()
               ) : (
                 <p className="text-sm text-muted-foreground">Awaiting analysis results</p>
               )}
