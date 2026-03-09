@@ -226,7 +226,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           </button>
           <ShimmerButton
             onClick={handleSubmit}
-            disabled={!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim() || loading}
+            disabled={files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim() || loading}
           >
             {loading ? "Submitting..." : "Begin Analysis"}
             <Zap className="h-4 w-4" />
