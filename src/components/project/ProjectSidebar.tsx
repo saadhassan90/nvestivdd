@@ -1,4 +1,5 @@
-import { LayoutDashboard, Layers, FileText, MessageSquare, FolderOpen } from "lucide-react";
+import { LayoutDashboard, Layers, Shield, MessageSquare, FolderOpen, FileText } from "lucide-react";
+import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProjectSidebarProps {
@@ -10,18 +11,18 @@ interface ProjectSidebarProps {
 const navItems = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "modules", label: "Modules", icon: Layers },
-  { key: "red_flags", label: "Red Flags", icon: MessageSquare },
+  { key: "red_flags", label: "Red Flags", icon: Shield },
   { key: "interrogatory", label: "Interrogatory", icon: MessageSquare },
   { key: "data_room", label: "Data Room", icon: FolderOpen },
   { key: "documents", label: "Research Sources", icon: FileText },
 ];
 
 const MODULE_NAMES: Record<string, string> = {
-  a: "Strategy & Terms",
-  b: "Track Record",
-  c: "Team & Governance",
-  d: "Portfolio & Risk",
-  e: "Ops & Compliance",
+  a: "Financial",
+  b: "Team",
+  c: "Strategy",
+  d: "Terms",
+  e: "Operational",
 };
 
 export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSidebarProps) {
@@ -63,7 +64,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-foreground text-sm truncate">{project.fund_name}</p>
-              <p className="text-[10px] text-muted-foreground">ID: #{project.id.slice(0, 8).toUpperCase()}</p>
+              <p className="text-[10px] text-muted-foreground">{project.asset_class || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -92,12 +93,14 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
 
         {/* Score card */}
         <div className="mt-auto border-t border-border pt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Overall Score</p>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-3xl font-bold text-foreground">{project.composite_score || '—'}</span>
-            <span className="text-lg text-muted-foreground">/ 100</span>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">L1 Score</p>
+          <div className="flex items-center gap-2 mb-2">
+            <ScoreBadge score={project.composite_score || 0} size="lg" />
+            <span className="text-sm text-muted-foreground">/ 100</span>
           </div>
-          <p className="text-xs text-muted-foreground mb-4">{project.recommendation}</p>
+          {project.recommendation && (
+            <p className="text-xs font-medium text-foreground mb-4">{project.recommendation}</p>
+          )}
 
           {/* Module bars */}
           <div className="space-y-2">
@@ -107,8 +110,8 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between text-[10px] mb-0.5">
-                    <span className="text-muted-foreground uppercase font-medium">Mod {key.toUpperCase()}</span>
-                    <span className="font-semibold text-foreground">{score}%</span>
+                    <span className="text-muted-foreground font-medium">{key.toUpperCase()}: {name}</span>
+                    <span className="font-semibold text-foreground">{score}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted">
                     <div className={`h-full rounded-full ${colorClass}`} style={{ width: `${score}%` }} />
