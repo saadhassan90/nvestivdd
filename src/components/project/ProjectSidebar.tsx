@@ -1,4 +1,4 @@
-import { LayoutDashboard, Layers, Shield, MessageSquare, FolderOpen, FileText, Users, TrendingUp, Target } from "lucide-react";
+import { LayoutDashboard, Shield, MessageSquare, FolderOpen, FileText, Users, TrendingUp, Target, Settings } from "lucide-react";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import type { Tables } from "@/integrations/supabase/types";
 
