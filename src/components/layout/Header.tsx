@@ -45,10 +45,10 @@ export function Header() {
           {/* Ask Iris */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <ShimmerButton className="text-sm shadow-lg" shimmerColor="hsl(217, 91%, 60%)" background="hsl(0, 0%, 5%)">
+                <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">Ask Iris</span>
-              </button>
+              </ShimmerButton>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-md">
               <SheetHeader>
