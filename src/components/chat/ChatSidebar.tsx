@@ -75,37 +75,6 @@ export function ChatSidebar() {
           <span className="text-sm font-semibold text-foreground">Nvestiv AI</span>
         </div>
 
-        {/* Model selector */}
-        <div className="relative">
-          <button
-            onClick={() => setShowModelMenu(!showModelMenu)}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
-          >
-            {currentModel.label}
-            <ChevronDown className="h-3 w-3" />
-          </button>
-          {showModelMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowModelMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border border-border bg-card shadow-lg py-1">
-                {MODELS.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setSelectedModel(m.id); setShowModelMenu(false); }}
-                    className="flex w-full items-center justify-between px-3 py-2 text-xs hover:bg-muted transition-colors"
-                  >
-                    <div>
-                      <span className="font-medium text-foreground">{m.label}</span>
-                      <span className="ml-1.5 text-muted-foreground">({m.desc})</span>
-                    </div>
-                    {selectedModel === m.id && <Check className="h-3 w-3 text-primary" />}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
         <div className="flex items-center gap-1">
           <button onClick={() => { startNewConversation(); setShowHistory(false); }} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
             <SquarePen className="h-4 w-4 text-muted-foreground" />
@@ -188,9 +157,11 @@ export function ChatSidebar() {
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
               </button>
             </div>
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
-              {currentModel.label} · {projectScope ? `Scoped to ${projectScope.name}` : "Global mode"}
-            </p>
+            {projectScope && (
+              <p className="mt-1.5 text-[10px] text-muted-foreground">
+                Scoped to {projectScope.name}
+              </p>
+            )}
           </div>
         </>
       )}
