@@ -105,9 +105,7 @@ export function ModuleTab({ sections, activeModule, onModuleChange }: ModuleTabP
         {section?.content ? (
           <BlurFade delay={0.1}>
             <MagicCard>
-              <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-li:text-muted-foreground prose-td:text-muted-foreground prose-th:text-foreground prose-th:text-xs prose-th:font-semibold prose-table:text-sm overflow-x-auto">
-                <ReactMarkdown>{section.content}</ReactMarkdown>
-              </div>
+              <MarkdownContent content={section.content} />
             </MagicCard>
           </BlurFade>
         ) : (
