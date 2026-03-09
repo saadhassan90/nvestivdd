@@ -72,7 +72,7 @@ export default function ProjectDetail() {
     return () => { supabase.removeChannel(channel); };
   }, [id, fetchData, toast]);
 
-  const handleRetry = async () => {
+  const handleRerunAnalysis = async () => {
     if (!project) return;
     await supabase.from('task_queue').insert({
       project_id: project.id,
@@ -80,7 +80,7 @@ export default function ProjectDetail() {
       status: 'pending',
     });
     await supabase.from('projects').update({ status: 'processing', error_message: null }).eq('id', project.id);
-    toast({ title: "Analysis re-queued" });
+    toast({ title: "Analysis queued", description: "The report will be updated with the latest data." });
   };
 
   if (loading) {
@@ -136,13 +136,13 @@ export default function ProjectDetail() {
               <div className="flex flex-col items-center justify-center py-20">
                 <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
                 <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || 'An unexpected error occurred.'}</p>
-                <ShimmerButton onClick={handleRetry}>Retry Analysis</ShimmerButton>
+                <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
               </div>
             </BlurFade>
           ) : (
             <>
               {activeTab === "overview" && (
-                <OverviewTab project={project} redFlags={redFlags} reportSections={reportSections} />
+                <OverviewTab project={project} redFlags={redFlags} reportSections={reportSections} documents={documents} onRerunAnalysis={handleRerunAnalysis} />
               )}
               {activeTab === "modules" && (
                 <ModuleTab sections={reportSections} activeModule={activeModule} onModuleChange={setActiveModule} />
@@ -154,10 +154,18 @@ export default function ProjectDetail() {
                 <InterrogatoryTab items={interrogatoryItems} fundName={project.fund_name} />
               )}
               {activeTab === "data_room" && (
-                <DataRoomTab items={dataRoomItems} />
+                <DataRoomTab
+                  items={dataRoomItems}
+                  documents={documents}
+                  projectId={project.id}
+                  projectStatus={project.status}
+                  lastAnalysisAt={project.updated_at}
+                  onRefresh={fetchData}
+                  onRerunAnalysis={handleRerunAnalysis}
+                />
               )}
               {activeTab === "documents" && (
-                <SourceFilesTab documents={documents} researchSources={researchSources} projectId={project.id} onRefresh={fetchData} />
+                <SourceFilesTab researchSources={researchSources} />
               )}
             </>
           )}
