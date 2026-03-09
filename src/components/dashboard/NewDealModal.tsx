@@ -52,15 +52,16 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   };
 
   const handleSubmit = async () => {
-    if (!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
+    if (files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
     setLoading(true);
+
+    const inferredName = files[0]?.name.replace(/\.[^.]+$/, '') || 'Untitled Deal';
 
     try {
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
-          fund_name: fundName.trim(),
-          asset_class: assetClass || null,
+          fund_name: inferredName,
           status: 'uploading',
           submitter_name: submitterName.trim(),
           submitter_company: submitterCompany.trim(),
