@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
@@ -10,6 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface DealTableProps {
