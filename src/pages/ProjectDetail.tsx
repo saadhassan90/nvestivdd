@@ -20,6 +20,7 @@ export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setProjectScope } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
