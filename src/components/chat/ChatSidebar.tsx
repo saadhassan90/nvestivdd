@@ -4,6 +4,7 @@ import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
 import { ChatEmptyState } from "./ChatEmptyState";
+import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
 
 const MODELS = [
