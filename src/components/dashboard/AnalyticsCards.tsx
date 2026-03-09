@@ -1,4 +1,4 @@
-import { MagicCard } from "@/components/magicui/MagicCard";
+import { Card, CardBody } from "@heroui/react";
 import { NumberTicker } from "@/components/magicui/NumberTicker";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { TrendingUp, TrendingDown } from "lucide-react";
@@ -25,52 +25,51 @@ export function AnalyticsCards({ projects, flagCount }: AnalyticsCardsProps) {
 
   return (
     <>
-      {/* Desktop: full cards */}
       <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, i) => (
           <BlurFade key={card.label} delay={i * 0.1}>
-            <MagicCard>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {card.label}
-              </p>
-              <div className="mt-3 flex items-end gap-2">
-                <span className="text-3xl font-bold text-foreground">
-                  <NumberTicker value={card.value} suffix={card.suffix} />
-                </span>
-                {card.trend !== "0" && (
-                  <span className={`flex items-center gap-0.5 text-xs font-medium ${card.trendUp ? 'text-trend-positive' : 'text-trend-negative'}`}>
-                    {card.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {card.trend}
+            <Card shadow="sm">
+              <CardBody className="p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-default-500">
+                  {card.label}
+                </p>
+                <div className="mt-3 flex items-end gap-2">
+                  <span className="text-3xl font-bold text-foreground">
+                    <NumberTicker value={card.value} suffix={card.suffix} />
                   </span>
-                )}
-              </div>
-            </MagicCard>
+                  {card.trend !== "0" && (
+                    <span className={`flex items-center gap-0.5 text-xs font-medium ${card.trendUp ? 'text-success' : 'text-danger'}`}>
+                      {card.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                      {card.trend}
+                    </span>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
           </BlurFade>
         ))}
       </div>
 
-      {/* Mobile: compact bento grid */}
       <BlurFade>
         <div className="sm:hidden grid grid-cols-2 gap-2">
           {cards.map((card) => (
-            <div
-              key={card.label}
-              className="rounded-lg border border-border bg-card px-3 py-2.5"
-            >
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
-                {card.label}
-              </p>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-bold text-foreground leading-none">
-                  {card.value}{card.suffix || ""}
-                </span>
-                {card.trend !== "0" && (
-                  <span className={`text-[10px] font-medium ${card.trendUp ? 'text-trend-positive' : 'text-trend-negative'}`}>
-                    {card.trend}
+            <Card key={card.label} shadow="sm">
+              <CardBody className="p-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-default-500 leading-tight">
+                  {card.label}
+                </p>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className="text-lg font-bold text-foreground leading-none">
+                    {card.value}{card.suffix || ""}
                   </span>
-                )}
-              </div>
-            </div>
+                  {card.trend !== "0" && (
+                    <span className={`text-[10px] font-medium ${card.trendUp ? 'text-success' : 'text-danger'}`}>
+                      {card.trend}
+                    </span>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
           ))}
         </div>
       </BlurFade>

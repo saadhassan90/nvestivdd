@@ -1,11 +1,6 @@
+import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Chip } from "@heroui/react";
 import { Search, ArrowUpDown, X, ChevronDown } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export interface FilterState {
   assetClass: string | null;
@@ -51,30 +46,33 @@ function FilterDropdown({ label, value, options, onSelect, onClear }: {
   onClear: () => void;
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
-          value
-            ? 'bg-primary text-primary-foreground'
-            : 'border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30'
-        }`}>
+    <Dropdown>
+      <DropdownTrigger>
+        <Button
+          variant={value ? "solid" : "bordered"}
+          color={value ? "primary" : "default"}
+          size="sm"
+          endContent={<ChevronDown className="h-3 w-3" />}
+          className="text-xs"
+        >
           {value ? options.find(o => o.value === value)?.label || label : label}
-          <ChevronDown className="h-3 w-3" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {value && (
-          <DropdownMenuItem onClick={onClear} className="text-muted-foreground">
-            Clear filter
-          </DropdownMenuItem>
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu aria-label={label}>
+        {value ? (
+          [
+            <DropdownItem key="clear" onPress={onClear} className="text-default-400">Clear filter</DropdownItem>,
+            ...options.map(opt => (
+              <DropdownItem key={opt.value} onPress={() => onSelect(opt.value)}>{opt.label}</DropdownItem>
+            ))
+          ]
+        ) : (
+          options.map(opt => (
+            <DropdownItem key={opt.value} onPress={() => onSelect(opt.value)}>{opt.label}</DropdownItem>
+          ))
         )}
-        {options.map(opt => (
-          <DropdownMenuItem key={opt.value} onClick={() => onSelect(opt.value)}>
-            {opt.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+    </Dropdown>
   );
 }
 
@@ -92,7 +90,6 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
   return (
     <BlurFade delay={0.2}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Filters row */}
         <div className="flex items-center gap-2 flex-wrap">
           <FilterDropdown
             label="Asset Class"
@@ -117,50 +114,75 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
           />
 
           {activeChips.map(chip => (
-            <span key={chip.key} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground">
+            <Chip
+              key={chip.key}
+              size="sm"
+              variant="flat"
+              onClose={() => clearFilter(chip.key)}
+            >
               {chip.label}
-              <button onClick={() => clearFilter(chip.key)} className="hover:text-severity-critical transition-colors">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
+            </Chip>
           ))}
         </div>
 
-        {/* Search + Sort */}
         <div className="flex items-center gap-2">
-          <div className="relative flex-1 sm:flex-none">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Filter funds..."
-              value={filters.search}
-              onChange={(e) => onChange({ ...filters, search: e.target.value })}
-              className="w-full sm:w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
+          <Input
+            type="text"
+            placeholder="Filter funds..."
+            size="sm"
+            value={filters.search}
+            onValueChange={(val) => onChange({ ...filters, search: val })}
+            startContent={<Search className="h-3.5 w-3.5 text-default-400" />}
+            classNames={{
+              base: "w-full sm:w-44",
+              inputWrapper: "bg-default-100 shadow-none h-8",
+              input: "text-xs",
+            }}
+          />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="bordered" size="sm" isIconOnly className="sm:hidden">
                 <ArrowUpDown className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sort</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Sort">
               {SORT_OPTIONS.map(opt => (
-                <DropdownMenuItem
+                <DropdownItem
                   key={opt.value}
-                  onClick={() => onChange({
+                  onPress={() => onChange({
                     ...filters,
                     sortBy: opt.value,
                     sortDir: filters.sortBy === opt.value && filters.sortDir === "asc" ? "desc" : "asc",
                   })}
                 >
                   {opt.label} {filters.sortBy === opt.value && (filters.sortDir === "asc" ? "↑" : "↓")}
-                </DropdownMenuItem>
+                </DropdownItem>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </Dropdown>
+
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="bordered" size="sm" startContent={<ArrowUpDown className="h-3.5 w-3.5" />} className="hidden sm:flex text-xs">
+                Sort
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Sort">
+              {SORT_OPTIONS.map(opt => (
+                <DropdownItem
+                  key={opt.value}
+                  onPress={() => onChange({
+                    ...filters,
+                    sortBy: opt.value,
+                    sortDir: filters.sortBy === opt.value && filters.sortDir === "asc" ? "desc" : "asc",
+                  })}
+                >
+                  {opt.label} {filters.sortBy === opt.value && (filters.sortDir === "asc" ? "↑" : "↓")}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
     </BlurFade>

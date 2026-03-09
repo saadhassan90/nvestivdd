@@ -1,15 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
+  Card, CardBody, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,
+  Button, Pagination,
+} from "@heroui/react";
+import { MoreHorizontal } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface DealTableProps {
@@ -21,190 +20,151 @@ interface DealTableProps {
   onPageChange: (page: number) => void;
 }
 
-function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange }: {
-  page: number;
-  totalPages: number;
-  totalCount: number;
-  shownCount: number;
-  onPageChange: (p: number) => void;
-}) {
-  // Build page numbers to show
-  const pages: (number | "...")[] = [];
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (page > 3) pages.push("...");
-    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
-    if (page < totalPages - 2) pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return (
-    <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5">
-      <p className="text-[11px] text-muted-foreground">
-        {shownCount} of {totalCount} results
-      </p>
-      {totalPages > 1 && (
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => onPageChange(Math.max(1, page - 1))}
-            disabled={page === 1}
-            className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
-          {pages.map((p, i) =>
-            p === "..." ? (
-              <span key={`e${i}`} className="px-1 text-[11px] text-muted-foreground">…</span>
-            ) : (
-              <button
-                key={p}
-                onClick={() => onPageChange(p)}
-                className={`flex h-6 min-w-[24px] items-center justify-center rounded text-[11px] font-medium transition-colors ${
-                  p === page
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                {p}
-              </button>
-            )
-          )}
-          <button
-            onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-            disabled={page === totalPages}
-            className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
-        <p className="text-sm text-muted-foreground">No deals match your filters.</p>
-      </div>
+      <Card shadow="sm">
+        <CardBody className="p-8 text-center">
+          <p className="text-sm text-default-500">No deals match your filters.</p>
+        </CardBody>
+      </Card>
     );
   }
 
-  const paginationBar = (
-    <PaginationBar
-      page={page}
-      totalPages={totalPages}
-      totalCount={totalCount ?? projects.length}
-      shownCount={projects.length}
-      onPageChange={onPageChange}
-    />
-  );
-
   return (
     <BlurFade delay={0.15}>
-      {/* Desktop table — tighter spacing */}
-      <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Fund Name</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Asset Class</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Flags</th>
-              <th className="px-3 lg:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((project) => {
-              const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
-              return (
-                <tr
-                  key={project.id}
-                  className="border-b border-border last:border-0 transition-colors hover:bg-muted/50 cursor-pointer"
-                  onClick={() => navigate(`/project/${project.id}`)}
-                >
-                  <td className="px-3 lg:px-4 py-2">
-                    <p className="font-medium text-foreground text-sm truncate max-w-[200px] lg:max-w-none">{project.fund_name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">
-                      Est. {project.established_year} • V{project.vintage}
-                    </p>
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                      {project.asset_class}
+      {/* Desktop table */}
+      <div className="hidden md:block">
+        <Card shadow="sm">
+          <CardBody className="p-0 overflow-hidden">
+            <Table
+              aria-label="Deals"
+              removeWrapper
+              classNames={{
+                th: "text-[10px] font-semibold uppercase tracking-wider text-default-500 bg-default-50",
+                td: "py-3",
+                tr: "cursor-pointer hover:bg-default-50 transition-colors",
+              }}
+              bottomContent={
+                totalPages > 1 ? (
+                  <div className="flex justify-between items-center px-4 py-2">
+                    <span className="text-xs text-default-400">
+                      {projects.length} of {totalCount ?? projects.length} results
                     </span>
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    <ScoreBadge score={project.composite_score} size="sm" />
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
-                  </td>
-                  <td className="px-3 lg:px-4 py-2 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <button className="p-1 rounded-md hover:bg-muted transition-colors">
-                          <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/project/${project.id}`); }}>
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Export Report</DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Archive</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div className="border-t border-border">
-          {paginationBar}
-        </div>
+                    <Pagination
+                      total={totalPages}
+                      page={page}
+                      onChange={onPageChange}
+                      size="sm"
+                      showControls
+                      classNames={{ cursor: "bg-primary text-white" }}
+                    />
+                  </div>
+                ) : (
+                  <div className="px-4 py-2">
+                    <span className="text-xs text-default-400">
+                      {projects.length} of {totalCount ?? projects.length} results
+                    </span>
+                  </div>
+                )
+              }
+            >
+              <TableHeader>
+                <TableColumn>Fund Name</TableColumn>
+                <TableColumn>Asset Class</TableColumn>
+                <TableColumn>Score</TableColumn>
+                <TableColumn>Recommendation</TableColumn>
+                <TableColumn>Flags</TableColumn>
+                <TableColumn width={48}>{""}</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {projects.map((project) => {
+                  const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+                  return (
+                    <TableRow key={project.id} onClick={() => navigate(`/project/${project.id}`)}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-foreground text-sm">{project.fund_name}</p>
+                          <p className="text-[10px] text-default-400">
+                            Est. {project.established_year} • V{project.vintage}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Chip size="sm" variant="flat" classNames={{ content: "text-[10px] font-semibold uppercase tracking-wider" }}>
+                          {project.asset_class}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <ScoreBadge score={project.composite_score} size="sm" />
+                      </TableCell>
+                      <TableCell>
+                        <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                      </TableCell>
+                      <TableCell>
+                        <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
+                      </TableCell>
+                      <TableCell>
+                        <Dropdown>
+                          <DropdownTrigger>
+                            <Button isIconOnly variant="light" size="sm" onPress={(e) => e.continuePropagation?.()}>
+                              <MoreHorizontal className="h-3.5 w-3.5 text-default-400" />
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu aria-label="Actions">
+                            <DropdownItem key="view" onPress={() => navigate(`/project/${project.id}`)}>View Details</DropdownItem>
+                            <DropdownItem key="export">Export Report</DropdownItem>
+                            <DropdownItem key="archive">Archive</DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardBody>
+        </Card>
       </div>
 
-      {/* Mobile — compact list rows instead of cards */}
-      <div className="md:hidden rounded-xl border border-border bg-card overflow-hidden">
-        {projects.map((project, i) => {
-          const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
-          return (
-            <div
-              key={project.id}
-              className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer active:bg-muted/50 transition-colors ${
-                i < projects.length - 1 ? 'border-b border-border' : ''
-              }`}
-              onClick={() => navigate(`/project/${project.id}`)}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-muted-foreground">{project.asset_class}</span>
-                  <span className="text-[10px] text-muted-foreground">•</span>
-                  <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
-                  {(flags.critical > 0 || flags.elevated > 0) && (
-                    <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
-                  )}
+      {/* Mobile list */}
+      <div className="md:hidden">
+        <Card shadow="sm">
+          <CardBody className="p-0">
+            {projects.map((project, i) => {
+              const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+              return (
+                <div
+                  key={project.id}
+                  className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer active:bg-default-50 transition-colors ${
+                    i < projects.length - 1 ? 'border-b border-divider' : ''
+                  }`}
+                  onClick={() => navigate(`/project/${project.id}`)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] text-default-400">{project.asset_class}</span>
+                      <span className="text-[10px] text-default-400">•</span>
+                      <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                      {(flags.critical > 0 || flags.elevated > 0) && (
+                        <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
+                      )}
+                    </div>
+                  </div>
+                  <ScoreBadge score={project.composite_score} size="sm" />
                 </div>
+              );
+            })}
+            {totalPages > 1 && (
+              <div className="flex justify-center py-3 border-t border-divider">
+                <Pagination total={totalPages} page={page} onChange={onPageChange} size="sm" showControls />
               </div>
-              <ScoreBadge score={project.composite_score} size="sm" />
-            </div>
-          );
-        })}
-        <div className="border-t border-border">
-          {paginationBar}
-        </div>
+            )}
+          </CardBody>
+        </Card>
       </div>
     </BlurFade>
   );
