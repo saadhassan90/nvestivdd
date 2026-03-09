@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface DotPatternProps {
   className?: string;
+  style?: React.CSSProperties;
   width?: number;
   height?: number;
   cx?: number;
@@ -11,6 +12,7 @@ interface DotPatternProps {
 
 export function DotPattern({
   className,
+  style,
   width = 16,
   height = 16,
   cx = 1,
@@ -22,6 +24,7 @@ export function DotPattern({
   return (
     <svg
       className={cn("pointer-events-none absolute inset-0 h-full w-full fill-muted-foreground/20", className)}
+      style={style}
       aria-hidden="true"
     >
       <defs>
