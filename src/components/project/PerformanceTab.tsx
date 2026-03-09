@@ -158,6 +158,13 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup 
 
       {activeSection === "fees" && (
         <div className="space-y-6">
+          {feesWriteup?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={feesWriteup.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {fees.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No fee structure data available yet.</p>

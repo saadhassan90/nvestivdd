@@ -103,6 +103,13 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
 
       {activeSection === "team" && (
         <div className="space-y-6">
+          {reportSection?.content && (
+            <BlurFade>
+              <MagicCard>
+                <MarkdownContent content={reportSection.content} />
+              </MagicCard>
+            </BlurFade>
+          )}
           {teamMembers.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No team member data available yet.</p>
