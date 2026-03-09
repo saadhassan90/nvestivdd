@@ -33,7 +33,6 @@ interface FeeItem {
 interface PerformanceTabProps {
   metrics: PerformanceMetric[];
   fees: FeeItem[];
-  reportSections?: { section_title: string | null; content: string | null; section_key: string }[];
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
