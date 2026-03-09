@@ -151,10 +151,13 @@ export default function Dashboard() {
               <span className="text-muted-foreground">&gt;</span>
               <span className="font-medium text-foreground">Due Diligence</span>
             </div>
-            <ShimmerButton onClick={() => setModalOpen(true)} className="text-sm">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-foreground bg-transparent px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+            >
               <Plus className="h-4 w-4" />
               New Deal
-            </ShimmerButton>
+            </button>
           </div>
         </BlurFade>
 
