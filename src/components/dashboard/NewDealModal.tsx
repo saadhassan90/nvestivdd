@@ -136,14 +136,14 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</span>
           </div>
           <div
-            className="rounded-xl border-2 border-dashed border-border p-6 sm:p-8 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
+            className="rounded-xl border-2 border-dashed border-border p-5 sm:p-6 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => document.getElementById('file-input')?.click()}
           >
-            <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+            <Upload className="mx-auto h-7 w-7 text-muted-foreground" />
             <p className="mt-2 text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-            <p className="mt-1 text-xs text-muted-foreground">LPA, CIM, or Financial Models (PDF, XLSX, DOCX)</p>
+            <p className="mt-1 text-xs text-muted-foreground">PDF, XLSX, DOCX</p>
             <input
               id="file-input"
               type="file"
@@ -152,6 +152,15 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
               className="hidden"
               onChange={handleFileInput}
             />
+          </div>
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recommended documents</p>
+            {RECOMMENDED_DOCS.map((doc) => (
+              <div key={doc} className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                <span className="text-xs text-muted-foreground">{doc}</span>
+              </div>
+            ))}
           </div>
         </div>
 
