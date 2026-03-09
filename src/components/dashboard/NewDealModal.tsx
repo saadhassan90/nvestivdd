@@ -57,7 +57,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
   };
 
   const handleSubmit = async () => {
-    if (!fundName.trim() || files.length === 0) return;
+    if (!fundName.trim() || files.length === 0 || !submitterName.trim() || !submitterCompany.trim() || !submitterEmail.trim()) return;
     setLoading(true);
 
     try {
@@ -67,7 +67,10 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           fund_name: fundName.trim(),
           asset_class: assetClass || null,
           status: 'uploading',
-        })
+          submitter_name: submitterName.trim(),
+          submitter_company: submitterCompany.trim(),
+          submitter_email: submitterEmail.trim(),
+        } as any)
         .select()
         .single();
 
