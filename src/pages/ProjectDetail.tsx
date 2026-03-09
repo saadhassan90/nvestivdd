@@ -155,7 +155,7 @@ export default function ProjectDetail() {
                 <DataRoomTab items={dataRoomItems} />
               )}
               {activeTab === "documents" && (
-                <SourceFilesTab documents={documents} projectId={project.id} onRefresh={fetchData} />
+                <SourceFilesTab documents={documents} researchSources={researchSources} projectId={project.id} onRefresh={fetchData} />
               )}
             </>
           )}
