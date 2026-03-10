@@ -849,6 +849,44 @@ export type Database = {
           },
         ]
       }
+      pipeline_cache: {
+        Row: {
+          char_count: number
+          created_at: string
+          id: string
+          model_used: string | null
+          output_text: string
+          phase_key: string
+          project_id: string
+        }
+        Insert: {
+          char_count?: number
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          output_text: string
+          phase_key: string
+          project_id: string
+        }
+        Update: {
+          char_count?: number
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          output_text?: string
+          phase_key?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_cache_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           analysis_date: string | null

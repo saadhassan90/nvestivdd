@@ -60,6 +60,28 @@ async function logStep(projectId: string, stepKey: string, stepLabel: string, st
   }
 }
 
+// ─── Cache Helpers ───
+
+async function getCachedOutput(projectId: string, phaseKey: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("pipeline_cache")
+    .select("output_text")
+    .eq("project_id", projectId)
+    .eq("phase_key", phaseKey)
+    .maybeSingle();
+  return data?.output_text || null;
+}
+
+async function setCachedOutput(projectId: string, phaseKey: string, output: string, model?: string): Promise<void> {
+  await supabase.from("pipeline_cache").upsert({
+    project_id: projectId,
+    phase_key: phaseKey,
+    output_text: output,
+    char_count: output.length,
+    model_used: model || null,
+  }, { onConflict: "project_id,phase_key" });
+}
+
 async function fetchSystemFile(path: string): Promise<string> {
   const { data, error } = await supabase.storage.from("system").download(path);
   if (error) throw new Error(`Failed to fetch system file ${path}: ${error.message}`);
@@ -284,8 +306,7 @@ serve(async (req) => {
       });
     }
 
-    // Clear previous logs
-    await supabase.from("analysis_logs").delete().eq("project_id", project_id);
+    // Don't clear previous logs — we'll update them. Don't clear cache!
     await supabase.from("task_queue")
       .update({ status: "running", started_at: new Date().toISOString() })
       .eq("project_id", project_id)
@@ -329,29 +350,35 @@ serve(async (req) => {
     await logStep(project_id, "download_docs", "Downloading Documents", 0, "complete", `Downloaded ${documentContents.length} documents`);
     const docBlocks = buildDocBlocks(documentContents);
 
-    // ─── STEP 1: Phase 1 — Triage (Sequential) ───
-    await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "running", "Opus analyzing document classification & triage...");
-    console.log(`[${project_id}] Phase 1: Triage starting...`);
+    // ─── STEP 1: Phase 1 — Triage (Sequential, cached) ───
+    let triageOutput = await getCachedOutput(project_id, "phase1_triage");
+    if (triageOutput) {
+      console.log(`[${project_id}] Phase 1: CACHED (${triageOutput.length} chars)`);
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Cached: ${triageOutput.length} chars`);
+    } else {
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "running", "Opus analyzing document classification & triage...");
+      console.log(`[${project_id}] Phase 1: Triage starting...`);
 
-    const triageOutput = await callClaude(
-      OPUS_MODEL,
-      PHASE1_SYSTEM,
-      [...docBlocks, { type: "text", text: "Perform document classification (Node 0) and triage (Node 1) on these fund documents. Be thorough — your output feeds all subsequent parallel analysis modules." }],
-      16000,
-      10000,
-    );
+      triageOutput = await callClaude(
+        OPUS_MODEL,
+        PHASE1_SYSTEM,
+        [...docBlocks, { type: "text", text: "Perform document classification (Node 0) and triage (Node 1) on these fund documents. Be thorough — your output feeds all subsequent parallel analysis modules." }],
+        16000,
+        10000,
+      );
 
-    console.log(`[${project_id}] Phase 1 complete: ${triageOutput.length} chars`);
-    await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Triage complete: ${triageOutput.length} chars`);
+      await setCachedOutput(project_id, "phase1_triage", triageOutput, OPUS_MODEL);
+      console.log(`[${project_id}] Phase 1 complete: ${triageOutput.length} chars`);
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Triage complete: ${triageOutput.length} chars`);
+    }
 
-    // ─── STEP 2: Phase 2 — Parallel Module Groups ───
-    console.log(`[${project_id}] Phase 2: Launching 3 parallel module groups...`);
+    // ─── STEP 2: Phase 2 — Parallel Module Groups (cached per group) ───
+    console.log(`[${project_id}] Phase 2: Checking cache for module groups...`);
 
-    // Mark all three as running simultaneously
-    await Promise.all([
-      logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "running", "Opus analyzing Financial & Operational..."),
-      logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "running", "Opus analyzing Team & Strategy..."),
-      logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "running", "Opus analyzing Terms & Structure..."),
+    const [cachedG1, cachedG2, cachedG3] = await Promise.all([
+      getCachedOutput(project_id, "phase2_group1"),
+      getCachedOutput(project_id, "phase2_group2"),
+      getCachedOutput(project_id, "phase2_group3"),
     ]);
 
     const makeModuleUserContent = (groupInstruction: string): any[] => [
@@ -362,63 +389,59 @@ serve(async (req) => {
       },
     ];
 
-    // Fire all 3 groups in parallel
-    const [group1Output, group2Output, group3Output] = await Promise.all([
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP1_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module A (Financial & Performance) and Module E (Operational Quick-Check). Use the triage findings for context. Be exhaustive."),
-        32000,
-        16000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 1 (A+E) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 1 failed:`, err);
-        await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "error", err.message);
-        throw err;
-      }),
+    // Only run groups that aren't cached
+    const groupPromises: [Promise<string>, Promise<string>, Promise<string>] = [
+      cachedG1
+        ? (async () => {
+            console.log(`[${project_id}] Group 1 (A+E): CACHED (${cachedG1.length} chars)`);
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Cached: ${cachedG1.length} chars`);
+            return cachedG1;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "running", "Opus analyzing Financial & Operational...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP1_MODULES, skillContent), makeModuleUserContent("Analyze Module A (Financial & Performance) and Module E (Operational Quick-Check). Use the triage findings for context. Be exhaustive."), 32000, 16000);
+            await setCachedOutput(project_id, "phase2_group1", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 1 (A+E) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "error", err.message); throw err; }),
 
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP2_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module B (Team & Management) and Module C (Strategy & Market Validation). Use the triage findings for context. Be exhaustive."),
-        32000,
-        16000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 2 (B+C) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 2 failed:`, err);
-        await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "error", err.message);
-        throw err;
-      }),
+      cachedG2
+        ? (async () => {
+            console.log(`[${project_id}] Group 2 (B+C): CACHED (${cachedG2.length} chars)`);
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Cached: ${cachedG2.length} chars`);
+            return cachedG2;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "running", "Opus analyzing Team & Strategy...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP2_MODULES, skillContent), makeModuleUserContent("Analyze Module B (Team & Management) and Module C (Strategy & Market Validation). Use the triage findings for context. Be exhaustive."), 32000, 16000);
+            await setCachedOutput(project_id, "phase2_group2", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 2 (B+C) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "error", err.message); throw err; }),
 
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP3_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module D (Terms & Structure). Use the triage findings for context. Be exhaustive."),
-        24000,
-        12000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 3 (D) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 3 failed:`, err);
-        await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "error", err.message);
-        throw err;
-      }),
-    ]);
+      cachedG3
+        ? (async () => {
+            console.log(`[${project_id}] Group 3 (D): CACHED (${cachedG3.length} chars)`);
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Cached: ${cachedG3.length} chars`);
+            return cachedG3;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "running", "Opus analyzing Terms & Structure...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP3_MODULES, skillContent), makeModuleUserContent("Analyze Module D (Terms & Structure). Use the triage findings for context. Be exhaustive."), 24000, 12000);
+            await setCachedOutput(project_id, "phase2_group3", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 3 (D) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "error", err.message); throw err; }),
+    ];
+
+    const [group1Output, group2Output, group3Output] = await Promise.all(groupPromises);
 
     console.log(`[${project_id}] Phase 2 complete. All module groups finished.`);
 
-    // ─── STEP 3: Phase 3 — Synthesis (Sequential) ───
-    await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "running", "Opus synthesizing all findings...");
-    console.log(`[${project_id}] Phase 3: Synthesis starting...`);
-
+    // ─── STEP 3: Phase 3 — Synthesis (Sequential, cached) ───
     const allModuleFindings = `<triage_findings>\n${triageOutput}\n</triage_findings>
 
 <module_a_e_findings>\n${group1Output}\n</module_a_e_findings>
@@ -427,22 +450,37 @@ serve(async (req) => {
 
 <module_d_findings>\n${group3Output}\n</module_d_findings>`;
 
-    const synthesisOutput = await callClaude(
-      OPUS_MODEL,
-      SYNTHESIS_SYSTEM,
-      [{ type: "text", text: `Here are all the analytical findings from the triage and module analysis phases. Perform the synthesis (Nodes 7-11).\n\n${allModuleFindings}` }],
-      32000,
-      16000,
-    );
+    let synthesisOutput = await getCachedOutput(project_id, "phase3_synthesis");
+    if (synthesisOutput) {
+      console.log(`[${project_id}] Phase 3: CACHED (${synthesisOutput.length} chars)`);
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Cached: ${synthesisOutput.length} chars`);
+    } else {
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "running", "Opus synthesizing all findings...");
+      console.log(`[${project_id}] Phase 3: Synthesis starting...`);
 
-    console.log(`[${project_id}] Phase 3 complete: ${synthesisOutput.length} chars`);
-    await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Synthesis complete: ${synthesisOutput.length} chars`);
+      synthesisOutput = await callClaude(
+        OPUS_MODEL,
+        SYNTHESIS_SYSTEM,
+        [{ type: "text", text: `Here are all the analytical findings from the triage and module analysis phases. Perform the synthesis (Nodes 7-11).\n\n${allModuleFindings}` }],
+        32000,
+        16000,
+      );
 
-    // ─── STEP 4: Phase 4 — Report Assembly (Sonnet) ───
-    await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "running", "Sonnet assembling final report...");
-    console.log(`[${project_id}] Phase 4: Report Assembly starting...`);
+      await setCachedOutput(project_id, "phase3_synthesis", synthesisOutput, OPUS_MODEL);
+      console.log(`[${project_id}] Phase 3 complete: ${synthesisOutput.length} chars`);
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Synthesis complete: ${synthesisOutput.length} chars`);
+    }
 
-    const reportAssemblyPrompt = `You are an institutional-grade report writer. Compile the raw analytical findings into a polished, publication-ready L1 Preliminary Due Diligence Report.
+    // ─── STEP 4: Phase 4 — Report Assembly (Sonnet, cached) ───
+    let reportMarkdown = await getCachedOutput(project_id, "phase4_report");
+    if (reportMarkdown) {
+      console.log(`[${project_id}] Phase 4: CACHED (${reportMarkdown.length} chars)`);
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Cached: ${reportMarkdown.length} chars`);
+    } else {
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "running", "Sonnet assembling final report...");
+      console.log(`[${project_id}] Phase 4: Report Assembly starting...`);
+
+      const reportAssemblyPrompt = `You are an institutional-grade report writer. Compile the raw analytical findings into a polished, publication-ready L1 Preliminary Due Diligence Report.
 
 Requirements:
 - Professional, institutional-grade prose
@@ -454,12 +492,12 @@ Requirements:
 
 Do NOT fabricate data. Only use findings from the analysis phases.`;
 
-    const reportMarkdown = await callClaude(
-      SONNET_MODEL,
-      reportAssemblyPrompt,
-      [{
-        type: "text",
-        text: `Here are the complete analytical findings from all phases. Compile into a polished L1 Preliminary Report matching the sample format exactly.
+      reportMarkdown = await callClaude(
+        SONNET_MODEL,
+        reportAssemblyPrompt,
+        [{
+          type: "text",
+          text: `Here are the complete analytical findings from all phases. Compile into a polished L1 Preliminary Report matching the sample format exactly.
 
 ${allModuleFindings}
 
@@ -468,13 +506,15 @@ ${allModuleFindings}
 <sample_report_format>\n${sampleContent}\n</sample_report_format>
 
 Produce the complete, polished markdown report now.`,
-      }],
-      16000,
-      8000,
-    );
+        }],
+        16000,
+        8000,
+      );
 
-    console.log(`[${project_id}] Phase 4 complete: ${reportMarkdown.length} chars`);
-    await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Report: ${reportMarkdown.length} chars`);
+      await setCachedOutput(project_id, "phase4_report", reportMarkdown, SONNET_MODEL);
+      console.log(`[${project_id}] Phase 4 complete: ${reportMarkdown.length} chars`);
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Report: ${reportMarkdown.length} chars`);
+    }
 
     if (!reportMarkdown || reportMarkdown.length < 500) {
       await logStep(project_id, "saving_report", "Saving Report", 7, "error", "Insufficient report content");
