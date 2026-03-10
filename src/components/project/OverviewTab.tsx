@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 import { ScoreBadge } from "@/components/dashboard/ScoreBadge";
 import type { Tables } from "@/integrations/supabase/types";
 import { getScoreTier, getScoreColor, formatRelativeTime } from "@/lib/score-utils";
