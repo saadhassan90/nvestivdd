@@ -233,10 +233,10 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
           return (
             <div
               key={project.id}
-              className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer active:bg-muted/50 transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
                 i < projects.length - 1 ? 'border-b border-border' : ''
-              }`}
-              onClick={() => navigate(`/project/${project.id}`)}
+              } ${isProcessing ? 'opacity-70' : 'cursor-pointer active:bg-muted/50'}`}
+              onClick={() => !isProcessing && navigate(`/project/${project.id}`)}
             >
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
