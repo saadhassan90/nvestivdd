@@ -1,0 +1,1 @@
+INSERT INTO storage.buckets (id, name, public) VALUES ('system', 'system', false) ON CONFLICT (id) DO NOTHING;
