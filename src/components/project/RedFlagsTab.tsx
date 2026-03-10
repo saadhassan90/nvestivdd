@@ -119,7 +119,7 @@ export function RedFlagsTab({ redFlags, reportMarkdown }: RedFlagsTabProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-lg sm:text-xl font-bold text-foreground">Red Flag Summary</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Flag Summary</h2>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1">Tiered risk assessment from L1 analysis and autonomous research.</p>
       </div>
 
