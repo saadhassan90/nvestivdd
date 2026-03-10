@@ -49,7 +49,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
             >
               <ChevronRight className={cn("h-3 w-3 transition-transform text-muted-foreground", thinkingOpen && "rotate-90")} />
               {message.isThinking ? (
-                <span className="font-medium text-amber-600 animate-pulse">⚡ Thinking...</span>
+                <span className="font-medium text-muted-foreground animate-pulse">⚡ Thinking...</span>
               ) : (
                 <span className="text-muted-foreground">💭 Thought for {message.thinkingDuration || "?"}s</span>
               )}
