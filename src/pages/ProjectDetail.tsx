@@ -22,6 +22,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setProjectScope } = useChatContext();
