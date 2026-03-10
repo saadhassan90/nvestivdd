@@ -118,7 +118,7 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
   );
 }
 
-export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange }: DealTableProps) {
+export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) {
