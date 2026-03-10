@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      analysis_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          project_id: string
+          started_at: string | null
+          status: string
+          step_index: number
+          step_key: string
+          step_label: string
+          total_steps: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          project_id: string
+          started_at?: string | null
+          status?: string
+          step_index?: number
+          step_key: string
+          step_label: string
+          total_steps?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          project_id?: string
+          started_at?: string | null
+          status?: string
+          step_index?: number
+          step_key?: string
+          step_label?: string
+          total_steps?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversations: {
         Row: {
           created_at: string
