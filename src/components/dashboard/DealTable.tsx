@@ -132,6 +132,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
               const submitter = (project as any).submitter_name;
               const submitterCompany = (project as any).submitter_company;
+              const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
               return (
                 <tr
                   key={project.id}
@@ -146,14 +147,24 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   </td>
                   <td className="px-3 lg:px-4 py-2">
                     <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                      {project.asset_class}
+                      {project.asset_class || '—'}
                     </span>
                   </td>
                   <td className="px-3 lg:px-4 py-2">
-                    <ScoreBadge score={project.composite_score} size="sm" />
+                    {isProcessing ? (
+                      <div className="flex items-center justify-center h-7 w-9">
+                        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                      </div>
+                    ) : (
+                      <ScoreBadge score={project.composite_score} size="sm" />
+                    )}
                   </td>
                   <td className="px-3 lg:px-4 py-2">
-                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                    {isProcessing ? (
+                      <span className="text-xs text-muted-foreground italic">Running analysis…</span>
+                    ) : (
+                      <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                    )}
                   </td>
                   <td className="px-3 lg:px-4 py-2">
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
