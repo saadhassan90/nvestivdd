@@ -36,12 +36,6 @@ const RECOMMENDATIONS = [
   { value: "Decline", label: "Decline" },
 ];
 
-const SORT_OPTIONS = [
-  { value: "created_at", label: "Date Created" },
-  { value: "fund_name", label: "Fund Name" },
-  { value: "composite_score", label: "Score" },
-  { value: "asset_class", label: "Asset Class" },
-];
 
 function FilterDropdown({ label, value, options, onSelect, onClear }: {
   label: string;
