@@ -77,13 +77,11 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup,
   });
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <BlurFade>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">Performance & Fees</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Track record metrics, benchmarking, and fee structure analysis.</p>
-        </div>
-      </BlurFade>
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Performance & Fees</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Track record metrics, benchmarking, and fee structure analysis.</p>
+      </div>
 
       <div className="flex items-center gap-2 overflow-x-auto">
         {hasMarkdown && (

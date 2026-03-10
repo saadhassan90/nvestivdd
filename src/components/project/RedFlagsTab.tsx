@@ -117,13 +117,11 @@ export function RedFlagsTab({ redFlags, reportMarkdown }: RedFlagsTabProps) {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <BlurFade>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">Red Flag Summary</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Tiered risk assessment from L1 analysis and autonomous research.</p>
-        </div>
-      </BlurFade>
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Red Flag Summary</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Tiered risk assessment from L1 analysis and autonomous research.</p>
+      </div>
 
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         {FILTERS.map(f => (
