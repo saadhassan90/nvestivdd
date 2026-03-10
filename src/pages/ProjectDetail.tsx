@@ -127,13 +127,19 @@ export default function ProjectDetail() {
 
   const handleRerunAnalysis = async () => {
     if (!project) return;
-    await supabase.from('task_queue').insert({
-      project_id: project.id,
-      task_type: 'l1_analysis',
-      status: 'pending',
-    });
     await supabase.from('projects').update({ status: 'processing', error_message: null }).eq('id', project.id);
-    toast({ title: "Analysis queued", description: "The report will be updated with the latest data." });
+    
+    // Dispatch to external analysis agent
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dispatch-analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ project_id: project.id }),
+    }).catch((err) => console.error('Analysis dispatch error:', err));
+    
+    toast({ title: "Analysis dispatched", description: "The analysis has been sent to the processing agent." });
   };
 
   if (loading) {
