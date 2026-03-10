@@ -37,10 +37,13 @@ export function ProcessingState({ startedAt }: ProcessingStateProps) {
           <Loader2 className="mx-auto h-10 w-10 text-muted-foreground animate-spin mb-4" />
           <h3 className="text-lg font-bold text-foreground">Analysis in Progress</h3>
           <p className="text-sm text-muted-foreground mt-2">
-            Your analysis is being processed. This typically takes 3–5 minutes.
+            Your documents are being analyzed by our AI engine. This typically takes 15–30 minutes depending on document complexity.
           </p>
           <p className="text-xs text-muted-foreground mt-3 font-mono">
             Elapsed: {minutes}:{seconds.toString().padStart(2, '0')}
+          </p>
+          <p className="text-[11px] text-muted-foreground/60 mt-2">
+            You can safely navigate away — we'll notify you when it's ready.
           </p>
         </MagicCard>
       </div>
