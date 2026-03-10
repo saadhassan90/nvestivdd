@@ -30,6 +30,7 @@ serve(async (req) => {
       .eq("status", "running")
       .lt("started_at", stuckCutoff);
 
+    let recovered = 0;
     if (stuckTasks && stuckTasks.length > 0) {
       console.log(`Found ${stuckTasks.length} stuck tasks, resetting to pending...`);
       for (const task of stuckTasks) {
@@ -40,62 +41,69 @@ serve(async (req) => {
           .update({ status: "processing" })
           .eq("id", task.project_id);
       }
+      recovered = stuckTasks.length;
     }
 
-    // 2. Find pending tasks to process
+    // 2. Find ALL pending tasks (not just one)
     const { data: pendingTasks } = await supabase
       .from("task_queue")
       .select("id, project_id, task_type")
       .eq("status", "pending")
       .order("created_at", { ascending: true })
-      .limit(1);
+      .limit(20); // process up to 20 in parallel
 
     if (!pendingTasks || pendingTasks.length === 0) {
       console.log("No pending tasks found.");
       return new Response(
-        JSON.stringify({ processed: 0, recovered: stuckTasks?.length || 0 }),
+        JSON.stringify({ dispatched: 0, recovered }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const task = pendingTasks[0];
-    console.log(`Processing task ${task.id} (${task.task_type}) for project ${task.project_id}`);
+    console.log(`Found ${pendingTasks.length} pending tasks. Dispatching all in parallel...`);
 
-    // 3. Claim the task atomically
-    const { data: claimed } = await supabase
-      .from("task_queue")
-      .update({ status: "running", started_at: new Date().toISOString() })
-      .eq("id", task.id)
-      .eq("status", "pending")
-      .select()
-      .single();
+    // 3. Claim ALL tasks atomically, then fire each as a separate edge function invocation
+    const dispatched: { task_id: string; project_id: string }[] = [];
 
-    if (!claimed) {
-      console.log("Task already claimed by another worker.");
-      return new Response(
-        JSON.stringify({ processed: 0, message: "Task already claimed" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    await Promise.all(pendingTasks.map(async (task) => {
+      // Claim the task
+      const { data: claimed } = await supabase
+        .from("task_queue")
+        .update({ status: "running", started_at: new Date().toISOString() })
+        .eq("id", task.id)
+        .eq("status", "pending")
+        .select("id")
+        .single();
 
-    // 4. Dispatch to the appropriate edge function
-    const functionName = task.task_type === "l1_analysis" ? "run-l1-analysis" : task.task_type;
-    console.log(`Dispatching to ${functionName}...`);
+      if (!claimed) {
+        console.log(`Task ${task.id} already claimed, skipping.`);
+        return;
+      }
 
-    // Fire the edge function (don't await the full response - it may take a long time)
-    fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({ project_id: task.project_id }),
-    }).catch((err) => {
-      console.error(`Failed to dispatch ${functionName}:`, err);
-    });
+      // Determine which edge function to invoke
+      const functionName = task.task_type === "l1_analysis" ? "run-l1-analysis" : task.task_type;
+
+      console.log(`Dispatching task ${task.id} → ${functionName} for project ${task.project_id}`);
+
+      // Fire the edge function — each invocation spins up its own isolate
+      fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ project_id: task.project_id }),
+      }).catch((err) => {
+        console.error(`Failed to dispatch ${functionName} for ${task.project_id}:`, err);
+      });
+
+      dispatched.push({ task_id: task.id, project_id: task.project_id });
+    }));
+
+    console.log(`Dispatched ${dispatched.length} tasks in parallel.`);
 
     return new Response(
-      JSON.stringify({ processed: 1, task_id: task.id, project_id: task.project_id }),
+      JSON.stringify({ dispatched: dispatched.length, recovered, tasks: dispatched }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
