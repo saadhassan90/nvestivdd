@@ -500,23 +500,62 @@ Produce the complete, polished markdown report now. Match the sample format exac
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
-    console.error("run-l1-analysis error:", e);
+    const errorMsg = e instanceof Error ? e.message : "Unknown error";
+    console.error("run-l1-analysis error:", errorMsg);
 
     try {
       const body = await req.clone().json().catch(() => ({}));
       if (body.project_id) {
-        await supabase.from("projects")
-          .update({ status: "error", error_message: e instanceof Error ? e.message : "Unknown error" })
-          .eq("id", body.project_id);
-        await supabase.from("task_queue")
-          .update({ status: "failed", error_message: e instanceof Error ? e.message : "Unknown error", completed_at: new Date().toISOString() })
+        // Get current retry count
+        const { data: taskData } = await supabase.from("task_queue")
+          .select("retry_count, max_retries")
           .eq("project_id", body.project_id)
-          .eq("task_type", "l1_analysis");
+          .eq("task_type", "l1_analysis")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const retryCount = (taskData?.retry_count || 0);
+        const maxRetries = taskData?.max_retries || 3;
+
+        // Log the failure step
+        await logStep(body.project_id, "error", `Attempt ${retryCount + 1} Failed`, 0, "error", errorMsg);
+
+        if (retryCount + 1 >= maxRetries) {
+          // Max retries reached — permanent failure
+          console.log(`Project ${body.project_id}: max retries (${maxRetries}) reached. Stopping.`);
+          await supabase.from("projects")
+            .update({ status: "error", error_message: `Analysis failed after ${maxRetries} attempts. Last error: ${errorMsg}` })
+            .eq("id", body.project_id);
+          await supabase.from("task_queue")
+            .update({
+              status: "max_retries_exceeded",
+              retry_count: retryCount + 1,
+              error_message: `Failed after ${maxRetries} attempts. Last error: ${errorMsg}`,
+              completed_at: new Date().toISOString(),
+            })
+            .eq("project_id", body.project_id)
+            .eq("task_type", "l1_analysis");
+        } else {
+          // Mark as failed — process-task-queue will pick it up for retry
+          console.log(`Project ${body.project_id}: attempt ${retryCount + 1}/${maxRetries} failed. Will retry.`);
+          await supabase.from("projects")
+            .update({ status: "error", error_message: `Attempt ${retryCount + 1}/${maxRetries} failed: ${errorMsg}. Retrying...` })
+            .eq("id", body.project_id);
+          await supabase.from("task_queue")
+            .update({
+              status: "failed",
+              retry_count: retryCount + 1,
+              error_message: errorMsg,
+            })
+            .eq("project_id", body.project_id)
+            .eq("task_type", "l1_analysis");
+        }
       }
     } catch {}
 
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: errorMsg }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
