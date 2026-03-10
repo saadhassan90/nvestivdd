@@ -17,9 +17,10 @@ interface OverviewTabProps {
   docQualityFlags?: any[];
   criticalInfoGaps?: any[];
   onRerunAnalysis: () => void;
+  reportMarkdown?: string | null;
 }
 
-export function OverviewTab({ project, redFlags, reportSections, documents, moduleScoresData = [], submissionQuality = [], docQualityFlags = [], criticalInfoGaps = [], onRerunAnalysis }: OverviewTabProps) {
+export function OverviewTab({ project, redFlags, reportSections, documents, moduleScoresData = [], submissionQuality = [], docQualityFlags = [], criticalInfoGaps = [], onRerunAnalysis, reportMarkdown }: OverviewTabProps) {
   const [showQuality, setShowQuality] = useState(false);
   const [showGaps, setShowGaps] = useState(false);
   const criticalFlags = redFlags.filter(f => f.severity === 'critical');
