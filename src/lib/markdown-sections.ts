@@ -98,9 +98,9 @@ export function combineSections(sections: ReportSection[]): string {
  */
 export const TAB_SECTION_MAP: Record<string, number[]> = {
   overview: [1, 2, 3, 11],
-  team: [5, 7],
+  team: [5],
   performance: [6],
-  strategy: [4, 12],
+  strategy: [4, 7, 12],
   red_flags: [8],
   interrogatory: [9],
   data_room: [10],
