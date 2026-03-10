@@ -18,7 +18,7 @@ export function RecommendationPill({ recommendation, scoreTier }: Recommendation
   const style = scoreTier ? styleMap[scoreTier] || "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground";
 
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${style}`}>
+    <span className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider leading-none whitespace-nowrap ${style}`}>
       {label}
     </span>
   );
