@@ -178,6 +178,13 @@ export default function Dashboard() {
               page={page}
               totalPages={totalPages}
               onPageChange={setPage}
+              sortBy={filters.sortBy}
+              sortDir={filters.sortDir}
+              onSort={(column) => handleFiltersChange({
+                ...filters,
+                sortBy: column,
+                sortDir: filters.sortBy === column && filters.sortDir === "asc" ? "desc" : "asc",
+              })}
             />
           </div>
         )}
