@@ -1,6 +1,11 @@
 /**
- * Extracts sections from an L1 report markdown file by splitting on SECTION headings.
- * Handles multiple heading formats: `## SECTION N:`, `# SECTION N:`, or bare `SECTION N:`.
+ * Extracts sections from L1 report markdown files.
+ * Handles multiple report formats:
+ *   - `## SECTION N: Title`  (Altum-style)
+ *   - `# N. Title`           (Apollo-style)
+ *   - Unnumbered `# TITLE`   headings (Executive Summary, Conclusion, Appendix, etc.)
+ *
+ * Uses keyword-based tab mapping so section numbers don't need to be consistent across reports.
  */
 
 export interface ReportSection {
@@ -9,12 +14,62 @@ export interface ReportSection {
   content: string;
 }
 
+// Lines to skip when cleaning parsed DOCX output
+const SKIP_PATTERNS = [
+  /^##\s*Page\s+\d+/i,
+  /^###\s*Images from page/i,
+  /^-\s*`parsed-documents:\/\//,
+  /Nvestiv Agentic DD System\s*\|\s*Page/i,
+  /^Nvestiv\s*\|\s*Level 1/i,
+  /^NVESTIV\s*\|\s*Level 1/i,
+];
+
+function shouldSkipLine(line: string): boolean {
+  return SKIP_PATTERNS.some(p => p.test(line.trim()));
+}
+
 /**
- * Parse a full L1 markdown report into numbered sections.
- * Matches lines like:
- *   ## SECTION 1: Executive Summary
- *   # SECTION 2: Submission Quality
- *   SECTION 3: MODULE A – Fund Structure
+ * Match section headings in multiple formats.
+ * Returns [sectionNumber, title] or null.
+ */
+function matchSectionHeading(line: string): [number, string] | null {
+  const trimmed = line.trim();
+
+  // Format 1: ## SECTION N: Title  or  # SECTION N: Title
+  const fmtSection = trimmed.match(/^#{1,4}\s*SECTION\s+(\d+)\s*[:\-–—]\s*(.+)/i);
+  if (fmtSection) return [parseInt(fmtSection[1], 10), fmtSection[2].trim()];
+
+  // Format 2: # N. Title  or  ## N. Title (e.g., "# 3. TEAM ASSESSMENT (MODULE B)")
+  const fmtNumbered = trimmed.match(/^#{1,4}\s+(\d+)\.\s+(.+)/);
+  if (fmtNumbered) return [parseInt(fmtNumbered[1], 10), fmtNumbered[2].trim()];
+
+  return null;
+}
+
+/**
+ * Match well-known unnumbered section headings.
+ * Assigns virtual section numbers (100+) to keep them unique.
+ */
+const NAMED_SECTIONS: [RegExp, number, string][] = [
+  [/^#{1,2}\s*EXECUTIVE\s+SUMMARY/i, 100, 'Executive Summary'],
+  [/^#{1,2}\s*CONCLUSION\s*[&\s]*RECOMMENDATION/i, 101, 'Conclusion & Recommendation'],
+  [/^#{1,2}\s*APPENDIX[:\s]*.*RESEARCH\s+SOURCES/i, 102, 'Research Sources & Citations'],
+  [/^#{1,2}\s*APPENDIX[:\s]*.*CITATION/i, 102, 'Research Sources & Citations'],
+  [/^#{1,2}\s*LIMITATIONS\s*[&\s]*CONFIDENCE/i, 103, 'Limitations & Confidence'],
+  [/^#{1,2}\s*FINAL\s+ASSESSMENT/i, 104, 'Final Assessment & Rating'],
+  [/^#{1,2}\s*L1\s+OVERALL\s+RATING/i, 104, 'Final Assessment & Rating'],
+];
+
+function matchNamedSection(line: string): [number, string] | null {
+  const trimmed = line.trim();
+  for (const [pattern, num, title] of NAMED_SECTIONS) {
+    if (pattern.test(trimmed)) return [num, title];
+  }
+  return null;
+}
+
+/**
+ * Parse a full L1 markdown report into sections.
  */
 export function parseReportSections(markdown: string): ReportSection[] {
   const lines = markdown.split('\n');
@@ -22,21 +77,22 @@ export function parseReportSections(markdown: string): ReportSection[] {
   let currentSection: ReportSection | null = null;
   let contentLines: string[] = [];
 
-  // Match any markdown heading level (or none) followed by SECTION N:
-  const sectionRegex = /^#{0,4}\s*SECTION\s+(\d+)\s*[:\-–—]\s*(.+)/i;
-
   for (const line of lines) {
-    const match = line.match(sectionRegex);
+    if (shouldSkipLine(line)) continue;
+
+    const numbered = matchSectionHeading(line);
+    const named = !numbered ? matchNamedSection(line) : null;
+    const match = numbered || named;
+
     if (match) {
-      // Save previous section
       if (currentSection) {
         currentSection.content = contentLines.join('\n').trim();
         sections.push(currentSection);
       }
       currentSection = {
-        sectionNumber: parseInt(match[1], 10),
-        title: match[2].trim(),
-      content: '',
+        sectionNumber: match[0],
+        title: match[1],
+        content: '',
       };
       contentLines = [];
     } else if (currentSection) {
@@ -44,7 +100,6 @@ export function parseReportSections(markdown: string): ReportSection[] {
     }
   }
 
-  // Save last section
   if (currentSection) {
     currentSection.content = contentLines.join('\n').trim();
     sections.push(currentSection);
@@ -53,16 +108,80 @@ export function parseReportSections(markdown: string): ReportSection[] {
   return sections;
 }
 
+// ── Keyword-based tab mapping ──────────────────────────────────
+
 /**
- * Get specific sections by their numbers.
+ * Keywords used to match section titles to tabs.
+ * Each tab has an array of keyword patterns (case-insensitive).
+ * A section matches a tab if any keyword is found in its title.
  */
+const TAB_KEYWORDS: Record<string, RegExp[]> = {
+  overview: [
+    /executive\s+summary/i,
+    /submission\s+quality/i,
+    /fund\s+structure/i,
+    /final\s+assessment/i,
+    /conclusion/i,
+    /recommendation/i,
+    /overall\s+rating/i,
+    /limitations/i,
+    /terms\s+(&|and)\s+structure/i,
+  ],
+  team: [
+    /team/i,
+    /organi[sz]ational/i,
+    /leadership/i,
+  ],
+  performance: [
+    /performance/i,
+    /track\s+record/i,
+    /financial/i,
+  ],
+  strategy: [
+    /strategy/i,
+    /market/i,
+    /philosophy/i,
+    /comparative/i,
+    /risk\s+management/i,
+    /operational/i,
+  ],
+  red_flags: [
+    /red\s+flag/i,
+    /risk\s+areas/i,
+    /risk\s+flags/i,
+  ],
+  interrogatory: [
+    /interrogatory/i,
+    /questions\s+for\s+gp/i,
+  ],
+  data_room: [
+    /data\s+room/i,
+    /checklist/i,
+  ],
+  documents: [
+    /research\s+sources/i,
+    /citations/i,
+    /appendix/i,
+    /references/i,
+  ],
+};
+
+/**
+ * Determine which tab a section belongs to based on its title.
+ */
+function getTabForSection(section: ReportSection): string | null {
+  for (const [tab, patterns] of Object.entries(TAB_KEYWORDS)) {
+    if (patterns.some(p => p.test(section.title))) return tab;
+  }
+  return null;
+}
+
+// ── Public API ──────────────────────────────────────────────────
+
 export function getSectionsByNumbers(sections: ReportSection[], numbers: number[]): ReportSection[] {
   return sections.filter(s => numbers.includes(s.sectionNumber));
 }
 
-/**
- * Get a single section's content by number.
- */
 export function getSectionContent(sections: ReportSection[], sectionNumber: number): string | null {
   const section = sections.find(s => s.sectionNumber === sectionNumber);
   return section?.content ?? null;
@@ -75,45 +194,45 @@ export function getSectionContent(sections: ReportSection[], sectionNumber: numb
 export function combineSections(sections: ReportSection[]): string {
   return sections
     .map(s => {
-      // Clean up the title: remove "MODULE X –" prefix for cleaner display
       const cleanTitle = s.title
         .replace(/^MODULE\s+[A-Z]\s*[–—-]\s*/i, '')
-        .replace(/^APPENDIX\s+[A-Z]\s*[–—-]\s*/i, '');
+        .replace(/^APPENDIX\s+[A-Z]\s*[–—-]\s*/i, '')
+        .replace(/\s*\(MODULE\s+[A-Z]\)\s*/i, '');
       return `## ${cleanTitle}\n\n${s.content}`;
     })
     .join('\n\n---\n\n');
 }
 
 /**
- * Tab-to-section mapping for the L1 report.
- *
- * Overview:      Sections 1 (Exec Summary), 2 (Submission Quality), 3 (Fund Structure), 11 (Final Assessment)
- * Team & Ops:    Sections 5 (Team & Org), 7 (Risk Management & Ops)
- * Performance:   Section 6 (Performance & Track Record)
- * Strategy:      Sections 4 (Strategy & Philosophy), 12 (Comparative Context)
- * Red Flags:     Section 8
- * Interrogatory: Section 9
- * Data Room:     Section 10
- * Sources:       Section 13
+ * Legacy section-number-based tab mapping (for backwards compat).
  */
 export const TAB_SECTION_MAP: Record<string, number[]> = {
-  overview: [1, 2, 3, 11],
+  overview: [1, 2, 3, 11, 100, 101, 103, 104],
   team: [5],
   performance: [6],
   strategy: [4, 7, 12],
   red_flags: [8],
   interrogatory: [9],
   data_room: [10],
-  documents: [13],
+  documents: [13, 102],
 };
 
 /**
  * Get the combined markdown content for a given tab key.
+ * Uses keyword-based matching first, falls back to section number mapping.
  */
 export function getTabMarkdown(sections: ReportSection[], tabKey: string): string | null {
-  const sectionNumbers = TAB_SECTION_MAP[tabKey];
-  if (!sectionNumbers) return null;
-  const matched = getSectionsByNumbers(sections, sectionNumbers);
-  if (matched.length === 0) return null;
+  // Keyword-based matching
+  const matched = sections.filter(s => getTabForSection(s) === tabKey);
+
+  // Fallback: section number mapping
+  if (matched.length === 0) {
+    const sectionNumbers = TAB_SECTION_MAP[tabKey];
+    if (!sectionNumbers) return null;
+    const fallback = getSectionsByNumbers(sections, sectionNumbers);
+    if (fallback.length === 0) return null;
+    return combineSections(fallback);
+  }
+
   return combineSections(matched);
 }
