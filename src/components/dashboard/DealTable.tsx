@@ -229,6 +229,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
       <div className="md:hidden rounded-xl border border-border bg-card overflow-hidden">
         {projects.map((project, i) => {
           const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+          const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
           return (
             <div
               key={project.id}
@@ -240,15 +241,23 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-muted-foreground">{project.asset_class}</span>
+                  <span className="text-[10px] text-muted-foreground">{project.asset_class || '—'}</span>
                   <span className="text-[10px] text-muted-foreground">•</span>
-                  <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                  {isProcessing ? (
+                    <span className="text-[10px] text-muted-foreground italic">Running analysis…</span>
+                  ) : (
+                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                  )}
                   {(flags.critical > 0 || flags.elevated > 0) && (
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
                   )}
                 </div>
               </div>
-              <ScoreBadge score={project.composite_score} size="sm" />
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+              ) : (
+                <ScoreBadge score={project.composite_score} size="sm" />
+              )}
             </div>
           );
         })}
