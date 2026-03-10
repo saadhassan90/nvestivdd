@@ -13,6 +13,7 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const STUCK_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_RETRIES = 3;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,48 +27,116 @@ serve(async (req) => {
     const stuckCutoff = new Date(Date.now() - STUCK_THRESHOLD_MS).toISOString();
     const { data: stuckTasks } = await supabase
       .from("task_queue")
-      .select("id, project_id, task_type")
+      .select("id, project_id, task_type, retry_count, max_retries")
       .eq("status", "running")
       .lt("started_at", stuckCutoff);
 
     let recovered = 0;
     if (stuckTasks && stuckTasks.length > 0) {
-      console.log(`Found ${stuckTasks.length} stuck tasks, resetting to pending...`);
+      console.log(`Found ${stuckTasks.length} stuck tasks...`);
       for (const task of stuckTasks) {
-        await supabase.from("task_queue")
-          .update({ status: "pending", started_at: null, error_message: "Auto-reset: previous attempt timed out" })
-          .eq("id", task.id);
-        await supabase.from("projects")
-          .update({ status: "processing" })
-          .eq("id", task.project_id);
+        const retryCount = (task.retry_count || 0) + 1;
+        const maxRetries = task.max_retries || MAX_RETRIES;
+
+        if (retryCount >= maxRetries) {
+          // Max retries reached — mark as permanently failed
+          console.log(`Task ${task.id} reached max retries (${maxRetries}). Marking as max_retries_exceeded.`);
+          await supabase.from("task_queue")
+            .update({
+              status: "max_retries_exceeded",
+              retry_count: retryCount,
+              error_message: `Failed after ${maxRetries} attempts. Last failure: timed out after 10 minutes.`,
+              completed_at: new Date().toISOString(),
+            })
+            .eq("id", task.id);
+          await supabase.from("projects")
+            .update({ status: "error", error_message: `Analysis failed after ${maxRetries} attempts. Please check the error details and retry.` })
+            .eq("id", task.project_id);
+        } else {
+          // Retry — reset to pending with incremented count
+          console.log(`Retrying task ${task.id} (attempt ${retryCount + 1}/${maxRetries})...`);
+          await supabase.from("task_queue")
+            .update({
+              status: "pending",
+              started_at: null,
+              retry_count: retryCount,
+              error_message: `Auto-reset: attempt ${retryCount} timed out. Retrying...`,
+            })
+            .eq("id", task.id);
+          await supabase.from("projects")
+            .update({ status: "processing" })
+            .eq("id", task.project_id);
+        }
+        recovered++;
       }
-      recovered = stuckTasks.length;
     }
 
-    // 2. Find ALL pending tasks (not just one)
+    // 2. Also handle failed tasks that haven't exceeded max retries
+    const { data: failedTasks } = await supabase
+      .from("task_queue")
+      .select("id, project_id, task_type, retry_count, max_retries, error_message")
+      .eq("status", "failed");
+
+    let retriedFailed = 0;
+    if (failedTasks && failedTasks.length > 0) {
+      for (const task of failedTasks) {
+        const retryCount = task.retry_count || 0;
+        const maxRetries = task.max_retries || MAX_RETRIES;
+
+        if (retryCount >= maxRetries) {
+          // Already at max — escalate
+          console.log(`Failed task ${task.id} at max retries (${retryCount}/${maxRetries}). Marking as max_retries_exceeded.`);
+          await supabase.from("task_queue")
+            .update({
+              status: "max_retries_exceeded",
+              error_message: `Failed after ${maxRetries} attempts. Last error: ${task.error_message || 'Unknown'}`,
+              completed_at: new Date().toISOString(),
+            })
+            .eq("id", task.id);
+          await supabase.from("projects")
+            .update({ status: "error", error_message: `Analysis failed after ${maxRetries} attempts. Last error: ${task.error_message || 'Unknown'}` })
+            .eq("id", task.project_id);
+        } else {
+          // Retry the failed task
+          console.log(`Retrying failed task ${task.id} (attempt ${retryCount + 1}/${maxRetries})...`);
+          await supabase.from("task_queue")
+            .update({
+              status: "pending",
+              started_at: null,
+              retry_count: retryCount + 1,
+              error_message: `Retrying after failure: ${task.error_message || 'Unknown'}`,
+            })
+            .eq("id", task.id);
+          await supabase.from("projects")
+            .update({ status: "processing", error_message: null })
+            .eq("id", task.project_id);
+          retriedFailed++;
+        }
+      }
+    }
+
+    // 3. Find ALL pending tasks
     const { data: pendingTasks } = await supabase
       .from("task_queue")
-      .select("id, project_id, task_type")
+      .select("id, project_id, task_type, retry_count")
       .eq("status", "pending")
       .order("created_at", { ascending: true })
-      .limit(20); // process up to 20 in parallel
+      .limit(20);
 
     if (!pendingTasks || pendingTasks.length === 0) {
       console.log("No pending tasks found.");
       return new Response(
-        JSON.stringify({ dispatched: 0, recovered }),
+        JSON.stringify({ dispatched: 0, recovered, retried_failed: retriedFailed }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Found ${pendingTasks.length} pending tasks. Dispatching all in parallel...`);
+    console.log(`Found ${pendingTasks.length} pending tasks. Dispatching...`);
 
-    // 3. Claim ALL tasks atomically, then fire each as a separate edge function invocation
-    const dispatched: { task_id: string; project_id: string }[] = [];
+    const dispatched: { task_id: string; project_id: string; attempt: number }[] = [];
 
     await Promise.all(pendingTasks.map(async (task) => {
-      // Claim the task — use count to verify the update actually matched
-      const { error: claimError, count } = await supabase
+      const { error: claimError } = await supabase
         .from("task_queue")
         .update({ status: "running", started_at: new Date().toISOString() })
         .eq("id", task.id)
@@ -78,7 +147,6 @@ serve(async (req) => {
         return;
       }
 
-      // Verify we actually updated the row by checking current status
       const { data: verify } = await supabase
         .from("task_queue")
         .select("status")
@@ -86,16 +154,14 @@ serve(async (req) => {
         .single();
 
       if (!verify || verify.status !== "running") {
-        console.log(`Task ${task.id} already claimed by another worker, skipping.`);
+        console.log(`Task ${task.id} already claimed, skipping.`);
         return;
       }
 
-      // Determine which edge function to invoke
       const functionName = task.task_type === "l1_analysis" ? "run-l1-analysis" : task.task_type;
 
-      console.log(`Dispatching task ${task.id} → ${functionName} for project ${task.project_id}`);
+      console.log(`Dispatching task ${task.id} → ${functionName} (attempt ${(task.retry_count || 0) + 1})`);
 
-      // Fire the edge function — each invocation spins up its own isolate
       fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
         method: "POST",
         headers: {
@@ -107,13 +173,13 @@ serve(async (req) => {
         console.error(`Failed to dispatch ${functionName} for ${task.project_id}:`, err);
       });
 
-      dispatched.push({ task_id: task.id, project_id: task.project_id });
+      dispatched.push({ task_id: task.id, project_id: task.project_id, attempt: (task.retry_count || 0) + 1 });
     }));
 
-    console.log(`Dispatched ${dispatched.length} tasks in parallel.`);
+    console.log(`Dispatched ${dispatched.length} tasks.`);
 
     return new Response(
-      JSON.stringify({ dispatched: dispatched.length, recovered, tasks: dispatched }),
+      JSON.stringify({ dispatched: dispatched.length, recovered, retried_failed: retriedFailed, tasks: dispatched }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
