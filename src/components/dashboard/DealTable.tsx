@@ -166,7 +166,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                       <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
                     )}
                   </td>
-                  <td className="px-3 lg:px-4 py-2" onClick={(e) => { if (!isProcessing) { e.stopPropagation(); navigate(`/project/${project.id}?tab=red-flags`); } }}>
+                  <td className="px-3 lg:px-4 py-2" onClick={(e) => { if (!isProcessing) { e.stopPropagation(); navigate(`/project/${project.id}?tab=red_flags`); } }}>
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
                   </td>
                   <td className="px-3 lg:px-4 py-2">
