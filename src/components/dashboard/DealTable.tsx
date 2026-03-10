@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight, User, Loader2 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
