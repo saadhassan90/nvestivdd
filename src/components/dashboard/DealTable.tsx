@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight, User, Loader2 } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight, User, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
@@ -25,6 +25,34 @@ interface DealTableProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  sortBy?: string;
+  sortDir?: "asc" | "desc";
+  onSort?: (column: string) => void;
+}
+
+function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
+  label: string;
+  column: string;
+  sortBy?: string;
+  sortDir?: "asc" | "desc";
+  onSort?: (column: string) => void;
+}) {
+  const isActive = sortBy === column;
+  return (
+    <th
+      className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
+      onClick={() => onSort?.(column)}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {isActive ? (
+          sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+        )}
+      </span>
+    </th>
+  );
 }
 
 function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange }: {
