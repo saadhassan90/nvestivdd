@@ -82,7 +82,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
           </div>
         </div>
 
-        <nav className="space-y-1 flex-1">
+        <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.key;
