@@ -69,7 +69,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
       </div>
 
       {/* Desktop: full sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 border-r border-border bg-card p-6 flex-col h-full">
+      <aside className="hidden lg:flex w-64 shrink-0 border-r border-border bg-card p-6 flex-col h-full justify-start">
         <div className="mb-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
