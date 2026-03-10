@@ -70,12 +70,10 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <BlurFade>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">Strategy & Market</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Thesis validation, competitive landscape, and market dynamics.</p>
-        </div>
-      </BlurFade>
+      <div>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Strategy & Market</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Thesis validation, competitive landscape, and market dynamics.</p>
+      </div>
 
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         {hasMarkdown && (

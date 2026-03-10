@@ -25,14 +25,12 @@ export function SourceFilesTab({ researchSources, reportMarkdown }: SourceFilesT
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <BlurFade>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-foreground">Research Sources</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            External research links and references used to enrich this report.
-          </p>
-        </div>
-      </BlurFade>
+      <div>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Research Sources</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          External research links and references used to enrich this report.
+        </p>
+      </div>
 
       {(hasMarkdown || hasStructuredData) && (
         <div className="flex items-center gap-2">
