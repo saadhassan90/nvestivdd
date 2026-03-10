@@ -46,7 +46,7 @@ export default function ProjectDetail() {
   const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
 
   // Fetch and parse the L1 report markdown
