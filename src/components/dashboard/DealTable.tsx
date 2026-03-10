@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight, User, Loader2 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { RecommendationPill } from "./RecommendationPill";
 import { FlagIndicator } from "./FlagIndicator";
@@ -132,6 +132,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
               const submitter = (project as any).submitter_name;
               const submitterCompany = (project as any).submitter_company;
+              const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
               return (
                 <tr
                   key={project.id}
@@ -146,14 +147,24 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   </td>
                   <td className="px-3 lg:px-4 py-2">
                     <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                      {project.asset_class}
+                      {project.asset_class || '—'}
                     </span>
                   </td>
                   <td className="px-3 lg:px-4 py-2">
-                    <ScoreBadge score={project.composite_score} size="sm" />
+                    {isProcessing ? (
+                      <div className="flex items-center justify-center h-7 w-9">
+                        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                      </div>
+                    ) : (
+                      <ScoreBadge score={project.composite_score} size="sm" />
+                    )}
                   </td>
                   <td className="px-3 lg:px-4 py-2">
-                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                    {isProcessing ? (
+                      <span className="text-xs text-muted-foreground italic">Running analysis…</span>
+                    ) : (
+                      <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                    )}
                   </td>
                   <td className="px-3 lg:px-4 py-2">
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
@@ -218,6 +229,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
       <div className="md:hidden rounded-xl border border-border bg-card overflow-hidden">
         {projects.map((project, i) => {
           const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
+          const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
           return (
             <div
               key={project.id}
@@ -229,15 +241,23 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-muted-foreground">{project.asset_class}</span>
+                  <span className="text-[10px] text-muted-foreground">{project.asset_class || '—'}</span>
                   <span className="text-[10px] text-muted-foreground">•</span>
-                  <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                  {isProcessing ? (
+                    <span className="text-[10px] text-muted-foreground italic">Running analysis…</span>
+                  ) : (
+                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+                  )}
                   {(flags.critical > 0 || flags.elevated > 0) && (
                     <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
                   )}
                 </div>
               </div>
-              <ScoreBadge score={project.composite_score} size="sm" />
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+              ) : (
+                <ScoreBadge score={project.composite_score} size="sm" />
+              )}
             </div>
           );
         })}
