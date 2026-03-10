@@ -1,6 +1,6 @@
 /**
- * Extracts sections from an L1 report markdown file by splitting on `## SECTION` headings.
- * Each section is identified by its number and returns the full markdown content (without the section heading line).
+ * Extracts sections from an L1 report markdown file by splitting on SECTION headings.
+ * Handles multiple heading formats: `## SECTION N:`, `# SECTION N:`, or bare `SECTION N:`.
  */
 
 export interface ReportSection {
@@ -11,7 +11,10 @@ export interface ReportSection {
 
 /**
  * Parse a full L1 markdown report into numbered sections.
- * Splits on lines starting with `## SECTION \d+:`
+ * Matches lines like:
+ *   ## SECTION 1: Executive Summary
+ *   # SECTION 2: Submission Quality
+ *   SECTION 3: MODULE A – Fund Structure
  */
 export function parseReportSections(markdown: string): ReportSection[] {
   const lines = markdown.split('\n');
@@ -19,8 +22,11 @@ export function parseReportSections(markdown: string): ReportSection[] {
   let currentSection: ReportSection | null = null;
   let contentLines: string[] = [];
 
+  // Match any markdown heading level (or none) followed by SECTION N:
+  const sectionRegex = /^#{0,4}\s*SECTION\s+(\d+)\s*[:\-–—]\s*(.+)/i;
+
   for (const line of lines) {
-    const match = line.match(/^## SECTION (\d+):\s*(.+)/i);
+    const match = line.match(sectionRegex);
     if (match) {
       // Save previous section
       if (currentSection) {
@@ -30,7 +36,7 @@ export function parseReportSections(markdown: string): ReportSection[] {
       currentSection = {
         sectionNumber: parseInt(match[1], 10),
         title: match[2].trim(),
-        content: '',
+      content: '',
       };
       contentLines = [];
     } else if (currentSection) {
@@ -63,10 +69,19 @@ export function getSectionContent(sections: ReportSection[], sectionNumber: numb
 }
 
 /**
- * Combine multiple sections into a single markdown string, separated by horizontal rules.
+ * Combine multiple sections into a single markdown string.
+ * Includes section titles as H2 headings for a cohesive report layout.
  */
 export function combineSections(sections: ReportSection[]): string {
-  return sections.map(s => s.content).join('\n\n---\n\n');
+  return sections
+    .map(s => {
+      // Clean up the title: remove "MODULE X –" prefix for cleaner display
+      const cleanTitle = s.title
+        .replace(/^MODULE\s+[A-Z]\s*[–—-]\s*/i, '')
+        .replace(/^APPENDIX\s+[A-Z]\s*[–—-]\s*/i, '');
+      return `## ${cleanTitle}\n\n${s.content}`;
+    })
+    .join('\n\n---\n\n');
 }
 
 /**
