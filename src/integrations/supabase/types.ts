@@ -717,6 +717,7 @@ export type Database = {
           recommendation: string | null
           recommended_timeline: string | null
           regulatory_status: string | null
+          report_markdown: string | null
           score_tier: string | null
           status: string
           strategy: string | null
@@ -751,6 +752,7 @@ export type Database = {
           recommendation?: string | null
           recommended_timeline?: string | null
           regulatory_status?: string | null
+          report_markdown?: string | null
           score_tier?: string | null
           status?: string
           strategy?: string | null
@@ -785,6 +787,7 @@ export type Database = {
           recommendation?: string | null
           recommended_timeline?: string | null
           regulatory_status?: string | null
+          report_markdown?: string | null
           score_tier?: string | null
           status?: string
           strategy?: string | null
