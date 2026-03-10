@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
@@ -22,6 +22,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setProjectScope } = useChatContext();
@@ -45,7 +46,7 @@ export default function ProjectDetail() {
   const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
 
   // Fetch and parse the L1 report markdown
