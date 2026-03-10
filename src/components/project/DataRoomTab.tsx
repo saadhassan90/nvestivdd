@@ -108,7 +108,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
   const selectedCount = selected.size;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
       <BlurFade>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>

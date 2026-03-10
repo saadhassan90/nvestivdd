@@ -77,7 +77,7 @@ export function OverviewTab({ project, redFlags, reportSections, documents, modu
   const displayRisks = keyRisks || criticalFlags.slice(0, 4).map(f => ({ category: f.title, detail: f.description || '' }));
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Status Banners */}
       {isProcessing && (
         <BlurFade>

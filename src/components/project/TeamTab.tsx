@@ -80,7 +80,7 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
   const categoryOrder = ["leadership", "investment_team", "operations", "sustainability", "business_development", "other"];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
       <BlurFade>
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-foreground">Team & Operations</h2>
