@@ -66,17 +66,27 @@ serve(async (req) => {
     const dispatched: { task_id: string; project_id: string }[] = [];
 
     await Promise.all(pendingTasks.map(async (task) => {
-      // Claim the task
-      const { data: claimed } = await supabase
+      // Claim the task — use count to verify the update actually matched
+      const { error: claimError, count } = await supabase
         .from("task_queue")
         .update({ status: "running", started_at: new Date().toISOString() })
         .eq("id", task.id)
-        .eq("status", "pending")
-        .select("id")
+        .eq("status", "pending");
+
+      if (claimError) {
+        console.error(`Failed to claim task ${task.id}:`, claimError.message);
+        return;
+      }
+
+      // Verify we actually updated the row by checking current status
+      const { data: verify } = await supabase
+        .from("task_queue")
+        .select("status")
+        .eq("id", task.id)
         .single();
 
-      if (!claimed) {
-        console.log(`Task ${task.id} already claimed, skipping.`);
+      if (!verify || verify.status !== "running") {
+        console.log(`Task ${task.id} already claimed by another worker, skipping.`);
         return;
       }
 
