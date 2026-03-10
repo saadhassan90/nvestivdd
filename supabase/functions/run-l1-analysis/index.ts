@@ -309,7 +309,7 @@ Be exhaustive. Extract every data point. Flag every inconsistency. This is the r
       },
       body: JSON.stringify({
         model: OPUS_MODEL,
-        max_tokens: 16000,
+        max_tokens: 64000,
         thinking: { type: "enabled", budget_tokens: 32000 },
         temperature: 1,
         stream: true,
