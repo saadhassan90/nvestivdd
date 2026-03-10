@@ -136,8 +136,8 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               return (
                 <tr
                   key={project.id}
-                  className="border-b border-border last:border-0 transition-colors hover:bg-muted/50 cursor-pointer"
-                  onClick={() => navigate(`/project/${project.id}`)}
+                  className={`border-b border-border last:border-0 transition-colors ${isProcessing ? 'opacity-70' : 'hover:bg-muted/50 cursor-pointer'}`}
+                  onClick={() => !isProcessing && navigate(`/project/${project.id}`)}
                 >
                   <td className="px-3 lg:px-4 py-2">
                     <p className="font-medium text-foreground text-sm truncate max-w-[200px] lg:max-w-none">{project.fund_name}</p>
