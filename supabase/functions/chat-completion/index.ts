@@ -128,12 +128,13 @@ const tools = [
   },
   {
     name: "search_documents",
-    description: "Semantic search over original fund documents using vector similarity. Returns relevant text passages from uploaded documents.",
+    description: "Semantic search over the knowledge graph using vector similarity. Returns relevant entities, concepts, people, risks, and their relationships from the fund's knowledge graph. Use this for open-ended questions, finding connections, or when structured tools don't cover the query.",
     input_schema: {
       type: "object",
       properties: {
         query: { type: "string", description: "Natural language search query" },
         project_id: { type: "string", description: "Optional project UUID to scope search" },
+        include_relationships: { type: "boolean", description: "Whether to also return connected nodes via edges. Default true." },
       },
       required: ["query"],
     },
