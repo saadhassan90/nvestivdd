@@ -1,0 +1,1 @@
+UPDATE public.projects SET status = 'pending', error_message = NULL WHERE id = '61090713-3596-4ea4-8e36-d4071930a257';
