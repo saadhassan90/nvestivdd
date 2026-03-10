@@ -60,6 +60,28 @@ async function logStep(projectId: string, stepKey: string, stepLabel: string, st
   }
 }
 
+// ─── Cache Helpers ───
+
+async function getCachedOutput(projectId: string, phaseKey: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("pipeline_cache")
+    .select("output_text")
+    .eq("project_id", projectId)
+    .eq("phase_key", phaseKey)
+    .maybeSingle();
+  return data?.output_text || null;
+}
+
+async function setCachedOutput(projectId: string, phaseKey: string, output: string, model?: string): Promise<void> {
+  await supabase.from("pipeline_cache").upsert({
+    project_id: projectId,
+    phase_key: phaseKey,
+    output_text: output,
+    char_count: output.length,
+    model_used: model || null,
+  }, { onConflict: "project_id,phase_key" });
+}
+
 async function fetchSystemFile(path: string): Promise<string> {
   const { data, error } = await supabase.storage.from("system").download(path);
   if (error) throw new Error(`Failed to fetch system file ${path}: ${error.message}`);
