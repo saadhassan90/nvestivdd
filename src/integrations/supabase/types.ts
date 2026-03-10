@@ -1232,8 +1232,10 @@ export type Database = {
           error_message: string | null
           id: string
           input_payload: Json | null
+          max_retries: number
           output_payload: Json | null
           project_id: string
+          retry_count: number
           started_at: string | null
           status: string
           task_type: string
@@ -1244,8 +1246,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           input_payload?: Json | null
+          max_retries?: number
           output_payload?: Json | null
           project_id: string
+          retry_count?: number
           started_at?: string | null
           status?: string
           task_type?: string
@@ -1256,8 +1260,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           input_payload?: Json | null
+          max_retries?: number
           output_payload?: Json | null
           project_id?: string
+          retry_count?: number
           started_at?: string | null
           status?: string
           task_type?: string
