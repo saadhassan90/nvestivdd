@@ -55,7 +55,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
               )}
             </button>
             {thinkingOpen && (
-              <div className="border-t border-border border-l-2 border-l-amber-400 mx-3 mb-3 mt-0 pl-3 py-2 max-h-48 overflow-y-auto">
+              <div className="border-t border-border border-l-2 border-l-muted-foreground/40 mx-3 mb-3 mt-0 pl-3 py-2 max-h-48 overflow-y-auto">
                 <pre className="text-[11px] leading-relaxed text-muted-foreground font-mono whitespace-pre-wrap break-words">
                   {message.thinkingContent}
                 </pre>
