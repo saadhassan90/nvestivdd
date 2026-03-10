@@ -372,14 +372,13 @@ serve(async (req) => {
       await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Triage complete: ${triageOutput.length} chars`);
     }
 
-    // ─── STEP 2: Phase 2 — Parallel Module Groups ───
-    console.log(`[${project_id}] Phase 2: Launching 3 parallel module groups...`);
+    // ─── STEP 2: Phase 2 — Parallel Module Groups (cached per group) ───
+    console.log(`[${project_id}] Phase 2: Checking cache for module groups...`);
 
-    // Mark all three as running simultaneously
-    await Promise.all([
-      logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "running", "Opus analyzing Financial & Operational..."),
-      logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "running", "Opus analyzing Team & Strategy..."),
-      logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "running", "Opus analyzing Terms & Structure..."),
+    const [cachedG1, cachedG2, cachedG3] = await Promise.all([
+      getCachedOutput(project_id, "phase2_group1"),
+      getCachedOutput(project_id, "phase2_group2"),
+      getCachedOutput(project_id, "phase2_group3"),
     ]);
 
     const makeModuleUserContent = (groupInstruction: string): any[] => [
@@ -390,56 +389,55 @@ serve(async (req) => {
       },
     ];
 
-    // Fire all 3 groups in parallel
-    const [group1Output, group2Output, group3Output] = await Promise.all([
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP1_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module A (Financial & Performance) and Module E (Operational Quick-Check). Use the triage findings for context. Be exhaustive."),
-        32000,
-        16000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 1 (A+E) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 1 failed:`, err);
-        await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "error", err.message);
-        throw err;
-      }),
+    // Only run groups that aren't cached
+    const groupPromises: [Promise<string>, Promise<string>, Promise<string>] = [
+      cachedG1
+        ? (async () => {
+            console.log(`[${project_id}] Group 1 (A+E): CACHED (${cachedG1.length} chars)`);
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Cached: ${cachedG1.length} chars`);
+            return cachedG1;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "running", "Opus analyzing Financial & Operational...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP1_MODULES, skillContent), makeModuleUserContent("Analyze Module A (Financial & Performance) and Module E (Operational Quick-Check). Use the triage findings for context. Be exhaustive."), 32000, 16000);
+            await setCachedOutput(project_id, "phase2_group1", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 1 (A+E) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group1", "Modules A+E: Financial & Operational", 2, "error", err.message); throw err; }),
 
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP2_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module B (Team & Management) and Module C (Strategy & Market Validation). Use the triage findings for context. Be exhaustive."),
-        32000,
-        16000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 2 (B+C) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 2 failed:`, err);
-        await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "error", err.message);
-        throw err;
-      }),
+      cachedG2
+        ? (async () => {
+            console.log(`[${project_id}] Group 2 (B+C): CACHED (${cachedG2.length} chars)`);
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Cached: ${cachedG2.length} chars`);
+            return cachedG2;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "running", "Opus analyzing Team & Strategy...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP2_MODULES, skillContent), makeModuleUserContent("Analyze Module B (Team & Management) and Module C (Strategy & Market Validation). Use the triage findings for context. Be exhaustive."), 32000, 16000);
+            await setCachedOutput(project_id, "phase2_group2", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 2 (B+C) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group2", "Modules B+C: Team & Strategy", 3, "error", err.message); throw err; }),
 
-      callClaude(
-        OPUS_MODEL,
-        makeModuleGroupSystem(GROUP3_MODULES, skillContent),
-        makeModuleUserContent("Analyze Module D (Terms & Structure). Use the triage findings for context. Be exhaustive."),
-        24000,
-        12000,
-      ).then(async (result) => {
-        console.log(`[${project_id}] Group 3 (D) complete: ${result.length} chars`);
-        await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Complete: ${result.length} chars`);
-        return result;
-      }).catch(async (err) => {
-        console.error(`[${project_id}] Group 3 failed:`, err);
-        await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "error", err.message);
-        throw err;
-      }),
-    ]);
+      cachedG3
+        ? (async () => {
+            console.log(`[${project_id}] Group 3 (D): CACHED (${cachedG3.length} chars)`);
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Cached: ${cachedG3.length} chars`);
+            return cachedG3;
+          })()
+        : (async () => {
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "running", "Opus analyzing Terms & Structure...");
+            const result = await callClaude(OPUS_MODEL, makeModuleGroupSystem(GROUP3_MODULES, skillContent), makeModuleUserContent("Analyze Module D (Terms & Structure). Use the triage findings for context. Be exhaustive."), 24000, 12000);
+            await setCachedOutput(project_id, "phase2_group3", result, OPUS_MODEL);
+            console.log(`[${project_id}] Group 3 (D) complete: ${result.length} chars`);
+            await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "complete", `Complete: ${result.length} chars`);
+            return result;
+          })().catch(async (err) => { await logStep(project_id, "phase2_group3", "Module D: Terms & Structure", 4, "error", err.message); throw err; }),
+    ];
+
+    const [group1Output, group2Output, group3Output] = await Promise.all(groupPromises);
 
     console.log(`[${project_id}] Phase 2 complete. All module groups finished.`);
 
