@@ -441,10 +441,7 @@ serve(async (req) => {
 
     console.log(`[${project_id}] Phase 2 complete. All module groups finished.`);
 
-    // ─── STEP 3: Phase 3 — Synthesis (Sequential) ───
-    await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "running", "Opus synthesizing all findings...");
-    console.log(`[${project_id}] Phase 3: Synthesis starting...`);
-
+    // ─── STEP 3: Phase 3 — Synthesis (Sequential, cached) ───
     const allModuleFindings = `<triage_findings>\n${triageOutput}\n</triage_findings>
 
 <module_a_e_findings>\n${group1Output}\n</module_a_e_findings>
@@ -453,22 +450,37 @@ serve(async (req) => {
 
 <module_d_findings>\n${group3Output}\n</module_d_findings>`;
 
-    const synthesisOutput = await callClaude(
-      OPUS_MODEL,
-      SYNTHESIS_SYSTEM,
-      [{ type: "text", text: `Here are all the analytical findings from the triage and module analysis phases. Perform the synthesis (Nodes 7-11).\n\n${allModuleFindings}` }],
-      32000,
-      16000,
-    );
+    let synthesisOutput = await getCachedOutput(project_id, "phase3_synthesis");
+    if (synthesisOutput) {
+      console.log(`[${project_id}] Phase 3: CACHED (${synthesisOutput.length} chars)`);
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Cached: ${synthesisOutput.length} chars`);
+    } else {
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "running", "Opus synthesizing all findings...");
+      console.log(`[${project_id}] Phase 3: Synthesis starting...`);
 
-    console.log(`[${project_id}] Phase 3 complete: ${synthesisOutput.length} chars`);
-    await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Synthesis complete: ${synthesisOutput.length} chars`);
+      synthesisOutput = await callClaude(
+        OPUS_MODEL,
+        SYNTHESIS_SYSTEM,
+        [{ type: "text", text: `Here are all the analytical findings from the triage and module analysis phases. Perform the synthesis (Nodes 7-11).\n\n${allModuleFindings}` }],
+        32000,
+        16000,
+      );
 
-    // ─── STEP 4: Phase 4 — Report Assembly (Sonnet) ───
-    await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "running", "Sonnet assembling final report...");
-    console.log(`[${project_id}] Phase 4: Report Assembly starting...`);
+      await setCachedOutput(project_id, "phase3_synthesis", synthesisOutput, OPUS_MODEL);
+      console.log(`[${project_id}] Phase 3 complete: ${synthesisOutput.length} chars`);
+      await logStep(project_id, "phase3_synthesis", "Synthesis: Red Flags, Interrogatory, Scoring", 5, "complete", `Synthesis complete: ${synthesisOutput.length} chars`);
+    }
 
-    const reportAssemblyPrompt = `You are an institutional-grade report writer. Compile the raw analytical findings into a polished, publication-ready L1 Preliminary Due Diligence Report.
+    // ─── STEP 4: Phase 4 — Report Assembly (Sonnet, cached) ───
+    let reportMarkdown = await getCachedOutput(project_id, "phase4_report");
+    if (reportMarkdown) {
+      console.log(`[${project_id}] Phase 4: CACHED (${reportMarkdown.length} chars)`);
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Cached: ${reportMarkdown.length} chars`);
+    } else {
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "running", "Sonnet assembling final report...");
+      console.log(`[${project_id}] Phase 4: Report Assembly starting...`);
+
+      const reportAssemblyPrompt = `You are an institutional-grade report writer. Compile the raw analytical findings into a polished, publication-ready L1 Preliminary Due Diligence Report.
 
 Requirements:
 - Professional, institutional-grade prose
@@ -480,12 +492,12 @@ Requirements:
 
 Do NOT fabricate data. Only use findings from the analysis phases.`;
 
-    const reportMarkdown = await callClaude(
-      SONNET_MODEL,
-      reportAssemblyPrompt,
-      [{
-        type: "text",
-        text: `Here are the complete analytical findings from all phases. Compile into a polished L1 Preliminary Report matching the sample format exactly.
+      reportMarkdown = await callClaude(
+        SONNET_MODEL,
+        reportAssemblyPrompt,
+        [{
+          type: "text",
+          text: `Here are the complete analytical findings from all phases. Compile into a polished L1 Preliminary Report matching the sample format exactly.
 
 ${allModuleFindings}
 
@@ -494,13 +506,15 @@ ${allModuleFindings}
 <sample_report_format>\n${sampleContent}\n</sample_report_format>
 
 Produce the complete, polished markdown report now.`,
-      }],
-      16000,
-      8000,
-    );
+        }],
+        16000,
+        8000,
+      );
 
-    console.log(`[${project_id}] Phase 4 complete: ${reportMarkdown.length} chars`);
-    await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Report: ${reportMarkdown.length} chars`);
+      await setCachedOutput(project_id, "phase4_report", reportMarkdown, SONNET_MODEL);
+      console.log(`[${project_id}] Phase 4 complete: ${reportMarkdown.length} chars`);
+      await logStep(project_id, "sonnet_assembly", "Report Assembly", 6, "complete", `Report: ${reportMarkdown.length} chars`);
+    }
 
     if (!reportMarkdown || reportMarkdown.length < 500) {
       await logStep(project_id, "saving_report", "Saving Report", 7, "error", "Insufficient report content");
