@@ -12,7 +12,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-const STUCK_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+const STUCK_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
 const MAX_RETRIES = 3;
 
 serve(async (req) => {
