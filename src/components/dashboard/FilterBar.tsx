@@ -1,4 +1,4 @@
-import { Search, ArrowUpDown, X, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import {
   DropdownMenu,
