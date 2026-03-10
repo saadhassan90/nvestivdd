@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TrendingUp, DollarSign } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 
 interface PerformanceMetric {
   id: string;
@@ -35,6 +35,7 @@ interface PerformanceTabProps {
   fees: FeeItem[];
   performanceWriteup?: { section_title: string | null; content: string | null };
   feesWriteup?: { section_title: string | null; content: string | null };
+  reportMarkdown?: string | null;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -53,8 +54,14 @@ const ASSESSMENT_COLORS: Record<string, string> = {
   critical_gap: "text-severity-critical bg-severity-critical/10",
 };
 
-export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup }: PerformanceTabProps) {
-  const [activeSection, setActiveSection] = useState<"performance" | "fees">("performance");
+export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup, reportMarkdown }: PerformanceTabProps) {
+  const hasMarkdown = !!reportMarkdown;
+  const hasStructuredData = metrics.length > 0 || fees.length > 0;
+
+  const [activeSection, setActiveSection] = useState<"report" | "performance" | "fees">(
+    hasMarkdown ? "report" : "performance"
+  );
+
   // Group metrics by category
   const metricsByCategory: Record<string, PerformanceMetric[]> = {};
   metrics.forEach(m => {
@@ -78,31 +85,49 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup 
         </div>
       </BlurFade>
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setActiveSection("performance")}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "performance" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5" /> Performance ({metrics.length})</span>
-        </button>
-        <button
-          onClick={() => setActiveSection("fees")}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "fees" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <span className="flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Fee Structure ({fees.length})</span>
-        </button>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        {hasMarkdown && (
+          <button
+            onClick={() => setActiveSection("report")}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+              activeSection === "report" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Report
+          </button>
+        )}
+        {hasStructuredData && (
+          <>
+            <button
+              onClick={() => setActiveSection("performance")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                activeSection === "performance" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5" /> Performance ({metrics.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveSection("fees")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                activeSection === "fees" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <span className="flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Fee Structure ({fees.length})</span>
+            </button>
+          </>
+        )}
       </div>
+
+      {activeSection === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
 
       {activeSection === "performance" && (
         <div className="space-y-6">
           {performanceWriteup?.content && (
             <BlurFade>
               <MagicCard>
-                <MarkdownContent content={performanceWriteup.content} />
+                <ReportMarkdownSection content={performanceWriteup.content} />
               </MagicCard>
             </BlurFade>
           )}
@@ -161,7 +186,7 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup 
           {feesWriteup?.content && (
             <BlurFade>
               <MagicCard>
-                <MarkdownContent content={feesWriteup.content} />
+                <ReportMarkdownSection content={feesWriteup.content} />
               </MagicCard>
             </BlurFade>
           )}
@@ -203,7 +228,6 @@ export function PerformanceTab({ metrics, fees, performanceWriteup, feesWriteup 
           )}
         </div>
       )}
-
     </div>
   );
 }

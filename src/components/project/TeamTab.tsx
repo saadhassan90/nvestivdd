@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Users, CheckCircle2, AlertTriangle, Shield, ExternalLink } from "lucide-react";
+import { Users, CheckCircle2, AlertTriangle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
-
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 
 interface TeamMember {
   id: string;
@@ -22,12 +21,6 @@ interface TeamMember {
   order_index: number | null;
 }
 
-interface TeamTabProps {
-  teamMembers: TeamMember[];
-  serviceProviders: ServiceProvider[];
-  reportSection?: { section_title: string | null; content: string | null };
-}
-
 interface ServiceProvider {
   id: string;
   provider_type: string;
@@ -37,6 +30,13 @@ interface ServiceProvider {
   verification_detail: string | null;
   importance: string;
   notes: string | null;
+}
+
+interface TeamTabProps {
+  teamMembers: TeamMember[];
+  serviceProviders: ServiceProvider[];
+  reportSection?: { section_title: string | null; content: string | null };
+  reportMarkdown?: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -60,8 +60,14 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   standard: "text-muted-foreground",
 };
 
-export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTabProps) {
-  const [activeSection, setActiveSection] = useState<"team" | "providers">(teamMembers.length > 0 ? "team" : "providers");
+export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMarkdown }: TeamTabProps) {
+  // If we have report markdown, show it as the primary content
+  const hasMarkdown = !!reportMarkdown;
+  const hasStructuredData = teamMembers.length > 0 || serviceProviders.length > 0;
+
+  const [activeSection, setActiveSection] = useState<"report" | "team" | "providers">(
+    hasMarkdown ? "report" : teamMembers.length > 0 ? "team" : "providers"
+  );
 
   // Group team by role_category
   const grouped: Record<string, TeamMember[]> = {};
@@ -82,34 +88,45 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
         </div>
       </BlurFade>
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setActiveSection("team")}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "team" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Team ({teamMembers.length})
-        </button>
-        <button
-          onClick={() => setActiveSection("providers")}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "providers" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Service Providers ({serviceProviders.length})
-        </button>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        {hasMarkdown && (
+          <button
+            onClick={() => setActiveSection("report")}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+              activeSection === "report" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Report
+          </button>
+        )}
+        {hasStructuredData && (
+          <>
+            <button
+              onClick={() => setActiveSection("team")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                activeSection === "team" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Team ({teamMembers.length})
+            </button>
+            <button
+              onClick={() => setActiveSection("providers")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                activeSection === "providers" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Service Providers ({serviceProviders.length})
+            </button>
+          </>
+        )}
       </div>
+
+      {activeSection === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
 
       {activeSection === "team" && (
         <div className="space-y-6">
-          {reportSection?.content && (
-            <BlurFade>
-              <MagicCard>
-                <MarkdownContent content={reportSection.content} />
-              </MagicCard>
-            </BlurFade>
-          )}
           {teamMembers.length === 0 ? (
             <MagicCard>
               <p className="text-sm text-muted-foreground text-center py-8">No team member data available yet.</p>
@@ -141,7 +158,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
                                 )}
                               </div>
                               {member.title && <p className="text-xs text-muted-foreground mt-0.5">{member.title}</p>}
-
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {member.years_experience && (
                                   <span className="text-[10px] rounded-full border border-border px-2 py-0.5 text-muted-foreground">
@@ -154,7 +170,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
                                   </span>
                                 )}
                               </div>
-
                               {member.prior_affiliations && (member.prior_affiliations as string[]).length > 0 && (
                                 <div className="mt-2">
                                   <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Prior: </span>
@@ -163,11 +178,9 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
                                   </span>
                                 </div>
                               )}
-
                               {member.verification_detail && (
                                 <p className="text-[11px] text-muted-foreground mt-2">{member.verification_detail}</p>
                               )}
-
                               {member.adverse_findings && (
                                 <div className="mt-2 rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-2">
                                   <div className="flex items-center gap-1.5 mb-1">
@@ -178,7 +191,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
                                 </div>
                               )}
                             </div>
-
                             <div className="flex flex-col items-end gap-1.5 shrink-0">
                               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${VERIFICATION_COLORS[member.verification_status] || ''}`}>
                                 {member.verification_status === 'verified' && <CheckCircle2 className="h-3 w-3 mr-1" />}
@@ -250,7 +262,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection }: TeamTa
           )}
         </div>
       )}
-
     </div>
   );
 }

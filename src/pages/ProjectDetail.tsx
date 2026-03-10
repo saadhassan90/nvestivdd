@@ -16,6 +16,8 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useReportMarkdown } from "@/hooks/use-report-markdown";
+import { getTabMarkdown } from "@/lib/markdown-sections";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
@@ -31,7 +33,6 @@ export default function ProjectDetail() {
   const [dataRoomItems, setDataRoomItems] = useState<Tables<"data_room_items">[]>([]);
   const [documents, setDocuments] = useState<Tables<"documents">[]>([]);
   const [researchSources, setResearchSources] = useState<Tables<"research_sources">[]>([]);
-  // New data
   const [moduleScores, setModuleScores] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([]);
@@ -46,6 +47,9 @@ export default function ProjectDetail() {
 
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+
+  // Fetch and parse the L1 report markdown
+  const { sections: reportMarkdownSections } = useReportMarkdown(id);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -150,6 +154,9 @@ export default function ProjectDetail() {
     );
   }
 
+  // Compute tab-specific markdown from the parsed report
+  const hasReportMarkdown = reportMarkdownSections.length > 0;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -197,22 +204,47 @@ export default function ProjectDetail() {
                   docQualityFlags={docQualityFlags}
                   criticalInfoGaps={criticalInfoGaps}
                   onRerunAnalysis={handleRerunAnalysis}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'overview') : null}
                 />
               )}
               {activeTab === "team" && (
-                <TeamTab teamMembers={teamMembers} serviceProviders={serviceProviders} reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('team') || s.section_title?.toLowerCase().includes('leadership'))} />
+                <TeamTab
+                  teamMembers={teamMembers}
+                  serviceProviders={serviceProviders}
+                  reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('team') || s.section_title?.toLowerCase().includes('leadership'))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'team') : null}
+                />
               )}
               {activeTab === "performance" && (
-                <PerformanceTab metrics={performanceMetrics} fees={feeStructure} performanceWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('performance') || s.section_title?.toLowerCase().includes('track record'))} feesWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('fee') || s.section_title?.toLowerCase().includes('economics'))} />
+                <PerformanceTab
+                  metrics={performanceMetrics}
+                  fees={feeStructure}
+                  performanceWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('performance') || s.section_title?.toLowerCase().includes('track record'))}
+                  feesWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('fee') || s.section_title?.toLowerCase().includes('economics'))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'performance') : null}
+                />
               )}
               {activeTab === "strategy" && (
-                <StrategyTab thesisValidations={thesisValidations} competitors={competitors} marketFactors={marketFactors} reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('strategy') || s.section_title?.toLowerCase().includes('market'))} />
+                <StrategyTab
+                  thesisValidations={thesisValidations}
+                  competitors={competitors}
+                  marketFactors={marketFactors}
+                  reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('strategy') || s.section_title?.toLowerCase().includes('market'))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'strategy') : null}
+                />
               )}
               {activeTab === "red_flags" && (
-                <RedFlagsTab redFlags={redFlags} />
+                <RedFlagsTab
+                  redFlags={redFlags}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'red_flags') : null}
+                />
               )}
               {activeTab === "interrogatory" && (
-                <InterrogatoryTab items={interrogatoryItems} fundName={project.fund_name} />
+                <InterrogatoryTab
+                  items={interrogatoryItems}
+                  fundName={project.fund_name}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'interrogatory') : null}
+                />
               )}
               {activeTab === "data_room" && (
                 <DataRoomTab
@@ -223,10 +255,14 @@ export default function ProjectDetail() {
                   lastAnalysisAt={project.updated_at}
                   onRefresh={fetchData}
                   onRerunAnalysis={handleRerunAnalysis}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'data_room') : null}
                 />
               )}
               {activeTab === "documents" && (
-                <SourceFilesTab researchSources={researchSources} />
+                <SourceFilesTab
+                  researchSources={researchSources}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'documents') : null}
+                />
               )}
             </>
           )}
