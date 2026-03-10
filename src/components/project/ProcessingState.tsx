@@ -24,7 +24,8 @@ interface ProcessingStateProps {
 
 const STEP_ICONS: Record<string, React.ReactNode> = {
   download_docs: <FileSearch className="h-4 w-4" />,
-  calling_claude: <Brain className="h-4 w-4" />,
+  opus_analysis: <Brain className="h-4 w-4" />,
+  sonnet_assembly: <FileText className="h-4 w-4" />,
   node_0: <Package className="h-4 w-4" />,
   node_1: <Zap className="h-4 w-4" />,
   node_2: <TrendingUp className="h-4 w-4" />,
