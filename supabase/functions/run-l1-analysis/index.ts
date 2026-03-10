@@ -350,20 +350,27 @@ serve(async (req) => {
     await logStep(project_id, "download_docs", "Downloading Documents", 0, "complete", `Downloaded ${documentContents.length} documents`);
     const docBlocks = buildDocBlocks(documentContents);
 
-    // ─── STEP 1: Phase 1 — Triage (Sequential) ───
-    await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "running", "Opus analyzing document classification & triage...");
-    console.log(`[${project_id}] Phase 1: Triage starting...`);
+    // ─── STEP 1: Phase 1 — Triage (Sequential, cached) ───
+    let triageOutput = await getCachedOutput(project_id, "phase1_triage");
+    if (triageOutput) {
+      console.log(`[${project_id}] Phase 1: CACHED (${triageOutput.length} chars)`);
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Cached: ${triageOutput.length} chars`);
+    } else {
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "running", "Opus analyzing document classification & triage...");
+      console.log(`[${project_id}] Phase 1: Triage starting...`);
 
-    const triageOutput = await callClaude(
-      OPUS_MODEL,
-      PHASE1_SYSTEM,
-      [...docBlocks, { type: "text", text: "Perform document classification (Node 0) and triage (Node 1) on these fund documents. Be thorough — your output feeds all subsequent parallel analysis modules." }],
-      16000,
-      10000,
-    );
+      triageOutput = await callClaude(
+        OPUS_MODEL,
+        PHASE1_SYSTEM,
+        [...docBlocks, { type: "text", text: "Perform document classification (Node 0) and triage (Node 1) on these fund documents. Be thorough — your output feeds all subsequent parallel analysis modules." }],
+        16000,
+        10000,
+      );
 
-    console.log(`[${project_id}] Phase 1 complete: ${triageOutput.length} chars`);
-    await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Triage complete: ${triageOutput.length} chars`);
+      await setCachedOutput(project_id, "phase1_triage", triageOutput, OPUS_MODEL);
+      console.log(`[${project_id}] Phase 1 complete: ${triageOutput.length} chars`);
+      await logStep(project_id, "phase1_triage", "Phase 1: Triage & Classification", 1, "complete", `Triage complete: ${triageOutput.length} chars`);
+    }
 
     // ─── STEP 2: Phase 2 — Parallel Module Groups ───
     console.log(`[${project_id}] Phase 2: Launching 3 parallel module groups...`);
