@@ -165,8 +165,6 @@ export default function ProjectDetail() {
         <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
           <button onClick={() => navigate('/dashboard')} className="text-muted-foreground hover:text-foreground transition-colors">Projects</button>
           <span className="text-muted-foreground">&gt;</span>
-          <span className="text-muted-foreground hidden sm:inline">{project.asset_class}</span>
-          <span className="text-muted-foreground hidden sm:inline">&gt;</span>
           <span className="font-medium text-foreground truncate">{project.fund_name}</span>
         </div>
       </div>
