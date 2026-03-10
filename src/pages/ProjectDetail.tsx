@@ -180,8 +180,8 @@ export default function ProjectDetail() {
         </div>
 
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
-          {project.status === 'processing' ? (
-            <ProcessingState />
+          {['processing', 'pending', 'uploading', 'analyzing', 'extracting'].includes(project.status) ? (
+            <ProcessingState startedAt={project.updated_at} />
           ) : project.status === 'error' ? (
             <BlurFade>
               <div className="flex flex-col items-center justify-center py-20">
