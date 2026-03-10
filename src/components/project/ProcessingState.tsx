@@ -3,13 +3,28 @@ import { Loader2 } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BorderBeam } from "@/components/magicui/BorderBeam";
 
-export function ProcessingState() {
-  const [elapsed, setElapsed] = useState(0);
+interface ProcessingStateProps {
+  startedAt?: string; // ISO timestamp of when processing began
+}
+
+export function ProcessingState({ startedAt }: ProcessingStateProps) {
+  const [elapsed, setElapsed] = useState(() => {
+    if (startedAt) {
+      return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+    }
+    return 0;
+  });
 
   useEffect(() => {
-    const timer = setInterval(() => setElapsed(prev => prev + 1), 1000);
+    const timer = setInterval(() => {
+      if (startedAt) {
+        setElapsed(Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)));
+      } else {
+        setElapsed(prev => prev + 1);
+      }
+    }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [startedAt]);
 
   const minutes = Math.floor(elapsed / 60);
   const seconds = elapsed % 60;
