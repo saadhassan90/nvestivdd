@@ -14,7 +14,7 @@ const navItems = [
   { key: "team", label: "Team & Ops", icon: Users },
   { key: "performance", label: "Performance & Fees", icon: TrendingUp },
   { key: "strategy", label: "Strategy & Market", icon: Target },
-  { key: "red_flags", label: "Red Flags", icon: Shield },
+  { key: "red_flags", label: "Flags", icon: Shield },
   { key: "interrogatory", label: "Interrogatory", icon: MessageSquare },
   { key: "data_room", label: "Data Room", icon: FolderOpen },
   { key: "documents", label: "Research Sources", icon: FileText },
