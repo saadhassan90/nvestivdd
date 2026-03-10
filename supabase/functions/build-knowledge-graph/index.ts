@@ -741,12 +741,17 @@ async function buildProjectGraph(projectId: string) {
   // ════════════════════════════════════════
   // PERSIST: Delete old graph, insert new
   // ════════════════════════════════════════
-  // Delete edges first (FK constraint), then nodes
-  await supabase.from("knowledge_edges").delete().in(
-    "source_node_id",
-    (await supabase.from("knowledge_nodes").select("id").eq("project_id", projectId)).data?.map((n: any) => n.id) || []
-  );
-  await supabase.from("knowledge_nodes").delete().eq("project_id", projectId);
+  // Delete old graph: get node IDs, delete edges referencing them, then nodes
+  const { data: oldNodes } = await supabase.from("knowledge_nodes").select("id").eq("project_id", projectId);
+  const oldNodeIds = (oldNodes || []).map((n: any) => n.id);
+  
+  if (oldNodeIds.length > 0) {
+    // Delete all edges where source OR target is one of our nodes
+    await supabase.from("knowledge_edges").delete().in("source_node_id", oldNodeIds);
+    await supabase.from("knowledge_edges").delete().in("target_node_id", oldNodeIds);
+    // Now safe to delete nodes
+    await supabase.from("knowledge_nodes").delete().eq("project_id", projectId);
+  }
 
   // Insert nodes in batches, building key→id map
   const keyToId: Record<string, string> = {};
