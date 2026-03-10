@@ -306,8 +306,7 @@ serve(async (req) => {
       });
     }
 
-    // Clear previous logs
-    await supabase.from("analysis_logs").delete().eq("project_id", project_id);
+    // Don't clear previous logs — we'll update them. Don't clear cache!
     await supabase.from("task_queue")
       .update({ status: "running", started_at: new Date().toISOString() })
       .eq("project_id", project_id)
