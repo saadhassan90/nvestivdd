@@ -535,6 +535,114 @@ export type Database = {
           },
         ]
       }
+      knowledge_edges: {
+        Row: {
+          created_at: string | null
+          id: string
+          properties: Json | null
+          relationship_type: string
+          source_node_id: string
+          target_node_id: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          properties?: Json | null
+          relationship_type: string
+          source_node_id: string
+          target_node_id: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          properties?: Json | null
+          relationship_type?: string
+          source_node_id?: string
+          target_node_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_edges_source_node_id_fkey"
+            columns: ["source_node_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_edges_target_node_id_fkey"
+            columns: ["target_node_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_nodes: {
+        Row: {
+          created_at: string | null
+          depth_level: number | null
+          embedding: string | null
+          id: string
+          label: string
+          node_type: string
+          parent_node_id: string | null
+          project_id: string | null
+          properties: Json | null
+          source_id: string | null
+          source_table: string | null
+          summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          depth_level?: number | null
+          embedding?: string | null
+          id?: string
+          label: string
+          node_type: string
+          parent_node_id?: string | null
+          project_id?: string | null
+          properties?: Json | null
+          source_id?: string | null
+          source_table?: string | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          depth_level?: number | null
+          embedding?: string | null
+          id?: string
+          label?: string
+          node_type?: string
+          parent_node_id?: string | null
+          project_id?: string | null
+          properties?: Json | null
+          source_id?: string | null
+          source_table?: string | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_nodes_parent_node_id_fkey"
+            columns: ["parent_node_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_nodes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_factors: {
         Row: {
           citation_ids: Json | null
@@ -1228,7 +1336,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_knowledge_graph: {
+        Args: {
+          filter_project_id?: string
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          depth_level: number
+          id: string
+          label: string
+          node_type: string
+          parent_node_id: string
+          project_id: string
+          properties: Json
+          similarity: number
+          source_id: string
+          source_table: string
+          summary: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

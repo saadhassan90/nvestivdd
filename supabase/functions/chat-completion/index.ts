@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -127,12 +128,13 @@ const tools = [
   },
   {
     name: "search_documents",
-    description: "Semantic search over original fund documents using vector similarity. Returns relevant text passages from uploaded documents.",
+    description: "Semantic search over the knowledge graph using vector similarity. Returns relevant entities, concepts, people, risks, and their relationships from the fund's knowledge graph. Use this for open-ended questions, finding connections, or when structured tools don't cover the query.",
     input_schema: {
       type: "object",
       properties: {
         query: { type: "string", description: "Natural language search query" },
         project_id: { type: "string", description: "Optional project UUID to scope search" },
+        include_relationships: { type: "boolean", description: "Whether to also return connected nodes via edges. Default true." },
       },
       required: ["query"],
     },
@@ -197,9 +199,118 @@ async function executeTool(name: string, input: any): Promise<string> {
         return JSON.stringify(data);
       }
       case "search_documents": {
-        // For now return empty since we don't have embeddings populated yet
-        // In production, this would do a pgvector similarity search
-        return JSON.stringify({ results: [], note: "Document embedding search not yet populated for this project." });
+        if (!OPENAI_API_KEY) return JSON.stringify({ error: "OPENAI_API_KEY not configured for semantic search" });
+        
+        // Generate query embedding using OpenAI text-embedding-3-small
+        const embResp = await fetch("https://api.openai.com/v1/embeddings", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: input.query,
+          }),
+        });
+        
+        if (!embResp.ok) {
+          const errText = await embResp.text();
+          return JSON.stringify({ error: `Embedding error: ${embResp.status} ${errText}` });
+        }
+        
+        const embData = await embResp.json();
+        const queryEmbedding = embData.data[0].embedding;
+        
+        // Search knowledge graph using pgvector similarity
+        const { data: graphResults, error: searchError } = await supabase.rpc("search_knowledge_graph", {
+          query_embedding: `[${queryEmbedding.join(",")}]`,
+          match_threshold: 0.6,
+          match_count: 15,
+          filter_project_id: input.project_id || null,
+        });
+        
+        if (searchError) return JSON.stringify({ error: searchError.message });
+        if (!graphResults || graphResults.length === 0) {
+          return JSON.stringify({ results: [], note: "No matching knowledge graph nodes found." });
+        }
+        
+        // Optionally fetch relationships for top results
+        const includeRels = input.include_relationships !== false;
+        let relationships: any[] = [];
+        
+        if (includeRels && graphResults.length > 0) {
+          const nodeIds = graphResults.slice(0, 8).map((r: any) => r.id);
+          
+          // Get edges where these nodes are source or target
+          const { data: edgesOut } = await supabase
+            .from("knowledge_edges")
+            .select("relationship_type, weight, target_node_id, properties")
+            .in("source_node_id", nodeIds)
+            .limit(50);
+          
+          const { data: edgesIn } = await supabase
+            .from("knowledge_edges")
+            .select("relationship_type, weight, source_node_id, properties")
+            .in("target_node_id", nodeIds)
+            .limit(50);
+          
+          // Get connected node labels
+          const connectedIds = [
+            ...(edgesOut || []).map((e: any) => e.target_node_id),
+            ...(edgesIn || []).map((e: any) => e.source_node_id),
+          ].filter((id) => !nodeIds.includes(id));
+          
+          const uniqueConnectedIds = [...new Set(connectedIds)];
+          let connectedNodes: Record<string, any> = {};
+          
+          if (uniqueConnectedIds.length > 0) {
+            const { data: connected } = await supabase
+              .from("knowledge_nodes")
+              .select("id, label, node_type, summary")
+              .in("id", uniqueConnectedIds.slice(0, 30));
+            
+            for (const cn of connected || []) {
+              connectedNodes[cn.id] = cn;
+            }
+          }
+          
+          // Also index result nodes for label lookup
+          for (const r of graphResults) {
+            connectedNodes[r.id] = { label: r.label, node_type: r.node_type };
+          }
+          
+          relationships = [
+            ...(edgesOut || []).map((e: any) => ({
+              from: connectedNodes[nodeIds.find((id: string) => true)]?.label, // simplified
+              type: e.relationship_type,
+              to: connectedNodes[e.target_node_id]?.label || "unknown",
+              to_type: connectedNodes[e.target_node_id]?.node_type || "unknown",
+              weight: e.weight,
+            })),
+            ...(edgesIn || []).map((e: any) => ({
+              from: connectedNodes[e.source_node_id]?.label || "unknown",
+              from_type: connectedNodes[e.source_node_id]?.node_type || "unknown",
+              type: e.relationship_type,
+              to: "matched node",
+              weight: e.weight,
+            })),
+          ];
+        }
+        
+        return JSON.stringify({
+          results: graphResults.map((r: any) => ({
+            node_type: r.node_type,
+            label: r.label,
+            summary: r.summary,
+            properties: r.properties,
+            depth_level: r.depth_level,
+            similarity: r.similarity?.toFixed(3),
+            source_table: r.source_table,
+          })),
+          relationships: relationships.slice(0, 20),
+          total_matches: graphResults.length,
+        });
       }
       default:
         return JSON.stringify({ error: `Unknown tool: ${name}` });
