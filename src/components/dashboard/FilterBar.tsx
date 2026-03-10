@@ -120,41 +120,16 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
           ))}
         </div>
 
-        {/* Search + Sort */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 sm:flex-none">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Filter funds..."
-              value={filters.search}
-              onChange={(e) => onChange({ ...filters, search: e.target.value })}
-              className="w-full sm:w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                <ArrowUpDown className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sort</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {SORT_OPTIONS.map(opt => (
-                <DropdownMenuItem
-                  key={opt.value}
-                  onClick={() => onChange({
-                    ...filters,
-                    sortBy: opt.value,
-                    sortDir: filters.sortBy === opt.value && filters.sortDir === "asc" ? "desc" : "asc",
-                  })}
-                >
-                  {opt.label} {filters.sortBy === opt.value && (filters.sortDir === "asc" ? "↑" : "↓")}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Search */}
+        <div className="relative flex-1 sm:flex-none">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Filter funds..."
+            value={filters.search}
+            onChange={(e) => onChange({ ...filters, search: e.target.value })}
+            className="w-full sm:w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
       </div>
     </BlurFade>
