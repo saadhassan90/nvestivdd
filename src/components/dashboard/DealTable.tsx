@@ -146,9 +146,9 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Fund Name</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Asset Class</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
+              <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="Asset Class" column="asset_class" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Flags</th>
               <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</th>
