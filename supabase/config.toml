@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.build-knowledge-graph]
 verify_jwt = false
+
+[functions.run-l1-analysis]
+verify_jwt = false
+
+[functions.extract-structured-data]
+verify_jwt = false

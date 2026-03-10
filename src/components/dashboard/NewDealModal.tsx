@@ -95,6 +95,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         });
       }
 
+      // Create task queue entry
       await supabase.from('task_queue').insert({
         project_id: project.id,
         task_type: 'l1_analysis',
@@ -103,7 +104,17 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
 
       await supabase.from('projects').update({ status: 'processing' }).eq('id', project.id);
 
-      toast({ title: "Analysis queued", description: `Your deal has been submitted for analysis.` });
+      // Trigger the L1 analysis edge function (fire and forget — it runs async)
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-l1-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ project_id: project.id }),
+      }).catch((err) => console.error('Analysis trigger error:', err));
+
+      toast({ title: "Analysis started", description: `Your deal has been submitted. Iris is now analyzing your documents.` });
       onClose();
       navigate(`/project/${project.id}`);
     } catch (error) {
