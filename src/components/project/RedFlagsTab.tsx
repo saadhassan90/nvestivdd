@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Shield, AlertTriangle, Eye } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 import { formatRelativeTime } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -15,16 +16,20 @@ const MODULE_LABELS: Record<string, string> = {
 
 interface RedFlagsTabProps {
   redFlags: Tables<"red_flags">[];
+  reportMarkdown?: string | null;
 }
 
-export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
-  const [activeFilter, setActiveFilter] = useState("all");
+export function RedFlagsTab({ redFlags, reportMarkdown }: RedFlagsTabProps) {
+  const hasMarkdown = !!reportMarkdown;
+  const hasStructuredData = redFlags.length > 0;
+
+  const [activeFilter, setActiveFilter] = useState(hasMarkdown ? "report" : "all");
 
   const criticalFlags = redFlags.filter(f => f.severity === 'critical');
   const elevatedFlags = redFlags.filter(f => f.severity === 'elevated');
   const monitorFlags = redFlags.filter(f => f.severity === 'monitor');
 
-  const filtered = activeFilter === "all"
+  const filtered = activeFilter === "all" || activeFilter === "report"
     ? redFlags
     : redFlags.filter(f => f.severity === activeFilter);
 
@@ -55,7 +60,6 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
             <p className="text-sm font-semibold text-foreground">{flag.title}</p>
             <p className="text-xs text-muted-foreground mt-1">{flag.description}</p>
 
-            {/* Structured issue/implication/resolution */}
             {(flag as any).issue && (
               <div className="mt-2 space-y-1.5">
                 <div>
@@ -82,7 +86,6 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
               </div>
             )}
 
-            {/* Linked actions */}
             <div className="flex flex-wrap gap-3 mt-3">
               {flag.data_room_action && (
                 <div className="text-[10px] text-muted-foreground">
@@ -104,10 +107,13 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
   );
 
   const FILTERS = [
-    { key: "all", label: `All (${redFlags.length})` },
-    { key: "critical", label: `Critical (${criticalFlags.length})` },
-    { key: "elevated", label: `Elevated (${elevatedFlags.length})` },
-    { key: "monitor", label: `Monitor (${monitorFlags.length})` },
+    ...(hasMarkdown ? [{ key: "report", label: "Report" }] : []),
+    ...(hasStructuredData ? [
+      { key: "all", label: `All (${redFlags.length})` },
+      { key: "critical", label: `Critical (${criticalFlags.length})` },
+      { key: "elevated", label: `Elevated (${elevatedFlags.length})` },
+      { key: "monitor", label: `Monitor (${monitorFlags.length})` },
+    ] : []),
   ];
 
   return (
@@ -119,7 +125,6 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
         </div>
       </BlurFade>
 
-      {/* Filter tabs */}
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         {FILTERS.map(f => (
           <button
@@ -136,8 +141,11 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
         ))}
       </div>
 
-      {/* Tiered display when "all" is selected */}
-      {activeFilter === "all" ? (
+      {activeFilter === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
+
+      {activeFilter === "all" && (
         <div className="space-y-6">
           {criticalFlags.length > 0 && (
             <div>
@@ -152,7 +160,6 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
               </div>
             </div>
           )}
-
           {elevatedFlags.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -166,7 +173,6 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
               </div>
             </div>
           )}
-
           {monitorFlags.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -181,13 +187,15 @@ export function RedFlagsTab({ redFlags }: RedFlagsTabProps) {
             </div>
           )}
         </div>
-      ) : (
+      )}
+
+      {activeFilter !== "all" && activeFilter !== "report" && (
         <div className="space-y-3">
           {filtered.map((flag, i) => renderFlag(flag, i))}
         </div>
       )}
 
-      {redFlags.length === 0 && (
+      {redFlags.length === 0 && activeFilter !== "report" && (
         <MagicCard>
           <p className="text-sm text-muted-foreground text-center py-8">No red flags identified yet.</p>
         </MagicCard>

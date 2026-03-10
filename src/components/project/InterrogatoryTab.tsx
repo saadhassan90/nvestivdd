@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 import type { Tables } from "@/integrations/supabase/types";
 
 const MODULE_LABELS: Record<string, string> = {
@@ -14,10 +15,10 @@ const MODULE_LABELS: Record<string, string> = {
 interface InterrogatoryTabProps {
   items: Tables<"interrogatory_items">[];
   fundName: string;
+  reportMarkdown?: string | null;
 }
 
 const PRIORITY_TIERS = [
-  { key: "all", label: "All Questions" },
   { key: "critical", label: "Tier 1: Critical" },
   { key: "high", label: "Tier 2: Important" },
   { key: "medium", label: "Tier 3: Nice-to-Have" },
@@ -45,8 +46,11 @@ const PRIORITY_DOT: Record<string, string> = {
   low: "bg-severity-monitor",
 };
 
-export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
-  const [activeFilter, setActiveFilter] = useState("all");
+export function InterrogatoryTab({ items, fundName, reportMarkdown }: InterrogatoryTabProps) {
+  const hasMarkdown = !!reportMarkdown;
+  const hasStructuredData = items.length > 0;
+
+  const [activeFilter, setActiveFilter] = useState(hasMarkdown ? "report" : "all");
 
   const grouped = {
     critical: items.filter(i => i.priority === 'critical'),
@@ -55,7 +59,7 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
     low: items.filter(i => i.priority === 'low'),
   };
 
-  const filtered = activeFilter === "all" ? items : items.filter(i => i.priority === activeFilter);
+  const filtered = activeFilter === "all" || activeFilter === "report" ? items : items.filter(i => i.priority === activeFilter);
 
   const renderQuestion = (item: Tables<"interrogatory_items">, i: number) => (
     <BlurFade key={item.id} delay={i * 0.03}>
@@ -118,6 +122,14 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
     );
   };
 
+  const FILTERS = [
+    ...(hasMarkdown ? [{ key: "report", label: "Report" }] : []),
+    ...(hasStructuredData ? [
+      { key: "all", label: "All Questions" },
+      ...PRIORITY_TIERS,
+    ] : []),
+  ];
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <BlurFade>
@@ -127,9 +139,8 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
         </div>
       </BlurFade>
 
-      {/* Filter pills */}
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-        {PRIORITY_TIERS.map(f => (
+        {FILTERS.map(f => (
           <button
             key={f.key}
             onClick={() => setActiveFilter(f.key)}
@@ -144,23 +155,30 @@ export function InterrogatoryTab({ items, fundName }: InterrogatoryTabProps) {
         ))}
       </div>
 
-      {/* Tiered view for "all" */}
-      {activeFilter === "all" ? (
+      {activeFilter === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
+
+      {activeFilter === "all" && (
         <div className="space-y-8">
           {renderTier("critical")}
           {renderTier("high")}
           {renderTier("medium")}
           {renderTier("low")}
         </div>
-      ) : (
+      )}
+
+      {activeFilter !== "all" && activeFilter !== "report" && (
         <div className="space-y-3">
           {filtered.map((item, i) => renderQuestion(item, i))}
         </div>
       )}
 
-      <div className="text-xs text-muted-foreground text-center sm:text-left">
-        {filtered.length} of {items.length} questions
-      </div>
+      {hasStructuredData && activeFilter !== "report" && (
+        <div className="text-xs text-muted-foreground text-center sm:text-left">
+          {filtered.length} of {items.length} questions
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Target, Swords, Wind, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 
 interface ThesisValidation {
   id: string;
@@ -41,6 +41,7 @@ interface StrategyTabProps {
   competitors: Competitor[];
   marketFactors: MarketFactor[];
   reportSection?: { section_title: string | null; content: string | null } | undefined;
+  reportMarkdown?: string | null;
 }
 
 const VALIDATION_ICONS: Record<string, { icon: typeof CheckCircle2; color: string }> = {
@@ -56,8 +57,13 @@ const TYPE_COLORS: Record<string, string> = {
   adjacent: "bg-muted text-muted-foreground",
 };
 
-export function StrategyTab({ thesisValidations, competitors, marketFactors, reportSection }: StrategyTabProps) {
-  const [activeSection, setActiveSection] = useState<"thesis" | "competitors" | "market">("market");
+export function StrategyTab({ thesisValidations, competitors, marketFactors, reportSection, reportMarkdown }: StrategyTabProps) {
+  const hasMarkdown = !!reportMarkdown;
+  const hasStructuredData = thesisValidations.length > 0 || competitors.length > 0 || marketFactors.length > 0;
+
+  const [activeSection, setActiveSection] = useState<"report" | "thesis" | "competitors" | "market">(
+    hasMarkdown ? "report" : "market"
+  );
 
   const tailwinds = marketFactors.filter(f => f.factor_type === "tailwind");
   const headwinds = marketFactors.filter(f => f.factor_type === "headwind");
@@ -72,22 +78,40 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
       </BlurFade>
 
       <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-        {[
-          { key: "market", label: "Market Factors", count: marketFactors.length, icon: Wind },
-          { key: "thesis", label: "Thesis Validation", count: thesisValidations.length, icon: Target },
-          { key: "competitors", label: "Competitors", count: competitors.length, icon: Swords },
-        ].map(s => (
+        {hasMarkdown && (
           <button
-            key={s.key}
-            onClick={() => setActiveSection(s.key as any)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
-              activeSection === s.key ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+            onClick={() => setActiveSection("report")}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+              activeSection === "report" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
             }`}
           >
-            <s.icon className="h-3.5 w-3.5" /> {s.label} ({s.count})
+            Report
           </button>
-        ))}
+        )}
+        {hasStructuredData && (
+          <>
+            {[
+              { key: "market", label: "Market Factors", count: marketFactors.length, icon: Wind },
+              { key: "thesis", label: "Thesis Validation", count: thesisValidations.length, icon: Target },
+              { key: "competitors", label: "Competitors", count: competitors.length, icon: Swords },
+            ].map(s => (
+              <button
+                key={s.key}
+                onClick={() => setActiveSection(s.key as any)}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                  activeSection === s.key ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <s.icon className="h-3.5 w-3.5" /> {s.label} ({s.count})
+              </button>
+            ))}
+          </>
+        )}
       </div>
+
+      {activeSection === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
 
       {activeSection === "thesis" && (
         <div className="space-y-3">
@@ -168,11 +192,10 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
 
       {activeSection === "market" && (
         <div className="space-y-6">
-          {/* Strategy & Market narrative from report */}
-          {reportSection?.content && (
+          {reportSection?.content && !hasMarkdown && (
             <BlurFade>
               <MagicCard>
-                <MarkdownContent content={reportSection.content} />
+                <ReportMarkdownSection content={reportSection.content} />
               </MagicCard>
             </BlurFade>
           )}
@@ -231,7 +254,6 @@ export function StrategyTab({ thesisValidations, competitors, marketFactors, rep
           )}
         </div>
       )}
-
     </div>
   );
 }

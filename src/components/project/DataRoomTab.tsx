@@ -3,6 +3,7 @@ import { Mail, Check, FolderOpen, Plus, FileText, FileSpreadsheet, File, Upload,
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,6 +17,7 @@ interface DataRoomTabProps {
   lastAnalysisAt: string | null;
   onRefresh: () => void;
   onRerunAnalysis: () => void;
+  reportMarkdown?: string | null;
 }
 
 const TIER_META: Record<string, { label: string; desc: string; dot: string }> = {
@@ -48,10 +50,11 @@ function formatFileSize(bytes: number | null) {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
-export function DataRoomTab({ items, documents, projectId, projectStatus, lastAnalysisAt, onRefresh, onRerunAnalysis }: DataRoomTabProps) {
+export function DataRoomTab({ items, documents, projectId, projectStatus, lastAnalysisAt, onRefresh, onRerunAnalysis, reportMarkdown }: DataRoomTabProps) {
+  const hasMarkdown = !!reportMarkdown;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
-  const [activeSection, setActiveSection] = useState<"checklist" | "files">("files");
+  const [activeSection, setActiveSection] = useState<"report" | "files" | "checklist">(hasMarkdown ? "report" : "files");
   const { toast } = useToast();
 
   const toggleItem = (id: string) => {
@@ -62,7 +65,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
     });
   };
 
-  // Detect if any documents were uploaded after the last analysis
   const hasNewFiles = lastAnalysisAt && documents.some(d => new Date(d.uploaded_at) > new Date(lastAnalysisAt));
   const isProcessing = projectStatus === 'processing';
 
@@ -90,7 +92,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
     }
   }, [projectId, onRefresh, toast]);
 
-  // Group checklist by priority, then by module
   const priorities = ['critical', 'high', 'medium', 'standard'];
 
   const groupByModule = (groupItems: Tables<"data_room_items">[]) => {
@@ -126,7 +127,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
         </div>
       </BlurFade>
 
-      {/* New files banner */}
       {(hasNewFiles && !isProcessing) && (
         <BlurFade>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-severity-elevated/30 bg-severity-elevated/5 px-4 py-3">
@@ -138,8 +138,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
               </div>
             </div>
             <ShimmerButton onClick={onRerunAnalysis} className="text-xs shrink-0">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Re-run Analysis
+              <RefreshCw className="h-3.5 w-3.5" /> Re-run Analysis
             </ShimmerButton>
           </div>
         </BlurFade>
@@ -157,14 +156,21 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
         </BlurFade>
       )}
 
-      {/* Section toggle */}
       <div className="flex items-center gap-2">
+        {hasMarkdown && (
+          <button
+            onClick={() => setActiveSection("report")}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              activeSection === "report" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Report
+          </button>
+        )}
         <button
           onClick={() => setActiveSection("files")}
           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "files"
-              ? 'bg-primary text-primary-foreground'
-              : 'border border-border text-muted-foreground hover:text-foreground'
+            activeSection === "files" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
           }`}
         >
           Source Files ({documents.length})
@@ -172,16 +178,17 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
         <button
           onClick={() => setActiveSection("checklist")}
           className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeSection === "checklist"
-              ? 'bg-primary text-primary-foreground'
-              : 'border border-border text-muted-foreground hover:text-foreground'
+            activeSection === "checklist" ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:text-foreground'
           }`}
         >
           Request Checklist ({items.length})
         </button>
       </div>
 
-      {/* Source Files */}
+      {activeSection === "report" && (
+        <ReportMarkdownSection content={reportMarkdown ?? null} />
+      )}
+
       {activeSection === "files" && (
         <div className="space-y-3">
           {documents.length === 0 ? (
@@ -227,8 +234,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
                   </BlurFade>
                 );
               })}
-
-              {/* Upload more */}
               <label className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-muted-foreground/40 p-4 cursor-pointer transition-colors">
                 <Plus className="h-4 w-4 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Add more files</span>
@@ -239,7 +244,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
         </div>
       )}
 
-      {/* Request Checklist */}
       {activeSection === "checklist" && (
         <div className="space-y-6">
           {selectedCount > 0 && (
@@ -250,14 +254,12 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
               </button>
             </div>
           )}
-
           <div className="space-y-8">
             {priorities.map(priority => {
               const groupItems = items.filter(i => i.priority === priority);
               if (groupItems.length === 0) return null;
               const meta = TIER_META[priority] || TIER_META.standard;
               const moduleGroups = groupByModule(groupItems);
-
               return (
                 <div key={priority}>
                   <div className="flex items-center gap-2 mb-1">
@@ -265,7 +267,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
                     <span className="text-xs font-semibold uppercase tracking-wider text-foreground">{meta.label}</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground mb-4 ml-[18px]">{meta.desc}</p>
-
                   <div className="space-y-5 ml-[18px]">
                     {Object.entries(moduleGroups).map(([module, modItems]) => (
                       <div key={module}>
@@ -285,9 +286,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
                                 onClick={() => !item.is_received && toggleItem(item.id)}
                               >
                                 <div className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                  isChecked
-                                    ? 'bg-primary border-primary text-primary-foreground'
-                                    : 'border-border'
+                                  isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-border'
                                 }`}>
                                   {isChecked && <Check className="h-3 w-3" />}
                                 </div>
@@ -309,7 +308,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
                 </div>
               );
             })}
-
             {items.length === 0 && (
               <MagicCard>
                 <p className="text-sm text-muted-foreground text-center py-8">No data room checklist items yet.</p>
@@ -319,7 +317,6 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
         </div>
       )}
 
-      {/* Summary bar */}
       <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted-foreground">
         <span>{documents.length} source files • {receivedCount}/{items.length} checklist items received</span>
       </div>
