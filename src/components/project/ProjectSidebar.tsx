@@ -47,7 +47,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
   return (
     <>
       {/* Mobile: horizontal scrollable pills */}
-      <div className="lg:hidden border-b border-border bg-card overflow-x-auto">
+      <div className="lg:hidden bg-background overflow-x-auto">
         <div className="flex px-4 py-2 gap-1 min-w-max">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -71,9 +71,9 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-56 shrink-0 border-r border-border bg-card flex-col h-full">
+      <aside className="hidden lg:flex w-56 shrink-0 bg-background flex-col h-full">
         {/* Brand header */}
-        <div className="p-4 border-b border-border">
+        <div className="p-4 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
               <span className="text-xs font-bold text-background">N</span>
