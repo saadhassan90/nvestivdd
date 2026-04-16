@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Shield, AlertTriangle, Eye, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
@@ -35,120 +34,83 @@ const SEVERITY_STYLE: Record<string, { bg: string; text: string; border: string;
 };
 
 export function RedFlagsTab({ redFlags, reportMarkdown, moduleScore, fundName, submissionQuality = [], criticalInfoGaps = [] }: RedFlagsTabProps) {
-  const hasMarkdown = !!reportMarkdown;
-  const [activeFilter, setActiveFilter] = useState(hasMarkdown ? "report" : "all");
-
   const criticalFlags = redFlags.filter((f) => f.severity === "critical");
   const elevatedFlags = redFlags.filter((f) => f.severity === "elevated");
   const monitorFlags = redFlags.filter((f) => f.severity === "monitor");
 
-  const filtered =
-    activeFilter === "all" || activeFilter === "report"
-      ? redFlags
-      : redFlags.filter((f) => f.severity === activeFilter);
-
-  // Hard floor gates from submission quality
   const hardFloors = submissionQuality.filter((sq) => sq.severity === "hard_floor" || sq.category?.includes("hard_floor"));
   const passedFloors = hardFloors.filter((h) => h.status === "pass" || h.status === "cleared");
 
-  const FILTERS = [
-    ...(hasMarkdown ? [{ key: "report", label: "Report" }] : []),
-    { key: "all", label: `All (${redFlags.length})` },
-    ...(criticalFlags.length > 0 ? [{ key: "critical", label: `Critical (${criticalFlags.length})` }] : []),
-    ...(elevatedFlags.length > 0 ? [{ key: "elevated", label: `Elevated (${elevatedFlags.length})` }] : []),
-    ...(monitorFlags.length > 0 ? [{ key: "monitor", label: `Monitor (${monitorFlags.length})` }] : []),
-  ];
-
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* ── Header ── */}
+      {/* Header */}
       <BlurFade>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-              Institutional Risk Assessment
-            </p>
             <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
               Risk & Red Flags
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
-              A comprehensive audit of institutional exposure, operational vulnerabilities, and hard floor compliance metrics{fundName ? ` for ${fundName}` : ""}.
+              Institutional exposure, operational vulnerabilities, and compliance metrics{fundName ? ` for ${fundName}` : ""}.
             </p>
           </div>
-          {moduleScore !== undefined && moduleScore !== null && (
+          {moduleScore != null && (
             <div className="shrink-0 flex flex-col items-center">
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                Risk Integrity Score
-              </p>
               <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-border bg-card">
                 <div className="flex items-center gap-1">
                   <span className={`text-xl font-bold ${
                     moduleScore >= 85 ? "text-score-strong" : moduleScore >= 70 ? "text-score-advance" : moduleScore >= 50 ? "text-score-review" : "text-severity-critical"
-                  }`}>
-                    {moduleScore}
-                  </span>
+                  }`}>{moduleScore}</span>
                   {moduleScore >= 70 && <CheckCircle2 className="h-4 w-4 text-score-strong" />}
                 </div>
               </div>
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">Risk Score</span>
             </div>
           )}
         </div>
       </BlurFade>
 
-      {/* ── Report Narrative ── */}
-      {activeFilter === "report" && reportMarkdown && (
-        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.05} />
-      )}
-
-      {/* ── Filters ── */}
-      <BlurFade delay={0.05}>
-        <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(f.key)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap border ${
-                activeFilter === f.key
-                  ? "bg-foreground text-background border-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </BlurFade>
-
-      {/* ── Executive Narrative (inline, non-report) ── */}
-      {activeFilter !== "report" && !hasMarkdown && criticalFlags.length > 0 && (
-        <BlurFade delay={0.1}>
-          <div className="rounded-xl border-l-4 border-l-severity-critical border border-severity-critical/20 bg-severity-critical/5 p-4 sm:p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="h-5 w-5 text-severity-critical" />
-              <p className="text-sm font-bold uppercase tracking-wider text-severity-critical">
-                Critical Flag Detected
-              </p>
-            </div>
-            <p className="text-sm font-semibold text-foreground mb-1">{criticalFlags[0].title}</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {criticalFlags[0].description || criticalFlags[0].issue}
-            </p>
-            {criticalFlags[0].source_module && (
-              <p className="text-[10px] text-severity-critical mt-2 uppercase tracking-wider">
-                Source: {criticalFlags[0].source_module}
-              </p>
+      {/* Summary bar */}
+      {redFlags.length > 0 && (
+        <BlurFade delay={0.03}>
+          <div className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3">
+            {criticalFlags.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-critical" />
+                <span className="text-xs font-semibold text-severity-critical">{criticalFlags.length} Critical</span>
+              </div>
             )}
+            {elevatedFlags.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-elevated" />
+                <span className="text-xs font-semibold text-severity-elevated">{elevatedFlags.length} Elevated</span>
+              </div>
+            )}
+            {monitorFlags.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-monitor" />
+                <span className="text-xs font-semibold text-severity-monitor">{monitorFlags.length} Monitor</span>
+              </div>
+            )}
+            <span className="text-xs text-muted-foreground ml-auto">{redFlags.length} total</span>
           </div>
         </BlurFade>
       )}
 
-      {/* ── Hard Floor Gates ── */}
-      {submissionQuality.length > 0 && activeFilter !== "report" && (
-        <BlurFade delay={0.15}>
+      {/* Report Narrative */}
+      {reportMarkdown && (
+        <BlurFade delay={0.05}>
+          <MarkdownSectionCards content={reportMarkdown} baseDelay={0.07} />
+        </BlurFade>
+      )}
+
+      {/* Hard Floor Gates */}
+      {submissionQuality.length > 0 && (
+        <BlurFade delay={0.08}>
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Hard Floor Gates (Mandatory Protocol)
+                Hard Floor Gates
               </p>
               {hardFloors.length > 0 && (
                 <span className="text-[10px] font-medium text-muted-foreground">
@@ -191,48 +153,38 @@ export function RedFlagsTab({ redFlags, reportMarkdown, moduleScore, fundName, s
         </BlurFade>
       )}
 
-      {/* ── Red Flags List ── */}
-      {activeFilter !== "report" && (
-        <>
-          {activeFilter === "all" ? (
-            <div className="space-y-6">
-              {(["critical", "elevated", "monitor"] as const).map((severity) => {
-                const flags = redFlags.filter((f) => f.severity === severity);
-                if (flags.length === 0) return null;
-                const style = SEVERITY_STYLE[severity];
-                const IconComp = severity === "critical" ? Shield : severity === "elevated" ? AlertTriangle : Eye;
-                return (
-                  <BlurFade key={severity} delay={0.2}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <IconComp className={`h-4 w-4 ${style.text}`} />
-                        <span className={`text-xs font-semibold uppercase tracking-wider ${style.text}`}>
-                          {style.label}
-                        </span>
-                      </div>
-                      <div className="space-y-3">
-                        {flags.map((flag, i) => (
-                          <FlagCard key={flag.id} flag={flag} index={i} />
-                        ))}
-                      </div>
-                    </div>
-                  </BlurFade>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filtered.map((flag, i) => (
-                <FlagCard key={flag.id} flag={flag} index={i} />
-              ))}
-            </div>
-          )}
-        </>
+      {/* Red Flags by severity */}
+      {redFlags.length > 0 && (
+        <div className="space-y-6">
+          {(["critical", "elevated", "monitor"] as const).map((severity) => {
+            const flags = redFlags.filter((f) => f.severity === severity);
+            if (flags.length === 0) return null;
+            const style = SEVERITY_STYLE[severity];
+            const IconComp = severity === "critical" ? Shield : severity === "elevated" ? AlertTriangle : Eye;
+            return (
+              <BlurFade key={severity} delay={0.12}>
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <IconComp className={`h-4 w-4 ${style.text}`} />
+                    <span className={`text-xs font-semibold uppercase tracking-wider ${style.text}`}>
+                      {style.label}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {flags.map((flag, i) => (
+                      <FlagCard key={flag.id} flag={flag} index={i} />
+                    ))}
+                  </div>
+                </div>
+              </BlurFade>
+            );
+          })}
+        </div>
       )}
 
-      {/* ── Critical Info Gaps ── */}
-      {criticalInfoGaps.length > 0 && activeFilter !== "report" && (
-        <BlurFade delay={0.25}>
+      {/* Critical Info Gaps */}
+      {criticalInfoGaps.length > 0 && (
+        <BlurFade delay={0.15}>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
               Critical Information Gaps
@@ -259,8 +211,8 @@ export function RedFlagsTab({ redFlags, reportMarkdown, moduleScore, fundName, s
         </BlurFade>
       )}
 
-      {/* ── Empty State ── */}
-      {redFlags.length === 0 && activeFilter !== "report" && (
+      {/* Empty State */}
+      {redFlags.length === 0 && submissionQuality.length === 0 && (
         <BlurFade>
           <MagicCard>
             <div className="text-center py-12">
@@ -282,7 +234,6 @@ function FlagCard({ flag, index }: { flag: Tables<"red_flags">; index: number })
   return (
     <BlurFade delay={index * 0.03}>
       <MagicCard className={`border-l-4 ${style.border}`}>
-        {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground ${
@@ -296,9 +247,7 @@ function FlagCard({ flag, index }: { flag: Tables<"red_flags">; index: number })
               </span>
             )}
             {flag.confidence && (
-              <span className="text-[10px] text-muted-foreground">
-                {flag.confidence} confidence
-              </span>
+              <span className="text-[10px] text-muted-foreground">{flag.confidence} confidence</span>
             )}
           </div>
           <span className="text-[10px] text-muted-foreground shrink-0">
@@ -306,13 +255,11 @@ function FlagCard({ flag, index }: { flag: Tables<"red_flags">; index: number })
           </span>
         </div>
 
-        {/* Title & description */}
         <p className="text-sm font-semibold text-foreground">{flag.title}</p>
         {flag.description && (
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{flag.description}</p>
         )}
 
-        {/* Issue / Implication / Resolution */}
         {(flag.issue || flag.implication || flag.resolution) && (
           <div className="mt-3 space-y-2 rounded-lg bg-muted/50 p-3">
             {flag.issue && (
@@ -336,7 +283,6 @@ function FlagCard({ flag, index }: { flag: Tables<"red_flags">; index: number })
           </div>
         )}
 
-        {/* Cross-references */}
         {(flag.data_room_action || flag.interrogatory_question || flag.timeline) && (
           <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-border/50">
             {flag.timeline && (
