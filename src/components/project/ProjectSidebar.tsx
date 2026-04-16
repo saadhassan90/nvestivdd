@@ -10,19 +10,20 @@ interface ProjectSidebarProps {
 }
 
 const COMPLETE_NAV_ITEMS = [
-  { key: "overview", label: "Due Diligence", icon: LayoutDashboard, section: null },
-  { key: "team", label: "Team", icon: Users, section: "analysis" },
-  { key: "performance", label: "Performance", icon: TrendingUp, section: "analysis" },
-  { key: "strategy", label: "Strategy & Market", icon: Target, section: "analysis" },
-  { key: "red_flags", label: "Risk Assessment", icon: AlertTriangle, section: "analysis" },
-  { key: "interrogatory", label: "Interrogatory", icon: MessageSquare, section: null },
-  { key: "data_room", label: "Data Room", icon: FolderOpen, section: null },
-  { key: "documents", label: "Research Sources", icon: FileText, section: null },
+  { key: "overview", label: "Overview", icon: LayoutDashboard, section: "report", moduleMatch: null },
+  { key: "team", label: "Team & governance", icon: Users, section: "analysis", moduleMatch: "team" },
+  { key: "performance", label: "Performance", icon: TrendingUp, section: "analysis", moduleMatch: "financial" },
+  { key: "strategy", label: "Strategy & thesis", icon: Target, section: "analysis", moduleMatch: "strategy" },
+  { key: "red_flags", label: "Risk & red flags", icon: AlertTriangle, section: "analysis", moduleMatch: "operations" },
+  { key: "interrogatory", label: "Interrogatory matrix", icon: MessageSquare, section: null, moduleMatch: null },
+  { key: "documents", label: "Sources", icon: FileText, section: null, moduleMatch: null },
+  { key: "data_room", label: "Data Room", icon: FolderOpen, section: null, moduleMatch: null },
+  { key: "analysis_log", label: "Analysis log", icon: FileBarChart, section: null, moduleMatch: null },
 ];
 
 const PROCESSING_NAV_ITEMS = [
-  { key: "overview", label: "Dashboard", icon: LayoutDashboard, section: null },
-  { key: "analysis_log", label: "Analysis Log", icon: FileBarChart, section: null },
+  { key: "overview", label: "Dashboard", icon: LayoutDashboard, section: null, moduleMatch: null },
+  { key: "analysis_log", label: "Analysis Log", icon: FileBarChart, section: null, moduleMatch: null },
 ];
 
 const MODULE_NAMES: Record<string, string> = {
