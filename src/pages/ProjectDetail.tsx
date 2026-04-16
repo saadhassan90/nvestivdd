@@ -71,7 +71,7 @@ export default function ProjectDetail() {
 
     const [
       projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes,
-      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes,
+      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes, ecsRes,
     ] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
       supabase.from("report_sections").select("*").eq("project_id", id).order("order_index"),
@@ -91,6 +91,7 @@ export default function ProjectDetail() {
       supabase.from("submission_quality").select("*").eq("project_id", id).order("order_index"),
       supabase.from("document_quality_flags").select("*").eq("project_id", id),
       supabase.from("critical_info_gaps").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("engagement_case_studies").select("*").eq("project_id", id).order("order_index"),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
