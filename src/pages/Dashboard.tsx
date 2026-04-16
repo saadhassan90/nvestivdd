@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Search, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -146,10 +148,9 @@ export default function Dashboard() {
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-border bg-card">
           <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-            {/* Logo for mobile */}
-            <span className="lg:hidden text-lg font-bold text-foreground">Nvestiv</span>
-            {/* Desktop title area */}
-            <span className="hidden lg:block text-lg font-bold text-foreground">Nvestiv</span>
+            <Link to="/dashboard" className="flex items-center shrink-0">
+              <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
+            </Link>
 
             {/* Search */}
             <div className="hidden md:flex flex-1 max-w-md mx-8">

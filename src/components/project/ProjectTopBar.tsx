@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import logo from "@/assets/logo.svg";
 import { Share2, Sparkles } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
@@ -45,7 +46,11 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
       <header className="sticky top-0 z-30 border-b border-border/50 bg-background shrink-0">
         <div className="flex h-12 items-center justify-between px-4 sm:px-5">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm min-w-0">
+          <div className="flex items-center gap-3 text-sm min-w-0">
+            <Link to="/dashboard" className="shrink-0">
+              <img src={logo} alt="Nvestiv" className="h-5" />
+            </Link>
+            <span className="text-muted-foreground shrink-0">›</span>
             <button onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
               Funds
             </button>
