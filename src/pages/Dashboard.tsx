@@ -140,10 +140,8 @@ export default function Dashboard() {
   const paginatedProjects = filteredProjects.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="flex-1 min-w-0 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
 
-      <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-border bg-card">
           <div className="flex h-14 items-center justify-between px-4 sm:px-6">
