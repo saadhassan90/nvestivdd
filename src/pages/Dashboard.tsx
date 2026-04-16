@@ -176,8 +176,8 @@ export default function Dashboard() {
           <BlurFade>
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Fund submissions</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">Sorted by L1 score, highest first</p>
+                <h1 className="text-2xl font-bold text-foreground">Deals</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">Sorted by score, highest first</p>
               </div>
               <button
                 onClick={() => setModalOpen(true)}
