@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FileDown, AlertTriangle, FileText, CheckCircle2, Lock } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MagicCard } from "@/components/magicui/MagicCard";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface InterrogatoryTabProps {
@@ -121,7 +121,7 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
 
       {/* ── Report markdown view ── */}
       {activeFilter === "report" && (
-        <ReportMarkdownSection content={reportMarkdown ?? null} />
+        <MarkdownSectionCards content={reportMarkdown ?? null} baseDelay={0.05} />
       )}
 
       {/* ── Desktop table view ── */}

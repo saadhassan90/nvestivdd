@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Shield, AlertTriangle, Eye, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import { formatRelativeTime } from "@/lib/score-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -97,7 +97,7 @@ export function RedFlagsTab({ redFlags, reportMarkdown, moduleScore, fundName, s
 
       {/* ── Report Narrative ── */}
       {activeFilter === "report" && reportMarkdown && (
-        <ReportMarkdownSection content={reportMarkdown} />
+        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.05} />
       )}
 
       {/* ── Filters ── */}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Users, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface TeamTabProps {
@@ -67,9 +67,7 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
 
       {/* ── Report Narrative ── */}
       {hasMarkdown && (
-        <BlurFade delay={0.05}>
-          <ReportMarkdownSection content={reportMarkdown} />
-        </BlurFade>
+        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.05} />
       )}
 
       {!hasMarkdown && reportSection?.content && (
@@ -78,7 +76,7 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
               Institutional Analysis
             </p>
-            <ReportMarkdownSection content={reportSection.content} />
+            <MarkdownSectionCards content={reportSection.content} baseDelay={0.07} />
           </div>
         </BlurFade>
       )}

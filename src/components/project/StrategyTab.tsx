@@ -1,7 +1,7 @@
 import { CheckCircle2, XCircle, AlertTriangle, AlertCircle, ShieldCheck } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface StrategyTabProps {
@@ -71,15 +71,11 @@ export function StrategyTab({
 
       {/* ── Report Narrative ── */}
       {reportMarkdown && (
-        <BlurFade delay={0.05}>
-          <ReportMarkdownSection content={reportMarkdown} />
-        </BlurFade>
+        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.05} />
       )}
 
       {!reportMarkdown && reportSection?.content && (
-        <BlurFade delay={0.05}>
-          <ReportMarkdownSection content={reportSection.content} />
-        </BlurFade>
+        <MarkdownSectionCards content={reportSection.content} baseDelay={0.05} />
       )}
 
       {/* ── Strategic Pillars (thesis validations) ── */}

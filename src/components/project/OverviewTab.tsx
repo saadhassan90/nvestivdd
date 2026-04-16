@@ -5,6 +5,7 @@ import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import type { Tables } from "@/integrations/supabase/types";
 import { getScoreTier } from "@/lib/score-utils";
 import { getVerdict, getVerdictLabel } from "@/lib/verdict-utils";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 
 interface OverviewTabProps {
   project: Tables<"projects">;
@@ -441,8 +442,13 @@ export function OverviewTab({ project, redFlags, reportSections, documents, modu
         </BlurFade>
       )}
 
+      {/* Report Narrative Sections */}
+      {reportMarkdown && (
+        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.24} />
+      )}
+
       {/* Footer */}
-      <BlurFade delay={0.24}>
+      <BlurFade delay={0.28}>
         <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2">
           <div className="flex items-center gap-1.5">
             <CheckCircle className="h-3.5 w-3.5 text-severity-monitor" />
