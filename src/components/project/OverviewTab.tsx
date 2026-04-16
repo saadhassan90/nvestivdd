@@ -154,10 +154,6 @@ export function OverviewTab({ project, redFlags, reportSections, documents, modu
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors">
-              <Shield className="h-3.5 w-3.5" />
-              Share
-            </button>
-            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors">
               <FileText className="h-3.5 w-3.5" />
               Export PDF
             </button>
