@@ -174,122 +174,126 @@ export default function ProjectDetail() {
   const hasReportMarkdown = reportMarkdownSections.length > 0;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Left sidebar */}
-      <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
+      {/* Full-width top bar */}
+      <ProjectTopBar project={project} isProcessing={isProcessing} />
 
-      {/* Center column */}
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <ProjectTopBar project={project} isProcessing={isProcessing} />
+      {/* Three-panel body below the top bar */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Left sidebar */}
+        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
 
-        {/* Mobile nav pills */}
-        <div className="lg:hidden">
-          <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
+        {/* Center column */}
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          {/* Mobile nav pills */}
+          <div className="lg:hidden">
+            <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
+          </div>
+
+          {/* Content area */}
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
+            {isProcessing && activeTab === "analysis_log" ? (
+              <ProcessingState startedAt={project.updated_at} projectId={project.id} />
+            ) : isProcessing && activeTab === "overview" ? (
+              <ProcessingState startedAt={project.updated_at} projectId={project.id} />
+            ) : project.status === "error" ? (
+              <BlurFade>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
+                  <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || "An unexpected error occurred."}</p>
+                  <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
+                </div>
+              </BlurFade>
+            ) : (
+              <>
+                {activeTab === "overview" && (
+                  <OverviewTab
+                    project={project}
+                    redFlags={redFlags}
+                    reportSections={reportSections}
+                    documents={documents}
+                    moduleScoresData={moduleScores}
+                    submissionQuality={submissionQuality}
+                    docQualityFlags={docQualityFlags}
+                    criticalInfoGaps={criticalInfoGaps}
+                    onRerunAnalysis={handleRerunAnalysis}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "overview") : null}
+                  />
+                )}
+                {activeTab === "team" && (
+                  <TeamTab
+                    teamMembers={teamMembers}
+                    serviceProviders={serviceProviders}
+                    reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("team") || s.section_title?.toLowerCase().includes("leadership"))}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "team") : null}
+                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("team"))?.score}
+                  />
+                )}
+                {activeTab === "performance" && (
+                  <PerformanceTab
+                    metrics={performanceMetrics}
+                    fees={feeStructure}
+                    engagementCaseStudies={engagementCaseStudies}
+                    performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
+                    feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
+                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("financial"))?.score}
+                  />
+                )}
+                {activeTab === "strategy" && (
+                  <StrategyTab
+                    thesisValidations={thesisValidations}
+                    competitors={competitors}
+                    marketFactors={marketFactors}
+                    reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("strategy") || s.section_title?.toLowerCase().includes("market"))}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "strategy") : null}
+                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("strategy"))?.score}
+                    fundName={project.fund_name}
+                  />
+                )}
+                {activeTab === "red_flags" && (
+                  <RedFlagsTab
+                    redFlags={redFlags}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "red_flags") : null}
+                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("operations") || ms.module_key?.includes("risk"))?.score}
+                    fundName={project.fund_name}
+                    submissionQuality={submissionQuality}
+                    criticalInfoGaps={criticalInfoGaps}
+                  />
+                )}
+                {activeTab === "interrogatory" && (
+                  <InterrogatoryTab
+                    items={interrogatoryItems}
+                    fundName={project.fund_name}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "interrogatory") : null}
+                  />
+                )}
+                {activeTab === "data_room" && (
+                  <DataRoomTab
+                    items={dataRoomItems}
+                    documents={documents}
+                    projectId={project.id}
+                    projectStatus={project.status}
+                    lastAnalysisAt={project.updated_at}
+                    onRefresh={fetchData}
+                    onRerunAnalysis={handleRerunAnalysis}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "data_room") : null}
+                  />
+                )}
+                {activeTab === "documents" && (
+                  <SourceFilesTab
+                    researchSources={researchSources}
+                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "documents") : null}
+                  />
+                )}
+              </>
+            )}
+          </main>
         </div>
 
-        {/* Content area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
-          {isProcessing && activeTab === "analysis_log" ? (
-            <ProcessingState startedAt={project.updated_at} projectId={project.id} />
-          ) : isProcessing && activeTab === "overview" ? (
-            <ProcessingState startedAt={project.updated_at} projectId={project.id} />
-          ) : project.status === "error" ? (
-            <BlurFade>
-              <div className="flex flex-col items-center justify-center py-20">
-                <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
-                <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || "An unexpected error occurred."}</p>
-                <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
-              </div>
-            </BlurFade>
-          ) : (
-            <>
-              {activeTab === "overview" && (
-                <OverviewTab
-                  project={project}
-                  redFlags={redFlags}
-                  reportSections={reportSections}
-                  documents={documents}
-                  moduleScoresData={moduleScores}
-                  submissionQuality={submissionQuality}
-                  docQualityFlags={docQualityFlags}
-                  criticalInfoGaps={criticalInfoGaps}
-                  onRerunAnalysis={handleRerunAnalysis}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "overview") : null}
-                />
-              )}
-              {activeTab === "team" && (
-                <TeamTab
-                  teamMembers={teamMembers}
-                  serviceProviders={serviceProviders}
-                  reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("team") || s.section_title?.toLowerCase().includes("leadership"))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "team") : null}
-                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("team"))?.score}
-                />
-              )}
-              {activeTab === "performance" && (
-                <PerformanceTab
-                  metrics={performanceMetrics}
-                  fees={feeStructure}
-                  engagementCaseStudies={engagementCaseStudies}
-                  performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
-                  feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
-                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("financial"))?.score}
-                />
-              )}
-              {activeTab === "strategy" && (
-                <StrategyTab
-                  thesisValidations={thesisValidations}
-                  competitors={competitors}
-                  marketFactors={marketFactors}
-                  reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("strategy") || s.section_title?.toLowerCase().includes("market"))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "strategy") : null}
-                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("strategy"))?.score}
-                  fundName={project.fund_name}
-                />
-              )}
-              {activeTab === "red_flags" && (
-                <RedFlagsTab
-                  redFlags={redFlags}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "red_flags") : null}
-                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("operations") || ms.module_key?.includes("risk"))?.score}
-                  fundName={project.fund_name}
-                  submissionQuality={submissionQuality}
-                  criticalInfoGaps={criticalInfoGaps}
-                />
-              )}
-              {activeTab === "interrogatory" && (
-                <InterrogatoryTab
-                  items={interrogatoryItems}
-                  fundName={project.fund_name}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "interrogatory") : null}
-                />
-              )}
-              {activeTab === "data_room" && (
-                <DataRoomTab
-                  items={dataRoomItems}
-                  documents={documents}
-                  projectId={project.id}
-                  projectStatus={project.status}
-                  lastAnalysisAt={project.updated_at}
-                  onRefresh={fetchData}
-                  onRerunAnalysis={handleRerunAnalysis}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "data_room") : null}
-                />
-              )}
-              {activeTab === "documents" && (
-                <SourceFilesTab
-                  researchSources={researchSources}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "documents") : null}
-                />
-              )}
-            </>
-          )}
-        </main>
+        {/* Right insights panel */}
+        <InsightsPanel projectName={project.fund_name} isProcessing={isProcessing} />
       </div>
-
-      {/* Right insights panel */}
-      <InsightsPanel projectName={project.fund_name} isProcessing={isProcessing} />
 
       {/* Mobile bottom nav */}
       <MobileBottomNav />
