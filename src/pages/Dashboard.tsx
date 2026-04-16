@@ -255,7 +255,6 @@ export default function Dashboard() {
             <span>Build 4.2.0-ARC</span>
           </div>
         </footer>
-      </div>
 
       {/* Mobile FAB */}
       <button
