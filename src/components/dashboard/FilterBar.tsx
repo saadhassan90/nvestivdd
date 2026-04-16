@@ -11,6 +11,8 @@ export interface FilterState {
   assetClass: string | null;
   scoreTier: string | null;
   recommendation: string | null;
+  status: string | null;
+  stage: string | null;
   search: string;
   sortBy: string;
   sortDir: "asc" | "desc";
@@ -23,19 +25,30 @@ interface FilterBarProps {
 }
 
 const SCORE_TIERS = [
-  { value: "strong_advance", label: "Score 85+" },
-  { value: "advance", label: "Score 70–84" },
-  { value: "review", label: "Score 50–69" },
-  { value: "decline", label: "Score < 50" },
+  { value: "85+", label: "85+" },
+  { value: "70-84", label: "70–84" },
+  { value: "50-69", label: "50–69" },
+  { value: "<50", label: "Below 50" },
 ];
 
-const RECOMMENDATIONS = [
-  { value: "Strong Advance", label: "Strong Advance" },
-  { value: "Advance with Diligence", label: "Advance" },
-  { value: "Review Required", label: "Review Required" },
-  { value: "Decline", label: "Decline" },
+const VERDICTS = [
+  { value: "proceed", label: "Proceed to meeting" },
+  { value: "conditional", label: "Proceed with caution" },
+  { value: "hard_floor", label: "Hard floor triggered" },
 ];
 
+const STATUSES = [
+  { value: "complete", label: "Complete" },
+  { value: "processing", label: "Processing" },
+  { value: "pending", label: "Pending" },
+  { value: "failed", label: "Failed" },
+];
+
+const STAGES = [
+  { value: "L1", label: "L1" },
+  { value: "L2", label: "L2" },
+  { value: "L3", label: "L3" },
+];
 
 function FilterDropdown({ label, value, options, onSelect, onClear }: {
   label: string;
@@ -75,8 +88,10 @@ function FilterDropdown({ label, value, options, onSelect, onClear }: {
 export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
   const activeChips = [
     filters.assetClass && { key: "assetClass", label: filters.assetClass },
-    filters.scoreTier && { key: "scoreTier", label: SCORE_TIERS.find(t => t.value === filters.scoreTier)?.label || filters.scoreTier },
-    filters.recommendation && { key: "recommendation", label: filters.recommendation },
+    filters.scoreTier && { key: "scoreTier", label: `Score ${SCORE_TIERS.find(t => t.value === filters.scoreTier)?.label || filters.scoreTier}` },
+    filters.recommendation && { key: "recommendation", label: VERDICTS.find(v => v.value === filters.recommendation)?.label || filters.recommendation },
+    filters.status && { key: "status", label: STATUSES.find(s => s.value === filters.status)?.label || filters.status },
+    filters.stage && { key: "stage", label: `Stage ${filters.stage}` },
   ].filter(Boolean) as { key: string; label: string }[];
 
   const clearFilter = (key: string) => {
@@ -103,11 +118,25 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
             onClear={() => onChange({ ...filters, scoreTier: null })}
           />
           <FilterDropdown
-            label="Recommendation"
+            label="Verdict"
             value={filters.recommendation}
-            options={RECOMMENDATIONS}
+            options={VERDICTS}
             onSelect={(val) => onChange({ ...filters, recommendation: val })}
             onClear={() => onChange({ ...filters, recommendation: null })}
+          />
+          <FilterDropdown
+            label="Status"
+            value={filters.status}
+            options={STATUSES}
+            onSelect={(val) => onChange({ ...filters, status: val })}
+            onClear={() => onChange({ ...filters, status: null })}
+          />
+          <FilterDropdown
+            label="Stage"
+            value={filters.stage}
+            options={STAGES}
+            onSelect={(val) => onChange({ ...filters, stage: val })}
+            onClear={() => onChange({ ...filters, stage: null })}
           />
 
           {activeChips.map(chip => (
@@ -125,7 +154,7 @@ export function FilterBar({ filters, onChange, assetClasses }: FilterBarProps) {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Filter funds..."
+            placeholder="Filter deals..."
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             className="w-full sm:w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
