@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { InsightsPanel } from "@/components/project/InsightsPanel";
