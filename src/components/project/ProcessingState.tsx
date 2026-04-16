@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-import { CheckCircle2, Circle, Loader2, AlertCircle, Clock } from "lucide-react";
+import {
+  CheckCircle2, Loader2, AlertCircle, RefreshCw,
+  Upload, Image, Eye, FileSearch, Tags, LayoutGrid,
+  Brain, Network, Building2, TrendingUp, Globe, Users, ClipboardCheck,
+  ChevronDown, ChevronRight, ExternalLink, Terminal
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MagicCard } from "@/components/magicui/MagicCard";
-import { NumberTicker } from "@/components/magicui/NumberTicker";
+import { cn } from "@/lib/utils";
+
+/* ────── Types ────── */
 
 interface AnalysisLog {
   id: string;
@@ -23,70 +29,189 @@ interface ProcessingStateProps {
   projectId?: string;
 }
 
-/** Group logs into phases based on step_index ranges */
-function groupIntoPhases(logs: AnalysisLog[]) {
-  const phases = [
-    { name: "Phase 1: Preparation", range: [0, 2] },
-    { name: "Phase 2: Research", range: [3, 8] },
-    { name: "Phase 3: Scoring & Assembly", range: [9, 99] },
-  ];
+/* ────── Step definitions ────── */
 
-  return phases.map((phase) => {
-    const items = logs.filter(
-      (l) => l.step_index >= phase.range[0] && l.step_index <= phase.range[1]
-    );
-    const allComplete = items.length > 0 && items.every((i) => i.status === "complete");
-    const hasRunning = items.some((i) => i.status === "running");
-    const status = allComplete ? "complete" : hasRunning ? "running" : "pending";
+const WORKFLOW_STEPS = [
+  { key: "upload",              label: "Upload",                         icon: Upload,          index: 0 },
+  { key: "page_conversion",     label: "Page Conversion",                icon: Image,           index: 1 },
+  { key: "document_preview",    label: "Document Preview",               icon: Eye,             index: 2 },
+  { key: "document_parsing",    label: "Document Parsing",               icon: FileSearch,      index: 3 },
+  { key: "fund_classification", label: "Fund Classification",            icon: Tags,            index: 4 },
+  { key: "slide_topology",      label: "Slide Topology Analysis",        icon: LayoutGrid,      index: 5 },
+  { key: "entity_extraction",   label: "Entity Extraction",              icon: Brain,           index: 6 },
+  { key: "ontology",            label: "Master Ontology Consolidation",  icon: Network,         index: 7 },
+  { key: "sec_filing",          label: "SEC Filing Diligence",           icon: Building2,       index: 8 },
+  { key: "fund_maturity",       label: "Fund Maturity Analysis",         icon: TrendingUp,      index: 9 },
+  { key: "website_discovery",   label: "Website Discovery",              icon: Globe,           index: 10 },
+  { key: "personnel",           label: "Key Personnel Intelligence",     icon: Users,           index: 11 },
+  { key: "verification",        label: "Verification Checklist Generation", icon: ClipboardCheck, index: 12 },
+];
 
-    const completedCount = items.filter((i) => i.status === "complete").length;
+/* ────── Helpers ────── */
 
-    return {
-      name: phase.name,
-      status,
-      items,
-      completedCount,
-      totalCount: items.length,
-    };
-  });
+function getStepStatus(log: AnalysisLog | undefined): "complete" | "running" | "error" | "pending" {
+  if (!log) return "pending";
+  if (log.status === "complete") return "complete";
+  if (log.status === "error") return "error";
+  if (log.status === "running") return "running";
+  return "pending";
 }
 
-function formatTime(dateStr: string | null) {
+function StatusBadge({ status }: { status: string }) {
+  if (status === "complete") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-score-strong/10 px-2.5 py-0.5 text-[11px] font-semibold text-score-strong">
+        <CheckCircle2 className="h-3 w-3" /> Complete
+      </span>
+    );
+  }
+  if (status === "running") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-severity-monitor/10 px-2.5 py-0.5 text-[11px] font-semibold text-severity-monitor">
+        <Loader2 className="h-3 w-3 animate-spin" /> Running
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-severity-critical/10 px-2.5 py-0.5 text-[11px] font-semibold text-severity-critical">
+        <AlertCircle className="h-3 w-3" /> Needs attention
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+      Pending
+    </span>
+  );
+}
+
+function StepIcon({ icon: Icon, status }: { icon: React.ElementType; status: string }) {
+  const colorMap: Record<string, string> = {
+    complete: "bg-score-strong/10 text-score-strong",
+    running: "bg-severity-monitor/10 text-severity-monitor",
+    error: "bg-severity-critical/10 text-severity-critical",
+    pending: "bg-muted text-muted-foreground",
+  };
+  return (
+    <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", colorMap[status] || colorMap.pending)}>
+      <Icon className="h-5 w-5" />
+    </div>
+  );
+}
+
+function formatTimestamp(dateStr: string | null) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
 }
 
-function PhaseStatusBadge({ status, completedCount, totalCount }: { status: string; completedCount: number; totalCount: number }) {
-  if (status === "complete") {
-    return <span className="text-[10px] font-bold uppercase tracking-wider text-score-strong">Complete</span>;
-  }
-  if (status === "running") {
-    return (
-      <span className="text-[10px] font-bold uppercase tracking-wider text-severity-monitor">
-        In Progress — {completedCount} of {totalCount} items complete
-      </span>
-    );
-  }
-  return <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pending previous phase</span>;
+/* ────── Execution Log ────── */
+
+interface LogEntry {
+  time: string;
+  label: string;
+  message: string;
+  isError: boolean;
 }
 
-function PhaseIcon({ status }: { status: string }) {
-  if (status === "complete") return <CheckCircle2 className="h-6 w-6 text-score-strong" />;
-  if (status === "running") return <Loader2 className="h-6 w-6 text-severity-monitor animate-spin" />;
-  return <Circle className="h-6 w-6 text-muted-foreground/30" />;
+function ExecutionLog({ logs, projectStatus }: { logs: AnalysisLog[]; projectStatus: string }) {
+  const [expanded, setExpanded] = useState(true);
+
+  const entries = useMemo<LogEntry[]>(() => {
+    return logs
+      .filter((l) => l.started_at)
+      .sort((a, b) => new Date(a.started_at!).getTime() - new Date(b.started_at!).getTime())
+      .flatMap((l) => {
+        const items: LogEntry[] = [];
+        items.push({
+          time: formatTimestamp(l.started_at),
+          label: l.step_label,
+          message: `started execution`,
+          isError: false,
+        });
+        if (l.status === "error" && l.detail) {
+          items.push({
+            time: formatTimestamp(l.completed_at || l.started_at),
+            label: l.step_label,
+            message: l.detail,
+            isError: true,
+          });
+        }
+        if (l.status === "complete" && l.completed_at) {
+          const durationMs = new Date(l.completed_at).getTime() - new Date(l.started_at!).getTime();
+          const durationStr = durationMs > 1000 ? `${(durationMs / 1000).toFixed(1)}s` : `${durationMs}ms`;
+          items.push({
+            time: formatTimestamp(l.completed_at),
+            label: l.step_label,
+            message: `completed in ${durationStr}`,
+            isError: false,
+          });
+        }
+        return items;
+      });
+  }, [logs]);
+
+  const hasFailed = projectStatus === "error" || logs.some((l) => l.status === "error");
+
+  return (
+    <div className="rounded-xl border border-border bg-[hsl(var(--card))] overflow-hidden">
+      {/* Header bar */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex w-full items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Terminal className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-mono font-medium text-foreground">execution.log</span>
+          {hasFailed && (
+            <span className="rounded bg-severity-critical/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-severity-critical">
+              Failed
+            </span>
+          )}
+          {!hasFailed && entries.length > 0 && (
+            <span className="rounded bg-score-strong/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-score-strong">
+              Live
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {expanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="bg-[hsl(220,15%,6%)] px-4 py-3 max-h-72 overflow-y-auto font-mono text-[12px] leading-relaxed">
+          {entries.length === 0 && (
+            <p className="text-muted-foreground">Waiting for execution events...</p>
+          )}
+          {entries.map((entry, i) => (
+            <div key={i} className="flex gap-3">
+              <span className="shrink-0 text-muted-foreground/60">{entry.time}</span>
+              <span className="shrink-0 text-muted-foreground">|</span>
+              <span className="text-muted-foreground">[{entry.label}]</span>
+              <span className={entry.isError ? "text-severity-critical font-semibold" : "text-foreground/80"}>
+                {entry.message}
+              </span>
+            </div>
+          ))}
+          {hasFailed && (
+            <div className="mt-3 text-severity-critical font-semibold">
+              ✕ Error: Task Failed. Check full logs for details.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
-function StepDot({ status }: { status: string }) {
-  if (status === "complete") return <span className="h-2 w-2 rounded-full bg-score-strong shrink-0 mt-1.5" />;
-  if (status === "running") return <span className="h-2 w-2 rounded-full bg-severity-monitor shrink-0 mt-1.5 animate-pulse" />;
-  if (status === "error") return <span className="h-2 w-2 rounded-full bg-severity-critical shrink-0 mt-1.5" />;
-  return <span className="h-2 w-2 rounded-full bg-muted-foreground/20 shrink-0 mt-1.5" />;
-}
+/* ────── Main Component ────── */
 
 export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) {
   const [elapsed, setElapsed] = useState(0);
   const [logs, setLogs] = useState<AnalysisLog[]>([]);
+  const [projectStatus, setProjectStatus] = useState("processing");
 
   useEffect(() => {
     const start = startedAt ? new Date(startedAt).getTime() : Date.now();
@@ -108,129 +233,146 @@ export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) 
       if (data) setLogs(data as AnalysisLog[]);
     };
 
+    const fetchProjectStatus = async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("status")
+        .eq("id", projectId)
+        .single();
+      if (data) setProjectStatus(data.status);
+    };
+
     fetchLogs();
+    fetchProjectStatus();
 
     const channel = supabase
       .channel(`analysis-logs-${projectId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "analysis_logs", filter: `project_id=eq.${projectId}` }, () => fetchLogs())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "projects", filter: `id=eq.${projectId}` }, () => fetchProjectStatus())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [projectId]);
 
-  const completedSteps = logs.filter((l) => l.status === "complete").length;
-  const totalSteps = logs.length > 0 ? logs[0].total_steps : 13;
-  const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-  const phases = useMemo(() => groupIntoPhases(logs), [logs]);
-  const minutes = Math.floor(elapsed / 60);
+  // Map logs by step_key for quick lookup
+  const logMap = useMemo(() => {
+    const m: Record<string, AnalysisLog> = {};
+    for (const l of logs) m[l.step_key] = l;
+    return m;
+  }, [logs]);
 
-  // Compute sources ingested (completed research steps)
-  const sourcesIngested = logs.filter((l) => l.status === "complete" && l.step_index >= 3 && l.step_index <= 8).length;
-  // Claims = total completed
-  const claimsCrossRef = completedSteps;
+  const completedSteps = logs.filter((l) => l.status === "complete").length;
+  const totalSteps = WORKFLOW_STEPS.length;
+  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <BlurFade>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Analysis Log</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Complete record of all research actions and automated ingestion cycles.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Analysis Log</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Pipeline execution for automated fund diligence workflow.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Elapsed</p>
+              <p className="text-lg font-bold font-mono text-foreground">
+                {minutes}:{seconds.toString().padStart(2, "0")}
+              </p>
+            </div>
+          </div>
         </div>
       </BlurFade>
 
-      {/* Metric cards */}
+      {/* Overall progress */}
       <BlurFade delay={0.05}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MagicCard>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Overall Progress</p>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-foreground">{progressPercent}%</span>
-              <span className="text-[10px] font-bold uppercase text-score-strong">Active</span>
-            </div>
-            <Progress value={progressPercent} className="h-1 mt-2" />
-          </MagicCard>
-          <MagicCard>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sources</p>
-            <span className="mt-2 block text-2xl font-bold text-foreground">
-              <NumberTicker value={sourcesIngested} />
-            </span>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Ingested to Vault</p>
-          </MagicCard>
-          <MagicCard>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Claims Identified</p>
-            <span className="mt-2 block text-2xl font-bold text-foreground">
-              <NumberTicker value={claimsCrossRef} />
-            </span>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Cross-reference map</p>
-          </MagicCard>
-          <MagicCard>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Elapsed Time</p>
-            <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-foreground">{minutes}</span>
-              <span className="text-sm text-muted-foreground">min</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-0.5">L1 Latency Monitor</p>
-          </MagicCard>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Overall Progress</span>
+            <span className="text-sm font-bold text-foreground">{completedSteps}/{totalSteps} steps</span>
+          </div>
+          <Progress value={progressPercent} className="h-2" />
+          <p className="text-[11px] text-muted-foreground mt-1.5">{progressPercent}% complete</p>
         </div>
       </BlurFade>
 
-      {/* Phases timeline */}
-      <div className="space-y-6">
-        {phases.map((phase, phaseIdx) => (
-          <BlurFade key={phase.name} delay={0.1 + phaseIdx * 0.05}>
-            <div>
-              {/* Phase header */}
-              <div className="flex items-center gap-3 mb-3">
-                <PhaseIcon status={phase.status} />
-                <h2 className="text-xl font-bold text-foreground">{phase.name}</h2>
-                <PhaseStatusBadge status={phase.status} completedCount={phase.completedCount} totalCount={phase.totalCount} />
-              </div>
+      {/* Workflow steps */}
+      <div className="space-y-0">
+        {WORKFLOW_STEPS.map((step, i) => {
+          const log = logMap[step.key];
+          const status = getStepStatus(log);
+          const isLast = i === WORKFLOW_STEPS.length - 1;
 
-              {/* Step items */}
-              {phase.items.length > 0 && (
-                <div className="ml-3 border-l-2 border-border pl-6 space-y-0">
-                  {phase.items.map((log) => (
-                    <div key={log.id} className="relative py-2">
-                      <div className="flex items-start gap-3">
-                        <StepDot status={log.status} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className={`text-sm font-semibold ${log.status === "running" ? "text-foreground" : log.status === "complete" ? "text-foreground" : "text-muted-foreground"}`}>
-                              {log.step_label}
-                            </span>
-                            {log.started_at && (
-                              <span className="text-[11px] text-muted-foreground font-mono shrink-0">
-                                {formatTime(log.started_at)}
-                              </span>
-                            )}
-                          </div>
-                          {log.detail && (
-                            <div className={`mt-1 text-sm leading-relaxed ${
-                              log.status === "error"
-                                ? "rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-3 text-severity-critical"
-                                : "text-muted-foreground"
-                            }`}>
-                              {log.detail}
-                            </div>
-                          )}
-                        </div>
+          return (
+            <BlurFade key={step.key} delay={0.08 + i * 0.02}>
+              <div className="relative">
+                {/* Connector line */}
+                {!isLast && (
+                  <div className={cn(
+                    "absolute left-5 top-[3.25rem] w-px h-[calc(100%-1rem)]",
+                    status === "complete" ? "bg-score-strong/30" : "bg-border"
+                  )} />
+                )}
+
+                <div className={cn(
+                  "flex items-start gap-4 rounded-xl px-4 py-3 transition-colors",
+                  status === "running" && "bg-severity-monitor/[0.03]",
+                  status === "error" && "bg-severity-critical/[0.03]",
+                )}>
+                  <StepIcon icon={step.icon} status={status} />
+
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        status === "pending" ? "text-muted-foreground" : "text-foreground"
+                      )}>
+                        {step.label}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {(status === "error" || status === "pending") && (
+                          <button className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <StatusBadge status={status} />
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {phase.items.length === 0 && phase.status === "pending" && (
-                <div className="ml-3 border-l-2 border-border pl-6 py-3">
-                  <p className="text-sm text-muted-foreground italic">Pending previous phase</p>
+                    {/* Detail / description */}
+                    {log?.detail && (
+                      <p className={cn(
+                        "text-[13px] mt-1 leading-relaxed",
+                        status === "error" ? "text-severity-critical/80" : "text-muted-foreground"
+                      )}>
+                        {log.detail}
+                      </p>
+                    )}
+
+                    {/* Timestamp */}
+                    {log?.started_at && (
+                      <p className="text-[11px] text-muted-foreground/50 font-mono mt-1">
+                        {formatTimestamp(log.started_at)}
+                        {log.completed_at && ` → ${formatTimestamp(log.completed_at)}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </BlurFade>
-        ))}
+              </div>
+            </BlurFade>
+          );
+        })}
       </div>
+
+      {/* Execution Log */}
+      <BlurFade delay={0.4}>
+        <ExecutionLog logs={logs} projectStatus={projectStatus} />
+      </BlurFade>
 
       <p className="text-[11px] text-muted-foreground/60 text-center pt-2">
         You can safely navigate away — we'll notify you when it's ready.
