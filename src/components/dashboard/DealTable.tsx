@@ -1,21 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, ChevronLeft, ChevronRight, User, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ArrowUp, ArrowDown, ArrowUpDown, ArrowRight } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
-import { RecommendationPill } from "./RecommendationPill";
-import { FlagIndicator } from "./FlagIndicator";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { getVerdict, getVerdictLabel, getVerdictColor, getStatusLabel, getStatusColor, formatSubmittedDate } from "@/lib/verdict-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface DealTableProps {
@@ -40,7 +27,7 @@ function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
   const isActive = sortBy === column;
   return (
     <th
-      className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
+      className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
       onClick={() => onSort?.(column)}
     >
       <span className="inline-flex items-center gap-1">
@@ -62,7 +49,6 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
   shownCount: number;
   onPageChange: (p: number) => void;
 }) {
-  // Build page numbers to show
   const pages: (number | "...")[] = [];
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -75,7 +61,7 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
   }
 
   return (
-    <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5">
+    <div className="flex items-center justify-between px-4 py-2.5">
       <p className="text-[11px] text-muted-foreground">
         {shownCount} of {totalCount} results
       </p>
@@ -97,8 +83,8 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
                 onClick={() => onPageChange(p)}
                 className={`flex h-6 min-w-[24px] items-center justify-center rounded text-[11px] font-medium transition-colors ${
                   p === page
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {p}
@@ -118,6 +104,15 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
   );
 }
 
+function StrategyPill({ strategy }: { strategy: string | null }) {
+  if (!strategy) return <span className="text-xs text-muted-foreground">—</span>;
+  return (
+    <span className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+      {strategy}
+    </span>
+  );
+}
+
 export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort }: DealTableProps) {
   const navigate = useNavigate();
 
@@ -128,6 +123,9 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
       </div>
     );
   }
+
+  const isProcessing = (status: string) =>
+    ["uploading", "processing", "analyzing", "extracting", "pending"].includes(status);
 
   const paginationBar = (
     <PaginationBar
@@ -141,157 +139,146 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
 
   return (
     <BlurFade delay={0.15}>
-      {/* Desktop table — tighter spacing */}
+      {/* Desktop table */}
       <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
+              <SortableHeader label="L1 Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <SortableHeader label="Asset Class" column="asset_class" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Flags</th>
-              <th className="px-3 lg:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</th>
-              <th className="px-3 lg:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12"></th>
+              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</th>
+              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</th>
+              <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Verdict</th>
+              <th className="px-4 py-3 w-10"></th>
             </tr>
           </thead>
           <tbody>
             {projects.map((project) => {
-              const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
-              const submitter = (project as any).submitter_name;
-              const submitterCompany = (project as any).submitter_company;
-              const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
+              const processing = isProcessing(project.status);
+              const verdict = getVerdict(project.composite_score, project.status);
+              const verdictLabel = getVerdictLabel(verdict);
+              const verdictColor = getVerdictColor(verdict);
+              const statusLabel = getStatusLabel(project.status);
+              const statusColor = getStatusColor(project.status);
+
               return (
                 <tr
                   key={project.id}
-                  className={`border-b border-border last:border-0 transition-colors ${isProcessing ? 'opacity-70' : 'hover:bg-muted/50 cursor-pointer'}`}
-                  onClick={() => !isProcessing && navigate(`/project/${project.id}`)}
+                  className={`border-b border-border last:border-0 transition-colors ${
+                    processing ? "opacity-60" : "hover:bg-muted/50 cursor-pointer"
+                  }`}
+                  onClick={() => !processing && navigate(`/project/${project.id}`)}
                 >
-                  <td className="px-3 lg:px-4 py-2">
-                    <p className="font-medium text-foreground text-sm truncate max-w-[200px] lg:max-w-none">{project.fund_name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">
-                      Est. {project.established_year} • V{project.vintage}
-                    </p>
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                      {project.asset_class || '—'}
-                    </span>
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    {isProcessing ? (
-                      <div className="flex items-center justify-center h-7 w-9">
-                        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
-                      </div>
+                  {/* L1 Score */}
+                  <td className="px-4 py-3">
+                    {processing ? (
+                      <span className="text-xs font-medium text-muted-foreground">—</span>
                     ) : (
                       <ScoreBadge score={project.composite_score} size="sm" />
                     )}
                   </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    {isProcessing ? (
-                      <span className="text-xs text-muted-foreground italic">Running analysis…</span>
-                    ) : (
-                      <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
+
+                  {/* Fund Name */}
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-foreground text-sm">{project.fund_name}</p>
+                  </td>
+
+                  {/* GP */}
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-foreground">
+                      {project.gp_entity_name || "—"}
+                    </span>
+                  </td>
+
+                  {/* Strategy */}
+                  <td className="px-4 py-3">
+                    <StrategyPill strategy={project.asset_class} />
+                  </td>
+
+                  {/* Submitted */}
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-muted-foreground">
+                      {formatSubmittedDate(project.created_at)}
+                    </span>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${statusColor}`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                      {statusLabel}
+                    </span>
+                  </td>
+
+                  {/* Verdict */}
+                  <td className="px-4 py-3">
+                    <span className={`text-sm font-medium ${verdictColor}`}>
+                      {verdictLabel}
+                    </span>
+                  </td>
+
+                  {/* Arrow */}
+                  <td className="px-4 py-3">
+                    {!processing && verdict === "proceed" && (
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     )}
-                  </td>
-                  <td className="px-3 lg:px-4 py-2" onClick={(e) => { if (!isProcessing) { e.stopPropagation(); navigate(`/project/${project.id}?tab=red_flags`); } }}>
-                    <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
-                  </td>
-                  <td className="px-3 lg:px-4 py-2">
-                    {submitter ? (
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="text-sm text-foreground cursor-default hover:text-primary transition-colors">
-                              {submitter}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="p-0 border-0 bg-transparent shadow-none">
-                            <div className="rounded-xl border border-border bg-card p-4 shadow-lg min-w-[200px]">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                                  <User className="h-4 w-4 text-primary" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-foreground">{submitter}</p>
-                                  {submitterCompany && (
-                                    <p className="text-xs text-muted-foreground">{submitterCompany}</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-3 lg:px-4 py-2 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <button className="p-1 rounded-md hover:bg-muted transition-colors">
-                          <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/project/${project.id}`); }}>
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Export Report</DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Archive</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-        <div className="border-t border-border">
-          {paginationBar}
-        </div>
+        <div className="border-t border-border">{paginationBar}</div>
       </div>
 
-      {/* Mobile — compact list rows instead of cards */}
-      <div className="md:hidden rounded-xl border border-border bg-card overflow-hidden">
-        {projects.map((project, i) => {
-          const flags = flagCounts[project.id] || { critical: 0, elevated: 0 };
-          const isProcessing = ['uploading', 'processing', 'analyzing', 'extracting', 'pending'].includes(project.status);
+      {/* Mobile — card list matching mockup */}
+      <div className="md:hidden space-y-2">
+        {projects.map((project) => {
+          const processing = isProcessing(project.status);
+          const verdict = getVerdict(project.composite_score, project.status);
+          const verdictLabel = verdict === "pending" ? `STATUS: ${getStatusLabel(project.status).toUpperCase()}` : `VERDICT: ${verdict === "proceed" ? "PASS" : verdict === "conditional" ? "PARTIAL" : "FAILED"}`;
+          const statusLabel = processing ? getStatusLabel(project.status) : project.status === "complete" ? "Under Review" : getStatusLabel(project.status);
+          const statusColor = getStatusColor(project.status);
+
           return (
             <div
               key={project.id}
-              className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
-                i < projects.length - 1 ? 'border-b border-border' : ''
-              } ${isProcessing ? 'opacity-70' : 'cursor-pointer active:bg-muted/50'}`}
-              onClick={() => !isProcessing && navigate(`/project/${project.id}`)}
+              className={`rounded-xl border border-border bg-card p-4 transition-colors ${
+                processing ? "opacity-60" : "cursor-pointer active:bg-muted/50"
+              }`}
+              onClick={() => !processing && navigate(`/project/${project.id}`)}
             >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-[13px] truncate">{project.fund_name}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-muted-foreground">{project.asset_class || '—'}</span>
-                  <span className="text-[10px] text-muted-foreground">•</span>
-                  {isProcessing ? (
-                    <span className="text-[10px] text-muted-foreground italic">Running analysis…</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground text-[15px]">{project.fund_name}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {project.asset_class || project.strategy || "—"}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {processing ? (
+                    <span className="inline-flex items-center justify-center h-10 w-12 rounded-lg border-2 border-border text-xs font-bold text-muted-foreground">
+                      {project.status === "pending" ? "PREP" : "PEND"}
+                    </span>
                   ) : (
-                    <RecommendationPill recommendation={project.recommendation} scoreTier={project.score_tier} />
-                  )}
-                  {(flags.critical > 0 || flags.elevated > 0) && (
-                    <FlagIndicator criticalCount={flags.critical} elevatedCount={flags.elevated} />
+                    <ScoreBadge score={project.composite_score} size="md" />
                   )}
                 </div>
               </div>
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
-              ) : (
-                <ScoreBadge score={project.composite_score} size="sm" />
-              )}
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  {verdictLabel}
+                </span>
+                <span className={`text-xs font-medium ${statusColor}`}>
+                  {statusLabel}
+                </span>
+              </div>
             </div>
           );
         })}
-        <div className="border-t border-border">
-          {paginationBar}
-        </div>
+        <div className="border-t border-border">{paginationBar}</div>
       </div>
     </BlurFade>
   );
