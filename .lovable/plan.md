@@ -1,71 +1,134 @@
 
 
-## PRD Analysis — Nvestiv L1 Due Diligence Platform
+# Report-to-App Mapping: Complete Section Breakdown
 
-### What the PRD Describes
+## Report Structure (11 Sections)
 
-Nvestiv is an automated due diligence platform for institutional investors. GPs submit pitch decks, an AI agent analyzes them, and the platform delivers a scored L1 Preliminary Report to help LPs make meet/no-meet decisions. The PRD covers:
+The L1 report has 11 sections. Here is how each section and its sub-parts map to the app's existing tabs.
 
-1. **Fund Dashboard** (`/funds`) — sortable table of submissions with score, GP, strategy, status, verdict columns; 4 summary metric cards
-2. **New Submission Page** (`/funds/new`) — centered upload flow with drag-and-drop, "Start AI analysis" button
-3. **Fund Detail** (`/funds/:id`) — three-panel layout: left sidebar (section nav with scores), middle (report body), right (comments/notes panel)
-4. **Shared Report** (`/share/:token`) — public read-only view without auth
-5. **Scoring System** — 5 dimensions (max 25/25/20/20/10 = 100), verdict thresholds (Meet ≥65, Conditional 50-64, No Meet <50), hard floor gates
-6. **Citation System** — inline GP-sourced (blue), verified (green), flagged (amber) tags with tooltip cards
-7. **Comment/Annotation System** — right panel with human + AI comments, section-anchored, threaded replies
-8. **Processing States** — Preparing → Researching → Finalizing, real-time analysis log streaming
-9. **Report Sharing** — private link generation with optional expiry
-10. **PDF Export** — paginated report export
-11. **Access Control** — account-based with Admin/Analyst roles
-12. **Responsive Behavior** — desktop (3-panel), tablet (icon rail + sheet), mobile (single panel)
+---
 
-### What's Already Built
+## Tab Mapping
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Dashboard with deal table | Done | Has filters, pagination, analytics cards |
-| New deal modal | Done | Modal-based (not separate page per PRD) |
-| Fund detail — sidebar + report body | Done | Two-panel (missing right comments panel) |
-| Overview tab | Done | Score, strengths/risks, module breakdown |
-| Team, Performance, Strategy, Flags tabs | Done | With markdown report rendering |
-| Interrogatory tab | Done | Question list view |
-| Data Room + Research Sources tabs | Done | File management + source list |
-| Processing state | Done | Real-time log streaming |
-| Webhook dispatch/receive pipeline | Done | External agent integration working |
-| Chat sidebar (AI assistant) | Done | Not in PRD — custom addition |
+### 1. OVERVIEW TAB
+Receives content from **4 report sections**:
 
-### Key Gaps Between PRD and Current Build
+| Report Section | Sub-part | UI Treatment |
+|---|---|---|
+| **Section 1 — Cover** | Key-value table (fund name, GP, strategy, geography, fund size, vintage, etc.) | **Fund Profile Card** — structured key-value grid at top of overview |
+| **Section 1 — Cover** | Abstract paragraph | **Abstract Card** — prose summary below the profile card |
+| **Section 1 — Cover** | Findings Overview paragraph | **Findings Summary Card** — expandable prose block |
+| **Section 2 — Verdict** | Composite Score, Recommendation, Hard Floor Override | **Score Ring + Verdict Badge** (already exists) |
+| **Section 2 — Verdict** | Rationale paragraph | **Verdict Rationale Card** — prose narrative explaining the score |
+| **Section 3 — Hard Floor Status** | 3-gate table (Team Integrity, Entity Legitimacy, Track Record) | **Hard Floor Gates Card** — 3 rows with PASS/FAIL badges and findings |
+| **Section 4 — Scorecard Summary** | 5-dimension scoring table | **Dimension Scores Card** — 5 rows with score bars, bands, and rationales |
+| **Section 10 — Conclusion** | Full conclusion prose | **Conclusion Card** — full-width prose block at bottom of overview |
 
-**Major gaps:**
-1. **Right comments panel** — PRD specifies a persistent 220px right panel for team comments and AI notes. Currently missing entirely.
-2. **Citation system** — No inline citation tags (blue/green/amber) or tooltip cards in report sections
-3. **Three-panel layout** — Currently two-panel (sidebar + body). PRD requires sidebar + body + comments
-4. **Shared report view** (`/share/:token`) — Not implemented
-5. **PDF export** — Not implemented
-6. **New submission as standalone page** — Currently a modal, PRD wants `/funds/new`
-7. **Access control / auth** — No authentication, roles, or account model
-8. **Verdict display logic** — PRD has specific verdict thresholds and hard floor override logic
+### 2. TEAM TAB
+Receives content from **Section 7.1 (People)**:
 
-**Medium gaps:**
-9. **Sidebar section scores** — PRD wants score badges next to each section nav item
-10. **Dashboard columns** — PRD wants GP name, Strategy pill, Verdict badge columns
-11. **Analysis log as section** — PRD wants it as a sidebar nav item, not just a processing view
-12. **Fund table auto-sort by score** — PRD wants score-descending default sort
-13. **Status states** — PRD defines Preparing/Researching/Scoring/Complete/Failed with specific styling
+| Sub-part | UI Treatment |
+|---|---|
+| Each named person (Preston, Glasgow, Donaldson, Russell, Matthews, Kasper, Morris, Harris) | **Team Member Card** — one card per person with name, title, tenure, bio narrative, verification status badge |
+| Regulatory & litigation scan summary | **Compliance Status Card** — single card showing "all clean" with source list |
+| Section 7.6 — Network (team affiliations) | **Network & Affiliations Card** — sponsor ecosystem connections, prior-firm overlap |
 
-**Minor gaps:**
-14. **Responsive three-panel behavior** — icon rail on tablet, single panel on mobile
-15. **Score dimension mapping** — PRD uses specific dimension names and max points (25/25/20/20/10)
-16. **Source appendix** — PRD wants APA 7th edition formatting with expandable detail
+### 3. PERFORMANCE TAB
+Receives content from **Section 7.3 (Track Record)**:
 
-### Recommendation
+| Sub-part | UI Treatment |
+|---|---|
+| Program-level summary (fund sizes, committed, deployed, co-invest count) | **Program Summary Card** — key metrics grid (4 programs, $519M deployed, 170 co-invests) |
+| Co-investment realized returns (2.8x MOIC, 27% IRR) | **Headline Returns Card** — large metric display with MOIC and IRR |
+| Deal-level verification (5 sampled deals + 2 recent) | **Deal Verification Table** — each deal as a row with name, date, sponsor, verified status, notes |
+| Fund-level HPEP I–IV returns | **Vintage Performance Card** — table of each vintage with MOIC, IRR, DPI, verification status |
+| Section 7.5 — Claims table (verified/unverified/contradicted) | **Claims Verification Card** — table with status badges (green verified, yellow unverified, red contradicted) |
+| Recent 2026 activity (Joe Van Gogh, Caring.com) | Part of the Deal Verification Table with "2026" badge |
 
-The current build has a solid foundation covering the dashboard, report rendering, and webhook pipeline. The largest architectural changes needed are the three-panel layout with comments, the citation system, authentication, and sharing. These should be tackled in priority order based on your roadmap.
+### 4. STRATEGY TAB
+Receives content from **3 report sections**:
 
-Want me to start implementing any of these gaps? I'd suggest prioritizing in this order:
-1. Authentication (required for comments, sharing, access control)
-2. Three-panel layout with comments panel
-3. Citation system
-4. Shared report view
-5. PDF export
+| Report Section | Sub-part | UI Treatment |
+|---|---|
+| **Section 7.4 — Strategy** | Core thesis, sourcing edge, target profile | **Investment Thesis Card** — structured prose with key claims |
+| **Section 7.4 — Strategy** | Critical strategy gap (regime shift analysis) | **Strategy Risk Card** — highlighted warning block with the deleveraging arbitrage analysis |
+| **Section 8 — Domain Research** | 8.1 LMM PE market conditions | **Market Environment Card** — structured findings with NEUTRAL/SUPPORTS/CONTRADICTS badges |
+| **Section 8 — Domain Research** | 8.2 Co-Investment Submarket | **Co-Investment Market Card** — pace benchmarks, fee norms, assessment badge |
+| **Section 8 — Domain Research** | 8.3 LMM Exit Environment | **Exit Environment Card** — hold periods, exit channels, timing expectations |
+| **Section 8 — Domain Research** | 8.4 Regulatory Environment | **Regulatory Card** — SEC regime, enforcement trends, Advisory Board governance concern |
+
+### 5. RED FLAGS TAB
+Receives content from **Section 5 — Flags**:
+
+| Sub-part | UI Treatment |
+|---|---|
+| RED flags grouped by dimension (Team, Track Record, Strategy, Domain, Structure) | **Red Flag Cards** — one card per flag with ID badge (R-T1, R-S1, etc.), severity indicator, full narrative, and source citations |
+| YELLOW flags grouped by dimension | **Yellow Flag Cards** — same layout, amber severity indicator |
+| Group headers (Team, Track Record, Strategy, Domain/Market, Structure) | **Dimension Group Headers** — collapsible sections grouping flags by category |
+
+### 6. INTERROGATORY TAB
+Receives content from **2 report sections**:
+
+| Report Section | Sub-part | UI Treatment |
+|---|---|
+| **Section 6 — Meeting Conditions** | 4 conditional-meet requirements | **Meeting Conditions Card** — numbered list with flag cross-references and "gate" styling |
+| **Section 9 — Meeting Questions** | 13 questions grouped by dimension | **Question Cards** — one per question with columns: Question, Rationale, Satisfactory Answer. Grouped under Dim 1–5 headers |
+
+### 7. DATA ROOM TAB
+Receives content from **Section 7.7 — Gap Register**:
+
+| Sub-part | UI Treatment |
+|---|---|
+| 25-item gap register table | **Data Room Checklist** — each row becomes a checklist item with: data point, expected source, L1 status badge, L2 routing action |
+| Items cross-referenced to Meeting Conditions | **Conditional-Meet Badge** on relevant items linking back to Section 6 gates |
+
+### 8. DOCUMENTS (SOURCE FILES) TAB
+Receives content from **Section 11 — Source Appendix**:
+
+| Sub-part | UI Treatment |
+|---|---|
+| Category A: Primary GP materials | **Source Group Card** — "Primary GP Materials" with citation list |
+| Category B: Regulatory sources | **Source Group Card** — "Regulatory Sources" |
+| Category C: Court/litigation sources | **Source Group Card** — "Court & Litigation" |
+| Category D: Market data/third-party research | **Source Group Card** — "Market Data & Research" |
+| Category E: Deal-specific press | **Source Group Card** — "Deal-Specific Press" |
+| Category F: LP/allocator searches (negative results) | **Source Group Card** — "LP Disclosure Searches" with "no match" badges |
+| Category G: Consulted — no findings | **Source Group Card** — "Consulted — No Findings" |
+| Section 7.2 — Entity verification | **Entity Verification Card** — adviser, fund, sidecar, prior vehicles with registration details |
+
+---
+
+## Implementation Plan
+
+### Step 1: Update the markdown parser
+Extend `markdown-sections.ts` to recognize all 11 sections and sub-sections (7.1–7.7, 8.1–8.4) and map them to the correct tabs with granular sub-section extraction.
+
+### Step 2: Create structured content components
+For each tab, build the card components described above that render structured data extracted from the markdown. Each card parses its section's markdown into structured elements (tables, prose, key-value pairs) rather than rendering raw markdown.
+
+### Step 3: Update each tab component
+Replace or augment the current `ReportMarkdownSection` (raw markdown dump) with the new structured card layouts for each tab. The tabs will display a curated, card-based layout where each report sub-section gets its own visual treatment.
+
+### Step 4: Update tab keyword mapping
+Revise `TAB_KEYWORDS` in `markdown-sections.ts` so each tab pulls exactly the right sections and sub-sections as mapped above.
+
+### Step 5: Wire up ProjectDetail.tsx
+Pass the granular section data to each tab component so they can render the structured cards.
+
+---
+
+### Files to create/modify
+
+| File | Action |
+|---|---|
+| `src/lib/markdown-sections.ts` | Extend parser for sub-sections (7.x, 8.x) and update tab mapping |
+| `src/components/project/OverviewTab.tsx` | Add Cover, Verdict Rationale, Hard Floor, Scorecard, Conclusion cards |
+| `src/components/project/TeamTab.tsx` | Add per-person cards, compliance card, network card |
+| `src/components/project/PerformanceTab.tsx` | Add program summary, deal verification, claims, vintage cards |
+| `src/components/project/StrategyTab.tsx` | Add thesis, strategy risk, 4 domain research cards |
+| `src/components/project/RedFlagsTab.tsx` | Group flags by dimension with RED/YELLOW severity cards |
+| `src/components/project/InterrogatoryTab.tsx` | Add meeting conditions card + 13 question cards by dimension |
+| `src/components/project/DataRoomTab.tsx` | Render 25-item gap register as checklist |
+| `src/components/project/SourceFilesTab.tsx` | Render 7 source-category groups + entity verification |
+| `src/pages/ProjectDetail.tsx` | Pass granular section data to tabs |
 
