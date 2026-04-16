@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Search, Sparkles, Bell } from "lucide-react";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
 import { DealTable } from "@/components/dashboard/DealTable";
@@ -140,10 +140,8 @@ export default function Dashboard() {
   const paginatedProjects = filteredProjects.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <AppSidebar onNewSubmission={() => setModalOpen(true)} />
+    <div className="min-h-screen bg-background flex flex-col">
 
-      <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-border bg-card">
           <div className="flex h-14 items-center justify-between px-4 sm:px-6">
@@ -257,7 +255,6 @@ export default function Dashboard() {
             <span>Build 4.2.0-ARC</span>
           </div>
         </footer>
-      </div>
 
       {/* Mobile FAB */}
       <button
