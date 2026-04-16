@@ -283,29 +283,29 @@ export function PerformanceTab({
         <>
           {fees.length > 0 ? (
             <BlurFade delay={0.05}>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.entries(feesByClass).map(([cls, classItems]) => (
                   <MagicCard key={cls}>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">{cls}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">{cls}</p>
                     <div className="space-y-3">
                       {classItems.map((fee) => (
-                        <div key={fee.id} className="flex items-start justify-between gap-3 py-2 border-b border-border/50 last:border-0">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-foreground">{fee.component}</p>
-                            <p className="text-sm font-semibold text-foreground mt-0.5">
-                              {fee.is_disclosed ? fee.value : <span className="text-severity-critical italic">Not Disclosed</span>}
-                            </p>
-                            {fee.asset_class_norm && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5">Norm: {fee.asset_class_norm}</p>
-                            )}
-                            {fee.assessment_detail && (
-                              <p className="text-[11px] text-muted-foreground mt-0.5">{fee.assessment_detail}</p>
+                        <div key={fee.id} className="py-2 border-b border-border/50 last:border-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-xs font-medium text-muted-foreground">{fee.component}</p>
+                            {fee.assessment && (
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase shrink-0 ${ASSESSMENT_COLORS[fee.assessment] || "text-muted-foreground bg-muted"}`}>
+                                {fee.assessment.replace("_", " ")}
+                              </span>
                             )}
                           </div>
-                          {fee.assessment && (
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase shrink-0 ${ASSESSMENT_COLORS[fee.assessment] || "text-muted-foreground bg-muted"}`}>
-                              {fee.assessment.replace("_", " ")}
-                            </span>
+                          <p className="text-lg font-bold text-foreground mt-0.5">
+                            {fee.is_disclosed ? fee.value : <span className="text-severity-critical italic text-sm">Not Disclosed</span>}
+                          </p>
+                          {fee.asset_class_norm && (
+                            <p className="text-[10px] text-muted-foreground mt-1">Asset class norm: {fee.asset_class_norm}</p>
+                          )}
+                          {fee.assessment_detail && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{fee.assessment_detail}</p>
                           )}
                         </div>
                       ))}

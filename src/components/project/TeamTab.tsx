@@ -54,13 +54,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
         </div>
       </BlurFade>
 
-      {/* Report Narrative */}
-      {hasMarkdown && <MarkdownSectionCards content={reportMarkdown} baseDelay={0.05} />}
-      {!hasMarkdown && reportSection?.content && (
-        <BlurFade delay={0.05}>
-          <MarkdownSectionCards content={reportSection.content} baseDelay={0.07} />
-        </BlurFade>
-      )}
 
       {/* Team Members — card grid */}
       {teamMembers.length > 0 && (
