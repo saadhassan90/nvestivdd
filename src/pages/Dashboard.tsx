@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Sparkles, Bell, Settings } from "lucide-react";
+import { Plus, Search, Sparkles, Bell } from "lucide-react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
@@ -167,9 +167,6 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <button className="p-2 rounded-md hover:bg-muted transition-colors">
                 <Bell className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button className="p-2 rounded-md hover:bg-muted transition-colors">
-                <Settings className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isOpen && (
                 <button
