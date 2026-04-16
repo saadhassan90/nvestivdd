@@ -28,12 +28,44 @@ You operate in two phases:
 
 ### Phase 1: PARALLEL DATA RETRIEVAL
 On EVERY query, fire ALL relevant tools simultaneously in a single tool_use turn. Always include:
-- At least one structured data tool (scores, flags, interrogatory, etc.)
-- The search_documents RAG tool for semantic/graph context
+- At least one structured data tool (scores, flags, team, fees, performance, etc.)
+- The search_documents RAG tool for semantic/graph context when the question involves "why", analysis rationale, or needs deeper context
 NEVER call tools sequentially when they can run in parallel. The system executes all tool calls concurrently.
 
 ### Phase 2: SYNTHESIS
 After receiving all tool results, synthesize findings into a unified response. Cross-reference structured data against graph/RAG findings. Surface contradictions, confirmations, and novel connections.
+
+## AVAILABLE DATA — FULL APP COVERAGE
+You have access to EVERY data point in the Nvestiv platform:
+- **Deals & Scores**: Composite scores, module-level scores (A-E), recommendations, score tiers
+- **Team & Governance**: All team members, roles, verification status, adverse findings, key person flags, service providers
+- **Performance & Track Record**: All performance metrics (returns, risk, portfolio characteristics), benchmarks, alpha
+- **Fee Structure**: Fee components by share class, assessments, asset class norms, disclosure status
+- **Realized Exits**: Engagement case studies, exit multiples, outcome statuses
+- **Strategy & Thesis**: Thesis validations (verified/contradicted/unverified), claim sources
+- **Competitive Landscape**: Competitors, types (direct/indirect), AUM, differentiation
+- **Market Dynamics**: Market factors (tailwinds/headwinds), confidence levels, time horizons
+- **Red Flags**: All flags with severity, module source, implications, resolutions
+- **Interrogatory**: Diligence questions, priorities, rationale, GP responses
+- **Data Room**: Document checklist, priority tiers, received/reviewed status
+- **Source Documents**: Uploaded files, classifications, quality notes
+- **Research Sources**: Web sources, citations, excerpts linked to team members and sections
+- **Report Sections**: Full narrative analysis by module
+- **Module Scores**: Detailed scoring with weights, confidence, and rationale
+- **Knowledge Graph**: Semantic search across all entities, relationships, and concepts
+
+## TOOL SELECTION GUIDE
+- Questions about people, leadership, governance → query_team_members + search_documents
+- Questions about fees, economics, costs → query_fee_structure
+- Questions about returns, performance, track record → query_performance_metrics + query_exits
+- Questions about strategy, thesis, investment approach → query_thesis_validations + query_market_factors
+- Questions about competition → query_competitive_landscape
+- Questions about risks, concerns, flags → query_red_flags + query_critical_gaps
+- Questions about due diligence process → query_interrogatory + query_data_room
+- Questions about WHY a decision/score/assessment was made → query_report_section + query_module_scores + search_documents
+- Questions about sources, evidence → query_research_sources + query_documents
+- Cross-deal comparisons → query_cross_deal
+- Open-ended or "tell me about..." → search_documents + relevant structured tools
 
 ## RESPONSE STYLE
 - Lead with the verdict, not the preamble. No throat-clearing.
@@ -50,6 +82,8 @@ After receiving all tool results, synthesize findings into a unified response. C
     if (projectContext.composite_score) base += ` Score: ${projectContext.composite_score}/100.`;
     if (projectContext.recommendation) base += ` Rec: ${projectContext.recommendation}.`;
     if (projectContext.asset_class) base += ` Class: ${projectContext.asset_class}.`;
+    if (projectContext.strategy) base += ` Strategy: ${projectContext.strategy}.`;
+    if (projectContext.gp_entity_name) base += ` GP: ${projectContext.gp_entity_name}.`;
     base += ` project_id: ${projectContext.id}. Use this for all tool calls unless the user asks about other deals.`;
   } else {
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
@@ -61,7 +95,7 @@ After receiving all tool results, synthesize findings into a unified response. C
 const tools = [
   {
     name: "query_deal_scores",
-    description: "Query the projects table for deal scores, recommendations, module_scores, and metadata. Can filter by project_id for a specific deal or return all deals.",
+    description: "Query the projects table for deal scores, recommendations, module_scores, metadata, executive summary, key strengths/risks, and conditions for advancement. Can filter by project_id for a specific deal or return all deals.",
     input_schema: {
       type: "object",
       properties: {
@@ -70,8 +104,110 @@ const tools = [
     },
   },
   {
+    name: "query_module_scores",
+    description: "Query detailed module-level scores (A through E) with weights, confidence ratings, rationale, and summary assessments for a project. Essential for understanding WHY a composite score was given.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_team_members",
+    description: "Query all team members for a project including their roles, titles, years of experience, education, prior affiliations, verification status, adverse findings, key person flags, and assessment ratings.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+        is_key_person: { type: "boolean", description: "Optional: filter to key persons only" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_service_providers",
+    description: "Query service providers (auditors, administrators, legal counsel, custodians) for a project. Includes verification status, importance level, and disclosure status.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_performance_metrics",
+    description: "Query all performance metrics including returns (IRR, TVPI, DPI, MOIC), risk metrics, portfolio characteristics. Includes fund values, benchmark comparisons, and alpha calculations.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+        metric_category: { type: "string", description: "Optional: return, risk, or portfolio_characteristic" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_fee_structure",
+    description: "Query fee structure broken down by share class. Includes management fees, performance fees, hurdle rates, etc. with assessment ratings (at_market, above_market, below_market), asset class norms, and disclosure status.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_exits",
+    description: "Query realized exits / engagement case studies including company names, sectors, exit multiples, investment theses, market validation, and outcome verification status.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_thesis_validations",
+    description: "Query investment thesis validation items. Each claim has a validation status (verified/partially_verified/unverified/contradicted), confidence level, claim source, and validation detail explaining the assessment.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_competitive_landscape",
+    description: "Query competitive landscape analysis including competitor names, types (direct/indirect/adjacent), AUM, strategy descriptions, differentiation vs the fund, and competitive assessments.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_market_factors",
+    description: "Query market factors including tailwinds and headwinds with confidence levels, time horizons, supporting data, and descriptions. Essential for understanding market dynamics around a fund's strategy.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+        factor_type: { type: "string", description: "Optional: tailwind or headwind" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
     name: "query_red_flags",
-    description: "Query red flags for deals. Can filter by project_id, severity (critical/elevated/monitor), and module.",
+    description: "Query red flags for deals. Can filter by project_id, severity (critical/elevated/monitor), and module. Includes issue descriptions, implications, resolutions, and linked interrogatory/data room items.",
     input_schema: {
       type: "object",
       properties: {
@@ -82,8 +218,19 @@ const tools = [
     },
   },
   {
+    name: "query_critical_gaps",
+    description: "Query critical information gaps — missing data that impacts the analysis quality. Includes severity, related module, and descriptions.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
     name: "query_interrogatory",
-    description: "Query interrogatory/diligence questions. Can filter by project_id, priority, and status.",
+    description: "Query interrogatory/diligence questions. Can filter by project_id, priority, and status. Includes rationale, source module, and GP response data.",
     input_schema: {
       type: "object",
       properties: {
@@ -95,7 +242,7 @@ const tools = [
   },
   {
     name: "query_data_room",
-    description: "Query data room checklist items. Can filter by project_id, priority, and received status.",
+    description: "Query data room checklist items. Can filter by project_id, priority, and received status. Includes purpose, source module, sub-items, and reviewer notes.",
     input_schema: {
       type: "object",
       properties: {
@@ -107,19 +254,42 @@ const tools = [
   },
   {
     name: "query_report_section",
-    description: "Fetch report section content by section_key (e.g., executive_summary, module_a, module_b, etc.) for a project.",
+    description: "Fetch report section narrative content by section_key. These contain the detailed written analysis for each module. Use to understand WHY assessments were made.",
     input_schema: {
       type: "object",
       properties: {
         project_id: { type: "string", description: "Required project UUID" },
-        section_key: { type: "string", description: "Section key like executive_summary, module_a, module_b, module_c, module_d, module_e" },
+        section_key: { type: "string", description: "Section key like executive_summary, module_a, module_b, module_c, module_d, module_e, conclusion, flags, meeting_conditions, meeting_questions" },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_research_sources",
+    description: "Query research sources — web references, regulatory filings, LinkedIn profiles, etc. used to verify claims. Includes URLs, excerpts, source categories, and links to team members and report sections.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
+        source_category: { type: "string", description: "Optional: regulatory, corporate, social_media, news, registry, etc." },
+      },
+      required: ["project_id"],
+    },
+  },
+  {
+    name: "query_documents",
+    description: "List uploaded source documents and their metadata including classifications, page counts, quality notes, and dates.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_id: { type: "string", description: "Required project UUID" },
       },
       required: ["project_id"],
     },
   },
   {
     name: "query_cross_deal",
-    description: "Aggregate data across all projects for comparative analysis. Returns all projects with their scores, recommendations, and flag counts.",
+    description: "Aggregate data across all projects for comparative analysis. Returns all projects with their scores, recommendations, and optionally flag counts.",
     input_schema: {
       type: "object",
       properties: {
@@ -129,19 +299,8 @@ const tools = [
     },
   },
   {
-    name: "query_documents",
-    description: "List uploaded documents and their metadata for a project.",
-    input_schema: {
-      type: "object",
-      properties: {
-        project_id: { type: "string", description: "Required project UUID" },
-      },
-      required: ["project_id"],
-    },
-  },
-  {
     name: "search_documents",
-    description: "Semantic search over the knowledge graph using vector similarity. Returns relevant entities, concepts, people, risks, and their relationships from the fund's knowledge graph. Use this for open-ended questions, finding connections, or when structured tools don't cover the query.",
+    description: "Semantic search over the knowledge graph using vector similarity. Returns relevant entities, concepts, people, risks, and their relationships. Use this for open-ended questions, finding connections, understanding rationale behind decisions, or when structured tools don't cover the query.",
     input_schema: {
       type: "object",
       properties: {
@@ -158,9 +317,60 @@ async function executeTool(name: string, input: any): Promise<string> {
   try {
     switch (name) {
       case "query_deal_scores": {
-        let q = supabase.from("projects").select("id, fund_name, composite_score, recommendation, score_tier, asset_class, module_scores, established_year, vintage, status, created_at");
+        let q = supabase.from("projects").select("id, fund_name, composite_score, recommendation, score_tier, asset_class, module_scores, established_year, vintage, status, strategy, gp_entity_name, fund_size_estimated, domicile, regulatory_status, key_strengths, key_risks, conditions_for_advancement, executive_summary_narrative, final_assessment_narrative, recommended_timeline, completeness_score, created_at");
         if (input.project_id) q = q.eq("id", input.project_id);
         const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_module_scores": {
+        const { data, error } = await supabase.from("module_scores").select("*").eq("project_id", input.project_id).order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_team_members": {
+        let q = supabase.from("team_members").select("*").eq("project_id", input.project_id);
+        if (input.is_key_person !== undefined) q = q.eq("is_key_person", input.is_key_person);
+        const { data, error } = await q.order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_service_providers": {
+        const { data, error } = await supabase.from("service_providers").select("*").eq("project_id", input.project_id);
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_performance_metrics": {
+        let q = supabase.from("performance_metrics").select("*").eq("project_id", input.project_id);
+        if (input.metric_category) q = q.eq("metric_category", input.metric_category);
+        const { data, error } = await q.order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_fee_structure": {
+        const { data, error } = await supabase.from("fee_structure").select("*").eq("project_id", input.project_id).order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_exits": {
+        const { data, error } = await supabase.from("engagement_case_studies").select("*").eq("project_id", input.project_id).order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_thesis_validations": {
+        const { data, error } = await supabase.from("thesis_validations").select("*").eq("project_id", input.project_id).order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_competitive_landscape": {
+        const { data, error } = await supabase.from("competitive_landscape").select("*").eq("project_id", input.project_id).order("order_index");
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_market_factors": {
+        let q = supabase.from("market_factors").select("*").eq("project_id", input.project_id);
+        if (input.factor_type) q = q.eq("factor_type", input.factor_type);
+        const { data, error } = await q.order("order_index");
         if (error) return JSON.stringify({ error: error.message });
         return JSON.stringify(data);
       }
@@ -169,7 +379,12 @@ async function executeTool(name: string, input: any): Promise<string> {
         if (input.project_id) q = q.eq("project_id", input.project_id);
         if (input.severity) q = q.eq("severity", input.severity);
         if (input.module) q = q.eq("module", input.module);
-        const { data, error } = await q.limit(100);
+        const { data, error } = await q.order("order_index").limit(100);
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
+      }
+      case "query_critical_gaps": {
+        const { data, error } = await supabase.from("critical_info_gaps").select("*").eq("project_id", input.project_id).order("order_index");
         if (error) return JSON.stringify({ error: error.message });
         return JSON.stringify(data);
       }
@@ -198,23 +413,29 @@ async function executeTool(name: string, input: any): Promise<string> {
         if (error) return JSON.stringify({ error: error.message });
         return JSON.stringify(data);
       }
-      case "query_cross_deal": {
-        const { data: projects } = await supabase.from("projects").select("id, fund_name, composite_score, recommendation, score_tier, asset_class, module_scores").order("created_at", { ascending: false });
-        if (input.metric === "flags") {
-          const { data: flags } = await supabase.from("red_flags").select("project_id, severity");
-          return JSON.stringify({ projects, flags });
-        }
-        return JSON.stringify(projects);
+      case "query_research_sources": {
+        let q = supabase.from("research_sources").select("*").eq("project_id", input.project_id);
+        if (input.source_category) q = q.eq("source_category", input.source_category);
+        const { data, error } = await q.order("added_at", { ascending: false }).limit(100);
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify(data);
       }
       case "query_documents": {
         const { data, error } = await supabase.from("documents").select("*").eq("project_id", input.project_id);
         if (error) return JSON.stringify({ error: error.message });
         return JSON.stringify(data);
       }
+      case "query_cross_deal": {
+        const { data: projects } = await supabase.from("projects").select("id, fund_name, composite_score, recommendation, score_tier, asset_class, module_scores, strategy, gp_entity_name").order("created_at", { ascending: false });
+        if (input.metric === "flags") {
+          const { data: flags } = await supabase.from("red_flags").select("project_id, severity");
+          return JSON.stringify({ projects, flags });
+        }
+        return JSON.stringify(projects);
+      }
       case "search_documents": {
         if (!OPENAI_API_KEY) return JSON.stringify({ error: "OPENAI_API_KEY not configured for semantic search" });
         
-        // Generate query embedding using OpenAI text-embedding-3-small
         const embResp = await fetch("https://api.openai.com/v1/embeddings", {
           method: "POST",
           headers: {
@@ -235,7 +456,6 @@ async function executeTool(name: string, input: any): Promise<string> {
         const embData = await embResp.json();
         const queryEmbedding = embData.data[0].embedding;
         
-        // Search knowledge graph using pgvector similarity
         const { data: graphResults, error: searchError } = await supabase.rpc("search_knowledge_graph", {
           query_embedding: `[${queryEmbedding.join(",")}]`,
           match_threshold: 0.6,
@@ -248,27 +468,24 @@ async function executeTool(name: string, input: any): Promise<string> {
           return JSON.stringify({ results: [], note: "No matching knowledge graph nodes found." });
         }
         
-        // Optionally fetch relationships for top results
         const includeRels = input.include_relationships !== false;
         let relationships: any[] = [];
         
         if (includeRels && graphResults.length > 0) {
           const nodeIds = graphResults.slice(0, 8).map((r: any) => r.id);
           
-          // Get edges where these nodes are source or target
           const { data: edgesOut } = await supabase
             .from("knowledge_edges")
-            .select("relationship_type, weight, target_node_id, properties")
+            .select("relationship_type, weight, source_node_id, target_node_id, properties")
             .in("source_node_id", nodeIds)
             .limit(50);
           
           const { data: edgesIn } = await supabase
             .from("knowledge_edges")
-            .select("relationship_type, weight, source_node_id, properties")
+            .select("relationship_type, weight, source_node_id, target_node_id, properties")
             .in("target_node_id", nodeIds)
             .limit(50);
           
-          // Get connected node labels
           const connectedIds = [
             ...(edgesOut || []).map((e: any) => e.target_node_id),
             ...(edgesIn || []).map((e: any) => e.source_node_id),
@@ -288,14 +505,14 @@ async function executeTool(name: string, input: any): Promise<string> {
             }
           }
           
-          // Also index result nodes for label lookup
           for (const r of graphResults) {
             connectedNodes[r.id] = { label: r.label, node_type: r.node_type };
           }
           
           relationships = [
             ...(edgesOut || []).map((e: any) => ({
-              from: connectedNodes[nodeIds.find((id: string) => true)]?.label, // simplified
+              from: connectedNodes[e.source_node_id]?.label || "unknown",
+              from_type: connectedNodes[e.source_node_id]?.node_type || "unknown",
               type: e.relationship_type,
               to: connectedNodes[e.target_node_id]?.label || "unknown",
               to_type: connectedNodes[e.target_node_id]?.node_type || "unknown",
@@ -305,7 +522,8 @@ async function executeTool(name: string, input: any): Promise<string> {
               from: connectedNodes[e.source_node_id]?.label || "unknown",
               from_type: connectedNodes[e.source_node_id]?.node_type || "unknown",
               type: e.relationship_type,
-              to: "matched node",
+              to: connectedNodes[e.target_node_id]?.label || "unknown",
+              to_type: connectedNodes[e.target_node_id]?.node_type || "unknown",
               weight: e.weight,
             })),
           ];
@@ -358,13 +576,11 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt(projectContext);
     const modelId = MODEL_MAP[model] || MODEL_MAP["sonnet-4"];
 
-    // Build Anthropic messages (convert from our format)
     const anthropicMessages = messages.map((m: any) => ({
       role: m.role === "system" ? "user" : m.role,
       content: m.content,
     }));
 
-    // Initial Anthropic API call with streaming
     const startTime = Date.now();
 
     const makeAnthropicCall = async (msgs: any[], pendingToolResults?: any[]) => {
@@ -377,13 +593,12 @@ serve(async (req) => {
         stream: true,
       };
 
-      // Enable extended thinking for Sonnet
       if (modelId.includes("sonnet")) {
         body.thinking = {
           type: "enabled",
           budget_tokens: 10000,
         };
-        body.temperature = 1; // Required for extended thinking
+        body.temperature = 1;
       }
 
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -405,7 +620,6 @@ serve(async (req) => {
       return resp;
     };
 
-    // We'll use a TransformStream to process Anthropic SSE and forward our own events
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -500,19 +714,19 @@ serve(async (req) => {
                         tokensOutput += event.usage.output_tokens || 0;
                       }
                       if (event.delta?.stop_reason === "tool_use" && pendingToolUses.length > 0) {
-                        // Execute all pending tools in parallel
                         const toolResults = await Promise.all(
                           pendingToolUses.map(async (tu) => {
                             send("tool_executing", { name: tu.name, id: tu.id });
                             const result = await executeTool(tu.name, tu.input);
                             const toolCall = { name: tu.name, input: tu.input, output: JSON.parse(result) };
                             allToolCalls.push(toolCall);
-                            send("tool_complete", { name: tu.name, id: tu.id, resultSummary: `${JSON.parse(result)?.length || 0} results` });
+                            const parsed = JSON.parse(result);
+                            const summary = Array.isArray(parsed) ? `${parsed.length} results` : parsed.total_matches ? `${parsed.total_matches} matches` : "done";
+                            send("tool_complete", { name: tu.name, id: tu.id, resultSummary: summary });
                             return { type: "tool_result", tool_use_id: tu.id, content: result };
                           })
                         );
 
-                        // Add assistant message with tool_use blocks and tool results
                         allMessages.push({
                           role: "assistant",
                           content: pendingToolUses.map((tu) => ({
@@ -538,7 +752,6 @@ serve(async (req) => {
 
           const durationMs = Date.now() - startTime;
 
-          // Save to database
           if (conversation_id) {
             await supabase.from("chat_messages").insert({
               conversation_id,
