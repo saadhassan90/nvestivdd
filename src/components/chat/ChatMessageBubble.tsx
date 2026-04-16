@@ -8,13 +8,24 @@ import type { ChatMessage } from "@/contexts/ChatContext";
 
 const TOOL_LABELS: Record<string, string> = {
   query_deal_scores: "Querying deal scores",
+  query_module_scores: "Reviewing module scores",
+  query_team_members: "Analyzing team members",
+  query_service_providers: "Checking service providers",
+  query_performance_metrics: "Pulling performance metrics",
+  query_fee_structure: "Reviewing fee structure",
+  query_exits: "Analyzing realized exits",
+  query_thesis_validations: "Validating thesis claims",
+  query_competitive_landscape: "Mapping competitors",
+  query_market_factors: "Assessing market dynamics",
   query_red_flags: "Searching red flags",
+  query_critical_gaps: "Identifying info gaps",
   query_interrogatory: "Checking interrogatory items",
   query_data_room: "Reviewing data room",
   query_report_section: "Reading report section",
+  query_research_sources: "Searching research sources",
   query_cross_deal: "Comparing deals",
   query_documents: "Listing documents",
-  search_documents: "RAG search",
+  search_documents: "Knowledge graph search",
 };
 
 export function ChatMessageBubble({ message }: { message: ChatMessage }) {
