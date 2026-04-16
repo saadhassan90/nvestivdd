@@ -225,20 +225,6 @@ export default function Dashboard() {
                 }
               />
 
-              {/* System integrity footer */}
-              <BlurFade delay={0.25}>
-                <div className="rounded-xl border border-border bg-card p-4 flex items-start gap-3">
-                  <div className="mt-0.5 h-5 w-5 rounded-full bg-severity-monitor/10 flex items-center justify-center shrink-0">
-                    <span className="text-severity-monitor text-xs font-bold">i</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">System Integrity Check</p>
-                    <p className="text-sm text-severity-monitor mt-0.5">
-                      All scores are calculated using the L1 Institutional Framework v4.2. Scores below 50 trigger an automatic "Hard Floor" status and require manual compliance override for further processing.
-                    </p>
-                  </div>
-                </div>
-              </BlurFade>
             </div>
           )}
         </main>
