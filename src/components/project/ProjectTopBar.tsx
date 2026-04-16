@@ -41,7 +41,7 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-border bg-card shrink-0">
+      <header className="sticky top-0 z-30 border-b border-border/50 bg-background shrink-0">
         <div className="flex h-12 items-center justify-between px-4 sm:px-5">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm min-w-0">
