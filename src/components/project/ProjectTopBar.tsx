@@ -71,18 +71,18 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
               <Share2 className="h-4 w-4 text-muted-foreground" />
             </button>
 
-            {/* CTA Button */}
+            {/* CTA Button — secondary style */}
             {cta && !isProcessing && (
-              <button className="ml-2 inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95">
+              <button className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-muted active:scale-95">
                 {cta.label}
               </button>
             )}
 
-            {/* Ask Iris */}
+            {/* Ask Iris — primary style */}
             {!isOpen && (
               <button
                 onClick={() => setIsOpen(true)}
-                className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-muted active:scale-95"
+                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Ask Iris</span>
