@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Users, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck } from "lucide-react";
+import { Users, CheckCircle2, AlertTriangle, ShieldCheck, Linkedin } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -19,21 +20,16 @@ const VERIFICATION_COLORS: Record<string, string> = {
   unverified: "text-severity-critical",
 };
 
-const SCORE_BAR_COLOR = (val: string | undefined) => {
-  if (!val) return "bg-muted";
-  const lower = val.toLowerCase();
-  if (lower === "high" || lower === "active" || lower === "daily" || lower === "quarterly" || lower === "pass" || lower === "verified")
-    return "bg-score-strong";
-  if (lower === "partial" || lower === "medium" || lower === "monthly")
-    return "bg-severity-elevated";
-  return "bg-severity-critical";
+const VERIFICATION_BG: Record<string, string> = {
+  verified: "bg-score-strong/10 border-score-strong/20",
+  partially_verified: "bg-severity-elevated/10 border-severity-elevated/20",
+  unverified: "bg-severity-critical/10 border-severity-critical/20",
 };
 
 export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMarkdown, moduleScore }: TeamTabProps) {
   const hasMarkdown = !!reportMarkdown;
-  const [visibleMembers, setVisibleMembers] = useState(5);
+  const [visibleMembers, setVisibleMembers] = useState(12);
 
-  const keyPersonnel = teamMembers.filter((m) => m.is_key_person);
   const allMembers = [...teamMembers].sort((a, b) => (a.order_index ?? 99) - (b.order_index ?? 99));
   const affiliations = (m: Tables<"team_members">) => (m.prior_affiliations as string[]) || [];
 
@@ -47,7 +43,7 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
               Team & Governance
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
-              A comprehensive assessment of the leadership structure, key person dependencies, and the institutional frameworks governing fund operations.
+              Leadership structure, key person dependencies, and institutional governance frameworks.
             </p>
           </div>
           {moduleScore !== undefined && moduleScore !== null && (
@@ -111,7 +107,7 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
         </BlurFade>
       )}
 
-      {/* ── Principal Profiles Table (Desktop) ── */}
+      {/* ── Team Member Cards ── */}
       {teamMembers.length > 0 && (
         <BlurFade delay={0.15}>
           <div>
@@ -119,127 +115,94 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
               Principal Profiles
             </p>
 
-            {/* Desktop table */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pr-4">Name</th>
-                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 px-4">Role</th>
-                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 px-4">Experience</th>
-                    <th className="text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pl-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allMembers.slice(0, visibleMembers).map((member) => (
-                    <tr key={member.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="py-3 pr-4">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-foreground text-sm">{member.name}</p>
-                          {member.is_key_person && (
-                            <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {allMembers.slice(0, visibleMembers).map((member, i) => {
+                const initials = member.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+                const photoUrl = (member as any).photo_url as string | null;
+                const verificationLabel = member.verification_status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                const verificationColor = VERIFICATION_COLORS[member.verification_status] || "text-muted-foreground";
+                const verificationBg = VERIFICATION_BG[member.verification_status] || "bg-muted border-border";
+
+                return (
+                  <BlurFade key={member.id} delay={0.15 + i * 0.03}>
+                    <MagicCard className="!p-5">
+                      <div className="flex items-start gap-4">
+                        {/* Avatar */}
+                        <Avatar className="h-14 w-14 shrink-0 border-2 border-border">
+                          {photoUrl && (
+                            <AvatarImage src={photoUrl} alt={member.name} className="object-cover" />
+                          )}
+                          <AvatarFallback className="text-sm font-bold bg-muted text-muted-foreground">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-semibold text-foreground text-sm truncate">{member.name}</p>
+                            {member.is_key_person && (
+                              <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{member.title || "—"}</p>
+                          {member.years_experience && (
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {member.years_experience} years experience
+                            </p>
                           )}
                         </div>
-                        {affiliations(member).length > 0 && (
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Ex-{affiliations(member)[0]}
-                          </p>
+                      </div>
+
+                      {/* Affiliations */}
+                      {affiliations(member).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {affiliations(member).map((aff, j) => (
+                            <span
+                              key={j}
+                              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border"
+                            >
+                              Ex-{aff}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Verification + Education */}
+                      <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${verificationBg} ${verificationColor}`}>
+                          {member.verification_status === "verified" && <CheckCircle2 className="h-3 w-3" />}
+                          {member.verification_status === "partially_verified" && <AlertTriangle className="h-3 w-3" />}
+                          {verificationLabel}
+                        </span>
+                        {member.education && (
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[50%]">
+                            {member.education}
+                          </span>
                         )}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {member.title || "—"}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {member.years_experience ? `${member.years_experience} Years` : "—"}
-                      </td>
-                      <td className="py-3 pl-4 text-center">
-                        <span className={`inline-flex items-center gap-1 text-xs font-medium ${VERIFICATION_COLORS[member.verification_status] || "text-muted-foreground"}`}>
-                          {member.verification_status === "verified" && <CheckCircle2 className="h-3.5 w-3.5" />}
-                          {member.verification_status === "partially_verified" && <AlertTriangle className="h-3.5 w-3.5" />}
-                          {member.verification_status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Adverse findings row */}
-              {allMembers.slice(0, visibleMembers).some((m) => m.adverse_findings) && (
-                <div className="mt-3 space-y-2">
-                  {allMembers
-                    .slice(0, visibleMembers)
-                    .filter((m) => m.adverse_findings)
-                    .map((m) => (
-                      <div key={m.id} className="flex items-start gap-2 rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-3">
-                        <AlertTriangle className="h-4 w-4 text-severity-critical shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-xs font-semibold text-severity-critical">{m.name} — Adverse Finding</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{m.adverse_findings}</p>
-                        </div>
                       </div>
-                    ))}
-                </div>
-              )}
 
-              {allMembers.length > visibleMembers && (
-                <button
-                  onClick={() => setVisibleMembers((c) => c + 10)}
-                  className="w-full rounded-lg border border-border py-3 mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                >
-                  View All Team Members ({allMembers.length})
-                </button>
-              )}
+                      {/* Adverse finding */}
+                      {member.adverse_findings && (
+                        <div className="mt-3 flex items-start gap-2 rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-2.5">
+                          <AlertTriangle className="h-3.5 w-3.5 text-severity-critical shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-muted-foreground">{member.adverse_findings}</p>
+                        </div>
+                      )}
+                    </MagicCard>
+                  </BlurFade>
+                );
+              })}
             </div>
 
-            {/* Mobile cards */}
-            <div className="sm:hidden space-y-3">
-              {allMembers.slice(0, visibleMembers).map((member, i) => (
-                <BlurFade key={member.id} delay={i * 0.03}>
-                  <MagicCard>
-                    <div className="flex items-center gap-3">
-                      {/* Avatar placeholder */}
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted">
-                        <span className="text-sm font-bold text-muted-foreground">
-                          {member.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="font-semibold text-foreground text-sm truncate">{member.name}</p>
-                          {member.verification_status === "verified" && (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{member.title || "—"}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
-                          {affiliations(member).length > 0 && `Ex-${affiliations(member)[0]} · `}
-                          {member.years_experience ? `${member.years_experience}Y Experience` : ""}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                    </div>
-
-                    {/* Adverse finding */}
-                    {member.adverse_findings && (
-                      <div className="mt-3 flex items-start gap-2 rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-2.5">
-                        <AlertTriangle className="h-3.5 w-3.5 text-severity-critical shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-muted-foreground">{member.adverse_findings}</p>
-                      </div>
-                    )}
-                  </MagicCard>
-                </BlurFade>
-              ))}
-
-              {allMembers.length > visibleMembers && (
-                <button
-                  onClick={() => setVisibleMembers((c) => c + 10)}
-                  className="w-full rounded-lg border border-border py-3 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  View All Team Members ({allMembers.length})
-                </button>
-              )}
-            </div>
+            {allMembers.length > visibleMembers && (
+              <button
+                onClick={() => setVisibleMembers((c) => c + 12)}
+                className="w-full rounded-lg border border-border py-3 mt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                View All Team Members ({allMembers.length})
+              </button>
+            )}
           </div>
         </BlurFade>
       )}
@@ -273,25 +236,6 @@ export function TeamTab({ teamMembers, serviceProviders, reportSection, reportMa
             </div>
           </div>
         </BlurFade>
-      )}
-
-      {/* ── Citation Legend ── */}
-      {teamMembers.length > 0 && (
-        <div className="flex items-center gap-6 pt-3 border-t border-border">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Citation Legend:</p>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            <span className="text-[10px] text-muted-foreground">[1] GP-Sourced</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-score-strong" />
-            <span className="text-[10px] text-muted-foreground">[3] Verified</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-severity-elevated" />
-            <span className="text-[10px] text-muted-foreground">[!] Flagged</span>
-          </div>
-        </div>
       )}
 
       {/* ── Empty State ── */}

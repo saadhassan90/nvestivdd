@@ -1326,6 +1326,7 @@ export type Database = {
           is_key_person: boolean
           name: string
           order_index: number | null
+          photo_url: string | null
           prior_affiliations: Json | null
           project_id: string
           role_category: string | null
@@ -1344,6 +1345,7 @@ export type Database = {
           is_key_person?: boolean
           name: string
           order_index?: number | null
+          photo_url?: string | null
           prior_affiliations?: Json | null
           project_id: string
           role_category?: string | null
@@ -1362,6 +1364,7 @@ export type Database = {
           is_key_person?: boolean
           name?: string
           order_index?: number | null
+          photo_url?: string | null
           prior_affiliations?: Json | null
           project_id?: string
           role_category?: string | null

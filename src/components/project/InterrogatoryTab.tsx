@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { FileDown, AlertTriangle, FileText, CheckCircle2, Lock } from "lucide-react";
+import { FileDown, AlertTriangle, FileText, Lock } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
@@ -47,35 +46,6 @@ const PRIORITY_SCORE_COLOR = (score: number | null) => {
 
 export function InterrogatoryTab({ items, fundName, reportMarkdown }: InterrogatoryTabProps) {
   const hasMarkdown = !!reportMarkdown;
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-
-  // Derive unique source categories for filter pills
-  const categoryCounts: Record<string, number> = {};
-  items.forEach((item) => {
-    const cat = item.source_module || item.module || "other";
-    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-  });
-
-  const filterOptions = [
-    { key: "all", label: `All (${items.length})` },
-    ...Object.entries(categoryCounts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([key, count]) => ({
-        key,
-        label: `${SOURCE_MODULE_LABELS[key] || key} (${count})`,
-      })),
-  ];
-
-  if (hasMarkdown) {
-    filterOptions.unshift({ key: "report", label: "Report" });
-  }
-
-  const filtered =
-    activeFilter === "all" || activeFilter === "report"
-      ? items
-      : items.filter(
-          (i) => (i.source_module || i.module) === activeFilter
-        );
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -87,7 +57,7 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
               Interrogatory Matrix
             </p>
             <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-              GP meeting questions
+              GP Meeting Questions
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {items.length} questions generated from red flags and verification gaps
@@ -100,35 +70,26 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
         </div>
       </BlurFade>
 
-      {/* ── Filters ── */}
-      <BlurFade delay={0.05}>
-        <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
-          {filterOptions.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(f.key)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap border ${
-                activeFilter === f.key
-                  ? "bg-foreground text-background border-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </BlurFade>
-
-      {/* ── Report markdown view ── */}
-      {activeFilter === "report" && (
-        <MarkdownSectionCards content={reportMarkdown ?? null} baseDelay={0.05} />
+      {/* ── Report Narrative ── */}
+      {hasMarkdown && (
+        <BlurFade delay={0.05}>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              Meeting Conditions & Analysis
+            </p>
+            <MarkdownSectionCards content={reportMarkdown ?? null} baseDelay={0.07} />
+          </div>
+        </BlurFade>
       )}
 
       {/* ── Desktop table view ── */}
-      {activeFilter !== "report" && (
+      {items.length > 0 && (
         <>
           <div className="hidden sm:block">
             <BlurFade delay={0.1}>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                Questions ({items.length})
+              </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -145,7 +106,7 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((item, i) => {
+                    {items.map((item) => {
                       const sourceKey = item.source_module || item.module || "structural";
                       const tagLabel = SOURCE_MODULE_LABELS[sourceKey] || sourceKey;
                       const tagStyle = TAG_STYLES[sourceKey] || TAG_STYLES.structural;
@@ -186,10 +147,9 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
 
           {/* ── Mobile card view ── */}
           <div className="sm:hidden space-y-4">
-            {filtered.map((item, i) => {
+            {items.map((item, i) => {
               const sourceKey = item.source_module || item.module || "structural";
               const tagLabel = SOURCE_MODULE_LABELS[sourceKey] || sourceKey;
-              const tagStyle = TAG_STYLES[sourceKey] || TAG_STYLES.structural;
               const score = item.gp_response_score;
 
               return (
@@ -220,7 +180,6 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
                       {item.question}
                     </p>
 
-                    {/* GP Response */}
                     {item.gp_response_notes && (
                       <div className="rounded-lg bg-muted/50 p-3 mb-3">
                         <div className="flex items-center gap-1.5 mb-1.5">
@@ -235,7 +194,6 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
                       </div>
                     )}
 
-                    {/* Rationale warning */}
                     {item.rationale && (
                       <div className="flex items-start gap-2 mb-3">
                         <AlertTriangle className="h-3.5 w-3.5 text-severity-elevated shrink-0 mt-0.5" />
@@ -245,7 +203,6 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
                       </div>
                     )}
 
-                    {/* Footer */}
                     <div className="flex items-center justify-between pt-2 border-t border-border/50">
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider ${
@@ -277,9 +234,8 @@ export function InterrogatoryTab({ items, fundName, reportMarkdown }: Interrogat
             })}
           </div>
 
-          {/* ── Count ── */}
           <div className="text-xs text-muted-foreground text-center sm:text-left pt-2">
-            Showing {filtered.length} of {items.length} questions
+            Showing {items.length} questions
           </div>
         </>
       )}
