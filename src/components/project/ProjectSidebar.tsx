@@ -10,19 +10,20 @@ interface ProjectSidebarProps {
 }
 
 const COMPLETE_NAV_ITEMS = [
-  { key: "overview", label: "Due Diligence", icon: LayoutDashboard, section: null },
-  { key: "team", label: "Team", icon: Users, section: "analysis" },
-  { key: "performance", label: "Performance", icon: TrendingUp, section: "analysis" },
-  { key: "strategy", label: "Strategy & Market", icon: Target, section: "analysis" },
-  { key: "red_flags", label: "Risk Assessment", icon: AlertTriangle, section: "analysis" },
-  { key: "interrogatory", label: "Interrogatory", icon: MessageSquare, section: null },
-  { key: "data_room", label: "Data Room", icon: FolderOpen, section: null },
-  { key: "documents", label: "Research Sources", icon: FileText, section: null },
+  { key: "overview", label: "Overview", icon: LayoutDashboard, section: "report", moduleMatch: null },
+  { key: "team", label: "Team & governance", icon: Users, section: "analysis", moduleMatch: "team" },
+  { key: "performance", label: "Performance", icon: TrendingUp, section: "analysis", moduleMatch: "financial" },
+  { key: "strategy", label: "Strategy & thesis", icon: Target, section: "analysis", moduleMatch: "strategy" },
+  { key: "red_flags", label: "Risk & red flags", icon: AlertTriangle, section: "analysis", moduleMatch: "operations" },
+  { key: "interrogatory", label: "Interrogatory matrix", icon: MessageSquare, section: null, moduleMatch: null },
+  { key: "documents", label: "Sources", icon: FileText, section: null, moduleMatch: null },
+  { key: "data_room", label: "Data Room", icon: FolderOpen, section: null, moduleMatch: null },
+  { key: "analysis_log", label: "Analysis log", icon: FileBarChart, section: null, moduleMatch: null },
 ];
 
 const PROCESSING_NAV_ITEMS = [
-  { key: "overview", label: "Dashboard", icon: LayoutDashboard, section: null },
-  { key: "analysis_log", label: "Analysis Log", icon: FileBarChart, section: null },
+  { key: "overview", label: "Dashboard", icon: LayoutDashboard, section: null, moduleMatch: null },
+  { key: "analysis_log", label: "Analysis Log", icon: FileBarChart, section: null, moduleMatch: null },
 ];
 
 const MODULE_NAMES: Record<string, string> = {
@@ -123,20 +124,17 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
           {analysisItems.length > 0 && (
             <>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-4 mb-1.5 px-3">
-                Analysis Sections
+                Report Sections
               </p>
               <nav className="space-y-0.5">
                 {analysisItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.key;
-                  // Find module score for this section
-                  const moduleScore = moduleScoresData.find((ms: any) => {
-                    if (item.key === "team") return ms.module_key?.includes("team");
-                    if (item.key === "performance") return ms.module_key?.includes("financial");
-                    if (item.key === "strategy") return ms.module_key?.includes("strategy");
-                    if (item.key === "red_flags") return ms.module_key?.includes("operations") || ms.module_key?.includes("terms");
-                    return false;
-                  });
+                  const moduleScore = item.moduleMatch
+                    ? moduleScoresData.find((ms: any) => ms.module_key?.includes(item.moduleMatch))
+                    : null;
+                  const score = moduleScore?.score;
+                  const scoreColor = score >= 85 ? "text-score-strong" : score >= 70 ? "text-score-advance" : score >= 50 ? "text-score-review" : score ? "text-severity-critical" : "";
                   return (
                     <button
                       key={item.key}
@@ -148,9 +146,9 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      {item.label}
-                      {moduleScore && (
-                        <span className="ml-auto text-[10px] text-muted-foreground">—</span>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {score !== undefined && (
+                        <span className={`text-xs font-bold ${scoreColor}`}>{score}</span>
                       )}
                     </button>
                   );

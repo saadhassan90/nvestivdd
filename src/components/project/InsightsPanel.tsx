@@ -1,4 +1,5 @@
-import { Sparkles, Clock } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, Plus } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 
 interface InsightsPanelProps {
@@ -6,84 +7,88 @@ interface InsightsPanelProps {
   isProcessing?: boolean;
 }
 
-/**
- * Right-side panel for system insights, filtered comments, and quick notes.
- * Shown during both processing and completed report states.
- */
+const FILTER_TABS = ["All", "Team", "AI"] as const;
+
 export function InsightsPanel({ projectName, isProcessing }: InsightsPanelProps) {
+  const [activeFilter, setActiveFilter] = useState<typeof FILTER_TABS[number]>("All");
+
   return (
     <aside className="hidden xl:flex flex-col w-[260px] shrink-0 border-l border-border bg-card h-full overflow-y-auto">
       <div className="p-4 space-y-5">
-        {/* System Insights */}
+        {/* Header */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">System Insights</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Comments & Notes</h3>
+          {/* Filter tabs */}
+          <div className="flex items-center gap-0.5 mt-3 rounded-lg bg-muted p-0.5">
+            {FILTER_TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveFilter(tab)}
+                className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                  activeFilter === tab
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.toUpperCase()}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {isProcessing ? (
-            <BlurFade>
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary">AI Observation</span>
-                </div>
-                <p className="text-xs text-foreground leading-relaxed">
-                  Analysis is currently in progress. System insights will populate as research phases complete and claims are cross-referenced.
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-wider">
-                  Confidence: Pending
-                </p>
-              </div>
-            </BlurFade>
-          ) : (
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
+        {isProcessing ? (
+          <BlurFade>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">AI Observation</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Nvestiv AI</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">Now</span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                No insights available yet.
+              <p className="text-xs text-foreground leading-relaxed">
+                Analysis is currently in progress. Insights and comments will populate as research phases complete.
               </p>
             </div>
-          )}
-        </div>
-
-        {/* Filtered Comments */}
-        <div>
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Filtered Comments</h3>
-
-          {isProcessing ? (
-            <div className="space-y-3">
-              <div className="rounded-lg border border-border p-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-foreground">System Log</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    <Clock className="h-3 w-3 inline mr-0.5" />
-                    Processing
-                  </span>
+          </BlurFade>
+        ) : (
+          <div className="space-y-3">
+            {/* Sample AI comment card */}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                  <Sparkles className="h-3 w-3 text-primary-foreground" />
                 </div>
-                <p className="text-xs text-muted-foreground italic leading-relaxed">
-                  Automated audit trail will appear here as analysis progresses.
-                </p>
+                <span className="text-xs font-semibold text-foreground">Nvestiv AI</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">Now</span>
               </div>
+              <p className="text-xs text-foreground leading-relaxed">
+                No AI observations generated yet. Comments will appear here as team members and the AI engine annotate the report.
+              </p>
             </div>
-          ) : (
-            <p className="text-xs text-muted-foreground italic">No comments yet.</p>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Quick Comment */}
-        <div>
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Quick Comment</h3>
-          <div className="relative">
-            <textarea
-              placeholder="Add observation to log..."
-              className="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-              rows={3}
-            />
-            <button className="absolute bottom-2 right-2 p-1 rounded hover:bg-muted transition-colors">
-              <span className="text-primary text-sm">▶</span>
-            </button>
+        {/* Add note button */}
+        <button className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+          <Plus className="h-3.5 w-3.5" />
+          Add note
+        </button>
+      </div>
+
+      {/* Report level indicator at bottom */}
+      <div className="mt-auto border-t border-border p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Report Level</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+            <span className="text-xs font-medium text-foreground">L1 Preliminary</span>
+          </div>
+          <div className="flex items-center gap-2 opacity-40">
+            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+            <span className="text-xs text-muted-foreground">L2 Detailed</span>
+          </div>
+          <div className="flex items-center gap-2 opacity-40">
+            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+            <span className="text-xs text-muted-foreground">L3 Final</span>
           </div>
         </div>
       </div>
