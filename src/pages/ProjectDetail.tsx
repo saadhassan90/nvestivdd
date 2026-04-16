@@ -285,6 +285,10 @@ export default function ProjectDetail() {
                 <RedFlagsTab
                   redFlags={redFlags}
                   reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "red_flags") : null}
+                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("operations") || ms.module_key?.includes("risk"))?.score}
+                  fundName={project.fund_name}
+                  submissionQuality={submissionQuality}
+                  criticalInfoGaps={criticalInfoGaps}
                 />
               )}
               {activeTab === "interrogatory" && (
