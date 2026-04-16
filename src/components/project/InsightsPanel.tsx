@@ -74,24 +74,6 @@ export function InsightsPanel({ projectName, isProcessing }: InsightsPanelProps)
         </button>
       </div>
 
-      {/* Report level indicator at bottom */}
-      <div className="mt-auto p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Report Level</p>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-            <span className="text-xs font-medium text-foreground">L1 Preliminary</span>
-          </div>
-          <div className="flex items-center gap-2 opacity-40">
-            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-            <span className="text-xs text-muted-foreground">L2 Detailed</span>
-          </div>
-          <div className="flex items-center gap-2 opacity-40">
-            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-            <span className="text-xs text-muted-foreground">L3 Final</span>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }
