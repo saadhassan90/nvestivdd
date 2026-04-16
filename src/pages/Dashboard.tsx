@@ -224,6 +224,7 @@ export default function Dashboard() {
                     sortDir: filters.sortBy === column && filters.sortDir === "asc" ? "desc" : "asc",
                   })
                 }
+                onRefresh={fetchData}
               />
 
             </div>
