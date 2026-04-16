@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useReportMarkdown } from "@/hooks/use-report-markdown";
 import { getTabMarkdown } from "@/lib/markdown-sections";
-import { getStatusLabel, getStatusColor } from "@/lib/verdict-utils";
+
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
@@ -172,8 +172,6 @@ export default function ProjectDetail() {
   }
 
   const hasReportMarkdown = reportMarkdownSections.length > 0;
-  const statusLabel = getStatusLabel(project.status);
-  const statusColor = getStatusColor(project.status);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
