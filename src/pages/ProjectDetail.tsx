@@ -256,6 +256,7 @@ export default function ProjectDetail() {
                   serviceProviders={serviceProviders}
                   reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("team") || s.section_title?.toLowerCase().includes("leadership"))}
                   reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "team") : null}
+                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("team"))?.score}
                 />
               )}
               {activeTab === "performance" && (
