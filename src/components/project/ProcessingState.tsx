@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, Loader2, AlertCircle, Brain, FileSearch, Zap, Shield, Users, TrendingUp, Target, FileText, HelpCircle, FolderOpen, Award, BookOpen, Package } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { CheckCircle2, Circle, Loader2, AlertCircle, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { BorderBeam } from "@/components/magicui/BorderBeam";
+import { MagicCard } from "@/components/magicui/MagicCard";
+import { NumberTicker } from "@/components/magicui/NumberTicker";
 
 interface AnalysisLog {
   id: string;
@@ -13,7 +14,7 @@ interface AnalysisLog {
   total_steps: number;
   status: string;
   detail: string | null;
-  started_at: string;
+  started_at: string | null;
   completed_at: string | null;
 }
 
@@ -22,62 +23,79 @@ interface ProcessingStateProps {
   projectId?: string;
 }
 
-const STEP_ICONS: Record<string, React.ReactNode> = {
-  download_docs: <FileSearch className="h-4 w-4" />,
-  opus_analysis: <Brain className="h-4 w-4" />,
-  sonnet_assembly: <FileText className="h-4 w-4" />,
-  node_0: <Package className="h-4 w-4" />,
-  node_1: <Zap className="h-4 w-4" />,
-  node_2: <TrendingUp className="h-4 w-4" />,
-  node_3: <Users className="h-4 w-4" />,
-  node_4: <Target className="h-4 w-4" />,
-  node_5: <FileText className="h-4 w-4" />,
-  node_6: <Shield className="h-4 w-4" />,
-  node_7: <AlertCircle className="h-4 w-4" />,
-  node_8: <HelpCircle className="h-4 w-4" />,
-  node_9: <FolderOpen className="h-4 w-4" />,
-  node_10: <Award className="h-4 w-4" />,
-  node_11: <BookOpen className="h-4 w-4" />,
-  node_12: <Package className="h-4 w-4" />,
-  saving_report: <FileText className="h-4 w-4" />,
-  extracting_data: <Zap className="h-4 w-4" />,
-};
+/** Group logs into phases based on step_index ranges */
+function groupIntoPhases(logs: AnalysisLog[]) {
+  const phases = [
+    { name: "Phase 1: Preparation", range: [0, 2] },
+    { name: "Phase 2: Research", range: [3, 8] },
+    { name: "Phase 3: Scoring & Assembly", range: [9, 99] },
+  ];
 
-function StatusIcon({ status }: { status: string }) {
-  switch (status) {
-    case "complete":
-      return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-    case "running":
-      return <Loader2 className="h-4 w-4 text-primary animate-spin" />;
-    case "error":
-      return <AlertCircle className="h-4 w-4 text-destructive" />;
-    default:
-      return <Circle className="h-4 w-4 text-muted-foreground/30" />;
+  return phases.map((phase) => {
+    const items = logs.filter(
+      (l) => l.step_index >= phase.range[0] && l.step_index <= phase.range[1]
+    );
+    const allComplete = items.length > 0 && items.every((i) => i.status === "complete");
+    const hasRunning = items.some((i) => i.status === "running");
+    const status = allComplete ? "complete" : hasRunning ? "running" : "pending";
+
+    const completedCount = items.filter((i) => i.status === "complete").length;
+
+    return {
+      name: phase.name,
+      status,
+      items,
+      completedCount,
+      totalCount: items.length,
+    };
+  });
+}
+
+function formatTime(dateStr: string | null) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+}
+
+function PhaseStatusBadge({ status, completedCount, totalCount }: { status: string; completedCount: number; totalCount: number }) {
+  if (status === "complete") {
+    return <span className="text-[10px] font-bold uppercase tracking-wider text-score-strong">Complete</span>;
   }
+  if (status === "running") {
+    return (
+      <span className="text-[10px] font-bold uppercase tracking-wider text-severity-monitor">
+        In Progress — {completedCount} of {totalCount} items complete
+      </span>
+    );
+  }
+  return <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pending previous phase</span>;
+}
+
+function PhaseIcon({ status }: { status: string }) {
+  if (status === "complete") return <CheckCircle2 className="h-6 w-6 text-score-strong" />;
+  if (status === "running") return <Loader2 className="h-6 w-6 text-severity-monitor animate-spin" />;
+  return <Circle className="h-6 w-6 text-muted-foreground/30" />;
+}
+
+function StepDot({ status }: { status: string }) {
+  if (status === "complete") return <span className="h-2 w-2 rounded-full bg-score-strong shrink-0 mt-1.5" />;
+  if (status === "running") return <span className="h-2 w-2 rounded-full bg-severity-monitor shrink-0 mt-1.5 animate-pulse" />;
+  if (status === "error") return <span className="h-2 w-2 rounded-full bg-severity-critical shrink-0 mt-1.5" />;
+  return <span className="h-2 w-2 rounded-full bg-muted-foreground/20 shrink-0 mt-1.5" />;
 }
 
 export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) {
-  const [elapsed, setElapsed] = useState(() => {
-    if (startedAt) {
-      return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
-    }
-    return 0;
-  });
+  const [elapsed, setElapsed] = useState(0);
   const [logs, setLogs] = useState<AnalysisLog[]>([]);
 
-  // Timer
   useEffect(() => {
+    const start = startedAt ? new Date(startedAt).getTime() : Date.now();
     const timer = setInterval(() => {
-      if (startedAt) {
-        setElapsed(Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)));
-      } else {
-        setElapsed(prev => prev + 1);
-      }
+      setElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
     }, 1000);
     return () => clearInterval(timer);
   }, [startedAt]);
 
-  // Fetch initial logs + subscribe to realtime
   useEffect(() => {
     if (!projectId) return;
 
@@ -94,122 +112,129 @@ export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) 
 
     const channel = supabase
       .channel(`analysis-logs-${projectId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "analysis_logs", filter: `project_id=eq.${projectId}` },
-        () => {
-          // Refetch all logs on any change to keep order consistent
-          fetchLogs();
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "analysis_logs", filter: `project_id=eq.${projectId}` }, () => fetchLogs())
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [projectId]);
 
-  const minutes = Math.floor(elapsed / 60);
-  const seconds = elapsed % 60;
-
-  // Calculate progress
-  const completedSteps = logs.filter(l => l.status === "complete").length;
-  const totalSteps = logs.length > 0 ? logs[0].total_steps : 17;
+  const completedSteps = logs.filter((l) => l.status === "complete").length;
+  const totalSteps = logs.length > 0 ? logs[0].total_steps : 13;
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  const phases = useMemo(() => groupIntoPhases(logs), [logs]);
+  const minutes = Math.floor(elapsed / 60);
 
-  // Current active step
-  const activeStep = logs.find(l => l.status === "running");
+  // Compute sources ingested (completed research steps)
+  const sourcesIngested = logs.filter((l) => l.status === "complete" && l.step_index >= 3 && l.step_index <= 8).length;
+  // Claims = total completed
+  const claimsCrossRef = completedSteps;
 
   return (
-    <BlurFade>
-      <div className="max-w-2xl mx-auto py-8 px-4">
-        {/* Progress header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 text-primary animate-spin" />
-              <h3 className="text-lg font-bold text-foreground">Analysis in Progress</h3>
-            </div>
-            <span className="text-xs font-mono text-muted-foreground">
-              {minutes}:{seconds.toString().padStart(2, "0")}
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="relative">
-            <Progress value={progressPercent} className="h-2" />
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-muted-foreground">
-                {activeStep ? activeStep.step_label : "Initializing..."}
-              </span>
-              <span className="text-xs font-medium text-foreground">{progressPercent}%</span>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <BlurFade>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Analysis Log</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Complete record of all research actions and automated ingestion cycles.
+          </p>
         </div>
+      </BlurFade>
 
-        {/* Step feed */}
-        <div className="relative rounded-lg border border-border bg-card overflow-hidden">
-          <BorderBeam size={120} duration={8} />
-          <div className="p-4">
-            <h4 className="text-sm font-semibold text-foreground mb-3">Analysis Steps</h4>
-            <div className="space-y-1">
-              {logs.length === 0 ? (
-                <div className="flex items-center gap-3 py-2">
-                  <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
-                  <span className="text-sm text-muted-foreground">Waiting for analysis to start...</span>
-                </div>
-              ) : (
-                logs.map((log) => (
-                  <div
-                    key={log.id}
-                    className={`flex items-start gap-3 py-2 px-2 rounded-md transition-colors ${
-                      log.status === "running"
-                        ? "bg-primary/5 border border-primary/10"
-                        : log.status === "complete"
-                        ? "opacity-80"
-                        : log.status === "error"
-                        ? "bg-destructive/5 border border-destructive/10"
-                        : "opacity-40"
-                    }`}
-                  >
-                    <div className="mt-0.5 flex-shrink-0">
-                      <StatusIcon status={log.status} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground flex-shrink-0">
-                          {STEP_ICONS[log.step_key] || <Circle className="h-4 w-4" />}
-                        </span>
-                        <span className={`text-sm font-medium truncate ${
-                          log.status === "running" ? "text-foreground" :
-                          log.status === "complete" ? "text-foreground" :
-                          "text-muted-foreground"
-                        }`}>
-                          {log.step_label}
-                        </span>
+      {/* Metric cards */}
+      <BlurFade delay={0.05}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <MagicCard>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Overall Progress</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-foreground">{progressPercent}%</span>
+              <span className="text-[10px] font-bold uppercase text-score-strong">Active</span>
+            </div>
+            <Progress value={progressPercent} className="h-1 mt-2" />
+          </MagicCard>
+          <MagicCard>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sources</p>
+            <span className="mt-2 block text-2xl font-bold text-foreground">
+              <NumberTicker value={sourcesIngested} />
+            </span>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Ingested to Vault</p>
+          </MagicCard>
+          <MagicCard>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Claims Identified</p>
+            <span className="mt-2 block text-2xl font-bold text-foreground">
+              <NumberTicker value={claimsCrossRef} />
+            </span>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Cross-reference map</p>
+          </MagicCard>
+          <MagicCard>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Elapsed Time</p>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-foreground">{minutes}</span>
+              <span className="text-sm text-muted-foreground">min</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">L1 Latency Monitor</p>
+          </MagicCard>
+        </div>
+      </BlurFade>
+
+      {/* Phases timeline */}
+      <div className="space-y-6">
+        {phases.map((phase, phaseIdx) => (
+          <BlurFade key={phase.name} delay={0.1 + phaseIdx * 0.05}>
+            <div>
+              {/* Phase header */}
+              <div className="flex items-center gap-3 mb-3">
+                <PhaseIcon status={phase.status} />
+                <h2 className="text-xl font-bold text-foreground">{phase.name}</h2>
+                <PhaseStatusBadge status={phase.status} completedCount={phase.completedCount} totalCount={phase.totalCount} />
+              </div>
+
+              {/* Step items */}
+              {phase.items.length > 0 && (
+                <div className="ml-3 border-l-2 border-border pl-6 space-y-0">
+                  {phase.items.map((log) => (
+                    <div key={log.id} className="relative py-2">
+                      <div className="flex items-start gap-3">
+                        <StepDot status={log.status} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`text-sm font-semibold ${log.status === "running" ? "text-foreground" : log.status === "complete" ? "text-foreground" : "text-muted-foreground"}`}>
+                              {log.step_label}
+                            </span>
+                            {log.started_at && (
+                              <span className="text-[11px] text-muted-foreground font-mono shrink-0">
+                                {formatTime(log.started_at)}
+                              </span>
+                            )}
+                          </div>
+                          {log.detail && (
+                            <div className={`mt-1 text-sm leading-relaxed ${
+                              log.status === "error"
+                                ? "rounded-lg bg-severity-critical/5 border border-severity-critical/20 p-3 text-severity-critical"
+                                : "text-muted-foreground"
+                            }`}>
+                              {log.detail}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {log.detail && (
-                        <p className="text-xs text-muted-foreground mt-0.5 ml-6 truncate">
-                          {log.detail}
-                        </p>
-                      )}
                     </div>
-                    {log.completed_at && log.started_at && (
-                      <span className="text-[10px] text-muted-foreground/60 font-mono flex-shrink-0 mt-0.5">
-                        {Math.round((new Date(log.completed_at).getTime() - new Date(log.started_at).getTime()) / 1000)}s
-                      </span>
-                    )}
-                  </div>
-                ))
+                  ))}
+                </div>
+              )}
+
+              {phase.items.length === 0 && phase.status === "pending" && (
+                <div className="ml-3 border-l-2 border-border pl-6 py-3">
+                  <p className="text-sm text-muted-foreground italic">Pending previous phase</p>
+                </div>
               )}
             </div>
-          </div>
-        </div>
-
-        <p className="text-[11px] text-muted-foreground/60 mt-4 text-center">
-          You can safely navigate away — we'll notify you when it's ready.
-        </p>
+          </BlurFade>
+        ))}
       </div>
-    </BlurFade>
+
+      <p className="text-[11px] text-muted-foreground/60 text-center pt-2">
+        You can safely navigate away — we'll notify you when it's ready.
+      </p>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
+import { InsightsPanel } from "@/components/project/InsightsPanel";
 import { OverviewTab } from "@/components/project/OverviewTab";
 import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
@@ -14,10 +14,13 @@ import { StrategyTab } from "@/components/project/StrategyTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { Search, Bell, Settings, Sparkles, Share2, MoreVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useReportMarkdown } from "@/hooks/use-report-markdown";
 import { getTabMarkdown } from "@/lib/markdown-sections";
+import { getStatusLabel, getStatusColor } from "@/lib/verdict-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
@@ -25,7 +28,7 @@ export default function ProjectDetail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setProjectScope } = useChatContext();
+  const { setProjectScope, isOpen, setIsOpen } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
@@ -49,34 +52,44 @@ export default function ProjectDetail() {
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
 
-  // Fetch and parse the L1 report markdown
   const { sections: reportMarkdownSections } = useReportMarkdown(id);
+
+  const isProcessing = project
+    ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status)
+    : false;
+
+  // Default to analysis_log tab when processing
+  useEffect(() => {
+    if (isProcessing && activeTab === "overview") {
+      setActiveTab("analysis_log");
+    }
+  }, [isProcessing]);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
 
     const [
       projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes,
-      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes
+      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes,
     ] = await Promise.all([
-      supabase.from('projects').select('*').eq('id', id).single(),
-      supabase.from('report_sections').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('red_flags').select('*').eq('project_id', id).order('order_index', { ascending: true }),
-      supabase.from('interrogatory_items').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('data_room_items').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('documents').select('*').eq('project_id', id).order('uploaded_at', { ascending: false }),
-      supabase.from('research_sources').select('*').eq('project_id', id).order('added_at', { ascending: false }),
-      supabase.from('module_scores').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('team_members').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('performance_metrics').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('fee_structure').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('thesis_validations').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('competitive_landscape').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('market_factors').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('service_providers').select('*').eq('project_id', id),
-      supabase.from('submission_quality').select('*').eq('project_id', id).order('order_index'),
-      supabase.from('document_quality_flags').select('*').eq('project_id', id),
-      supabase.from('critical_info_gaps').select('*').eq('project_id', id).order('order_index'),
+      supabase.from("projects").select("*").eq("id", id).single(),
+      supabase.from("report_sections").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("red_flags").select("*").eq("project_id", id).order("order_index", { ascending: true }),
+      supabase.from("interrogatory_items").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("data_room_items").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("documents").select("*").eq("project_id", id).order("uploaded_at", { ascending: false }),
+      supabase.from("research_sources").select("*").eq("project_id", id).order("added_at", { ascending: false }),
+      supabase.from("module_scores").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("team_members").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("performance_metrics").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("fee_structure").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("thesis_validations").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("competitive_landscape").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("market_factors").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("service_providers").select("*").eq("project_id", id),
+      supabase.from("submission_quality").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("document_quality_flags").select("*").eq("project_id", id),
+      supabase.from("critical_info_gaps").select("*").eq("project_id", id).order("order_index"),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
@@ -105,10 +118,10 @@ export default function ProjectDetail() {
 
     const channel = supabase
       .channel(`project-${id}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'projects', filter: `id=eq.${id}` }, (payload) => {
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "projects", filter: `id=eq.${id}` }, (payload) => {
         const updated = payload.new as Tables<"projects">;
         setProject(updated);
-        if (updated.status === 'complete' || updated.status === 'completed') {
+        if (updated.status === "complete" || updated.status === "completed") {
           toast({ title: "Analysis Complete", description: `Analysis complete for ${updated.fund_name}` });
           fetchData();
         }
@@ -127,18 +140,15 @@ export default function ProjectDetail() {
 
   const handleRerunAnalysis = async () => {
     if (!project) return;
-    await supabase.from('projects').update({ status: 'processing', error_message: null }).eq('id', project.id);
-    
-    // Dispatch to external analysis agent
+    await supabase.from("projects").update({ status: "processing", error_message: null }).eq("id", project.id);
     fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dispatch-analysis`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ project_id: project.id }),
-    }).catch((err) => console.error('Analysis dispatch error:', err));
-    
+    }).catch((err) => console.error("Analysis dispatch error:", err));
     toast({ title: "Analysis dispatched", description: "The analysis has been sent to the processing agent." });
   };
 
@@ -152,47 +162,72 @@ export default function ProjectDetail() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center py-20">
-          <p className="text-muted-foreground">Project not found</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Project not found</p>
       </div>
     );
   }
 
-  // Compute tab-specific markdown from the parsed report
   const hasReportMarkdown = reportMarkdownSections.length > 0;
+  const statusLabel = getStatusLabel(project.status);
+  const statusColor = getStatusColor(project.status);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* Left sidebar */}
+      <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
 
-      <div className="border-b border-border bg-card px-4 sm:px-6 py-2 overflow-x-auto">
-        <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
-          <button onClick={() => navigate('/dashboard')} className="text-muted-foreground hover:text-foreground transition-colors">Projects</button>
-          <span className="text-muted-foreground">&gt;</span>
-          <span className="font-medium text-foreground truncate">{project.fund_name}</span>
-        </div>
-      </div>
+      {/* Center column */}
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 border-b border-border bg-card shrink-0">
+          <div className="flex h-12 items-center justify-between px-4 sm:px-5">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm min-w-0">
+              <button onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                Funds
+              </button>
+              <span className="text-muted-foreground shrink-0">›</span>
+              <span className="font-medium text-foreground truncate">{project.fund_name}</span>
+              {isProcessing && (
+                <span className={`ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColor}`}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                  L1 Processing
+                </span>
+              )}
+            </div>
 
-      <div className="lg:hidden">
-        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
-      </div>
+            {/* Right actions */}
+            <div className="flex items-center gap-1.5">
+              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                <Bell className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                <Share2 className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+        </header>
 
-      <div className="flex flex-1 min-h-0">
-        <div className="hidden lg:flex">
+        {/* Mobile nav pills */}
+        <div className="lg:hidden">
           <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
         </div>
 
-        <main className="flex-1 p-4 sm:p-6 overflow-auto">
-          {['processing', 'pending', 'uploading', 'analyzing', 'extracting'].includes(project.status) ? (
+        {/* Content area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
+          {isProcessing && activeTab === "analysis_log" ? (
             <ProcessingState startedAt={project.updated_at} projectId={project.id} />
-          ) : project.status === 'error' ? (
+          ) : isProcessing && activeTab === "overview" ? (
+            <ProcessingState startedAt={project.updated_at} projectId={project.id} />
+          ) : project.status === "error" ? (
             <BlurFade>
               <div className="flex flex-col items-center justify-center py-20">
                 <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
-                <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || 'An unexpected error occurred.'}</p>
+                <p className="text-sm text-muted-foreground mb-4 text-center px-4">{project.error_message || "An unexpected error occurred."}</p>
                 <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
               </div>
             </BlurFade>
@@ -209,24 +244,24 @@ export default function ProjectDetail() {
                   docQualityFlags={docQualityFlags}
                   criticalInfoGaps={criticalInfoGaps}
                   onRerunAnalysis={handleRerunAnalysis}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'overview') : null}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "overview") : null}
                 />
               )}
               {activeTab === "team" && (
                 <TeamTab
                   teamMembers={teamMembers}
                   serviceProviders={serviceProviders}
-                  reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('team') || s.section_title?.toLowerCase().includes('leadership'))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'team') : null}
+                  reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("team") || s.section_title?.toLowerCase().includes("leadership"))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "team") : null}
                 />
               )}
               {activeTab === "performance" && (
                 <PerformanceTab
                   metrics={performanceMetrics}
                   fees={feeStructure}
-                  performanceWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('performance') || s.section_title?.toLowerCase().includes('track record'))}
-                  feesWriteup={reportSections.find(s => s.section_title?.toLowerCase().includes('fee') || s.section_title?.toLowerCase().includes('economics'))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'performance') : null}
+                  performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
+                  feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
                 />
               )}
               {activeTab === "strategy" && (
@@ -234,21 +269,21 @@ export default function ProjectDetail() {
                   thesisValidations={thesisValidations}
                   competitors={competitors}
                   marketFactors={marketFactors}
-                  reportSection={reportSections.find(s => s.section_title?.toLowerCase().includes('strategy') || s.section_title?.toLowerCase().includes('market'))}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'strategy') : null}
+                  reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("strategy") || s.section_title?.toLowerCase().includes("market"))}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "strategy") : null}
                 />
               )}
               {activeTab === "red_flags" && (
                 <RedFlagsTab
                   redFlags={redFlags}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'red_flags') : null}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "red_flags") : null}
                 />
               )}
               {activeTab === "interrogatory" && (
                 <InterrogatoryTab
                   items={interrogatoryItems}
                   fundName={project.fund_name}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'interrogatory') : null}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "interrogatory") : null}
                 />
               )}
               {activeTab === "data_room" && (
@@ -260,19 +295,25 @@ export default function ProjectDetail() {
                   lastAnalysisAt={project.updated_at}
                   onRefresh={fetchData}
                   onRerunAnalysis={handleRerunAnalysis}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'data_room') : null}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "data_room") : null}
                 />
               )}
               {activeTab === "documents" && (
                 <SourceFilesTab
                   researchSources={researchSources}
-                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, 'documents') : null}
+                  reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "documents") : null}
                 />
               )}
             </>
           )}
         </main>
       </div>
+
+      {/* Right insights panel */}
+      <InsightsPanel projectName={project.fund_name} isProcessing={isProcessing} />
+
+      {/* Mobile bottom nav */}
+      <MobileBottomNav />
     </div>
   );
 }
