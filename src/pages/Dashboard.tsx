@@ -16,6 +16,7 @@ import { useChatContext } from "@/contexts/ChatContext";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getScoreTier } from "@/lib/score-utils";
+import { getVerdict } from "@/lib/verdict-utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 const PAGE_SIZE = 100;
