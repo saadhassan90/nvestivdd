@@ -112,6 +112,7 @@ export default function ProjectDetail() {
     if (sqRes.data) setSubmissionQuality(sqRes.data);
     if (dqRes.data) setDocQualityFlags(dqRes.data);
     if (cigRes.data) setCriticalInfoGaps(cigRes.data);
+    if (ecsRes.data) setEngagementCaseStudies(ecsRes.data);
     setLoading(false);
   }, [id]);
 
