@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>

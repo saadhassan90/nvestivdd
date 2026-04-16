@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Sparkles, Bell } from "lucide-react";
+import { Plus, Search, Sparkles } from "lucide-react";
+import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
@@ -163,9 +164,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded-md hover:bg-muted transition-colors">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-              </button>
+              <NotificationsDropdown />
               {!isOpen && (
                 <button
                   onClick={() => setIsOpen(true)}

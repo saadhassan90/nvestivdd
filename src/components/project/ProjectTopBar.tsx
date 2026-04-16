@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Share2, MoreVertical, Sparkles } from "lucide-react";
+import { Share2, Sparkles } from "lucide-react";
+import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
@@ -60,9 +61,7 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
-            <button className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Notifications">
-              <Bell className="h-4 w-4 text-muted-foreground" />
-            </button>
+            <NotificationsDropdown />
             <button
               onClick={() => setShareOpen(true)}
               className="p-1.5 rounded-md hover:bg-muted transition-colors"
