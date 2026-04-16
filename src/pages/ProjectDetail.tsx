@@ -277,6 +277,8 @@ export default function ProjectDetail() {
                   marketFactors={marketFactors}
                   reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("strategy") || s.section_title?.toLowerCase().includes("market"))}
                   reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "strategy") : null}
+                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("strategy"))?.score}
+                  fundName={project.fund_name}
                 />
               )}
               {activeTab === "red_flags" && (
