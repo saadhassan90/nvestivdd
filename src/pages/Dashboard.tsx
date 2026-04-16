@@ -31,6 +31,8 @@ export default function Dashboard() {
     assetClass: null,
     scoreTier: null,
     recommendation: null,
+    status: null,
+    stage: null,
     search: "",
     sortBy: "composite_score",
     sortDir: "desc",
