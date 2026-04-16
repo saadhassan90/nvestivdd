@@ -13,7 +13,7 @@ export function InsightsPanel({ projectName, isProcessing }: InsightsPanelProps)
   const [activeFilter, setActiveFilter] = useState<typeof FILTER_TABS[number]>("All");
 
   return (
-    <aside className="hidden xl:flex flex-col w-[260px] shrink-0 border-l border-border bg-card h-full overflow-y-auto">
+    <aside className="hidden xl:flex flex-col w-[260px] shrink-0 bg-background h-full overflow-y-auto">
       <div className="p-4 space-y-5">
         {/* Header */}
         <div>
@@ -75,7 +75,7 @@ export function InsightsPanel({ projectName, isProcessing }: InsightsPanelProps)
       </div>
 
       {/* Report level indicator at bottom */}
-      <div className="mt-auto border-t border-border p-4">
+      <div className="mt-auto p-4">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Report Level</p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
