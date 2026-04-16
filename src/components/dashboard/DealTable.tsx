@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Loader2, ArrowUp, ArrowDown, ArrowUpDown, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, MoreHorizontal, Eye, RefreshCw, Trash2, Download, Share2 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { getVerdict, getVerdictLabel, getVerdictColor, getStatusLabel, getStatusColor, formatSubmittedDate } from "@/lib/verdict-utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface DealTableProps {
@@ -15,6 +19,7 @@ interface DealTableProps {
   sortBy?: string;
   sortDir?: "asc" | "desc";
   onSort?: (column: string) => void;
+  onRefresh?: () => void;
 }
 
 function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
@@ -113,7 +118,77 @@ function StrategyPill({ strategy }: { strategy: string | null }) {
   );
 }
 
-export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort }: DealTableProps) {
+function StagePill({ stage }: { stage: string }) {
+  const colors: Record<string, string> = {
+    L1: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    L2: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    L3: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  };
+  const colorClass = colors[stage] || colors.L1;
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider ${colorClass}`}>
+      {stage}
+    </span>
+  );
+}
+
+function getStage(_project: Tables<"projects">): string {
+  // For now all projects are L1 stage — expand logic when L2/L3 are implemented
+  return "L1";
+}
+
+function RowActionsMenu({ project, onRefresh }: { project: Tables<"projects">; onRefresh?: () => void }) {
+  const navigate = useNavigate();
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Delete "${project.fund_name}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("projects").delete().eq("id", project.id);
+    if (error) {
+      toast.error("Failed to delete project");
+    } else {
+      toast.success("Project deleted");
+      onRefresh?.();
+    }
+  };
+
+  const handleView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/project/${project.id}`);
+  };
+
+  const handleRefresh = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.info("Re-analysis queued (not yet implemented)");
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <button className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onClick={handleView}>
+          <Eye className="mr-2 h-3.5 w-3.5" />
+          View Report
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleRefresh}>
+          <RefreshCw className="mr-2 h-3.5 w-3.5" />
+          Re-analyze
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+          <Trash2 className="mr-2 h-3.5 w-3.5" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort, onRefresh }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) {
@@ -144,10 +219,11 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <SortableHeader label="L1 Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</th>
               <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</th>
+              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</th>
               <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
               <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Verdict</th>
@@ -162,6 +238,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
               const verdictColor = getVerdictColor(verdict);
               const statusLabel = getStatusLabel(project.status);
               const statusColor = getStatusColor(project.status);
+              const stage = getStage(project);
 
               return (
                 <tr
@@ -171,7 +248,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   }`}
                   onClick={() => !processing && navigate(`/project/${project.id}`)}
                 >
-                  {/* L1 Score */}
+                  {/* Score */}
                   <td className="px-4 py-3">
                     {processing ? (
                       <span className="text-xs font-medium text-muted-foreground">—</span>
@@ -197,6 +274,11 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                     <StrategyPill strategy={project.asset_class} />
                   </td>
 
+                  {/* Stage */}
+                  <td className="px-4 py-3">
+                    <StagePill stage={stage} />
+                  </td>
+
                   {/* Submitted */}
                   <td className="px-4 py-3">
                     <span className="text-sm text-muted-foreground">
@@ -219,11 +301,9 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                     </span>
                   </td>
 
-                  {/* Arrow */}
+                  {/* Actions */}
                   <td className="px-4 py-3">
-                    {!processing && verdict === "proceed" && (
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    <RowActionsMenu project={project} onRefresh={onRefresh} />
                   </td>
                 </tr>
               );
@@ -233,7 +313,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
         <div className="border-t border-border">{paginationBar}</div>
       </div>
 
-      {/* Mobile — card list matching mockup */}
+      {/* Mobile — card list */}
       <div className="md:hidden space-y-2">
         {projects.map((project) => {
           const processing = isProcessing(project.status);
@@ -241,6 +321,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
           const verdictLabel = verdict === "pending" ? `STATUS: ${getStatusLabel(project.status).toUpperCase()}` : `VERDICT: ${verdict === "proceed" ? "PASS" : verdict === "conditional" ? "PARTIAL" : "FAILED"}`;
           const statusLabel = processing ? getStatusLabel(project.status) : project.status === "complete" ? "Under Review" : getStatusLabel(project.status);
           const statusColor = getStatusColor(project.status);
+          const stage = getStage(project);
 
           return (
             <div
@@ -252,12 +333,15 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground text-[15px]">{project.fund_name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-foreground text-[15px]">{project.fund_name}</p>
+                    <StagePill stage={stage} />
+                  </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {project.asset_class || project.strategy || "—"}
                   </p>
                 </div>
-                <div className="shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   {processing ? (
                     <span className="inline-flex items-center justify-center h-10 w-12 rounded-lg border-2 border-border text-xs font-bold text-muted-foreground">
                       {project.status === "pending" ? "PREP" : "PEND"}
@@ -265,6 +349,7 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   ) : (
                     <ScoreBadge score={project.composite_score} size="md" />
                   )}
+                  <RowActionsMenu project={project} onRefresh={onRefresh} />
                 </div>
               </div>
               <div className="flex items-center justify-between mt-3">
