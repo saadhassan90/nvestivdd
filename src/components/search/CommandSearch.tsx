@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, FileText, AlertTriangle, Users, HelpCircle, BookOpen, Sparkles, Loader2, X } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SearchResult {
@@ -160,29 +159,27 @@ export function CommandSearch() {
   const isMac = navigator.platform?.toUpperCase().includes("MAC");
 
   return (
-    <>
-      {/* Trigger button styled as search bar */}
-      <button
-        onClick={() => setOpen(true)}
-        className="hidden md:flex flex-1 max-w-md mx-8 items-center"
-      >
-        <div className="relative w-full group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <div className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-16 text-sm text-muted-foreground text-left cursor-pointer group-hover:bg-muted/80 transition-colors">
-            Search deals...
+    <div className="hidden md:flex flex-1 max-w-2xl mx-8 relative">
+      {/* Trigger / active search bar */}
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="w-full flex items-center"
+        >
+          <div className="relative w-full group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-16 text-sm text-muted-foreground text-left cursor-pointer group-hover:bg-muted/80 transition-colors">
+              Search deals...
+            </div>
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-border bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              {isMac ? "⌘" : "Ctrl+"}K
+            </kbd>
           </div>
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-border bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-            {isMac ? "⌘" : "Ctrl+"}K
-          </kbd>
-        </div>
-      </button>
-
-      {/* Modal */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden [&>button]:hidden">
-          {/* Search input */}
-          <div className="flex items-center border-b border-border px-4">
-            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+        </button>
+      ) : (
+        <div className="w-full">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               ref={inputRef}
               type="text"
@@ -190,20 +187,31 @@ export function CommandSearch() {
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search deals, team members, red flags, reports..."
-              className="flex-1 border-0 bg-transparent py-3.5 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
-            {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />}
-            {query && !loading && (
-              <button onClick={() => { setQuery(""); setResults(null); }} className="text-muted-foreground hover:text-foreground">
-                <X className="h-4 w-4" />
-              </button>
-            )}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+              {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              {query && !loading && (
+                <button onClick={() => { setQuery(""); setResults(null); }} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Results */}
+      {/* Backdrop */}
+      {open && (
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+      )}
+
+      {/* Dropdown results panel */}
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl border border-border bg-card shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
           <div className="max-h-[60vh] overflow-y-auto">
             {query.length < 2 && !results && (
-              <div className="px-4 py-8 text-center">
+              <div className="px-4 py-6 text-center">
                 <p className="text-sm text-muted-foreground">
                   Type to search across all deals, team members, red flags, and reports
                 </p>
@@ -222,7 +230,7 @@ export function CommandSearch() {
             )}
 
             {query.length >= 2 && !loading && totalCount === 0 && (
-              <div className="px-4 py-8 text-center">
+              <div className="px-4 py-6 text-center">
                 <p className="text-sm text-muted-foreground">No results found for "{query}"</p>
                 <p className="text-xs text-muted-foreground mt-1">Try different keywords or a broader search</p>
               </div>
@@ -316,8 +324,8 @@ export function CommandSearch() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      )}
+    </div>
   );
 }
