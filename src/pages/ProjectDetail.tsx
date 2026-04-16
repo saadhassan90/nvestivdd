@@ -15,7 +15,7 @@ import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { Search, Bell, Settings, Sparkles, Share2, MoreVertical } from "lucide-react";
+import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useReportMarkdown } from "@/hooks/use-report-markdown";
@@ -182,38 +182,7 @@ export default function ProjectDetail() {
 
       {/* Center column */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b border-border bg-card shrink-0">
-          <div className="flex h-12 items-center justify-between px-4 sm:px-5">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm min-w-0">
-              <button onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                Funds
-              </button>
-              <span className="text-muted-foreground shrink-0">›</span>
-              <span className="font-medium text-foreground truncate">{project.fund_name}</span>
-              {isProcessing && (
-                <span className={`ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColor}`}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-                  L1 Processing
-                </span>
-              )}
-            </div>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1.5">
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <Share2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <MoreVertical className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-        </header>
+        <ProjectTopBar project={project} isProcessing={isProcessing} />
 
         {/* Mobile nav pills */}
         <div className="lg:hidden">
