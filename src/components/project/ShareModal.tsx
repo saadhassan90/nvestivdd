@@ -55,7 +55,7 @@ export function ShareModal({ open, onClose, fundName, projectId }: ShareModalPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
@@ -72,9 +72,9 @@ export function ShareModal({ open, onClose, fundName, projectId }: ShareModalPro
           <div>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Report Link</label>
             <div className="mt-1.5 flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2">
+              <div className="flex-1 min-w-0 flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 overflow-hidden">
                 <Link2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-xs text-foreground truncate">{shareUrl}</span>
+                <span className="text-xs text-foreground truncate block">{shareUrl}</span>
               </div>
               <button
                 onClick={handleCopy}
