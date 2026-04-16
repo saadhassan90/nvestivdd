@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
+import { CommandSearch } from "@/components/search/CommandSearch";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
@@ -152,17 +153,7 @@ export default function Dashboard() {
               <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
             </Link>
 
-            {/* Search */}
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search institutional data..."
-                  className="w-full rounded-lg border-0 bg-muted py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            </div>
+            <CommandSearch />
 
             <div className="flex items-center gap-2">
               <NotificationsDropdown />
@@ -185,8 +176,8 @@ export default function Dashboard() {
           <BlurFade>
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Fund submissions</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">Sorted by L1 score, highest first</p>
+                <h1 className="text-2xl font-bold text-foreground">Deals</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">Sorted by score, highest first</p>
               </div>
               <button
                 onClick={() => setModalOpen(true)}
