@@ -262,9 +262,11 @@ export default function ProjectDetail() {
                 <PerformanceTab
                   metrics={performanceMetrics}
                   fees={feeStructure}
+                  engagementCaseStudies={engagementCaseStudies}
                   performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
                   feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
                   reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
+                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("financial"))?.score}
                 />
               )}
               {activeTab === "strategy" && (
