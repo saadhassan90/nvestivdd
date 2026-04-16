@@ -309,7 +309,7 @@ export function PerformanceTab({
 
             {feesWriteup?.content && (
               <div className="mb-4">
-                <ReportMarkdownSection content={feesWriteup.content} />
+                <MarkdownSectionCards content={feesWriteup.content} baseDelay={0.25} />
               </div>
             )}
 
