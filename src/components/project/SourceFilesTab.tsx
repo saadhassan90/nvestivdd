@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Globe, ExternalLink, Bookmark, Search, ChevronDown, CheckCircle2, AlertCircle, FileText } from "lucide-react";
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface SourceFilesTabProps {
@@ -129,7 +129,7 @@ export function SourceFilesTab({ researchSources, reportMarkdown }: SourceFilesT
 
       {/* ── Report view ── */}
       {activeSection === "report" && (
-        <ReportMarkdownSection content={reportMarkdown ?? null} />
+        <MarkdownSectionCards content={reportMarkdown ?? null} baseDelay={0.05} />
       )}
 
       {/* ── Sources list ── */}

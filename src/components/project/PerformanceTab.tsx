@@ -1,7 +1,7 @@
 import { TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Circle } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MagicCard } from "@/components/magicui/MagicCard";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface PerformanceTabProps {
@@ -121,21 +121,12 @@ export function PerformanceTab({
 
       {/* ── Performance Narrative (markdown report) ── */}
       {reportMarkdown && (
-        <BlurFade delay={0.1}>
-          <ReportMarkdownSection content={reportMarkdown} />
-        </BlurFade>
+        <MarkdownSectionCards content={reportMarkdown} baseDelay={0.1} />
       )}
 
       {/* ── Performance Writeup (from report_sections) ── */}
       {!reportMarkdown && performanceWriteup?.content && (
-        <BlurFade delay={0.1}>
-          <MagicCard>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
-              Performance Narrative
-            </p>
-            <ReportMarkdownSection content={performanceWriteup.content} />
-          </MagicCard>
-        </BlurFade>
+        <MarkdownSectionCards content={performanceWriteup.content} baseDelay={0.1} />
       )}
 
       {/* ── Verification Gap Alert ── */}
@@ -318,7 +309,7 @@ export function PerformanceTab({
 
             {feesWriteup?.content && (
               <div className="mb-4">
-                <ReportMarkdownSection content={feesWriteup.content} />
+                <MarkdownSectionCards content={feesWriteup.content} baseDelay={0.25} />
               </div>
             )}
 

@@ -3,7 +3,7 @@ import { Mail, Check, FolderOpen, Plus, FileText, FileSpreadsheet, File, Upload,
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
-import { ReportMarkdownSection } from "@/components/project/ReportMarkdownSection";
+import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -186,7 +186,7 @@ export function DataRoomTab({ items, documents, projectId, projectStatus, lastAn
       </div>
 
       {activeSection === "report" && (
-        <ReportMarkdownSection content={reportMarkdown ?? null} />
+        <MarkdownSectionCards content={reportMarkdown ?? null} baseDelay={0.05} />
       )}
 
       {activeSection === "files" && (
