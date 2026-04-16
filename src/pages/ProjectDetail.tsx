@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { InsightsPanel } from "@/components/project/InsightsPanel";
@@ -15,18 +15,18 @@ import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { Search, Bell, Settings, Sparkles, Share2, MoreVertical } from "lucide-react";
+import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useReportMarkdown } from "@/hooks/use-report-markdown";
 import { getTabMarkdown } from "@/lib/markdown-sections";
-import { getStatusLabel, getStatusColor } from "@/lib/verdict-utils";
+
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  
   const { toast } = useToast();
   const { setProjectScope, isOpen, setIsOpen } = useChatContext();
 
@@ -172,8 +172,6 @@ export default function ProjectDetail() {
   }
 
   const hasReportMarkdown = reportMarkdownSections.length > 0;
-  const statusLabel = getStatusLabel(project.status);
-  const statusColor = getStatusColor(project.status);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -182,38 +180,7 @@ export default function ProjectDetail() {
 
       {/* Center column */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b border-border bg-card shrink-0">
-          <div className="flex h-12 items-center justify-between px-4 sm:px-5">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm min-w-0">
-              <button onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                Funds
-              </button>
-              <span className="text-muted-foreground shrink-0">›</span>
-              <span className="font-medium text-foreground truncate">{project.fund_name}</span>
-              {isProcessing && (
-                <span className={`ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColor}`}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-                  L1 Processing
-                </span>
-              )}
-            </div>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1.5">
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <Share2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                <MoreVertical className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-        </header>
+        <ProjectTopBar project={project} isProcessing={isProcessing} />
 
         {/* Mobile nav pills */}
         <div className="lg:hidden">
