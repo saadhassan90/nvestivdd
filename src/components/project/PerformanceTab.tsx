@@ -307,11 +307,6 @@ export function PerformanceTab({
               <p className="text-sm font-bold uppercase tracking-wider text-foreground">Fee Structure</p>
             </div>
 
-            {feesWriteup?.content && (
-              <div className="mb-4">
-                <MarkdownSectionCards content={feesWriteup.content} baseDelay={0.25} />
-              </div>
-            )}
 
             {Object.entries(feesByClass).map(([cls, classItems]) => (
               <MagicCard key={cls} className="mb-4 last:mb-0">
