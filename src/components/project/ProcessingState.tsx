@@ -335,7 +335,7 @@ export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) 
                         {step.label}
                       </span>
                       <div className="flex items-center gap-2 shrink-0">
-                        {(status === "error" || status === "pending") && status !== "running" && (
+                        {(status === "error" || status === "pending") && (
                           <button className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                             <RefreshCw className="h-3.5 w-3.5" />
                           </button>
