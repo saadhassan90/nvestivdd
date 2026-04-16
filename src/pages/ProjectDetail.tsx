@@ -48,6 +48,7 @@ export default function ProjectDetail() {
   const [submissionQuality, setSubmissionQuality] = useState<any[]>([]);
   const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
+  const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
