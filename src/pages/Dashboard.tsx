@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
+import { CommandSearch } from "@/components/search/CommandSearch";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
