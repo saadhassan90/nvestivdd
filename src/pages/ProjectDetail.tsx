@@ -192,7 +192,7 @@ export default function ProjectDetail() {
 
           {/* Content area */}
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
-            {isProcessing && activeTab === "analysis_log" ? (
+            {activeTab === "analysis_log" ? (
               <ProcessingState startedAt={project.updated_at} projectId={project.id} />
             ) : isProcessing && activeTab === "overview" ? (
               <ProcessingState startedAt={project.updated_at} projectId={project.id} />
