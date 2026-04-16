@@ -48,6 +48,7 @@ export default function ProjectDetail() {
   const [submissionQuality, setSubmissionQuality] = useState<any[]>([]);
   const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
+  const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,7 @@ export default function ProjectDetail() {
 
     const [
       projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes,
-      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes,
+      moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes, ecsRes,
     ] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
       supabase.from("report_sections").select("*").eq("project_id", id).order("order_index"),
@@ -90,6 +91,7 @@ export default function ProjectDetail() {
       supabase.from("submission_quality").select("*").eq("project_id", id).order("order_index"),
       supabase.from("document_quality_flags").select("*").eq("project_id", id),
       supabase.from("critical_info_gaps").select("*").eq("project_id", id).order("order_index"),
+      supabase.from("engagement_case_studies").select("*").eq("project_id", id).order("order_index"),
     ]);
 
     if (projectRes.data) setProject(projectRes.data);
@@ -110,6 +112,7 @@ export default function ProjectDetail() {
     if (sqRes.data) setSubmissionQuality(sqRes.data);
     if (dqRes.data) setDocQualityFlags(dqRes.data);
     if (cigRes.data) setCriticalInfoGaps(cigRes.data);
+    if (ecsRes.data) setEngagementCaseStudies(ecsRes.data);
     setLoading(false);
   }, [id]);
 
@@ -259,9 +262,11 @@ export default function ProjectDetail() {
                 <PerformanceTab
                   metrics={performanceMetrics}
                   fees={feeStructure}
+                  engagementCaseStudies={engagementCaseStudies}
                   performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
                   feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
                   reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
+                  moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("financial"))?.score}
                 />
               )}
               {activeTab === "strategy" && (
