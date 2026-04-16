@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, FileText, AlertTriangle, Users, HelpCircle, BookOpen, Sparkles, Loader2, X } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SearchResult {
