@@ -108,12 +108,36 @@ export default function Dashboard() {
     }
     if (filters.scoreTier) {
       result = result.filter((p) => {
-        const tier = p.score_tier || getScoreTier(p.composite_score);
-        return tier === filters.scoreTier;
+        const s = p.composite_score || 0;
+        switch (filters.scoreTier) {
+          case "85+": return s >= 85;
+          case "70-84": return s >= 70 && s < 85;
+          case "50-69": return s >= 50 && s < 70;
+          case "<50": return s < 50;
+          default: return true;
+        }
       });
     }
     if (filters.recommendation) {
-      result = result.filter((p) => p.recommendation === filters.recommendation);
+      result = result.filter((p) => {
+        const verdict = getVerdict(p.composite_score, p.status);
+        return verdict === filters.recommendation;
+      });
+    }
+    if (filters.status) {
+      result = result.filter((p) => {
+        if (filters.status === "processing") {
+          return ["processing", "analyzing", "extracting", "uploading"].includes(p.status);
+        }
+        if (filters.status === "pending") {
+          return p.status === "pending";
+        }
+        return p.status === filters.status;
+      });
+    }
+    if (filters.stage) {
+      // Currently all are L1; filter is ready for when L2/L3 are added
+      result = result.filter(() => filters.stage === "L1");
     }
     if (filters.search) {
       const q = filters.search.toLowerCase();
