@@ -29,9 +29,9 @@ const PROCESSING_NAV_ITEMS = [
 type ReportLevel = "L1" | "L2" | "L3";
 
 const REPORT_LEVELS: { key: ReportLevel; label: string }[] = [
-  { key: "L1", label: "L1 — Initial Screen" },
-  { key: "L2", label: "L2 — Deep Dive" },
-  { key: "L3", label: "L3 — IC Memo" },
+  { key: "L1", label: "Triage" },
+  { key: "L2", label: "Deep Dive" },
+  { key: "L3", label: "IC Memo" },
 ];
 
 export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSidebarProps) {
