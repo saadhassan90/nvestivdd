@@ -166,7 +166,7 @@ export default function Dashboard() {
                   <span className="hidden sm:inline">Ask Iris</span>
                 </button>
               )}
-              <div className="h-8 w-8 rounded-full bg-muted border border-border" />
+              
             </div>
           </div>
         </header>
