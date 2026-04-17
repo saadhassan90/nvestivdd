@@ -1,134 +1,85 @@
 
 
-# Report-to-App Mapping: Complete Section Breakdown
+## Plan: Restructure all L1 report tabs to match PRD v1.0
 
-## Report Structure (11 Sections)
+I'll rebuild every tab as a **deterministic skeleton** following the PRD exactly. Every section described in the PRD gets rendered for every fund, even when data is missing — empty sections show a muted `[NOT DISCLOSED AT L1]` chip or "No data available" placeholder so the layout is identical across every deal.
 
-The L1 report has 11 sections. Here is how each section and its sub-parts map to the app's existing tabs.
+### Core principle: skeleton-first
 
----
+Every tab becomes an ordered sequence of section cards. Each section has:
+- A persistent header (always shown)
+- A body that either renders data or shows an empty-state message
+- No section is ever hidden — only its content varies
 
-## Tab Mapping
+### Global chrome (applied across all tabs)
 
-### 1. OVERVIEW TAB
-Receives content from **4 report sections**:
+1. **Cover Block** (`ProjectTopBar`) — extend to show: report type label, fund name, working-name pills, sponsor line, analysis date, analyst, scorecard version, related prior report chip, composite score badge, recommendation badge (MEET / CONDITIONAL MEET / NO MEET), tier pill (Strong Advance / Advance / Review / Decline).
+2. **Hard Floor banner** — global red banner at top of every tab when `trigger_fired` is true.
+3. **Tab order** (`ProjectSidebar`) — reorder to PRD spec: Overview · Scorecard · Team · Strategy · Performance · Risk · Interrogatory Matrix · Sources · Analysis Log · Dataroom.
+4. **URL sync** — `?tab=` reflects active tab.
 
-| Report Section | Sub-part | UI Treatment |
-|---|---|---|
-| **Section 1 — Cover** | Key-value table (fund name, GP, strategy, geography, fund size, vintage, etc.) | **Fund Profile Card** — structured key-value grid at top of overview |
-| **Section 1 — Cover** | Abstract paragraph | **Abstract Card** — prose summary below the profile card |
-| **Section 1 — Cover** | Findings Overview paragraph | **Findings Summary Card** — expandable prose block |
-| **Section 2 — Verdict** | Composite Score, Recommendation, Hard Floor Override | **Score Ring + Verdict Badge** (already exists) |
-| **Section 2 — Verdict** | Rationale paragraph | **Verdict Rationale Card** — prose narrative explaining the score |
-| **Section 3 — Hard Floor Status** | 3-gate table (Team Integrity, Entity Legitimacy, Track Record) | **Hard Floor Gates Card** — 3 rows with PASS/FAIL badges and findings |
-| **Section 4 — Scorecard Summary** | 5-dimension scoring table | **Dimension Scores Card** — 5 rows with score bars, bands, and rationales |
-| **Section 10 — Conclusion** | Full conclusion prose | **Conclusion Card** — full-width prose block at bottom of overview |
+### Tab-by-tab rebuild
 
-### 2. TEAM TAB
-Receives content from **Section 7.1 (People)**:
+**1. OverviewTab** → Hero Card · Abstract block · Findings Overview KPI strip (5 tiles: Composite, Recommendation, Hard Floor, Critical Flag count, Completeness %) · Fund Snapshot 2-col grid (14-17 rows) · Source Materials card · Cross-reference card.
 
-| Sub-part | UI Treatment |
-|---|---|
-| Each named person (Preston, Glasgow, Donaldson, Russell, Matthews, Kasper, Morris, Harris) | **Team Member Card** — one card per person with name, title, tenure, bio narrative, verification status badge |
-| Regulatory & litigation scan summary | **Compliance Status Card** — single card showing "all clean" with source list |
-| Section 7.6 — Network (team affiliations) | **Network & Affiliations Card** — sponsor ecosystem connections, prior-firm overlap |
+**2. ScorecardTab** → Composite Score Hero · Hard Floor Gates Panel (3 cards) · 5-Dimension Rubric Grid (expandable rows showing flags/gaps/verification) · Composite Row · Verdict & Recommendation Panel · Meeting Conditions Panel (only renders content when CONDITIONAL MEET, otherwise shows skeleton with empty message) · Score Tier Thresholds legend (dual scale).
 
-### 3. PERFORMANCE TAB
-Receives content from **Section 7.3 (Track Record)**:
+**3. TeamTab** → Sponsor Entity Cards (one per sponsor, side-by-side for co-GP) · Person Cards (education, employment chain, credentials, regulatory checks, deck-vs-research diff, confidence badge) · Team Governance strip · Team Network strip · Team Flags subsection (RED/YELLOW lanes) · Team Interrogatory subset.
 
-| Sub-part | UI Treatment |
-|---|---|
-| Program-level summary (fund sizes, committed, deployed, co-invest count) | **Program Summary Card** — key metrics grid (4 programs, $519M deployed, 170 co-invests) |
-| Co-investment realized returns (2.8x MOIC, 27% IRR) | **Headline Returns Card** — large metric display with MOIC and IRR |
-| Deal-level verification (5 sampled deals + 2 recent) | **Deal Verification Table** — each deal as a row with name, date, sponsor, verified status, notes |
-| Fund-level HPEP I–IV returns | **Vintage Performance Card** — table of each vintage with MOIC, IRR, DPI, verification status |
-| Section 7.5 — Claims table (verified/unverified/contradicted) | **Claims Verification Card** — table with status badges (green verified, yellow unverified, red contradicted) |
-| Recent 2026 activity (Joe Van Gogh, Caring.com) | Part of the Deal Verification Table with "2026" badge |
+**4. StrategyTab** → Thesis Card · Portfolio Construction (mini-chart) · Target Company Profile grid · Term Structure grid · Economics grid · Target Returns panel · Fee Benchmark Callout · Strategy Flags · Strategy Interrogatory subset.
 
-### 4. STRATEGY TAB
-Receives content from **3 report sections**:
+**5. PerformanceTab** → Headline Metrics Strip (4 KPI tiles) · Scale & Count Grid · In-Strategy Breakdown toggle · Multiple Expansion Panel · Securitizations table · Investor Verification Panel · Performance/Scale row · Reconciliation Note · Benchmarks Callout · Performance Flags · Performance Interrogatory subset.
 
-| Report Section | Sub-part | UI Treatment |
-|---|---|
-| **Section 7.4 — Strategy** | Core thesis, sourcing edge, target profile | **Investment Thesis Card** — structured prose with key claims |
-| **Section 7.4 — Strategy** | Critical strategy gap (regime shift analysis) | **Strategy Risk Card** — highlighted warning block with the deleveraging arbitrage analysis |
-| **Section 8 — Domain Research** | 8.1 LMM PE market conditions | **Market Environment Card** — structured findings with NEUTRAL/SUPPORTS/CONTRADICTS badges |
-| **Section 8 — Domain Research** | 8.2 Co-Investment Submarket | **Co-Investment Market Card** — pace benchmarks, fee norms, assessment badge |
-| **Section 8 — Domain Research** | 8.3 LMM Exit Environment | **Exit Environment Card** — hold periods, exit channels, timing expectations |
-| **Section 8 — Domain Research** | 8.4 Regulatory Environment | **Regulatory Card** — SEC regime, enforcement trends, Advisory Board governance concern |
+**6. RedFlagsTab → renamed "Risk"** → Severity Summary Strip (Critical / Elevated / Monitor + Inherited badge) · CRITICAL Flag Cards · ELEVATED table · MONITOR table · Category sub-tabs (Team/Track Record/Strategy/Domain/Structure) · Hard Floor Gate Detail · Discrepancies Found panel · Regulatory & Litigation panel · Carry-forward callout.
 
-### 5. RED FLAGS TAB
-Receives content from **Section 5 — Flags**:
+**7. InterrogatoryTab → "Interrogatory Matrix"** → Question Count Strip · Priority + Category filter chips · Questions Table (with editable 0–3 GP Response Score, audit log to localStorage, Export CSV button) · Per-Dimension View toggle · Scoring Guidance Footer · No-Meet Conversion Threshold banner.
 
-| Sub-part | UI Treatment |
-|---|---|
-| RED flags grouped by dimension (Team, Track Record, Strategy, Domain, Structure) | **Red Flag Cards** — one card per flag with ID badge (R-T1, R-S1, etc.), severity indicator, full narrative, and source citations |
-| YELLOW flags grouped by dimension | **Yellow Flag Cards** — same layout, amber severity indicator |
-| Group headers (Team, Track Record, Strategy, Domain/Market, Structure) | **Dimension Group Headers** — collapsible sections grouping flags by category |
+**8. SourceFilesTab → "Sources"** → Source Categories Navigator (left rail, A–G taxonomy) · Citations List (APA-style, access-status icon) · Disambiguation Panel · Confidence Legend · Negative-Results Ledger (always rendered).
 
-### 6. INTERROGATORY TAB
-Receives content from **2 report sections**:
+**9. ProcessingState (Analysis Log)** → keep existing pipeline UI but add: Pipeline Metadata card · Verification Actions Completed checklist · Domain Research blocks (4 panels: 8.1–8.4 with 9-item questionnaire) · Market Context card · Evidence Gaps Register table · Cross-reference Inheritance map.
 
-| Report Section | Sub-part | UI Treatment |
-|---|---|
-| **Section 6 — Meeting Conditions** | 4 conditional-meet requirements | **Meeting Conditions Card** — numbered list with flag cross-references and "gate" styling |
-| **Section 9 — Meeting Questions** | 13 questions grouped by dimension | **Question Cards** — one per question with columns: Question, Rationale, Satisfactory Answer. Grouped under Dim 1–5 headers |
+**10. DataRoomTab → "Dataroom"** → Submission Quality Strip (4 KPIs) · Critical Missing Documents card · Priority Checklist (4 accordion groups: P1 Deal-Breaker, P2 Essential, P3 Supporting, P4 Nice-to-Have) · Completeness Verification panel · Upload/Request Action bar.
 
-### 7. DATA ROOM TAB
-Receives content from **Section 7.7 — Gap Register**:
+### Shared primitives to create
 
-| Sub-part | UI Treatment |
-|---|---|
-| 25-item gap register table | **Data Room Checklist** — each row becomes a checklist item with: data point, expected source, L1 status badge, L2 routing action |
-| Items cross-referenced to Meeting Conditions | **Conditional-Meet Badge** on relevant items linking back to Section 6 gates |
+- `SectionCard` — header + empty-state wrapper used by every section
+- `EmptyChip` — `[NOT DISCLOSED AT L1]` muted chip for missing field values
+- `KpiTile` — used by Findings Overview, Severity, Headline Metrics, etc.
+- `FieldValueGrid` — 2-column field/value table with empty handling
+- `FlagLane` — RED/YELLOW lane renderer used by category-filtered subsections
+- `RecommendationBadge` / `TierPill` / `BandBadge` — verdict scale primitives
 
-### 8. DOCUMENTS (SOURCE FILES) TAB
-Receives content from **Section 11 — Source Appendix**:
+### Files to create
 
-| Sub-part | UI Treatment |
-|---|---|
-| Category A: Primary GP materials | **Source Group Card** — "Primary GP Materials" with citation list |
-| Category B: Regulatory sources | **Source Group Card** — "Regulatory Sources" |
-| Category C: Court/litigation sources | **Source Group Card** — "Court & Litigation" |
-| Category D: Market data/third-party research | **Source Group Card** — "Market Data & Research" |
-| Category E: Deal-specific press | **Source Group Card** — "Deal-Specific Press" |
-| Category F: LP/allocator searches (negative results) | **Source Group Card** — "LP Disclosure Searches" with "no match" badges |
-| Category G: Consulted — no findings | **Source Group Card** — "Consulted — No Findings" |
-| Section 7.2 — Entity verification | **Entity Verification Card** — adviser, fund, sidecar, prior vehicles with registration details |
+- `src/components/project/primitives/SectionCard.tsx`
+- `src/components/project/primitives/EmptyChip.tsx`
+- `src/components/project/primitives/KpiTile.tsx`
+- `src/components/project/primitives/FieldValueGrid.tsx`
+- `src/components/project/primitives/FlagLane.tsx`
+- `src/components/project/primitives/VerdictBadges.tsx`
+- `src/components/project/primitives/HardFloorBanner.tsx`
 
----
+### Files to rewrite (skeleton-first)
 
-## Implementation Plan
+- `src/components/project/OverviewTab.tsx`
+- `src/components/project/ScorecardTab.tsx`
+- `src/components/project/TeamTab.tsx`
+- `src/components/project/StrategyTab.tsx`
+- `src/components/project/PerformanceTab.tsx`
+- `src/components/project/RedFlagsTab.tsx` (relabel "Risk")
+- `src/components/project/InterrogatoryTab.tsx` (add inline editing + CSV export + per-dim toggle)
+- `src/components/project/SourceFilesTab.tsx` (relabel "Sources", add A–G nav, negative ledger)
+- `src/components/project/DataRoomTab.tsx` (4 priority accordions + KPI strip)
+- `src/components/project/ProcessingState.tsx` (add 6 Analysis Log sections)
+- `src/components/project/ProjectSidebar.tsx` (reorder + relabel tabs to PRD spec)
+- `src/components/project/ProjectTopBar.tsx` (full Cover Block per PRD §3.2)
+- `src/pages/ProjectDetail.tsx` (URL `?tab=` sync, hard-floor global banner, pass missing data flags through)
 
-### Step 1: Update the markdown parser
-Extend `markdown-sections.ts` to recognize all 11 sections and sub-sections (7.1–7.7, 8.1–8.4) and map them to the correct tabs with granular sub-section extraction.
+### Verification step (after build)
 
-### Step 2: Create structured content components
-For each tab, build the card components described above that render structured data extracted from the markdown. Each card parses its section's markdown into structured elements (tables, prose, key-value pairs) rather than rendering raw markdown.
+I'll walk through PRD §8 (the 86-row coverage matrix) and confirm each row maps to a rendered section in the skeleton. Anything missing gets added before delivery.
 
-### Step 3: Update each tab component
-Replace or augment the current `ReportMarkdownSection` (raw markdown dump) with the new structured card layouts for each tab. The tabs will display a curated, card-based layout where each report sub-section gets its own visual treatment.
+### Out of scope (intentional, per PRD §6.3)
 
-### Step 4: Update tab keyword mapping
-Revise `TAB_KEYWORDS` in `markdown-sections.ts` so each tab pulls exactly the right sections and sub-sections as mapped above.
-
-### Step 5: Wire up ProjectDetail.tsx
-Pass the granular section data to each tab component so they can render the structured cards.
-
----
-
-### Files to create/modify
-
-| File | Action |
-|---|---|
-| `src/lib/markdown-sections.ts` | Extend parser for sub-sections (7.x, 8.x) and update tab mapping |
-| `src/components/project/OverviewTab.tsx` | Add Cover, Verdict Rationale, Hard Floor, Scorecard, Conclusion cards |
-| `src/components/project/TeamTab.tsx` | Add per-person cards, compliance card, network card |
-| `src/components/project/PerformanceTab.tsx` | Add program summary, deal verification, claims, vintage cards |
-| `src/components/project/StrategyTab.tsx` | Add thesis, strategy risk, 4 domain research cards |
-| `src/components/project/RedFlagsTab.tsx` | Group flags by dimension with RED/YELLOW severity cards |
-| `src/components/project/InterrogatoryTab.tsx` | Add meeting conditions card + 13 question cards by dimension |
-| `src/components/project/DataRoomTab.tsx` | Render 25-item gap register as checklist |
-| `src/components/project/SourceFilesTab.tsx` | Render 7 source-category groups + entity verification |
-| `src/pages/ProjectDetail.tsx` | Pass granular section data to tabs |
+Pre-synthesis fact-gathering input format (Hometap 5-Pillar) is rejected upstream; no special handling here. Pipeline data shape (which JSON keypaths populate which DB columns) stays as currently mapped — this PR is **frontend rendering only**.
 
