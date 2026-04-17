@@ -17,22 +17,20 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
+import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useReportMarkdown } from "@/hooks/use-report-markdown";
-import { getTabMarkdown } from "@/lib/markdown-sections";
 
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const { toast } = useToast();
-  const { setProjectScope, isOpen, setIsOpen } = useChatContext();
+  const { setProjectScope } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
-  const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
   const [redFlags, setRedFlags] = useState<Tables<"red_flags">[]>([]);
   const [interrogatoryItems, setInterrogatoryItems] = useState<Tables<"interrogatory_items">[]>([]);
   const [dataRoomItems, setDataRoomItems] = useState<Tables<"data_room_items">[]>([]);
@@ -50,26 +48,28 @@ export default function ProjectDetail() {
   const [docQualityFlags, setDocQualityFlags] = useState<any[]>([]);
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
   const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
+  const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
 
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [loading, setLoading] = useState(true);
 
-  const { sections: reportMarkdownSections } = useReportMarkdown(id);
+  const isProcessing = project ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status) : false;
 
-  const isProcessing = project
-    ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status)
-    : false;
-
-  // Default to analysis_log tab when processing
+  // URL ↔ tab sync
   useEffect(() => {
-    if (isProcessing && activeTab === "overview") {
-      setActiveTab("analysis_log");
+    const params = new URLSearchParams(searchParams);
+    if (params.get("tab") !== activeTab) {
+      params.set("tab", activeTab);
+      setSearchParams(params, { replace: true });
     }
-  }, [isProcessing]);
+  }, [activeTab, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (isProcessing && activeTab === "overview") setActiveTab("analysis_log");
+  }, [isProcessing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = useCallback(async () => {
     if (!id) return;
-
     const [
       projectRes, sectionsRes, flagsRes, interrogatoryRes, dataRoomRes, docsRes, sourcesRes,
       moduleScoresRes, teamRes, perfRes, feesRes, thesisRes, compRes, marketRes, spRes, sqRes, dqRes, cigRes, ecsRes,
@@ -94,7 +94,6 @@ export default function ProjectDetail() {
       supabase.from("critical_info_gaps").select("*").eq("project_id", id).order("order_index"),
       supabase.from("engagement_case_studies").select("*").eq("project_id", id).order("order_index"),
     ]);
-
     if (projectRes.data) setProject(projectRes.data);
     if (sectionsRes.data) setReportSections(sectionsRes.data);
     if (flagsRes.data) setRedFlags(flagsRes.data);
@@ -119,26 +118,22 @@ export default function ProjectDetail() {
 
   useEffect(() => {
     fetchData();
-
-    const channel = supabase
+    const ch = supabase
       .channel(`project-${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "projects", filter: `id=eq.${id}` }, (payload) => {
-        const updated = payload.new as Tables<"projects">;
-        setProject(updated);
-        if (updated.status === "complete" || updated.status === "completed") {
-          toast({ title: "Analysis Complete", description: `Analysis complete for ${updated.fund_name}` });
+        const u = payload.new as Tables<"projects">;
+        setProject(u);
+        if (u.status === "complete" || u.status === "completed") {
+          toast({ title: "Analysis Complete", description: `Analysis complete for ${u.fund_name}` });
           fetchData();
         }
       })
       .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(ch); };
   }, [id, fetchData, toast]);
 
   useEffect(() => {
-    if (project) {
-      setProjectScope({ id: project.id, name: project.fund_name });
-    }
+    if (project) setProjectScope({ id: project.id, name: project.fund_name });
     return () => { setProjectScope(null); };
   }, [project?.id, project?.fund_name, setProjectScope]);
 
@@ -147,13 +142,10 @@ export default function ProjectDetail() {
     await supabase.from("projects").update({ status: "processing", error_message: null }).eq("id", project.id);
     fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dispatch-analysis`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
       body: JSON.stringify({ project_id: project.id }),
-    }).catch((err) => console.error("Analysis dispatch error:", err));
-    toast({ title: "Analysis dispatched", description: "The analysis has been sent to the processing agent." });
+    }).catch((e) => console.error("dispatch error", e));
+    toast({ title: "Analysis dispatched" });
   };
 
   if (loading) {
@@ -163,7 +155,6 @@ export default function ProjectDetail() {
       </div>
     );
   }
-
   if (!project) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -172,30 +163,29 @@ export default function ProjectDetail() {
     );
   }
 
-  const hasReportMarkdown = reportMarkdownSections.length > 0;
+  // global hard-floor signal
+  const hardFloors = submissionQuality.filter((sq) => sq.severity === "hard_floor" || sq.category?.includes("hard_floor"));
+  const hardFloorTriggered = hardFloors.some((h: any) => h.status === "fail" || h.status === "flagged");
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
-      {/* Full-width top bar */}
       <ProjectTopBar project={project} isProcessing={isProcessing} />
 
-      {/* Three-panel body below the top bar */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Left sidebar */}
         <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
 
-        {/* Center column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-          {/* Mobile nav pills */}
           <div className="lg:hidden">
             <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
           </div>
 
-          {/* Content area */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
-            {activeTab === "analysis_log" ? (
-              <ProcessingState startedAt={project.updated_at} projectId={project.id} />
-            ) : isProcessing && activeTab === "overview" ? (
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6 space-y-4">
+            {/* Global hard-floor banner */}
+            {hardFloorTriggered && activeTab !== "scorecard" && activeTab !== "red_flags" && activeTab !== "overview" && (
+              <HardFloorBanner triggered />
+            )}
+
+            {activeTab === "analysis_log" || (isProcessing && activeTab === "overview") ? (
               <ProcessingState startedAt={project.updated_at} projectId={project.id} />
             ) : project.status === "error" ? (
               <BlurFade>
@@ -218,19 +208,18 @@ export default function ProjectDetail() {
                     docQualityFlags={docQualityFlags}
                     criticalInfoGaps={criticalInfoGaps}
                     onRerunAnalysis={handleRerunAnalysis}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "overview") : null}
                   />
                 )}
                 {activeTab === "scorecard" && (
-                  <ScorecardTab project={project} moduleScores={moduleScores} />
+                  <ScorecardTab project={project} moduleScores={moduleScores} submissionQuality={submissionQuality} />
                 )}
                 {activeTab === "team" && (
                   <TeamTab
                     teamMembers={teamMembers}
                     serviceProviders={serviceProviders}
-                    reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("team") || s.section_title?.toLowerCase().includes("leadership"))}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "team") : null}
-                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("team"))?.score}
+                    redFlags={redFlags}
+                    interrogatoryItems={interrogatoryItems}
+                    gpEntityName={project.gp_entity_name}
                   />
                 )}
                 {activeTab === "performance" && (
@@ -238,10 +227,8 @@ export default function ProjectDetail() {
                     metrics={performanceMetrics}
                     fees={feeStructure}
                     engagementCaseStudies={engagementCaseStudies}
-                    performanceWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("performance") || s.section_title?.toLowerCase().includes("track record"))}
-                    feesWriteup={reportSections.find((s) => s.section_title?.toLowerCase().includes("fee") || s.section_title?.toLowerCase().includes("economics"))}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "performance") : null}
-                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("financial"))?.score}
+                    redFlags={redFlags}
+                    interrogatoryItems={interrogatoryItems}
                   />
                 )}
                 {activeTab === "strategy" && (
@@ -249,28 +236,22 @@ export default function ProjectDetail() {
                     thesisValidations={thesisValidations}
                     competitors={competitors}
                     marketFactors={marketFactors}
-                    reportSection={reportSections.find((s) => s.section_title?.toLowerCase().includes("strategy") || s.section_title?.toLowerCase().includes("market"))}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "strategy") : null}
-                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("strategy"))?.score}
-                    fundName={project.fund_name}
+                    fees={feeStructure}
+                    redFlags={redFlags}
+                    interrogatoryItems={interrogatoryItems}
+                    project={project}
                   />
                 )}
                 {activeTab === "red_flags" && (
                   <RedFlagsTab
                     redFlags={redFlags}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "red_flags") : null}
-                    moduleScore={moduleScores.find((ms: any) => ms.module_key?.includes("operations") || ms.module_key?.includes("risk"))?.score}
                     fundName={project.fund_name}
                     submissionQuality={submissionQuality}
                     criticalInfoGaps={criticalInfoGaps}
                   />
                 )}
                 {activeTab === "interrogatory" && (
-                  <InterrogatoryTab
-                    items={interrogatoryItems}
-                    fundName={project.fund_name}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "interrogatory") : null}
-                  />
+                  <InterrogatoryTab items={interrogatoryItems} fundName={project.fund_name} projectId={project.id} />
                 )}
                 {activeTab === "data_room" && (
                   <DataRoomTab
@@ -281,25 +262,20 @@ export default function ProjectDetail() {
                     lastAnalysisAt={project.updated_at}
                     onRefresh={fetchData}
                     onRerunAnalysis={handleRerunAnalysis}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "data_room") : null}
+                    submissionQuality={submissionQuality}
                   />
                 )}
                 {activeTab === "documents" && (
-                  <SourceFilesTab
-                    researchSources={researchSources}
-                    reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "documents") : null}
-                  />
+                  <SourceFilesTab researchSources={researchSources} />
                 )}
               </>
             )}
           </main>
         </div>
 
-        {/* Right insights panel */}
         <InsightsPanel projectName={project.fund_name} isProcessing={isProcessing} />
       </div>
 
-      {/* Mobile bottom nav */}
       <MobileBottomNav />
     </div>
   );

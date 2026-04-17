@@ -9,6 +9,7 @@ interface ProjectSidebarProps {
   moduleScoresData?: any[];
 }
 
+// PRD §3.3 — exact left-to-right tab order
 const L1_NAV_ITEMS = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "scorecard", label: "Scorecard", icon: Gauge },
@@ -40,14 +41,12 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
   const [activeLevel, setActiveLevel] = useState<ReportLevel>("L1");
   const [reportExpanded, setReportExpanded] = useState(true);
 
-  // For now L2/L3 are locked
   const isLevelAvailable = (level: ReportLevel) => level === "L1";
-
   const navItems = isProcessing ? PROCESSING_NAV_ITEMS : L1_NAV_ITEMS;
 
   return (
     <>
-      {/* Mobile: horizontal scrollable pills */}
+      {/* Mobile pills */}
       <div className="lg:hidden bg-background overflow-x-auto">
         <div className="flex px-4 py-2 gap-1 min-w-max">
           {navItems.map((item) => {
@@ -58,9 +57,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
                 key={item.key}
                 onClick={() => onTabChange(item.key)}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -71,9 +68,8 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
         </div>
       </div>
 
-      {/* Desktop sidebar */}
+      {/* Desktop */}
       <aside className="hidden lg:flex w-56 shrink-0 bg-background flex-col h-full">
-        {/* Brand header */}
         <div className="p-4 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
@@ -86,7 +82,6 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
           </div>
         </div>
 
-        {/* Report levels */}
         <div className="px-3 pt-3">
           <button
             onClick={() => setReportExpanded(!reportExpanded)}
@@ -109,19 +104,15 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
                       isActive
                         ? "bg-primary/10 text-foreground font-medium border border-primary/20"
                         : available
-                        ? "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                        : "text-muted-foreground/40 cursor-not-allowed"
+                          ? "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          : "text-muted-foreground/40 cursor-not-allowed"
                     }`}
                   >
                     <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[9px] font-bold ${
                       isActive ? "bg-foreground text-background" : available ? "bg-muted text-muted-foreground" : "bg-muted/50 text-muted-foreground/40"
-                    }`}>
-                      {level.key}
-                    </span>
-                    <span className="truncate">{level.label.split("—")[1]?.trim() || level.label}</span>
-                    {!available && (
-                      <span className="ml-auto text-[9px] text-muted-foreground/40 font-medium">Locked</span>
-                    )}
+                    }`}>{level.key}</span>
+                    <span className="truncate">{level.label}</span>
+                    {!available && <span className="ml-auto text-[9px] text-muted-foreground/40 font-medium">Locked</span>}
                   </button>
                 );
               })}
@@ -129,7 +120,6 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
           )}
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 pt-2 space-y-0.5">
           <div className="h-px bg-border mb-2" />
           {navItems.map((item) => {
@@ -140,9 +130,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
                 key={item.key}
                 onClick={() => onTabChange(item.key)}
                 className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isActive
-                    ? "bg-muted text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  isActive ? "bg-muted text-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />

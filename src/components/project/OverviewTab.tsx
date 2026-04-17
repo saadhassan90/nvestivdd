@@ -1,10 +1,11 @@
-import { CheckCircle2, AlertTriangle, Shield, FileText, RefreshCw, CheckCircle, Zap, TrendingUp, Target } from "lucide-react";
+import { FileText, Building2, Layers, Link2, Sparkles } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { ShimmerButton } from "@/components/magicui/ShimmerButton";
+import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { KpiTile } from "@/components/project/primitives/KpiTile";
+import { FieldValueGrid } from "@/components/project/primitives/FieldValueGrid";
+import { TierPill, RecommendationBadge, recommendationFromScore, tierFromScore } from "@/components/project/primitives/VerdictBadges";
+import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import type { Tables } from "@/integrations/supabase/types";
-import { getScoreTier } from "@/lib/score-utils";
-import { getVerdict, getVerdictLabel } from "@/lib/verdict-utils";
-import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
 
 interface OverviewTabProps {
   project: Tables<"projects">;
@@ -19,306 +20,164 @@ interface OverviewTabProps {
   reportMarkdown?: string | null;
 }
 
-/** SVG score ring */
-function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
-  const tier = getScoreTier(score);
-  const colorMap: Record<string, string> = {
-    strong_advance: "hsl(160, 84%, 39%)",
-    advance: "hsl(168, 76%, 42%)",
-    review: "hsl(38, 92%, 50%)",
-    decline: "hsl(0, 84%, 60%)",
-  };
-  const color = colorMap[tier] || colorMap.decline;
-  const radius = (size - 12) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (score / 100) * circumference;
+export function OverviewTab({
+  project,
+  redFlags,
+  documents,
+  submissionQuality = [],
+}: OverviewTabProps) {
+  const composite = project.composite_score ?? null;
+  const tier = tierFromScore(composite);
+  const rec = recommendationFromScore(composite);
+  const criticalCount = redFlags.filter((f) => f.severity === "critical").length;
+  const completeness = (project.completeness_score ?? null) as number | null;
 
-  return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={8} />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={8}
-          strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset}
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-3xl font-bold text-foreground">{score}</span>
-      </div>
-    </div>
+  const hardFloors = submissionQuality.filter((sq: any) =>
+    sq.severity === "hard_floor" || sq.category?.includes("hard_floor"),
   );
-}
+  const hardFloorTriggered = hardFloors.some((h: any) => h.status === "fail" || h.status === "flagged");
 
-/** Module score card */
-function ModuleScoreCard({ label, score, icon }: { label: string; score: number; icon?: React.ReactNode }) {
-  const tier = getScoreTier(score);
-  const barColorMap: Record<string, string> = {
-    strong_advance: "bg-score-strong",
-    advance: "bg-score-advance",
-    review: "bg-score-review",
-    decline: "bg-score-decline",
-  };
-  const barColor = barColorMap[tier];
+  const abstract = (project as any).executive_summary_narrative as string | null;
 
-  return (
-    <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <div className="flex items-center justify-between mt-1.5">
-        <span className="text-2xl font-bold text-foreground">{score}</span>
-        {icon && <span className="text-muted-foreground">{icon}</span>}
-      </div>
-      <div className="h-1 rounded-full bg-muted mt-2">
-        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${score}%` }} />
-      </div>
-    </div>
-  );
-}
-
-const MODULE_ICONS: Record<string, React.ReactNode> = {
-  team: <TrendingUp className="h-4 w-4" />,
-  track: <CheckCircle2 className="h-4 w-4" />,
-  strategy: <Target className="h-4 w-4" />,
-  terms: <Shield className="h-4 w-4" />,
-  risk: <AlertTriangle className="h-4 w-4" />,
-};
-
-const MODULE_SHORT_LABELS: Record<string, string> = {
-  module_a_financial: "Track",
-  module_b_team: "Team",
-  module_c_strategy: "Strategy",
-  module_d_terms: "Terms",
-  module_e_operations: "Risk",
-};
-
-export function OverviewTab({ project, redFlags, reportSections, documents, moduleScoresData = [], onRerunAnalysis, reportMarkdown }: OverviewTabProps) {
-  const tier = getScoreTier(project.composite_score);
-  const verdict = getVerdict(project.composite_score, project.status);
-  const verdictLabel = getVerdictLabel(verdict);
-
-  const rawStrengths = (project as any).key_strengths as ({ category: string; detail: string } | string)[] | null;
-  const rawRisks = (project as any).key_risks as ({ category: string; detail: string } | string)[] | null;
-  const keyStrengths = rawStrengths?.map(s => typeof s === "string" ? { category: s, detail: "" } : s) ?? null;
-  const keyRisks = rawRisks?.map(r => typeof r === "string" ? { category: r, detail: "" } : r) ?? null;
-
-  const execNarrative = (project as any).executive_summary_narrative as string | null;
-  const finalNarrative = (project as any).final_assessment_narrative as string | null;
-  const conditions = (project as any).conditions_for_advancement as string[] | null;
-  const timeline = (project as any).recommended_timeline as string | null;
-  const fundSize = (project as any).fund_size_estimated as string | null;
-  const gpEntity = (project as any).gp_entity_name as string | null;
-
-  const isProcessing = project.status === "processing";
-  const isComplete = project.status === "complete" || project.status === "completed";
-  const hasNewFiles = project.updated_at && documents.some(d => new Date(d.uploaded_at) > new Date(project.updated_at));
-
-  const criticalFlags = redFlags.filter(f => f.severity === "critical");
-  const displayStrengths = keyStrengths || [];
-  const displayRisks = keyRisks || criticalFlags.slice(0, 4).map(f => ({ category: f.title, detail: f.description || "" }));
-
-  const legacyScores = (project.module_scores as Record<string, number>) || {};
+  const fundSnapshotRows = [
+    { label: "Fund Name", value: project.fund_name },
+    { label: "GP Entity", value: (project as any).gp_entity_name },
+    { label: "Asset Class", value: project.asset_class },
+    { label: "Strategy", value: project.strategy },
+    { label: "Vintage", value: project.vintage },
+    { label: "Inception", value: (project as any).fund_inception_date },
+    { label: "Domicile", value: (project as any).domicile },
+    { label: "Regulatory Status", value: (project as any).regulatory_status },
+    { label: "Fund Size (target)", value: (project as any).fund_size_estimated },
+    { label: "Document Type", value: project.document_type },
+    { label: "Established", value: (project as any).established_year },
+    { label: "Submitter", value: (project as any).submitter_name },
+    { label: "Submitter Org", value: (project as any).submitter_company },
+    { label: "Analysis Date", value: (project as any).analysis_date },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Page title */}
+    <div className="space-y-5">
+      <HardFloorBanner triggered={hardFloorTriggered} reason="One or more hard-floor gates failed during L1 triage." />
+
+      {/* Hero card */}
       <BlurFade>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-foreground">Institutional Overview</h1>
-              {isComplete && (
-                <span className="inline-flex items-center rounded-full border border-score-strong/30 bg-score-strong/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-score-strong">
-                  L1 Complete
+        <SectionCard
+          title="Hero — Verdict Snapshot"
+          subtitle="Composite score, recommendation, and tier."
+          icon={<Sparkles className="h-4 w-4" />}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 items-center">
+            <div className="flex flex-col items-center md:items-start">
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-bold tabular-nums text-foreground">
+                  {composite ?? "—"}
                 </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-              <button className="hover:text-foreground transition-colors">Funds</button>
-              <span>›</span>
-              <span>{project.fund_name}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors">
-              <FileText className="h-3.5 w-3.5" />
-              Export PDF
-            </button>
-          </div>
-        </div>
-      </BlurFade>
-
-      {/* Rerun banner */}
-      {hasNewFiles && !isProcessing && (
-        <BlurFade>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-severity-elevated/30 bg-severity-elevated/5 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-severity-elevated shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-foreground">New files added since last analysis</p>
-                <p className="text-[11px] text-muted-foreground">Re-run to incorporate the latest documents.</p>
+                <span className="text-base text-muted-foreground">/100</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <RecommendationBadge recommendation={rec} />
+                <TierPill tier={tier} />
               </div>
             </div>
-            <ShimmerButton onClick={onRerunAnalysis} className="text-xs shrink-0">
-              <RefreshCw className="h-3.5 w-3.5" /> Re-run Analysis
-            </ShimmerButton>
-          </div>
-        </BlurFade>
-      )}
-
-      {/* Hero verdict card */}
-      <BlurFade delay={0.03}>
-        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
-            <ScoreRing score={project.composite_score || 0} size={130} />
-            <div className="flex-1 min-w-0 text-center sm:text-left">
-              <h2 className="text-2xl font-bold text-foreground">{verdictLabel}</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 mt-4">
+            <div className="space-y-2 min-w-0">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</p>
-                  <p className="text-sm font-medium text-foreground">{gpEntity || "—"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sponsor</p>
+                  <p className="text-foreground font-medium truncate">{(project as any).gp_entity_name || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</p>
-                  <p className="text-sm font-medium text-foreground">{project.asset_class || "—"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Strategy</p>
+                  <p className="text-foreground font-medium truncate">{project.asset_class || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Fund</p>
-                  <p className="text-sm font-medium text-foreground">{project.vintage || "—"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Vintage</p>
+                  <p className="text-foreground font-medium truncate">{project.vintage || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Target</p>
-                  <p className="text-sm font-medium text-foreground">{fundSize || "—"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Target Size</p>
+                  <p className="text-foreground font-medium truncate">{(project as any).fund_size_estimated || "—"}</p>
                 </div>
               </div>
-              {execNarrative && (
-                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{execNarrative}</p>
-              )}
             </div>
           </div>
-        </div>
+        </SectionCard>
       </BlurFade>
 
-      {/* Module score cards */}
+      {/* Abstract */}
+      <BlurFade delay={0.04}>
+        <SectionCard
+          title="Abstract"
+          subtitle="Executive narrative · Section 1"
+          icon={<FileText className="h-4 w-4" />}
+          empty={!abstract}
+          emptyMessage="Abstract not generated at L1."
+        >
+          {abstract && <p className="text-sm leading-relaxed text-foreground/85">{abstract}</p>}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Findings Overview KPI strip */}
       <BlurFade delay={0.06}>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {moduleScoresData.length > 0
-            ? moduleScoresData.map((ms: any) => {
-                const shortLabel = MODULE_SHORT_LABELS[ms.module_key] || ms.module_label || ms.module_key;
-                const iconKey = shortLabel.toLowerCase();
-                return (
-                  <ModuleScoreCard key={ms.id} label={shortLabel} score={ms.score || 0} icon={MODULE_ICONS[iconKey]} />
-                );
-              })
-            : Object.entries({ a: "Team", b: "Track", c: "Strategy", d: "Terms", e: "Risk" }).map(([key, label]) => (
-                <ModuleScoreCard key={key} label={label} score={legacyScores[key] || 0} icon={MODULE_ICONS[label.toLowerCase()]} />
-              ))}
-        </div>
+        <SectionCard
+          title="Findings Overview"
+          subtitle="At-a-glance verdict signals"
+          icon={<Layers className="h-4 w-4" />}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <KpiTile label="Composite" value={composite != null ? `${composite}/100` : null} />
+            <KpiTile label="Recommendation" value={rec ?? null} tone={rec === "MEET" ? "good" : rec === "NO MEET" ? "bad" : "warn"} />
+            <KpiTile label="Hard Floor" value={hardFloorTriggered ? "TRIGGERED" : "Pass"} tone={hardFloorTriggered ? "bad" : "good"} />
+            <KpiTile label="Critical Flags" value={criticalCount} tone={criticalCount > 0 ? "bad" : "good"} />
+            <KpiTile label="Completeness" value={completeness != null ? `${completeness}%` : null} />
+          </div>
+        </SectionCard>
       </BlurFade>
 
-      {/* Key Strengths + Key Concerns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <BlurFade delay={0.09}>
-          <div className="rounded-xl border border-border bg-card p-5 h-full">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="h-4 w-4 text-score-strong" />
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-score-strong">Key Strengths</h3>
-            </div>
-            <div className="space-y-2">
-              {displayStrengths.length > 0 ? (
-                displayStrengths.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-foreground mt-1 shrink-0">•</span>
-                    <p className="text-sm text-foreground leading-relaxed">
-                      {s.detail ? `${s.category}: ${s.detail}` : s.category}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No strengths data available</p>
-              )}
-            </div>
-          </div>
-        </BlurFade>
+      {/* Fund snapshot grid */}
+      <BlurFade delay={0.08}>
+        <SectionCard
+          title="Fund Snapshot"
+          subtitle="14-row field/value table sourced from fund_overview"
+          icon={<Building2 className="h-4 w-4" />}
+        >
+          <FieldValueGrid rows={fundSnapshotRows} columns={2} />
+        </SectionCard>
+      </BlurFade>
 
-        <BlurFade delay={0.11}>
-          <div className="rounded-xl border border-border bg-card p-5 h-full">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-severity-elevated" />
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-severity-elevated">Key Concerns</h3>
-            </div>
-            <div className="space-y-2">
-              {displayRisks.length > 0 ? (
-                displayRisks.slice(0, 5).map((r, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-severity-elevated mt-1 shrink-0">•</span>
-                    <p className="text-sm text-severity-elevated leading-relaxed">
-                      {r.detail ? `${r.category}: ${r.detail}` : r.category}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No critical issues identified</p>
-              )}
-            </div>
-          </div>
-        </BlurFade>
-      </div>
+      {/* Source materials */}
+      <BlurFade delay={0.1}>
+        <SectionCard
+          title="Source Materials"
+          subtitle="Documents fed into this report"
+          icon={<FileText className="h-4 w-4" />}
+          empty={documents.length === 0}
+          emptyMessage="No source materials uploaded."
+        >
+          {documents.length > 0 && (
+            <ul className="divide-y divide-border/40">
+              {documents.map((d) => (
+                <li key={d.id} className="py-2 flex items-center justify-between gap-3 text-xs">
+                  <span className="font-medium text-foreground truncate">{d.file_name}</span>
+                  <span className="text-muted-foreground shrink-0">
+                    {d.page_count ? `${d.page_count}p` : "—"} · {d.document_type_classified || "doc"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </BlurFade>
 
-      {/* Final Assessment */}
-      {(project.recommendation || finalNarrative) && (
-        <BlurFade delay={0.13}>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Shield className="h-4 w-4 text-foreground" />
-              <h3 className="text-sm font-semibold text-foreground">Final Assessment & Recommendation</h3>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-3">
-              {finalNarrative && <p className="leading-relaxed">{finalNarrative}</p>}
-              {conditions && conditions.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Conditions for Advancement</p>
-                  <ul className="space-y-1">
-                    {conditions.map((c, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs">
-                        <span className="text-foreground mt-0.5">•</span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {timeline && (
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Recommended Timeline</p>
-                  <p className="text-xs">{timeline}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </BlurFade>
-      )}
-
-      {/* Report Narrative (if available) */}
-      {reportMarkdown && (
-        <BlurFade delay={0.15}>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
-              Detailed Analysis
-            </p>
-            <MarkdownSectionCards content={reportMarkdown} baseDelay={0.17} />
-          </div>
-        </BlurFade>
-      )}
-
-      {/* Footer */}
-      <BlurFade delay={0.2}>
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle className="h-3.5 w-3.5 text-severity-monitor" />
-            <span>{redFlags.length > 0 ? `${redFlags.length} claims verified` : "Claims verified"} by Nvestiv AI Engine</span>
-          </div>
-          <span className="font-mono">Report ID: NV-{new Date(project.created_at).getFullYear()}-{project.id.slice(0, 4).toUpperCase()}</span>
-        </div>
+      {/* Cross-reference */}
+      <BlurFade delay={0.12}>
+        <SectionCard
+          title="Cross-reference — Related Prior Report"
+          subtitle="Carry-forward inheritance"
+          icon={<Link2 className="h-4 w-4" />}
+          empty={true}
+          emptyMessage="No related prior report linked at L1."
+        />
       </BlurFade>
     </div>
   );
