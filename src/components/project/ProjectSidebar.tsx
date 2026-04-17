@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Target, TrendingUp, AlertTriangle, MessageSquare, FileText, FileBarChart, FolderOpen, ChevronDown, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, Target, TrendingUp, AlertTriangle, MessageSquare, FileText, FileBarChart, FolderOpen, ChevronDown, ChevronRight, Gauge } from "lucide-react";
 import { useState } from "react";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -11,6 +11,7 @@ interface ProjectSidebarProps {
 
 const L1_NAV_ITEMS = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
+  { key: "scorecard", label: "Scorecard", icon: Gauge },
   { key: "team", label: "Team", icon: Users },
   { key: "strategy", label: "Strategy", icon: Target },
   { key: "performance", label: "Performance", icon: TrendingUp },

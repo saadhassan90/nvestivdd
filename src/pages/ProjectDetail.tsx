@@ -4,6 +4,7 @@ import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { InsightsPanel } from "@/components/project/InsightsPanel";
 import { OverviewTab } from "@/components/project/OverviewTab";
+import { ScorecardTab } from "@/components/project/ScorecardTab";
 import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
 import { DataRoomTab } from "@/components/project/DataRoomTab";
@@ -219,6 +220,9 @@ export default function ProjectDetail() {
                     onRerunAnalysis={handleRerunAnalysis}
                     reportMarkdown={hasReportMarkdown ? getTabMarkdown(reportMarkdownSections, "overview") : null}
                   />
+                )}
+                {activeTab === "scorecard" && (
+                  <ScorecardTab project={project} moduleScores={moduleScores} />
                 )}
                 {activeTab === "team" && (
                   <TeamTab
