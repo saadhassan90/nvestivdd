@@ -1,8 +1,10 @@
-import { Shield, AlertTriangle, Eye, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
-import { MagicCard } from "@/components/magicui/MagicCard";
+import { useState } from "react";
+import { Shield, AlertOctagon, AlertTriangle, Eye, Layers, Scale, Gavel, Link2 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { MarkdownSectionCards } from "@/components/project/MarkdownSectionCards";
-import { formatRelativeTime } from "@/lib/score-utils";
+import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { KpiTile } from "@/components/project/primitives/KpiTile";
+import { FlagLane } from "@/components/project/primitives/FlagLane";
+import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface RedFlagsTabProps {
@@ -14,295 +16,175 @@ interface RedFlagsTabProps {
   criticalInfoGaps?: Tables<"critical_info_gaps">[];
 }
 
-const MODULE_LABELS: Record<string, string> = {
-  module_a: "Financial",
-  module_b: "Team",
-  module_c: "Strategy",
-  module_d: "Terms",
-  module_e: "Operational",
-  financial: "Financial",
+const CATEGORIES = ["all", "team", "track_record", "strategy", "domain", "structure"] as const;
+type Cat = typeof CATEGORIES[number];
+
+const CAT_LABEL: Record<Cat, string> = {
+  all: "All",
   team: "Team",
+  track_record: "Track Record",
   strategy: "Strategy",
-  terms: "Terms",
-  operations: "Operational",
+  domain: "Domain",
+  structure: "Structure",
 };
 
-const SEVERITY_STYLE: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  critical: { bg: "bg-severity-critical/10", text: "text-severity-critical", border: "border-l-severity-critical", label: "Critical — Require Resolution Before Investment" },
-  elevated: { bg: "bg-severity-elevated/10", text: "text-severity-elevated", border: "border-l-severity-elevated", label: "Elevated — Material Diligence Items" },
-  monitor: { bg: "bg-severity-monitor/10", text: "text-severity-monitor", border: "border-l-severity-monitor", label: "Monitor — Track But Not Deal-Breaking" },
-};
+function categoryOf(flag: Tables<"red_flags">): Cat {
+  const m = (flag.module || flag.source_module || "").toLowerCase();
+  if (m.includes("team")) return "team";
+  if (m.includes("track") || m.includes("performance") || m.includes("financial")) return "track_record";
+  if (m.includes("strateg")) return "strategy";
+  if (m.includes("domain") || m.includes("market")) return "domain";
+  if (m.includes("structur") || m.includes("term")) return "structure";
+  return "all";
+}
 
-export function RedFlagsTab({ redFlags, reportMarkdown, moduleScore, fundName, submissionQuality = [], criticalInfoGaps = [] }: RedFlagsTabProps) {
-  const criticalFlags = redFlags.filter((f) => f.severity === "critical");
-  const elevatedFlags = redFlags.filter((f) => f.severity === "elevated");
-  const monitorFlags = redFlags.filter((f) => f.severity === "monitor");
+export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps = [] }: RedFlagsTabProps) {
+  const [cat, setCat] = useState<Cat>("all");
+
+  const filtered = cat === "all" ? redFlags : redFlags.filter((f) => categoryOf(f) === cat);
+
+  const critical = filtered.filter((f) => f.severity === "critical");
+  const elevated = filtered.filter((f) => f.severity === "elevated");
+  const monitor = filtered.filter((f) => f.severity === "monitor");
 
   const hardFloors = submissionQuality.filter((sq) => sq.severity === "hard_floor" || sq.category?.includes("hard_floor"));
-  const passedFloors = hardFloors.filter((h) => h.status === "pass" || h.status === "cleared");
+  const triggered = hardFloors.some((h) => h.status === "fail" || h.status === "flagged");
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
+    <div className="space-y-5">
+      <HardFloorBanner triggered={triggered} />
+
+      {/* Severity Summary Strip */}
       <BlurFade>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-              Risk & Red Flags
-            </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
-              Institutional exposure, operational vulnerabilities, and compliance metrics{fundName ? ` for ${fundName}` : ""}.
-            </p>
+        <SectionCard title="Severity Summary" subtitle="Critical · Elevated · Monitor" icon={<Shield className="h-4 w-4" />}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <KpiTile label="Critical" value={redFlags.filter((f) => f.severity === "critical").length} tone="bad" />
+            <KpiTile label="Elevated" value={redFlags.filter((f) => f.severity === "elevated").length} tone="warn" />
+            <KpiTile label="Monitor" value={redFlags.filter((f) => f.severity === "monitor").length} />
+            <KpiTile label="Inherited" value={0} subValue="Carry-forward from prior" />
           </div>
-          {moduleScore != null && (
-            <div className="shrink-0 flex flex-col items-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-border bg-card">
-                <div className="flex items-center gap-1">
-                  <span className={`text-xl font-bold ${
-                    moduleScore >= 85 ? "text-score-strong" : moduleScore >= 70 ? "text-score-advance" : moduleScore >= 50 ? "text-score-review" : "text-severity-critical"
-                  }`}>{moduleScore}</span>
-                  {moduleScore >= 70 && <CheckCircle2 className="h-4 w-4 text-score-strong" />}
-                </div>
-              </div>
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">Risk Score</span>
-            </div>
-          )}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Category sub-tabs */}
+      <BlurFade delay={0.04}>
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCat(c)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+                cat === c
+                  ? "bg-foreground text-background"
+                  : "border border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {CAT_LABEL[c]}
+            </button>
+          ))}
         </div>
       </BlurFade>
 
-      {/* Summary bar */}
-      {redFlags.length > 0 && (
-        <BlurFade delay={0.03}>
-          <div className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3">
-            {criticalFlags.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-critical" />
-                <span className="text-xs font-semibold text-severity-critical">{criticalFlags.length} Critical</span>
-              </div>
-            )}
-            {elevatedFlags.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-elevated" />
-                <span className="text-xs font-semibold text-severity-elevated">{elevatedFlags.length} Elevated</span>
-              </div>
-            )}
-            {monitorFlags.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-monitor" />
-                <span className="text-xs font-semibold text-severity-monitor">{monitorFlags.length} Monitor</span>
-              </div>
-            )}
-            <span className="text-xs text-muted-foreground ml-auto">{redFlags.length} total</span>
-          </div>
-        </BlurFade>
-      )}
-
-      {/* Report Narrative */}
-      {reportMarkdown && (
-        <BlurFade delay={0.05}>
-          <MarkdownSectionCards content={reportMarkdown} baseDelay={0.07} />
-        </BlurFade>
-      )}
-
-      {/* Hard Floor Gates */}
-      {submissionQuality.length > 0 && (
-        <BlurFade delay={0.08}>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Hard Floor Gates
-              </p>
-              {hardFloors.length > 0 && (
-                <span className="text-[10px] font-medium text-muted-foreground">
-                  {passedFloors.length} of {hardFloors.length} Cleared
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {submissionQuality.map((sq) => {
-                const passed = sq.status === "pass" || sq.status === "cleared" || sq.status === "present";
-                const warning = sq.severity === "elevated" || sq.severity === "critical" || sq.status === "fail" || sq.status === "flagged";
-                return (
-                  <MagicCard
-                    key={sq.id}
-                    className={warning ? "!border-severity-elevated/30 !bg-severity-elevated/5" : ""}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className={`text-[10px] font-bold uppercase tracking-wider ${warning ? "text-severity-elevated" : "text-muted-foreground"}`}>
-                        {sq.category_label}
-                      </p>
-                      {passed ? (
-                        <CheckCircle2 className="h-4 w-4 text-score-strong shrink-0" />
-                      ) : warning ? (
-                        <AlertTriangle className="h-4 w-4 text-severity-elevated shrink-0" />
-                      ) : (
-                        <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                      )}
-                    </div>
-                    <p className={`text-lg font-bold ${warning ? "text-severity-elevated" : "text-foreground"}`}>
-                      {sq.confidence}
+      {/* Critical Cards */}
+      <BlurFade delay={0.06}>
+        <SectionCard title="CRITICAL Flags" subtitle="Each rendered as full card" icon={<AlertOctagon className="h-4 w-4" />}>
+          {critical.length === 0 ? (
+            <p className="text-xs italic text-muted-foreground">All clear — no critical flags in this category.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {critical.map((f, i) => (
+                <div
+                  key={f.id}
+                  id={`flag-${f.flag_number ?? i}`}
+                  className="rounded-lg border border-severity-critical/40 border-l-4 border-l-severity-critical bg-severity-critical/5 p-3"
+                >
+                  <div className="flex items-baseline justify-between gap-2 mb-1">
+                    <span className="text-[10px] font-mono font-bold text-severity-critical">CRIT-{f.flag_number ?? i + 1}</span>
+                    {f.timeline && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{f.timeline.replace(/_/g, " ")}</span>}
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">{f.title}</p>
+                  {f.issue && (
+                    <p className="text-xs text-foreground/80 mt-1.5 leading-relaxed">
+                      <span className="font-bold uppercase tracking-wider text-[10px]">Issue: </span>
+                      {f.issue}
                     </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {sq.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  )}
+                  {f.implication && (
+                    <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
+                      <span className="font-bold uppercase tracking-wider text-[10px]">Implication: </span>
+                      {f.implication}
                     </p>
-                  </MagicCard>
-                );
-              })}
-            </div>
-          </div>
-        </BlurFade>
-      )}
-
-      {/* Red Flags by severity */}
-      {redFlags.length > 0 && (
-        <div className="space-y-6">
-          {(["critical", "elevated", "monitor"] as const).map((severity) => {
-            const flags = redFlags.filter((f) => f.severity === severity);
-            if (flags.length === 0) return null;
-            const style = SEVERITY_STYLE[severity];
-            const IconComp = severity === "critical" ? Shield : severity === "elevated" ? AlertTriangle : Eye;
-            return (
-              <BlurFade key={severity} delay={0.12}>
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <IconComp className={`h-4 w-4 ${style.text}`} />
-                    <span className={`text-xs font-semibold uppercase tracking-wider ${style.text}`}>
-                      {style.label}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {flags.map((flag, i) => (
-                      <FlagCard key={flag.id} flag={flag} index={i} />
-                    ))}
-                  </div>
-                </div>
-              </BlurFade>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Critical Info Gaps */}
-      {criticalInfoGaps.length > 0 && (
-        <BlurFade delay={0.15}>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
-              Critical Information Gaps
-            </p>
-            <div className="space-y-2">
-              {criticalInfoGaps.map((gap) => (
-                <div key={gap.id} className="flex items-start gap-3 rounded-lg border border-border p-3">
-                  <XCircle className={`h-4 w-4 shrink-0 mt-0.5 ${
-                    gap.severity === "critical" ? "text-severity-critical" : "text-severity-elevated"
-                  }`} />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{gap.gap_title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{gap.gap_description}</p>
-                    {gap.related_module && (
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1 inline-block">
-                        Module: {MODULE_LABELS[gap.related_module] || gap.related_module}
-                      </span>
-                    )}
-                  </div>
+                  )}
+                  {f.resolution && (
+                    <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
+                      <span className="font-bold uppercase tracking-wider text-[10px]">Resolution: </span>
+                      {f.resolution}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
-        </BlurFade>
-      )}
+          )}
+        </SectionCard>
+      </BlurFade>
 
-      {/* Empty State */}
-      {redFlags.length === 0 && submissionQuality.length === 0 && (
-        <BlurFade>
-          <MagicCard>
-            <div className="text-center py-12">
-              <Shield className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-sm font-medium text-muted-foreground">No red flags identified yet.</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Risk assessment will appear once the analysis is complete.</p>
-            </div>
-          </MagicCard>
-        </BlurFade>
-      )}
+      {/* Elevated Table */}
+      <BlurFade delay={0.08}>
+        <SectionCard title="ELEVATED Flags" subtitle="Filterable table" icon={<AlertTriangle className="h-4 w-4" />}>
+          <FlagLane title="Elevated" tone="elevated" flags={elevated} />
+        </SectionCard>
+      </BlurFade>
+
+      {/* Monitor Table */}
+      <BlurFade delay={0.1}>
+        <SectionCard title="MONITOR Flags" subtitle="Track but not deal-breaking" icon={<Eye className="h-4 w-4" />}>
+          <FlagLane title="Monitor" tone="monitor" flags={monitor} />
+        </SectionCard>
+      </BlurFade>
+
+      {/* Hard Floor Gate Detail */}
+      <BlurFade delay={0.12}>
+        <SectionCard title="Hard Floor Gate Detail" subtitle="Full reasoning per gate" icon={<Layers className="h-4 w-4" />} empty={hardFloors.length === 0} emptyMessage="No hard-floor gates evaluated at L1.">
+          {hardFloors.length > 0 && (
+            <ul className="space-y-2">
+              {hardFloors.map((g) => (
+                <li key={g.id} className="rounded-md border border-border p-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-semibold text-foreground">{g.category_label}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{g.status?.replace(/_/g, " ")}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Discrepancies Found */}
+      <BlurFade delay={0.14}>
+        <SectionCard title="Discrepancies Found" subtitle="Deck-vs-research mismatch matrix" icon={<Scale className="h-4 w-4" />} empty={criticalInfoGaps.length === 0} emptyMessage="No deck-vs-research discrepancies parsed at L1.">
+          {criticalInfoGaps.length > 0 && (
+            <ul className="space-y-1.5">
+              {criticalInfoGaps.map((g) => (
+                <li key={g.id} className="text-xs">
+                  <p className="font-medium text-foreground">{g.gap_title}</p>
+                  <p className="text-muted-foreground">{g.gap_description}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Regulatory & Litigation */}
+      <BlurFade delay={0.16}>
+        <SectionCard title="Regulatory & Litigation" subtitle="Advisories · enforcement · court rulings" icon={<Gavel className="h-4 w-4" />} empty emptyMessage="No regulatory or litigation findings at L1." />
+      </BlurFade>
+
+      {/* Carry-forward callout */}
+      <BlurFade delay={0.18}>
+        <SectionCard title="Carry-forward Risk" subtitle="Inherited from prior report" icon={<Link2 className="h-4 w-4" />} empty emptyMessage="No carry-forward inheritance at L1." />
+      </BlurFade>
     </div>
-  );
-}
-
-/* ── Individual Flag Card ── */
-function FlagCard({ flag, index }: { flag: Tables<"red_flags">; index: number }) {
-  const style = SEVERITY_STYLE[flag.severity] || SEVERITY_STYLE.monitor;
-
-  return (
-    <BlurFade delay={index * 0.03}>
-      <MagicCard className={`border-l-4 ${style.border}`}>
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground ${
-              flag.severity === "critical" ? "bg-severity-critical" : flag.severity === "elevated" ? "bg-severity-elevated" : "bg-severity-monitor"
-            }`}>
-              {flag.severity}
-            </span>
-            {flag.source_module && (
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                {MODULE_LABELS[flag.source_module] || flag.source_module}
-              </span>
-            )}
-            {flag.confidence && (
-              <span className="text-[10px] text-muted-foreground">{flag.confidence} confidence</span>
-            )}
-          </div>
-          <span className="text-[10px] text-muted-foreground shrink-0">
-            {formatRelativeTime(flag.logged_at)}
-          </span>
-        </div>
-
-        <p className="text-sm font-semibold text-foreground">{flag.title}</p>
-        {flag.description && (
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{flag.description}</p>
-        )}
-
-        {(flag.issue || flag.implication || flag.resolution) && (
-          <div className="mt-3 space-y-2 rounded-lg bg-muted/50 p-3">
-            {flag.issue && (
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Issue: </span>
-                <span className="text-xs text-muted-foreground">{flag.issue}</span>
-              </div>
-            )}
-            {flag.implication && (
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Implication: </span>
-                <span className="text-xs text-muted-foreground">{flag.implication}</span>
-              </div>
-            )}
-            {flag.resolution && (
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Resolution: </span>
-                <span className="text-xs text-muted-foreground">{flag.resolution}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {(flag.data_room_action || flag.interrogatory_question || flag.timeline) && (
-          <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-border/50">
-            {flag.timeline && (
-              <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[9px] font-medium text-muted-foreground uppercase">
-                {flag.timeline.replace(/_/g, " ")}
-              </span>
-            )}
-            {flag.data_room_action && (
-              <span className="text-[10px] text-muted-foreground">
-                <span className="font-bold uppercase tracking-wider">DR: </span>{flag.data_room_action}
-              </span>
-            )}
-            {flag.interrogatory_question && (
-              <span className="text-[10px] text-muted-foreground italic">
-                Q: "{flag.interrogatory_question}"
-              </span>
-            )}
-          </div>
-        )}
-      </MagicCard>
-    </BlurFade>
   );
 }

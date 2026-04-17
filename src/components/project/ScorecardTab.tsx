@@ -1,231 +1,265 @@
-import { BlurFade } from "@/components/magicui/BlurFade";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Target, TrendingUp, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { useState } from "react";
-import { getVerdict, getVerdictLabel, getVerdictColor } from "@/lib/verdict-utils";
+import { Gauge, Shield, ListChecks, ClipboardList, BookOpen, ChevronDown } from "lucide-react";
+import { BlurFade } from "@/components/magicui/BlurFade";
+import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { TierPill, RecommendationBadge, recommendationFromScore, tierFromScore, BandBadge, bandFromScore } from "@/components/project/primitives/VerdictBadges";
+import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
+import { EmptyChip } from "@/components/project/primitives/EmptyChip";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ScorecardTabProps {
   project: Tables<"projects">;
   moduleScores: any[];
+  submissionQuality?: any[];
 }
 
-const RUBRIC_TIERS = [
-  { range: "85–100", label: "Strong Advance", description: "Exceptional fund — institutional-grade evidence across all modules.", color: "text-score-strong", bg: "bg-score-strong/10", border: "border-score-strong/30" },
-  { range: "70–84", label: "Advance", description: "Strong fund with minor gaps — proceed to deeper diligence.", color: "text-score-advance", bg: "bg-score-advance/10", border: "border-score-advance/30" },
-  { range: "50–69", label: "Review", description: "Material concerns — conditional advancement requires resolution.", color: "text-score-review", bg: "bg-score-review/10", border: "border-score-review/30" },
-  { range: "0–49", label: "Decline", description: "Hard floor triggered — fundamental gaps prevent advancement.", color: "text-severity-critical", bg: "bg-severity-critical/10", border: "border-severity-critical/30" },
+const HARD_FLOOR_GATES = [
+  { key: "team_integrity", label: "Team Integrity", description: "No undisclosed adverse personal findings" },
+  { key: "entity_legitimacy", label: "Entity Legitimacy", description: "Sponsor entity verified via regulator filings" },
+  { key: "track_record_contradiction", label: "Track Record Contradiction", description: "Claimed returns reconcile with public records" },
 ];
 
-const CONFIDENCE_LABELS: Record<string, { label: string; color: string }> = {
-  high: { label: "High confidence", color: "text-score-strong" },
-  medium_high: { label: "Medium-high", color: "text-score-advance" },
-  medium: { label: "Medium", color: "text-score-review" },
-  medium_low: { label: "Medium-low", color: "text-severity-monitor" },
-  low: { label: "Low confidence", color: "text-severity-critical" },
-};
+const FIVE_DIMENSIONS = [
+  { key: "team", label: "Manager & Team", max: 25 },
+  { key: "track_record", label: "Track Record", max: 25 },
+  { key: "strategy", label: "Strategy", max: 20 },
+  { key: "domain", label: "Domain", max: 20 },
+  { key: "structural", label: "Structural", max: 10 },
+];
 
-function getModuleTierColor(score: number) {
-  if (score >= 85) return { text: "text-score-strong", bg: "bg-score-strong", border: "border-score-strong/30", soft: "bg-score-strong/10" };
-  if (score >= 70) return { text: "text-score-advance", bg: "bg-score-advance", border: "border-score-advance/30", soft: "bg-score-advance/10" };
-  if (score >= 50) return { text: "text-score-review", bg: "bg-score-review", border: "border-score-review/30", soft: "bg-score-review/10" };
-  return { text: "text-severity-critical", bg: "bg-severity-critical", border: "border-severity-critical/30", soft: "bg-severity-critical/10" };
+function findGate(submissionQuality: any[], key: string) {
+  return submissionQuality.find(
+    (sq) => sq.category === key || sq.category === `hard_floor_${key}` || sq.category_label?.toLowerCase().includes(key.replace(/_/g, " ")),
+  );
 }
 
-function getModuleTierLabel(score: number) {
-  if (score >= 85) return "Strong Advance";
-  if (score >= 70) return "Advance";
-  if (score >= 50) return "Review";
-  return "Decline";
+function findDimension(modules: any[], key: string) {
+  return modules.find((m) => m.module_key?.toLowerCase().includes(key) || m.module_label?.toLowerCase().includes(key.replace(/_/g, " ")));
 }
 
-export function ScorecardTab({ project, moduleScores }: ScorecardTabProps) {
-  const composite = project.composite_score ?? 0;
-  const verdict = getVerdict(composite, project.status);
-  const compositeColors = getModuleTierColor(composite);
+export function ScorecardTab({ project, moduleScores, submissionQuality = [] }: ScorecardTabProps) {
+  const composite = project.composite_score ?? null;
+  const tier = tierFromScore(composite);
+  const rec = recommendationFromScore(composite);
 
-  const sortedModules = [...moduleScores].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
-  const totalWeight = sortedModules.reduce((sum, m) => sum + (Number(m.weight) || 0), 0);
+  const hardFloors = submissionQuality.filter((sq: any) =>
+    sq.severity === "hard_floor" || sq.category?.includes("hard_floor"),
+  );
+  const triggered = hardFloors.some((h: any) => h.status === "fail" || h.status === "flagged");
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* Composite header */}
-      <BlurFade delay={0.05}>
-        <Card className="overflow-hidden border-border">
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
-            <div className={`p-6 ${compositeColors.soft} border-r border-border flex flex-col justify-center items-center text-center`}>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Composite Score</p>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-6xl font-bold tabular-nums ${compositeColors.text}`}>{composite}</span>
+    <div className="space-y-5">
+      <HardFloorBanner triggered={triggered} />
+
+      {/* Composite Hero */}
+      <BlurFade>
+        <SectionCard
+          title="Composite Score"
+          subtitle="Tier, recommendation, and hard-floor gate status"
+          icon={<Gauge className="h-4 w-4" />}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-6xl font-bold tabular-nums text-foreground">{composite ?? "—"}</span>
                 <span className="text-xl text-muted-foreground">/100</span>
               </div>
-              <Badge variant="outline" className={`mt-3 ${compositeColors.border} ${compositeColors.text} font-semibold`}>
-                {getModuleTierLabel(composite)}
-              </Badge>
-              <p className={`mt-2 text-sm font-medium ${getVerdictColor(verdict)}`}>{getVerdictLabel(verdict)}</p>
-            </div>
-            <div className="p-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-sm font-semibold text-foreground">Scoring Methodology</h2>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                The composite score is a weighted aggregate across {sortedModules.length} diligence modules. Each module receives a 0–100 score
-                from the analyst pipeline, multiplied by its rubric weight. Confidence levels reflect the strength of source evidence backing each
-                assessment.
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
-                {RUBRIC_TIERS.map((tier) => (
-                  <div key={tier.range} className={`rounded-md border ${tier.border} ${tier.bg} px-2.5 py-2`}>
-                    <p className={`text-[10px] font-bold uppercase ${tier.color}`}>{tier.label}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{tier.range}</p>
-                  </div>
-                ))}
+              <div className="flex items-center gap-2 mt-3">
+                <TierPill tier={tier} />
+                <RecommendationBadge recommendation={rec} />
               </div>
             </div>
+            <div className="text-xs text-muted-foreground sm:text-right">
+              <p>4-tier UI scale drives band colors.</p>
+              <p>3-tier scale drives recommendation badge.</p>
+            </div>
           </div>
-        </Card>
+        </SectionCard>
       </BlurFade>
 
-      {/* Module breakdown */}
-      <BlurFade delay={0.1}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Module Breakdown</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Detailed scoring across all {sortedModules.length} diligence modules · Total weight: {(totalWeight * 100).toFixed(0)}%
-            </p>
-          </div>
-        </div>
-
-        {sortedModules.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-sm text-muted-foreground">No module scores available yet.</p>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {sortedModules.map((mod, idx) => (
-              <ModuleScoreRow key={mod.id} module={mod} index={idx} totalWeight={totalWeight} />
-            ))}
-          </div>
-        )}
-      </BlurFade>
-
-      {/* Rubric detail */}
-      <BlurFade delay={0.15}>
-        <Card className="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Info className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Rubric Reference</h2>
-          </div>
-          <div className="space-y-3">
-            {RUBRIC_TIERS.map((tier) => (
-              <div key={tier.range} className={`flex gap-3 p-3 rounded-lg border ${tier.border} ${tier.bg}`}>
-                <div className="shrink-0 min-w-[80px]">
-                  <p className={`text-xs font-bold ${tier.color}`}>{tier.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{tier.range}</p>
+      {/* Hard Floor Gates */}
+      <BlurFade delay={0.04}>
+        <SectionCard
+          title="Hard Floor Gates"
+          subtitle="Three pass/fail gates from the L1 hardfloor schema"
+          icon={<Shield className="h-4 w-4" />}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {HARD_FLOOR_GATES.map((gate) => {
+              const data = findGate(submissionQuality, gate.key);
+              const status = (data?.status || "").toLowerCase();
+              const passed = ["pass", "cleared", "present"].includes(status);
+              const failed = ["fail", "flagged", "triggered"].includes(status);
+              return (
+                <div
+                  key={gate.key}
+                  className={`rounded-lg border p-3 ${
+                    failed
+                      ? "border-severity-critical/40 bg-severity-critical/5"
+                      : passed
+                        ? "border-score-strong/30 bg-score-strong/5"
+                        : "border-border bg-card"
+                  }`}
+                >
+                  <p className="text-xs font-semibold text-foreground">{gate.label}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{gate.description}</p>
+                  <p
+                    className={`text-[10px] font-bold uppercase tracking-wider mt-2 ${
+                      failed ? "text-severity-critical" : passed ? "text-score-strong" : "text-muted-foreground"
+                    }`}
+                  >
+                    {data?.status?.replace(/_/g, " ") || "Pending verification"}
+                  </p>
+                  {data?.confidence && (
+                    <p className="text-[10px] text-muted-foreground mt-1">Confidence: {data.confidence}</p>
+                  )}
                 </div>
-                <p className="text-xs text-foreground/80 leading-relaxed">{tier.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </Card>
+        </SectionCard>
+      </BlurFade>
+
+      {/* 5-Dimension Rubric Grid */}
+      <BlurFade delay={0.06}>
+        <SectionCard
+          title="5-Dimension Rubric"
+          subtitle="Manager & Team · Track Record · Strategy · Domain · Structural"
+          icon={<ListChecks className="h-4 w-4" />}
+        >
+          <div className="space-y-1.5">
+            {FIVE_DIMENSIONS.map((dim, idx) => {
+              const data = findDimension(moduleScores, dim.key);
+              return <RubricRow key={dim.key} dim={dim} data={data} defaultOpen={idx === 0} />;
+            })}
+          </div>
+
+          {/* Composite row */}
+          <div className="mt-3 rounded-md border border-border bg-muted/30 px-3 py-2.5 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground">Composite</span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-bold tabular-nums text-foreground">{composite ?? "—"}/100</span>
+              <TierPill tier={tier} />
+            </div>
+          </div>
+        </SectionCard>
+      </BlurFade>
+
+      {/* Verdict & Recommendation */}
+      <BlurFade delay={0.08}>
+        <SectionCard
+          title="Verdict & Recommendation"
+          subtitle="Section 2 rationale"
+          icon={<ClipboardList className="h-4 w-4" />}
+          empty={!project.final_assessment_narrative && !project.executive_summary_narrative}
+          emptyMessage="Verdict rationale not generated at L1."
+        >
+          {(project.final_assessment_narrative || project.executive_summary_narrative) && (
+            <div className="text-sm text-foreground/85 leading-relaxed space-y-3">
+              {project.executive_summary_narrative && <p>{project.executive_summary_narrative}</p>}
+              {project.final_assessment_narrative && <p>{project.final_assessment_narrative}</p>}
+            </div>
+          )}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Meeting Conditions Panel — only meaningful for CONDITIONAL MEET */}
+      <BlurFade delay={0.1}>
+        <SectionCard
+          title="Meeting Conditions"
+          subtitle={rec === "CONDITIONAL MEET" ? "Conditions to satisfy before first meeting" : "Only rendered for CONDITIONAL MEET verdicts"}
+          icon={<ClipboardList className="h-4 w-4" />}
+          empty={rec !== "CONDITIONAL MEET" || !project.conditions_for_advancement}
+          emptyMessage={rec === "CONDITIONAL MEET" ? "No meeting conditions parsed at L1." : "Recommendation is not CONDITIONAL MEET — section reserved."}
+        >
+          {rec === "CONDITIONAL MEET" && project.conditions_for_advancement && (
+            <ul className="space-y-2">
+              {(project.conditions_for_advancement as string[]).map((c, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs">
+                  <input type="checkbox" className="mt-1 shrink-0" />
+                  <span className="text-foreground">{c}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </BlurFade>
+
+      {/* Score Tier Thresholds Legend */}
+      <BlurFade delay={0.12}>
+        <SectionCard
+          title="Score Tier Thresholds"
+          subtitle="Dual canonical scales"
+          icon={<BookOpen className="h-4 w-4" />}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">UI Tier (4-step)</p>
+              <ul className="space-y-1.5 text-xs">
+                <li className="flex items-center gap-2"><TierPill tier="Strong Advance" /><span className="text-muted-foreground">85–100</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Advance" /><span className="text-muted-foreground">70–84</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Review" /><span className="text-muted-foreground">50–69</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Decline" /><span className="text-muted-foreground">0–49</span></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Recommendation (3-step)</p>
+              <ul className="space-y-1.5 text-xs">
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="MEET" /><span className="text-muted-foreground">≥65</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="CONDITIONAL MEET" /><span className="text-muted-foreground">50–64</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="NO MEET" /><span className="text-muted-foreground">&lt;50</span></li>
+              </ul>
+            </div>
+          </div>
+        </SectionCard>
       </BlurFade>
     </div>
   );
 }
 
-function ModuleScoreRow({ module: mod, index, totalWeight }: { module: any; index: number; totalWeight: number }) {
-  const [open, setOpen] = useState(index === 0);
-  const score = Number(mod.score) || 0;
-  const weight = Number(mod.weight) || 0;
-  const weighted = Number(mod.weighted_score) || (score * weight);
-  const tier = getModuleTierColor(score);
-  const conf = CONFIDENCE_LABELS[mod.confidence] || { label: mod.confidence || "—", color: "text-muted-foreground" };
-  const weightPct = totalWeight > 0 ? (weight / totalWeight) * 100 : 0;
+function RubricRow({ dim, data, defaultOpen }: { dim: { key: string; label: string; max: number }; data: any; defaultOpen: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const score = data?.score ?? null;
+  const pct = score != null ? Math.min(1, score / 100) : 0;
+  const band = score != null ? bandFromScore(pct) : null;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className={`overflow-hidden transition-colors ${open ? "border-border" : "border-border/60 hover:border-border"}`}>
-        <CollapsibleTrigger className="w-full text-left">
-          <div className="p-4 flex items-center gap-4">
-            {/* Score circle */}
-            <div className={`shrink-0 h-14 w-14 rounded-lg ${tier.soft} ${tier.border} border flex flex-col items-center justify-center`}>
-              <span className={`text-xl font-bold tabular-nums ${tier.text} leading-none`}>{score}</span>
-              <span className="text-[9px] text-muted-foreground mt-0.5">/100</span>
-            </div>
-
-            {/* Title + meta */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm font-semibold text-foreground truncate">{mod.module_label}</h3>
-                <Badge variant="outline" className={`${tier.border} ${tier.text} text-[10px] font-semibold`}>
-                  {getModuleTierLabel(score)}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                <span>Weight: <span className="font-medium text-foreground">{(weight * 100).toFixed(0)}%</span></span>
-                <span>·</span>
-                <span>Weighted: <span className="font-medium text-foreground tabular-nums">{Number(weighted).toFixed(2)}</span></span>
-                <span>·</span>
-                <span className={`font-medium ${conf.color}`}>{conf.label}</span>
-              </div>
-              <div className="mt-2">
-                <Progress value={score} className="h-1.5" />
-              </div>
-            </div>
-
-            <ChevronDown className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      <div className="rounded-md border border-border bg-card overflow-hidden">
+        <CollapsibleTrigger className="w-full px-3 py-2 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left">
+          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} />
+          <span className="text-xs font-semibold text-foreground w-44 truncate">{dim.label}</span>
+          <div className="flex-1 min-w-0">
+            <Progress value={score ?? 0} className="h-1.5" />
           </div>
+          <span className="text-xs tabular-nums text-foreground shrink-0 w-12 text-right">
+            {score != null ? `${score}` : "—"}
+          </span>
+          <BandBadge band={band} />
         </CollapsibleTrigger>
-
         <CollapsibleContent>
-          <div className="px-4 pb-4 pt-1 border-t border-border/60 space-y-4">
-            {/* Summary assessment */}
-            {mod.summary_assessment && (
-              <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Summary Assessment</h4>
-                </div>
-                <p className="text-sm text-foreground/85 leading-relaxed">{mod.summary_assessment}</p>
-              </div>
+          <div className="px-3 py-2.5 border-t border-border/60 bg-muted/20 space-y-2">
+            {data?.summary_assessment ? (
+              <p className="text-xs text-foreground/85 leading-relaxed">{data.summary_assessment}</p>
+            ) : (
+              <p className="text-xs italic text-muted-foreground">Sub-factor detail not parsed at L1.</p>
             )}
-
-            {/* Confidence rationale */}
-            {mod.confidence_rationale && (
-              <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Confidence Rationale</h4>
-                </div>
-                <p className="text-sm text-foreground/85 leading-relaxed">{mod.confidence_rationale}</p>
-              </div>
+            {data?.confidence_rationale && (
+              <p className="text-[11px] text-muted-foreground italic leading-relaxed">{data.confidence_rationale}</p>
             )}
-
-            {/* Score math */}
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              <div className="rounded-md bg-muted/40 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Raw Score</p>
-                <p className={`text-lg font-bold tabular-nums ${tier.text} mt-0.5`}>{score}</p>
-              </div>
-              <div className="rounded-md bg-muted/40 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Weight</p>
-                <p className="text-lg font-bold tabular-nums text-foreground mt-0.5">{(weight * 100).toFixed(0)}%</p>
-                <p className="text-[10px] text-muted-foreground">{weightPct.toFixed(0)}% of total</p>
-              </div>
-              <div className="rounded-md bg-muted/40 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Contribution</p>
-                <p className="text-lg font-bold tabular-nums text-foreground mt-0.5">{Number(weighted).toFixed(2)}</p>
-                <p className="text-[10px] text-muted-foreground">to composite</p>
-              </div>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Confidence:</span>
+              {data?.confidence ? (
+                <span className="text-[11px] font-medium text-foreground">{data.confidence}</span>
+              ) : (
+                <EmptyChip />
+              )}
             </div>
           </div>
         </CollapsibleContent>
-      </Card>
+      </div>
     </Collapsible>
   );
 }
