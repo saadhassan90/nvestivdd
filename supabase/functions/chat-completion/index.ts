@@ -7,16 +7,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// Map legacy model aliases (used by the client) to Gemini model IDs.
+// Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
-  "sonnet-4": "claude-sonnet-4-20250514",
-  "haiku-3.5": "claude-3-5-haiku-20241022",
+  "sonnet-4": "gemini-2.0-flash",
+  "haiku-3.5": "gemini-2.0-flash-lite",
+  "gemini-flash": "gemini-2.0-flash",
+  "gemini-flash-lite": "gemini-2.0-flash-lite",
+  "gemini-pro": "gemini-2.5-pro",
 };
 
 function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
