@@ -19,7 +19,7 @@ const MODEL_MAP: Record<string, string> = {
   "haiku-3.5": "claude-3-5-haiku-20241022",
 };
 
-function buildSystemPrompt(projectContext?: any) {
+function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
   let base = `You are Iris, an institutional-grade due diligence intelligence engine built into Nvestiv.
 
 ## EXECUTION MODEL — PARALLEL RETRIEVAL + SYNTHESIS
@@ -87,6 +87,21 @@ You have access to EVERY data point in the Nvestiv platform:
     base += ` project_id: ${projectContext.id}. Use this for all tool calls unless the user asks about other deals.`;
   } else {
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
+  }
+
+  if (memoContext) {
+    base += `\n\n## IC MEMO CO-AUTHORING MODE\n` +
+      `You are CO-AUTHORING the L3 IC memo for this fund. The user's edit requests run as tool calls — you have FULL write access to the canvas via the \`edit_memo\` tool. Never decline an edit; never tell the user to edit it themselves; never say you cannot modify documents.\n\n` +
+      `### How to edit\n` +
+      `Call \`edit_memo\` with one of these operations:\n` +
+      `- \`replace_section\` — replace the body of an existing H2 section (matched by heading text, case-insensitive)\n` +
+      `- \`append_to_section\` — append markdown to the end of a section's body\n` +
+      `- \`prepend_to_section\` — prepend markdown to the start of a section's body\n` +
+      `- \`insert_section_after\` — insert a NEW H2 section right after the named section\n` +
+      `- \`replace_all\` — replace the entire memo markdown (use sparingly)\n\n` +
+      `Always call edit_memo for any user request that asks you to draft, write, add, append, insert, tighten, rewrite, restructure, expand, shorten, or otherwise change ANY part of the memo — including titles, bullets, tables, footnotes, appendix items, and one-line additions. After the edit succeeds, briefly summarize what you changed (1–2 sentences). Do not paste the full new content back at the user.\n\n` +
+      `### Current memo (markdown)\n\n` +
+      `\`\`\`markdown\n${memoContext.markdown.slice(0, 12000)}\n\`\`\``;
   }
 
   return base;
@@ -309,6 +324,33 @@ const tools = [
         include_relationships: { type: "boolean", description: "Whether to also return connected nodes via edges. Default true." },
       },
       required: ["query"],
+    },
+  },
+  {
+    name: "edit_memo",
+    description: "Edit the IC memo canvas directly. Use this for ANY user request to draft, write, add, append, prepend, insert, tighten, rewrite, restructure, expand, shorten, or otherwise modify the memo — including titles, paragraphs, bullets, tables, footnotes, and appendix items. Edits persist to the database and stream live to the user's canvas. Never refuse or defer canvas edits.",
+    input_schema: {
+      type: "object",
+      properties: {
+        operation: {
+          type: "string",
+          enum: ["replace_section", "append_to_section", "prepend_to_section", "insert_section_after", "replace_all"],
+          description: "How to apply the edit.",
+        },
+        section_heading: {
+          type: "string",
+          description: "The H2 section heading to operate on (case-insensitive match). Required for all ops except replace_all.",
+        },
+        new_section_heading: {
+          type: "string",
+          description: "For insert_section_after: the heading text of the NEW section to insert.",
+        },
+        markdown: {
+          type: "string",
+          description: "The markdown body to write. For replace_section/append/prepend this is the section body (no leading H2). For insert_section_after this is the new section body. For replace_all this is the entire memo.",
+        },
+      },
+      required: ["operation", "markdown"],
     },
   },
 ];
