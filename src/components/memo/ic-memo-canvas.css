@@ -1,0 +1,169 @@
+/* ============================================================
+ * IC Memo Canvas — Notion-inspired styling
+ * Reduces BlockNote default text sizes and tightens spacing
+ * to match a polished editorial document.
+ * ============================================================ */
+
+.ic-memo-canvas .bn-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+}
+
+/* Editor padding — Notion-like generous whitespace */
+.ic-memo-canvas .bn-editor {
+  padding: 0 8px;
+}
+
+/* ---- Block paragraph (body text) ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="paragraph"] {
+  font-size: 15px;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+}
+
+/* ---- Headings: Notion-style scale ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-top: 28px;
+  margin-bottom: 4px;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  margin-top: 22px;
+  margin-bottom: 4px;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-top: 18px;
+  margin-bottom: 2px;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 14px;
+  margin-bottom: 2px;
+  text-transform: none;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 12px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ---- Lists ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="bulletListItem"],
+.ic-memo-canvas .bn-block-content[data-content-type="numberedListItem"],
+.ic-memo-canvas .bn-block-content[data-content-type="checkListItem"] {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ---- Quote ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="quote"] {
+  font-size: 15px;
+  font-style: italic;
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 14px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ---- Code blocks ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"] {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+
+/* Inline code */
+.ic-memo-canvas code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.88em;
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: hsl(var(--foreground));
+}
+
+/* ---- Tables ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="table"] table {
+  font-size: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="table"] td,
+.ic-memo-canvas .bn-block-content[data-content-type="table"] th {
+  border: 1px solid hsl(var(--border));
+  padding: 6px 10px;
+  background-color: hsl(var(--background));
+}
+.ic-memo-canvas .bn-block-content[data-content-type="table"] th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+}
+
+/* ---- Divider ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="divider"] {
+  margin: 16px 0;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="divider"] hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* ---- Image / file embeds ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="image"],
+.ic-memo-canvas .bn-block-content[data-content-type="file"],
+.ic-memo-canvas .bn-block-content[data-content-type="video"],
+.ic-memo-canvas .bn-block-content[data-content-type="audio"] {
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+/* ---- Links ---- */
+.ic-memo-canvas a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--border));
+  text-underline-offset: 2px;
+}
+.ic-memo-canvas a:hover {
+  text-decoration-color: hsl(var(--primary));
+}
+
+/* ---- Slash menu / formatting toolbar refinement ---- */
+.bn-suggestion-menu,
+.bn-formatting-toolbar,
+.bn-side-menu,
+.bn-link-toolbar {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+/* Reduce default block padding for tighter Notion-like rhythm */
+.ic-memo-canvas .bn-block {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}

@@ -4,6 +4,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import "@blocknote/core/fonts/inter.css";
+import "./ic-memo-canvas.css";
 
 interface IcMemoCanvasProps {
   /** BlockNote document JSON. If empty, the editor falls back to seedMarkdown. */
@@ -25,6 +26,8 @@ export function IcMemoCanvas({ contentJson, seedMarkdown, onChange, resetKey }: 
   const editor = useCreateBlockNote(
     {
       schema,
+      // Allow all 5 heading levels for the IC memo (default is 3)
+      heading: { levels: [1, 2, 3, 4, 5] },
       initialContent:
         Array.isArray(contentJson) && contentJson.length > 0 ? contentJson : undefined,
     },
