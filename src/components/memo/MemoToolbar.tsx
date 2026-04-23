@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Copy, Download, RotateCcw, Loader2 } from "lucide-react";
 import {
   AlertDialog,
@@ -49,10 +49,10 @@ export function MemoToolbar({
   const [, setTick] = useState(0);
 
   // Re-render every 15s to update relative time
-  useState(() => {
+  useEffect(() => {
     const t = setInterval(() => setTick((x) => x + 1), 15000);
     return () => clearInterval(t);
-  });
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(contentMarkdown);
@@ -88,7 +88,7 @@ export function MemoToolbar({
             </>
           ) : (
             <>
-              <Check className="h-3 w-3 text-emerald-600" />
+              <Check className="h-3 w-3 text-foreground" />
               Saved {formatRelative(lastSavedAt)}
             </>
           )}
