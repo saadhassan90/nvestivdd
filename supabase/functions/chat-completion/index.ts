@@ -7,16 +7,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// Map legacy model aliases (used by the client) to Gemini model IDs.
+// Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
-  "sonnet-4": "claude-sonnet-4-20250514",
-  "haiku-3.5": "claude-3-5-haiku-20241022",
+  "sonnet-4": "gemini-2.0-flash",
+  "haiku-3.5": "gemini-2.0-flash-lite",
+  "gemini-flash": "gemini-2.0-flash",
+  "gemini-flash-lite": "gemini-2.0-flash-lite",
+  "gemini-pro": "gemini-2.5-pro",
 };
 
 function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
@@ -720,14 +725,54 @@ async function executeTool(name: string, input: any, ctx: { memoId?: string | nu
   }
 }
 
+// ---------- Gemini helpers ----------
+
+// Convert Anthropic-style tool schema (with input_schema) to Gemini functionDeclarations.
+// Gemini does not accept `additionalProperties` and ignores other Anthropic-specific keys.
+function toGeminiTools(toolList: any[]) {
+  const sanitize = (schema: any): any => {
+    if (!schema || typeof schema !== "object") return schema;
+    const { additionalProperties, $schema, ...rest } = schema;
+    if (rest.properties && typeof rest.properties === "object") {
+      const cleanedProps: Record<string, any> = {};
+      for (const [k, v] of Object.entries(rest.properties)) {
+        cleanedProps[k] = sanitize(v);
+      }
+      rest.properties = cleanedProps;
+    }
+    if (rest.items) rest.items = sanitize(rest.items);
+    return rest;
+  };
+  return [
+    {
+      functionDeclarations: toolList.map((t) => ({
+        name: t.name,
+        description: t.description,
+        parameters: sanitize(t.input_schema),
+      })),
+    },
+  ];
+}
+
+// Convert chat history to Gemini `contents` format.
+// Gemini uses { role: "user" | "model", parts: [{ text }] } and requires alternating roles.
+function toGeminiContents(messages: any[]) {
+  return messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: typeof m.content === "string" ? [{ text: m.content }] : m.content,
+    }));
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (!ANTHROPIC_API_KEY) {
-      return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }), {
+    if (!GEMINI_API_KEY) {
+      return new Response(JSON.stringify({ error: "GEMINI_API_KEY is not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -735,7 +780,7 @@ serve(async (req) => {
 
     const { messages, model, project_id, conversation_id, memo_id } = await req.json();
 
-    // In memo mode, default to Haiku for blazing-fast tool calls. User can still override via `model`.
+    // In memo mode, default to flash-lite for the fastest possible tool calls.
     const effectiveModel = model || (memo_id ? "haiku-3.5" : "sonnet-4");
 
     // Get project context if scoped
@@ -757,55 +802,41 @@ serve(async (req) => {
     }
 
     const systemPrompt = buildSystemPrompt(projectContext, memoContext);
-    const modelId = MODEL_MAP[effectiveModel] || MODEL_MAP["sonnet-4"];
+    const modelId = MODEL_MAP[effectiveModel] || "gemini-2.0-flash";
 
-    // In memo mode, expose ONLY edit_memo to keep input tokens minimal and force fast tool selection.
-    const activeTools = memo_id
-      ? tools.filter((t) => t.name === "edit_memo")
-      : tools;
+    // In memo mode, expose ONLY edit_memo to force fast tool selection.
+    const activeTools = memo_id ? tools.filter((t) => t.name === "edit_memo") : tools;
+    const geminiTools = toGeminiTools(activeTools);
 
-    const anthropicMessages = messages.map((m: any) => ({
-      role: m.role === "system" ? "user" : m.role,
-      content: m.content,
-    }));
-
+    const baseContents = toGeminiContents(messages);
     const startTime = Date.now();
 
-    const makeAnthropicCall = async (msgs: any[], pendingToolResults?: any[]) => {
+    const makeGeminiCall = async (contents: any[]) => {
       const body: any = {
-        model: modelId,
-        max_tokens: memo_id ? 4000 : 16000,
-        system: systemPrompt,
-        messages: pendingToolResults ? [...msgs, ...pendingToolResults] : msgs,
-        tools: activeTools,
-        stream: true,
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        tools: geminiTools,
+        generationConfig: {
+          temperature: memo_id ? 0.3 : 0.7,
+          maxOutputTokens: memo_id ? 4096 : 8192,
+        },
       };
-
-      // Extended thinking adds 5–15s latency. Skip it for memo edits (Haiku) — trivial markdown ops don't need it.
-      if (modelId.includes("sonnet") && !memo_id) {
-        body.thinking = {
-          type: "enabled",
-          budget_tokens: 10000,
-        };
-        body.temperature = 1;
+      // Force tool calling in memo mode so the model never just chats about edits.
+      if (memo_id) {
+        body.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
       }
 
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+      const resp = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       if (!resp.ok) {
         const errorText = await resp.text();
-        console.error("Anthropic error:", resp.status, errorText);
-        throw new Error(`Anthropic API error: ${resp.status} ${errorText}`);
+        console.error("Gemini error:", resp.status, errorText);
+        throw new Error(`Gemini API error: ${resp.status} ${errorText}`);
       }
-
       return resp;
     };
 
@@ -817,125 +848,103 @@ serve(async (req) => {
         };
 
         try {
-          let allMessages = [...anthropicMessages];
+          const allContents = [...baseContents];
           let fullContent = "";
-          let fullThinking = "";
-          let allToolCalls: any[] = [];
+          const allToolCalls: any[] = [];
           let tokensInput = 0;
           let tokensOutput = 0;
           let continueLoop = true;
+          let safetyHops = 0;
 
-          while (continueLoop) {
+          while (continueLoop && safetyHops < 5) {
             continueLoop = false;
-            const resp = await makeAnthropicCall(allMessages);
+            safetyHops++;
+
+            const resp = await makeGeminiCall(allContents);
             const reader = resp.body!.getReader();
             const decoder = new TextDecoder();
             let buffer = "";
-            let currentToolName = "";
-            let currentToolId = "";
-            let currentToolInput = "";
-            let pendingToolUses: any[] = [];
+            const pendingFunctionCalls: { id: string; name: string; args: any }[] = [];
+            const assistantParts: any[] = [];
 
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
               buffer += decoder.decode(value, { stream: true });
 
-              let newlineIdx;
-              while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
-                const line = buffer.slice(0, newlineIdx).trim();
-                buffer = buffer.slice(newlineIdx + 1);
-
+              // Gemini streams as SSE: lines beginning with "data: " separated by blank lines.
+              let nlIdx: number;
+              while ((nlIdx = buffer.indexOf("\n")) !== -1) {
+                const rawLine = buffer.slice(0, nlIdx);
+                buffer = buffer.slice(nlIdx + 1);
+                const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
                 if (!line.startsWith("data: ")) continue;
-                const jsonStr = line.slice(6);
-                if (jsonStr === "[DONE]") continue;
+                const jsonStr = line.slice(6).trim();
+                if (!jsonStr || jsonStr === "[DONE]") continue;
 
+                let event: any;
                 try {
-                  const event = JSON.parse(jsonStr);
-
-                  switch (event.type) {
-                    case "message_start":
-                      if (event.message?.usage) {
-                        tokensInput += event.message.usage.input_tokens || 0;
-                      }
-                      break;
-
-                    case "content_block_start":
-                      if (event.content_block?.type === "thinking") {
-                        send("thinking_start", {});
-                      } else if (event.content_block?.type === "tool_use") {
-                        currentToolName = event.content_block.name;
-                        currentToolId = event.content_block.id;
-                        currentToolInput = "";
-                        send("tool_start", { name: currentToolName, id: currentToolId });
-                      }
-                      break;
-
-                    case "content_block_delta":
-                      if (event.delta?.type === "thinking_delta") {
-                        fullThinking += event.delta.thinking;
-                        send("thinking_delta", { text: event.delta.thinking });
-                      } else if (event.delta?.type === "text_delta") {
-                        fullContent += event.delta.text;
-                        send("content_delta", { text: event.delta.text });
-                      } else if (event.delta?.type === "input_json_delta") {
-                        currentToolInput += event.delta.partial_json;
-                      }
-                      break;
-
-                    case "content_block_stop":
-                      if (currentToolName) {
-                        let parsedInput = {};
-                        try { parsedInput = JSON.parse(currentToolInput); } catch {}
-                        pendingToolUses.push({
-                          id: currentToolId,
-                          name: currentToolName,
-                          input: parsedInput,
-                        });
-                        currentToolName = "";
-                        currentToolId = "";
-                        currentToolInput = "";
-                      }
-                      break;
-
-                    case "message_delta":
-                      if (event.usage) {
-                        tokensOutput += event.usage.output_tokens || 0;
-                      }
-                      if (event.delta?.stop_reason === "tool_use" && pendingToolUses.length > 0) {
-                        const toolResults = await Promise.all(
-                          pendingToolUses.map(async (tu) => {
-                            send("tool_executing", { name: tu.name, id: tu.id });
-                            const result = await executeTool(tu.name, tu.input, { memoId: memo_id });
-                            const toolCall = { name: tu.name, input: tu.input, output: JSON.parse(result) };
-                            allToolCalls.push(toolCall);
-                            const parsed = JSON.parse(result);
-                            const summary = Array.isArray(parsed) ? `${parsed.length} results` : parsed.total_matches ? `${parsed.total_matches} matches` : "done";
-                            send("tool_complete", { name: tu.name, id: tu.id, resultSummary: summary });
-                            return { type: "tool_result", tool_use_id: tu.id, content: result };
-                          })
-                        );
-
-                        allMessages.push({
-                          role: "assistant",
-                          content: pendingToolUses.map((tu) => ({
-                            type: "tool_use",
-                            id: tu.id,
-                            name: tu.name,
-                            input: tu.input,
-                          })),
-                        });
-                        allMessages.push({ role: "user", content: toolResults });
-
-                        pendingToolUses = [];
-                        continueLoop = true;
-                      }
-                      break;
-                  }
+                  event = JSON.parse(jsonStr);
                 } catch {
-                  // Ignore parse errors
+                  // Partial JSON across chunks — push back and wait.
+                  buffer = line + "\n" + buffer;
+                  break;
+                }
+
+                if (event.usageMetadata) {
+                  tokensInput = event.usageMetadata.promptTokenCount || tokensInput;
+                  tokensOutput = event.usageMetadata.candidatesTokenCount || tokensOutput;
+                }
+
+                const candidate = event.candidates?.[0];
+                const parts = candidate?.content?.parts || [];
+                for (const part of parts) {
+                  if (part.text) {
+                    fullContent += part.text;
+                    assistantParts.push({ text: part.text });
+                    send("content_delta", { text: part.text });
+                  } else if (part.functionCall) {
+                    const callId = `call_${pendingFunctionCalls.length}_${Date.now()}`;
+                    pendingFunctionCalls.push({
+                      id: callId,
+                      name: part.functionCall.name,
+                      args: part.functionCall.args || {},
+                    });
+                    assistantParts.push({ functionCall: part.functionCall });
+                    send("tool_start", { name: part.functionCall.name, id: callId });
+                  }
                 }
               }
+            }
+
+            if (pendingFunctionCalls.length > 0) {
+              // Execute all function calls in parallel
+              const responseParts = await Promise.all(
+                pendingFunctionCalls.map(async (fc) => {
+                  send("tool_executing", { name: fc.name, id: fc.id });
+                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id });
+                  let parsed: any;
+                  try { parsed = JSON.parse(result); } catch { parsed = { raw: result }; }
+                  allToolCalls.push({ name: fc.name, input: fc.args, output: parsed });
+                  const summary = Array.isArray(parsed)
+                    ? `${parsed.length} results`
+                    : parsed?.total_matches
+                      ? `${parsed.total_matches} matches`
+                      : parsed?.success ? "done" : "done";
+                  send("tool_complete", { name: fc.name, id: fc.id, resultSummary: summary });
+                  return {
+                    functionResponse: {
+                      name: fc.name,
+                      response: typeof parsed === "object" && parsed !== null ? parsed : { result: parsed },
+                    },
+                  };
+                })
+              );
+
+              // Push assistant turn (with the function calls) and the function responses, then loop.
+              allContents.push({ role: "model", parts: assistantParts });
+              allContents.push({ role: "user", parts: responseParts });
+              continueLoop = true;
             }
           }
 
@@ -946,7 +955,7 @@ serve(async (req) => {
               conversation_id,
               role: "assistant",
               content: fullContent,
-              thinking_content: fullThinking || null,
+              thinking_content: null,
               tool_calls: allToolCalls.length > 0 ? allToolCalls : null,
               model_used: modelId,
               tokens_input: tokensInput,
