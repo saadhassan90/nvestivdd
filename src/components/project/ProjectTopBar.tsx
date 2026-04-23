@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { Share2, Sparkles, Calendar, User, FileBadge, Link2 } from "lucide-react";
+import { ArrowLeft, Share2, Sparkles, Calendar, User, FileBadge, Link2 } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
+import { StageDropdown } from "@/components/memo/StageDropdown";
 import {
   RecommendationBadge,
   TierPill,
@@ -17,6 +18,9 @@ import type { Tables } from "@/integrations/supabase/types";
 interface ProjectTopBarProps {
   project: Tables<"projects">;
   isProcessing: boolean;
+  /** When set to "memo", the Ask Iris pill is replaced with a Stage dropdown
+   *  + Back-to-Reports button. Defaults to undefined (= L1 tabs page). */
+  mode?: "memo";
 }
 
 function getReportLevel(status: string): "L1" | "L2" | "L3" | null {
@@ -52,7 +56,7 @@ function workingNamePills(fundName: string, gpEntity?: string | null): string[] 
   return pills;
 }
 
-export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
+export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
   const [shareOpen, setShareOpen] = useState(false);
@@ -71,6 +75,7 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
     (project.updated_at ? new Date(project.updated_at).toLocaleDateString() : null);
 
   const showCoverBlock = !isProcessing;
+  const isMemoMode = mode === "memo";
 
   return (
     <>
@@ -111,13 +116,28 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
               <Share2 className="h-4 w-4 text-muted-foreground" />
             </button>
 
-            {cta && !isProcessing && (
+            {cta && !isProcessing && !isMemoMode && (
               <button className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-muted active:scale-95">
                 {cta.label}
               </button>
             )}
 
-            {!isOpen && (
+            {isMemoMode ? (
+              <>
+                <button
+                  onClick={() => navigate(`/project/${project.id}?tab=overview`)}
+                  className="ml-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
+                  title="Back to L1 report"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Back to Reports</span>
+                </button>
+                <div className="ml-1">
+                  <StageDropdown projectId={project.id} current="L3" />
+                </div>
+              </>
+            ) : (
+              !isOpen && (
               <button
                 onClick={() => setIsOpen(true)}
                 className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
@@ -125,6 +145,7 @@ export function ProjectTopBar({ project, isProcessing }: ProjectTopBarProps) {
                 <Sparkles className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Ask Iris</span>
               </button>
+              )
             )}
           </div>
         </div>

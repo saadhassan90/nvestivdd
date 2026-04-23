@@ -526,6 +526,36 @@ export type Database = {
           },
         ]
       }
+      ic_memos: {
+        Row: {
+          content_json: Json
+          content_markdown: string
+          created_at: string
+          id: string
+          project_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content_json?: Json
+          content_markdown?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          content_json?: Json
+          content_markdown?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       interrogatory_items: {
         Row: {
           gp_response_notes: string | null
