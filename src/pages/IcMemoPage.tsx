@@ -85,7 +85,7 @@ export default function IcMemoPage() {
             contentMarkdown={memo?.content_markdown || seedMarkdown}
             onResetToTemplate={resetToTemplate}
           />
-          <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8">
+          <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
             {memoLoading || !memo ? (
               <div className="flex items-center justify-center py-20">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-foreground" />
