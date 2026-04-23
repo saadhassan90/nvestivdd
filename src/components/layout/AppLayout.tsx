@@ -1,11 +1,12 @@
 import { type ReactNode } from "react";
-import { useChatContext } from "@/contexts/ChatContext";
+import { useOptionalChatContext } from "@/contexts/ChatContext";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { isOpen } = useChatContext();
+  const chat = useOptionalChatContext();
+  const isOpen = chat?.isOpen ?? false;
   const isMobile = useIsMobile();
   const location = useLocation();
   // Suppress the global Iris drawer on the IC memo workspace —
