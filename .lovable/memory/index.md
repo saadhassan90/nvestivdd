@@ -1,5 +1,5 @@
 # Memory: index.md
-Updated: now
+Updated: just now
 
 # Project Memory
 
@@ -8,10 +8,8 @@ Monochrome cool-gray palette (HSL hue 220) for all visual styling.
 Supabase with RLS enabled on all tables using standard `user_id` pattern.
 Event-driven UI updates via Supabase Realtime baton pass (no polling).
 Tiered AI models: Claude Opus 4.6, Sonnet 4.5, gpt-4o-mini, text-embedding-3-small.
-L1 report skeleton is LOCKED: 10 fixed tabs in fixed order, every section always renders, missing data shows [NOT DISCLOSED AT L1] via EmptyChip — never hide sections.
 
 ## Memories
-- [Report Structure Lock](mem://features/report-structure-lock) — Locked PRD v1.0 skeleton, tab order, and mapping rules for every uploaded report
 - [Deal Submission](mem://features/deal-submission-requirements) — Submission requirements, auto-extraction, and checklist details
 - [Mobile Patterns](mem://ux/mobile-patterns) — Responsive behaviors for dashboard, sidebars, and analytics
 - [Document Organization](mem://features/document-organization) — Research Sources list formatting and Data Room diligence tiers
@@ -30,3 +28,4 @@ L1 report skeleton is LOCKED: 10 fixed tabs in fixed order, every section always
 - [Analysis Caching](mem://tech/analysis-caching) — Phase-level persistence for task resumption
 - [Task Trigger Logic](mem://architecture/task-trigger-logic) — Database trigger queues, cron safety nets, and retry limits
 - [AI Model Selection](mem://tech/ai-model-selection) — Tiered model selection for research, assembly, extraction
+- [IC Memo Workspace](mem://features/ic-memo-workspace) — L3 page with BlockNote canvas + embedded Iris chat, top-bar stage dropdown
