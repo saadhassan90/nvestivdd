@@ -103,7 +103,7 @@ export default function IcMemoPage() {
 
         {/* Chat column — desktop only */}
         <div className="hidden lg:block w-[420px] shrink-0 border-l border-border">
-          <EmbeddedIrisChat fundName={project.fund_name} />
+          <EmbeddedIrisChat fundName={project.fund_name} memoId={memo?.id ?? null} />
         </div>
       </div>
     </div>
