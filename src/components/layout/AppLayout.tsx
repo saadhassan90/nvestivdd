@@ -2,10 +2,16 @@ import { type ReactNode } from "react";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "react-router-dom";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { isOpen } = useChatContext();
   const isMobile = useIsMobile();
+  const location = useLocation();
+  // Suppress the global Iris drawer on the IC memo workspace —
+  // that page hosts its own embedded chat in the right column.
+  const isMemoRoute = /^\/project\/[^/]+\/memo$/.test(location.pathname);
+  const drawerActive = isOpen && !isMemoRoute;
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -13,14 +19,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div
         className="flex-1 min-w-0 overflow-y-auto transition-all duration-300 ease-in-out"
         style={{
-          marginRight: !isMobile && isOpen ? 420 : 0,
+          marginRight: !isMobile && drawerActive ? 420 : 0,
         }}
       >
         {children}
       </div>
 
       {/* Chat drawer */}
-      {isOpen && (
+      {drawerActive && (
         <>
           {isMobile ? (
             <div className="fixed inset-0 z-50 bg-card">

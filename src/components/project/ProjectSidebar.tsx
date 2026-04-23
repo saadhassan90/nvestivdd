@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, Target, TrendingUp, AlertTriangle, MessageSquare, FileText, FileBarChart, FolderOpen, ChevronDown, ChevronRight, Gauge } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProjectSidebarProps {
@@ -40,9 +41,18 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
   const isProcessing = ["pending", "uploading", "processing", "analyzing", "extracting"].includes(project.status);
   const [activeLevel, setActiveLevel] = useState<ReportLevel>("L1");
   const [reportExpanded, setReportExpanded] = useState(true);
+  const navigate = useNavigate();
 
-  const isLevelAvailable = (level: ReportLevel) => level === "L1";
+  const isLevelAvailable = (level: ReportLevel) => level === "L1" || level === "L3";
   const navItems = isProcessing ? PROCESSING_NAV_ITEMS : L1_NAV_ITEMS;
+
+  const handleLevelClick = (level: ReportLevel) => {
+    if (level === "L1") {
+      setActiveLevel("L1");
+    } else if (level === "L3") {
+      navigate(`/project/${project.id}/memo`);
+    }
+  };
 
   return (
     <>
@@ -98,7 +108,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange }: ProjectSideb
                 return (
                   <button
                     key={level.key}
-                    onClick={() => available && setActiveLevel(level.key)}
+                    onClick={() => available && handleLevelClick(level.key)}
                     disabled={!available}
                     className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors ${
                       isActive
