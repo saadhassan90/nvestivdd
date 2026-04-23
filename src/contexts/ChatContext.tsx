@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ChatMessage = {
@@ -40,6 +39,10 @@ export function useChatContext() {
   const ctx = useContext(ChatContext);
   if (!ctx) throw new Error("useChatContext must be used within ChatProvider");
   return ctx;
+}
+
+export function useOptionalChatContext() {
+  return useContext(ChatContext);
 }
 
 export function ChatProvider({ children }: { children: ReactNode }) {
