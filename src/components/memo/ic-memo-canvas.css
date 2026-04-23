@@ -9,6 +9,14 @@
   font-size: 15px;
   line-height: 1.6;
   color: hsl(var(--foreground));
+  background-color: transparent;
+}
+
+/* Remove BlockNote's default editor background so the canvas blends with the page */
+.ic-memo-canvas [data-theme],
+.ic-memo-canvas .bn-editor,
+.ic-memo-canvas .bn-default-styles {
+  background-color: transparent !important;
 }
 
 /* Editor padding — Notion-like generous whitespace */
