@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useChatContext } from "@/contexts/ChatContext";
@@ -63,6 +63,22 @@ export default function IcMemoPage() {
     [scheduleSave],
   );
 
+  // Stable resetKey: only changes on memo identity (initial load / reset to template
+ // / remote realtime updates), NOT on every local save. Otherwise the editor would
+ // remount on each save and wipe the undo (Cmd/Ctrl-Z) history.
+  const lastSeenMemoIdRef = useRef<string | null>(null);
+  const resetCounterRef = useRef(0);
+  const resetKey = useMemo(() => {
+    if (!memo) return "init";
+    if (lastSeenMemoIdRef.current !== memo.id) {
+      lastSeenMemoIdRef.current = memo.id;
+      resetCounterRef.current += 1;
+    }
+    return `${memo.id}-${resetCounterRef.current}`;
+    // Intentionally exclude memo.version — local saves bump version and would remount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memo?.id]);
+
   if (loading || !project) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -95,7 +111,7 @@ export default function IcMemoPage() {
                 contentJson={memo.content_json}
                 seedMarkdown={memo.content_markdown || seedMarkdown}
                 onChange={handleCanvasChange}
-                resetKey={`${memo.id}-${memo.version}`}
+                resetKey={resetKey}
               />
             )}
           </main>
