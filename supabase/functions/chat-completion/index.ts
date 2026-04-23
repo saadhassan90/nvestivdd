@@ -728,7 +728,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model = "sonnet-4", project_id, conversation_id } = await req.json();
+    const { messages, model = "sonnet-4", project_id, conversation_id, memo_id } = await req.json();
 
     // Get project context if scoped
     let projectContext = null;
@@ -737,7 +737,18 @@ serve(async (req) => {
       projectContext = data;
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext);
+    // Get memo context if in IC memo mode
+    let memoContext: { id: string; markdown: string } | null = null;
+    if (memo_id) {
+      const { data } = await supabase
+        .from("ic_memos")
+        .select("id, content_markdown")
+        .eq("id", memo_id)
+        .maybeSingle();
+      if (data) memoContext = { id: data.id, markdown: data.content_markdown || "" };
+    }
+
+    const systemPrompt = buildSystemPrompt(projectContext, memoContext);
     const modelId = MODEL_MAP[model] || MODEL_MAP["sonnet-4"];
 
     const anthropicMessages = messages.map((m: any) => ({
@@ -881,7 +892,7 @@ serve(async (req) => {
                         const toolResults = await Promise.all(
                           pendingToolUses.map(async (tu) => {
                             send("tool_executing", { name: tu.name, id: tu.id });
-                            const result = await executeTool(tu.name, tu.input);
+                            const result = await executeTool(tu.name, tu.input, { memoId: memo_id });
                             const toolCall = { name: tu.name, input: tu.input, output: JSON.parse(result) };
                             allToolCalls.push(toolCall);
                             const parsed = JSON.parse(result);
