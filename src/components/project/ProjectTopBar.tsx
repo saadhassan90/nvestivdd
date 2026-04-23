@@ -74,8 +74,8 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
     (project as any).analysis_date ||
     (project.updated_at ? new Date(project.updated_at).toLocaleDateString() : null);
 
-  const showCoverBlock = !isProcessing;
   const isMemoMode = mode === "memo";
+  const showCoverBlock = !isProcessing && !isMemoMode;
 
   return (
     <>
