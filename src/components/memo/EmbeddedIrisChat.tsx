@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SquarePen, Menu, Paperclip, ArrowUp, Loader2, X } from "lucide-react";
+import { Paperclip, ArrowUp, Loader2, X } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
-import { ChatHistory } from "@/components/chat/ChatHistory";
 import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
 
@@ -19,23 +18,27 @@ const MEMO_PROMPTS = [
  * Reuses the ChatProvider state but renders inline (not as a fixed drawer).
  * The close button is omitted because the chat is permanent here.
  */
-export function EmbeddedIrisChat({ fundName }: { fundName: string }) {
+export function EmbeddedIrisChat({ fundName, memoId }: { fundName: string; memoId?: string | null }) {
   const {
     messages,
     isLoading,
     sendMessage,
-    startNewConversation,
     projectScope,
     setProjectScope,
-    loadConversations,
+    setMemoContext,
   } = useChatContext();
 
   const [input, setInput] = useState("");
-  const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [userScrolled, setUserScrolled] = useState(false);
+
+  // Register the active memo with the chat context so every send carries memo_id.
+  useEffect(() => {
+    setMemoContext(memoId ? { memoId } : null);
+    return () => setMemoContext(null);
+  }, [memoId, setMemoContext]);
 
   useEffect(() => {
     if (!userScrolled && messagesEndRef.current) {
@@ -73,45 +76,17 @@ export function EmbeddedIrisChat({ fundName }: { fundName: string }) {
     el.style.height = Math.min(el.scrollHeight, 144) + "px";
   };
 
-  const lastAssistantMsg = useMemo(
-    () => [...messages].reverse().find((m) => m.role === "assistant" && m.content && !m.isStreaming),
-    [messages],
-  );
-
   return (
     <div className="flex flex-col h-full w-full bg-card border-l border-border">
-      {/* Header */}
+      {/* Header — slimmed down: no history / new-chat buttons in memo mode */}
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowHistory(!showHistory);
-                if (!showHistory) loadConversations();
-              }}
-              className="p-1.5 rounded-md hover:bg-muted transition-colors"
-              title="History"
-            >
-              <Menu className="h-4 w-4 text-muted-foreground" />
-            </button>
             <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
-            <span className="text-sm font-semibold text-foreground">Ask Iris</span>
+            <span className="text-sm font-semibold text-foreground">Put Iris to work</span>
             <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
               Memo
             </span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => {
-                startNewConversation();
-                setShowHistory(false);
-              }}
-              className="p-1.5 rounded-md hover:bg-muted transition-colors"
-              title="New conversation"
-            >
-              <SquarePen className="h-4 w-4 text-muted-foreground" />
-            </button>
           </div>
         </div>
         {projectScope && (
@@ -130,10 +105,7 @@ export function EmbeddedIrisChat({ fundName }: { fundName: string }) {
       </div>
 
       {/* Content */}
-      {showHistory ? (
-        <ChatHistory onBack={() => setShowHistory(false)} />
-      ) : (
-        <div className="relative flex-1 min-h-0">
+      <div className="relative flex-1 min-h-0">
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
@@ -156,7 +128,7 @@ export function EmbeddedIrisChat({ fundName }: { fundName: string }) {
                   Co-author the {fundName} memo
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4 max-w-[260px]">
-                  Ask Iris to draft, tighten, or restructure any section. Edits land directly in the canvas.
+                  Tell Iris what to write — she edits the canvas directly.
                 </p>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {MEMO_PROMPTS.map((p) => (
@@ -237,7 +209,6 @@ export function EmbeddedIrisChat({ fundName }: { fundName: string }) {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }

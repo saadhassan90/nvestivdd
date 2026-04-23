@@ -6,7 +6,6 @@ import { NotificationsDropdown } from "@/components/notifications/NotificationsD
 import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
-import { StageDropdown } from "@/components/memo/StageDropdown";
 import {
   RecommendationBadge,
   TierPill,
@@ -123,19 +122,14 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
             )}
 
             {isMemoMode ? (
-              <>
-                <button
-                  onClick={() => navigate(`/project/${project.id}?tab=overview`)}
-                  className="ml-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
-                  title="Back to L1 report"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Back to Reports</span>
-                </button>
-                <div className="ml-1">
-                  <StageDropdown projectId={project.id} current="L3" />
-                </div>
-              </>
+              <button
+                onClick={() => navigate(`/project/${project.id}?tab=overview`)}
+                className="ml-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
+                title="Back to L1 report"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Back to Reports</span>
+              </button>
             ) : (
               !isOpen && (
               <button

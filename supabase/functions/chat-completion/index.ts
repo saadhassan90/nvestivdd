@@ -19,7 +19,7 @@ const MODEL_MAP: Record<string, string> = {
   "haiku-3.5": "claude-3-5-haiku-20241022",
 };
 
-function buildSystemPrompt(projectContext?: any) {
+function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
   let base = `You are Iris, an institutional-grade due diligence intelligence engine built into Nvestiv.
 
 ## EXECUTION MODEL — PARALLEL RETRIEVAL + SYNTHESIS
@@ -87,6 +87,21 @@ You have access to EVERY data point in the Nvestiv platform:
     base += ` project_id: ${projectContext.id}. Use this for all tool calls unless the user asks about other deals.`;
   } else {
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
+  }
+
+  if (memoContext) {
+    base += `\n\n## IC MEMO CO-AUTHORING MODE\n` +
+      `You are CO-AUTHORING the L3 IC memo for this fund. The user's edit requests run as tool calls — you have FULL write access to the canvas via the \`edit_memo\` tool. Never decline an edit; never tell the user to edit it themselves; never say you cannot modify documents.\n\n` +
+      `### How to edit\n` +
+      `Call \`edit_memo\` with one of these operations:\n` +
+      `- \`replace_section\` — replace the body of an existing H2 section (matched by heading text, case-insensitive)\n` +
+      `- \`append_to_section\` — append markdown to the end of a section's body\n` +
+      `- \`prepend_to_section\` — prepend markdown to the start of a section's body\n` +
+      `- \`insert_section_after\` — insert a NEW H2 section right after the named section\n` +
+      `- \`replace_all\` — replace the entire memo markdown (use sparingly)\n\n` +
+      `Always call edit_memo for any user request that asks you to draft, write, add, append, insert, tighten, rewrite, restructure, expand, shorten, or otherwise change ANY part of the memo — including titles, bullets, tables, footnotes, appendix items, and one-line additions. After the edit succeeds, briefly summarize what you changed (1–2 sentences). Do not paste the full new content back at the user.\n\n` +
+      `### Current memo (markdown)\n\n` +
+      `\`\`\`markdown\n${memoContext.markdown.slice(0, 12000)}\n\`\`\``;
   }
 
   return base;
@@ -311,11 +326,160 @@ const tools = [
       required: ["query"],
     },
   },
+  {
+    name: "edit_memo",
+    description: "Edit the IC memo canvas directly. Use this for ANY user request to draft, write, add, append, prepend, insert, tighten, rewrite, restructure, expand, shorten, or otherwise modify the memo — including titles, paragraphs, bullets, tables, footnotes, and appendix items. Edits persist to the database and stream live to the user's canvas. Never refuse or defer canvas edits.",
+    input_schema: {
+      type: "object",
+      properties: {
+        operation: {
+          type: "string",
+          enum: ["replace_section", "append_to_section", "prepend_to_section", "insert_section_after", "replace_all"],
+          description: "How to apply the edit.",
+        },
+        section_heading: {
+          type: "string",
+          description: "The H2 section heading to operate on (case-insensitive match). Required for all ops except replace_all.",
+        },
+        new_section_heading: {
+          type: "string",
+          description: "For insert_section_after: the heading text of the NEW section to insert.",
+        },
+        markdown: {
+          type: "string",
+          description: "The markdown body to write. For replace_section/append/prepend this is the section body (no leading H2). For insert_section_after this is the new section body. For replace_all this is the entire memo.",
+        },
+      },
+      required: ["operation", "markdown"],
+    },
+  },
 ];
 
-async function executeTool(name: string, input: any): Promise<string> {
+function applyMemoEdit(
+  currentMd: string,
+  op: string,
+  sectionHeading: string | undefined,
+  newSectionHeading: string | undefined,
+  newMd: string,
+): { ok: boolean; markdown?: string; error?: string } {
+  if (op === "replace_all") {
+    return { ok: true, markdown: newMd };
+  }
+  if (!sectionHeading) {
+    return { ok: false, error: "section_heading is required for this operation" };
+  }
+
+  // Split memo into sections by H2 (## ...). The first chunk before any H2 is the "intro" (title block).
+  const lines = currentMd.split("\n");
+  type Section = { heading: string; headingLine: string; body: string[]; startIdx: number };
+  const sections: Section[] = [];
+  let intro: string[] = [];
+  let cur: Section | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const m = line.match(/^##\s+(.+?)\s*$/);
+    if (m) {
+      if (cur) sections.push(cur);
+      else intro = lines.slice(0, i);
+      cur = { heading: m[1].trim(), headingLine: line, body: [], startIdx: i };
+    } else if (cur) {
+      cur.body.push(line);
+    }
+  }
+  if (cur) sections.push(cur);
+  if (sections.length === 0) intro = lines.slice();
+
+  const target = sectionHeading.toLowerCase().trim();
+  const idx = sections.findIndex((s) => s.heading.toLowerCase() === target);
+  if (idx === -1 && op !== "insert_section_after") {
+    return { ok: false, error: `Section "${sectionHeading}" not found. Existing sections: ${sections.map((s) => s.heading).join(" | ")}` };
+  }
+
+  if (op === "replace_section") {
+    sections[idx] = { ...sections[idx], body: newMd.split("\n") };
+  } else if (op === "append_to_section") {
+    // Trim trailing blank lines, then add a single blank separator + new content
+    const body = [...sections[idx].body];
+    while (body.length && body[body.length - 1].trim() === "") body.pop();
+    sections[idx] = { ...sections[idx], body: [...body, "", ...newMd.split("\n")] };
+  } else if (op === "prepend_to_section") {
+    sections[idx] = { ...sections[idx], body: [...newMd.split("\n"), "", ...sections[idx].body] };
+  } else if (op === "insert_section_after") {
+    const heading = (newSectionHeading || "New Section").trim();
+    const newSec: Section = {
+      heading,
+      headingLine: `## ${heading}`,
+      body: ["", ...newMd.split("\n")],
+      startIdx: -1,
+    };
+    if (idx === -1) {
+      sections.push(newSec);
+    } else {
+      sections.splice(idx + 1, 0, newSec);
+    }
+  } else {
+    return { ok: false, error: `Unknown operation: ${op}` };
+  }
+
+  // Reassemble
+  const out: string[] = [];
+  if (intro.length) out.push(...intro);
+  for (const s of sections) {
+    if (out.length && out[out.length - 1].trim() !== "") out.push("");
+    out.push(s.headingLine);
+    out.push(...s.body);
+  }
+  return { ok: true, markdown: out.join("\n") };
+}
+
+async function executeTool(name: string, input: any, ctx: { memoId?: string | null } = {}): Promise<string> {
   try {
     switch (name) {
+      case "edit_memo": {
+        if (!ctx.memoId) {
+          return JSON.stringify({ error: "No memo is currently open. edit_memo can only be used in the IC Memo workspace." });
+        }
+        const { data: memoRow, error: fetchErr } = await supabase
+          .from("ic_memos")
+          .select("id, content_markdown, version")
+          .eq("id", ctx.memoId)
+          .maybeSingle();
+        if (fetchErr || !memoRow) {
+          return JSON.stringify({ error: `Could not load memo: ${fetchErr?.message || "not found"}` });
+        }
+        const currentMd = memoRow.content_markdown || "";
+        const result = applyMemoEdit(
+          currentMd,
+          input.operation,
+          input.section_heading,
+          input.new_section_heading,
+          input.markdown || "",
+        );
+        if (!result.ok) {
+          return JSON.stringify({ error: result.error });
+        }
+        const nextVersion = (memoRow.version || 0) + 1;
+        const { error: updateErr } = await supabase
+          .from("ic_memos")
+          .update({
+            content_markdown: result.markdown,
+            content_json: [], // clears so canvas re-seeds from markdown via realtime
+            version: nextVersion,
+          })
+          .eq("id", memoRow.id);
+        if (updateErr) {
+          return JSON.stringify({ error: `Failed to save edit: ${updateErr.message}` });
+        }
+        return JSON.stringify({
+          success: true,
+          operation: input.operation,
+          section: input.operation === "insert_section_after"
+            ? input.new_section_heading
+            : input.section_heading,
+          version: nextVersion,
+          summary: `Memo updated (${input.operation})`,
+        });
+      }
       case "query_deal_scores": {
         let q = supabase.from("projects").select("id, fund_name, composite_score, recommendation, score_tier, asset_class, module_scores, established_year, vintage, status, strategy, gp_entity_name, fund_size_estimated, domicile, regulatory_status, key_strengths, key_risks, conditions_for_advancement, executive_summary_narrative, final_assessment_narrative, recommended_timeline, completeness_score, created_at");
         if (input.project_id) q = q.eq("id", input.project_id);
@@ -564,7 +728,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model = "sonnet-4", project_id, conversation_id } = await req.json();
+    const { messages, model = "sonnet-4", project_id, conversation_id, memo_id } = await req.json();
 
     // Get project context if scoped
     let projectContext = null;
@@ -573,7 +737,18 @@ serve(async (req) => {
       projectContext = data;
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext);
+    // Get memo context if in IC memo mode
+    let memoContext: { id: string; markdown: string } | null = null;
+    if (memo_id) {
+      const { data } = await supabase
+        .from("ic_memos")
+        .select("id, content_markdown")
+        .eq("id", memo_id)
+        .maybeSingle();
+      if (data) memoContext = { id: data.id, markdown: data.content_markdown || "" };
+    }
+
+    const systemPrompt = buildSystemPrompt(projectContext, memoContext);
     const modelId = MODEL_MAP[model] || MODEL_MAP["sonnet-4"];
 
     const anthropicMessages = messages.map((m: any) => ({
@@ -717,7 +892,7 @@ serve(async (req) => {
                         const toolResults = await Promise.all(
                           pendingToolUses.map(async (tu) => {
                             send("tool_executing", { name: tu.name, id: tu.id });
-                            const result = await executeTool(tu.name, tu.input);
+                            const result = await executeTool(tu.name, tu.input, { memoId: memo_id });
                             const toolCall = { name: tu.name, input: tu.input, output: JSON.parse(result) };
                             allToolCalls.push(toolCall);
                             const parsed = JSON.parse(result);
