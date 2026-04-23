@@ -20,6 +20,26 @@ const MODEL_MAP: Record<string, string> = {
 };
 
 function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
+  // FAST PATH: in IC Memo mode we want minimal prompt + single-purpose tool to keep TTFT low.
+  if (memoContext) {
+    let memoBase = `You are Iris, co-authoring an IC memo. You have direct write access to the canvas via the \`edit_memo\` tool.
+
+## RULES (memo mode)
+- For ANY user request to draft / write / add / append / prepend / insert / tighten / rewrite / restructure / expand / shorten / change ANY part of the memo: call \`edit_memo\` immediately. Do not explain first, do not ask permission, do not say "I'll do that" — just call the tool.
+- Never refuse or defer canvas edits. Never tell the user to edit it themselves.
+- Operations: \`replace_section\`, \`append_to_section\`, \`prepend_to_section\`, \`insert_section_after\`, \`replace_all\`. Match section_heading case-insensitively against existing H2 headings.
+- After the edit succeeds, reply with ONE short sentence summarizing what changed. Do not paste the new content back.
+- For pure questions about the memo content, answer directly without calling tools.`;
+
+    if (projectContext) {
+      memoBase += `\n\nFund: "${projectContext.fund_name}" (project_id: ${projectContext.id}).`;
+    }
+
+    // Keep memo context tight — 4k chars is enough to identify sections; full content is fetched fresh on every edit_memo call.
+    memoBase += `\n\n## Current memo (markdown, truncated)\n\n\`\`\`markdown\n${memoContext.markdown.slice(0, 4000)}\n\`\`\``;
+    return memoBase;
+  }
+
   let base = `You are Iris, an institutional-grade due diligence intelligence engine built into Nvestiv.
 
 ## EXECUTION MODEL — PARALLEL RETRIEVAL + SYNTHESIS
@@ -87,21 +107,6 @@ You have access to EVERY data point in the Nvestiv platform:
     base += ` project_id: ${projectContext.id}. Use this for all tool calls unless the user asks about other deals.`;
   } else {
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
-  }
-
-  if (memoContext) {
-    base += `\n\n## IC MEMO CO-AUTHORING MODE\n` +
-      `You are CO-AUTHORING the L3 IC memo for this fund. The user's edit requests run as tool calls — you have FULL write access to the canvas via the \`edit_memo\` tool. Never decline an edit; never tell the user to edit it themselves; never say you cannot modify documents.\n\n` +
-      `### How to edit\n` +
-      `Call \`edit_memo\` with one of these operations:\n` +
-      `- \`replace_section\` — replace the body of an existing H2 section (matched by heading text, case-insensitive)\n` +
-      `- \`append_to_section\` — append markdown to the end of a section's body\n` +
-      `- \`prepend_to_section\` — prepend markdown to the start of a section's body\n` +
-      `- \`insert_section_after\` — insert a NEW H2 section right after the named section\n` +
-      `- \`replace_all\` — replace the entire memo markdown (use sparingly)\n\n` +
-      `Always call edit_memo for any user request that asks you to draft, write, add, append, insert, tighten, rewrite, restructure, expand, shorten, or otherwise change ANY part of the memo — including titles, bullets, tables, footnotes, appendix items, and one-line additions. After the edit succeeds, briefly summarize what you changed (1–2 sentences). Do not paste the full new content back at the user.\n\n` +
-      `### Current memo (markdown)\n\n` +
-      `\`\`\`markdown\n${memoContext.markdown.slice(0, 12000)}\n\`\`\``;
   }
 
   return base;
