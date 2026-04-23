@@ -733,7 +733,10 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model = "sonnet-4", project_id, conversation_id, memo_id } = await req.json();
+    const { messages, model, project_id, conversation_id, memo_id } = await req.json();
+
+    // In memo mode, default to Haiku for blazing-fast tool calls. User can still override via `model`.
+    const effectiveModel = model || (memo_id ? "haiku-3.5" : "sonnet-4");
 
     // Get project context if scoped
     let projectContext = null;
@@ -754,7 +757,12 @@ serve(async (req) => {
     }
 
     const systemPrompt = buildSystemPrompt(projectContext, memoContext);
-    const modelId = MODEL_MAP[model] || MODEL_MAP["sonnet-4"];
+    const modelId = MODEL_MAP[effectiveModel] || MODEL_MAP["sonnet-4"];
+
+    // In memo mode, expose ONLY edit_memo to keep input tokens minimal and force fast tool selection.
+    const activeTools = memo_id
+      ? tools.filter((t) => t.name === "edit_memo")
+      : tools;
 
     const anthropicMessages = messages.map((m: any) => ({
       role: m.role === "system" ? "user" : m.role,
@@ -766,14 +774,15 @@ serve(async (req) => {
     const makeAnthropicCall = async (msgs: any[], pendingToolResults?: any[]) => {
       const body: any = {
         model: modelId,
-        max_tokens: 16000,
+        max_tokens: memo_id ? 4000 : 16000,
         system: systemPrompt,
         messages: pendingToolResults ? [...msgs, ...pendingToolResults] : msgs,
-        tools,
+        tools: activeTools,
         stream: true,
       };
 
-      if (modelId.includes("sonnet")) {
+      // Extended thinking adds 5–15s latency. Skip it for memo edits (Haiku) — trivial markdown ops don't need it.
+      if (modelId.includes("sonnet") && !memo_id) {
         body.thinking = {
           type: "enabled",
           budget_tokens: 10000,
