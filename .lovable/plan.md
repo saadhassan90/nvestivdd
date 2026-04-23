@@ -1,85 +1,86 @@
 
 
-## Plan: Restructure all L1 report tabs to match PRD v1.0
+## Plan: L3 IC Memo workspace (revised — no left rail)
 
-I'll rebuild every tab as a **deterministic skeleton** following the PRD exactly. Every section described in the PRD gets rendered for every fund, even when data is missing — empty sections show a muted `[NOT DISCLOSED AT L1]` chip or "No data available" placeholder so the layout is identical across every deal.
+Drop the left stage rail. The IC memo page becomes a clean **2-column layout**: BlockNote canvas on the left, always-on Iris chat on the right. Stage switching moves into the top bar.
 
-### Core principle: skeleton-first
+### Layout
 
-Every tab becomes an ordered sequence of section cards. Each section has:
-- A persistent header (always shown)
-- A body that either renders data or shows an empty-state message
-- No section is ever hidden — only its content varies
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ ProjectTopBar  …  [Stage ▾ L3 — IC Memo]  [Back to Reports] │
+├────────────────────────────────────┬─────────────────────────┤
+│ Canvas (BlockNote)                 │ Iris chat (always on)   │
+│  • IC Memo title                   │                         │
+│  • Sections seeded from L1         │ Project-scoped, with    │
+│  • Inline editing                  │ memo context + tools    │
+│                                    │                         │
+│ flex-1, max-w-[820px] centered     │ 420px                   │
+└────────────────────────────────────┴─────────────────────────┘
+```
 
-### Global chrome (applied across all tabs)
+### Top bar changes (memo page only)
 
-1. **Cover Block** (`ProjectTopBar`) — extend to show: report type label, fund name, working-name pills, sponsor line, analysis date, analyst, scorecard version, related prior report chip, composite score badge, recommendation badge (MEET / CONDITIONAL MEET / NO MEET), tier pill (Strong Advance / Advance / Review / Decline).
-2. **Hard Floor banner** — global red banner at top of every tab when `trigger_fired` is true.
-3. **Tab order** (`ProjectSidebar`) — reorder to PRD spec: Overview · Scorecard · Team · Strategy · Performance · Risk · Interrogatory Matrix · Sources · Analysis Log · Dataroom.
-4. **URL sync** — `?tab=` reflects active tab.
+`ProjectTopBar` gets a `mode` prop. When `mode="memo"`:
 
-### Tab-by-tab rebuild
+- **Replace the "Ask Iris" pill** with a **Stage dropdown** showing the current stage ("L3 — IC Memo") and a chevron. Menu items:
+  - L1 — Triage Report → navigates to `/project/:id?tab=overview`
+  - L2 — Deep Dive → disabled, "Locked" tag
+  - L3 — IC Memo → current, checkmark
+- Add a secondary **"Back to Reports"** ghost button to the left of the dropdown for one-click return to L1.
+- Cover Block (composite/recommendation/tier pills) stays — useful context while drafting.
+- Share + Notifications buttons stay.
 
-**1. OverviewTab** → Hero Card · Abstract block · Findings Overview KPI strip (5 tiles: Composite, Recommendation, Hard Floor, Critical Flag count, Completeness %) · Fund Snapshot 2-col grid (14-17 rows) · Source Materials card · Cross-reference card.
+On the L1 tabs page nothing changes (Ask Iris pill stays).
 
-**2. ScorecardTab** → Composite Score Hero · Hard Floor Gates Panel (3 cards) · 5-Dimension Rubric Grid (expandable rows showing flags/gaps/verification) · Composite Row · Verdict & Recommendation Panel · Meeting Conditions Panel (only renders content when CONDITIONAL MEET, otherwise shows skeleton with empty message) · Score Tier Thresholds legend (dual scale).
+### Routing & navigation
 
-**3. TeamTab** → Sponsor Entity Cards (one per sponsor, side-by-side for co-GP) · Person Cards (education, employment chain, credentials, regulatory checks, deck-vs-research diff, confidence badge) · Team Governance strip · Team Network strip · Team Flags subsection (RED/YELLOW lanes) · Team Interrogatory subset.
+- New route `/project/:id/memo` renders `IcMemoPage`.
+- `ProjectSidebar` Report picker: clicking **L3** navigates to `/project/:id/memo`. L1 stays on tabs page. L2 still locked.
+- `AppLayout` suppresses the global Iris drawer on `/project/*/memo` since the page hosts its own embedded chat.
 
-**4. StrategyTab** → Thesis Card · Portfolio Construction (mini-chart) · Target Company Profile grid · Term Structure grid · Economics grid · Target Returns panel · Fee Benchmark Callout · Strategy Flags · Strategy Interrogatory subset.
+### Canvas (BlockNote)
 
-**5. PerformanceTab** → Headline Metrics Strip (4 KPI tiles) · Scale & Count Grid · In-Strategy Breakdown toggle · Multiple Expansion Panel · Securitizations table · Investor Verification Panel · Performance/Scale row · Reconciliation Note · Benchmarks Callout · Performance Flags · Performance Interrogatory subset.
+- Deps: `@blocknote/core`, `@blocknote/react`, `@blocknote/mantine`.
+- `IcMemoCanvas` wraps `useCreateBlockNote` + `<BlockNoteView />` themed to our HSL tokens (monochrome cool-gray).
+- **Seeded skeleton** when no memo exists yet, derived from L1 data — same skeleton-first rule as the report:
+  H1 `{fund_name} — Investment Committee Memo`, then H2 sections: Recommendation · Executive Summary · Fund Overview · Team & Governance · Strategy · Performance & Track Record · Fees & Terms · Risks & Mitigants · Diligence Status · Conditions for Advancement · Appendix. Each seeded with a paragraph from matching L1 fields or a muted `[NOT YET DRAFTED]` block.
+- Small toolbar above canvas: "Saved · 2s ago" indicator, Export menu (download Markdown / copy), "Reset to template" (with confirm).
 
-**6. RedFlagsTab → renamed "Risk"** → Severity Summary Strip (Critical / Elevated / Monitor + Inherited badge) · CRITICAL Flag Cards · ELEVATED table · MONITOR table · Category sub-tabs (Team/Track Record/Strategy/Domain/Structure) · Hard Floor Gate Detail · Discrepancies Found panel · Regulatory & Litigation panel · Carry-forward callout.
+### Persistence
 
-**7. InterrogatoryTab → "Interrogatory Matrix"** → Question Count Strip · Priority + Category filter chips · Questions Table (with editable 0–3 GP Response Score, audit log to localStorage, Export CSV button) · Per-Dimension View toggle · Scoring Guidance Footer · No-Meet Conversion Threshold banner.
+- New `ic_memos` table: `id`, `project_id` (unique), `content_json` (jsonb BlockNote doc), `content_markdown` (text), `version` (int), `updated_at`. Public RLS matching the rest of the app.
+- Load → fetch row; if absent, generate seeded skeleton and insert.
+- Edit → debounced (1.5s) upsert of `content_json` + regenerated `content_markdown` via BlockNote's `blocksToMarkdownLossy`.
+- Realtime subscription so chat-driven edits appear in the editor live.
 
-**8. SourceFilesTab → "Sources"** → Source Categories Navigator (left rail, A–G taxonomy) · Citations List (APA-style, access-status icon) · Disambiguation Panel · Confidence Legend · Negative-Results Ledger (always rendered).
+### Iris chat (embedded, agentic)
 
-**9. ProcessingState (Analysis Log)** → keep existing pipeline UI but add: Pipeline Metadata card · Verification Actions Completed checklist · Domain Research blocks (4 panels: 8.1–8.4 with 9-item questionnaire) · Market Context card · Evidence Gaps Register table · Cross-reference Inheritance map.
+- Reuse `ChatProvider` / `useChatContext`. On mount, page calls `setProjectScope({ id, name })` so messages are scoped to this fund.
+- New `EmbeddedIrisChat` renders the same UI as `ChatSidebar` (history, model picker, suggested prompts, bubbles, input) but mounted inside the right column instead of as a fixed drawer. Header omits the close button since it's permanent here.
+- Send requests include optional `memo_id`. `chat-completion` edge function:
+  - When `memo_id` is present, injects current `content_markdown` into the system prompt: "You are co-authoring an IC memo for {fund_name}…"
+  - Registers two new tools:
+    - `propose_memo_edit({ section_heading, new_markdown, mode: "replace" | "append" | "insert_after" })` → returns a diff preview to the client.
+    - `apply_memo_edit({ edit_id })` → server applies edit to `ic_memos` (markdown → blocks via `tryParseMarkdownToBlocks`) and broadcasts via realtime.
+- Client renders proposed edits as compact diff cards inside chat bubbles with **Apply** / **Discard** buttons. Apply round-trips and the canvas updates from the realtime sub.
+- Suggested prompts (memo scope): "Tighten the executive summary", "Draft the recommendation paragraph", "Pull the fee table into Fees & Terms", "Add mitigants column to Risks".
 
-**10. DataRoomTab → "Dataroom"** → Submission Quality Strip (4 KPIs) · Critical Missing Documents card · Priority Checklist (4 accordion groups: P1 Deal-Breaker, P2 Essential, P3 Supporting, P4 Nice-to-Have) · Completeness Verification panel · Upload/Request Action bar.
+### Mobile (< lg)
 
-### Shared primitives to create
+Top bar stage dropdown stays. Canvas full-width; chat collapses into a bottom-docked drawer toggle.
 
-- `SectionCard` — header + empty-state wrapper used by every section
-- `EmptyChip` — `[NOT DISCLOSED AT L1]` muted chip for missing field values
-- `KpiTile` — used by Findings Overview, Severity, Headline Metrics, etc.
-- `FieldValueGrid` — 2-column field/value table with empty handling
-- `FlagLane` — RED/YELLOW lane renderer used by category-filtered subsections
-- `RecommendationBadge` / `TierPill` / `BandBadge` — verdict scale primitives
+### Memory updates
 
-### Files to create
+- New `mem://features/ic-memo-workspace.md` documenting: route, 2-column layout, top-bar stage dropdown (no left rail), BlockNote choice, `ic_memos` schema, seed-from-L1 rule, agentic edit tool contract.
+- Index gets one new line under Memories.
 
-- `src/components/project/primitives/SectionCard.tsx`
-- `src/components/project/primitives/EmptyChip.tsx`
-- `src/components/project/primitives/KpiTile.tsx`
-- `src/components/project/primitives/FieldValueGrid.tsx`
-- `src/components/project/primitives/FlagLane.tsx`
-- `src/components/project/primitives/VerdictBadges.tsx`
-- `src/components/project/primitives/HardFloorBanner.tsx`
+---
 
-### Files to rewrite (skeleton-first)
+### Technical notes
 
-- `src/components/project/OverviewTab.tsx`
-- `src/components/project/ScorecardTab.tsx`
-- `src/components/project/TeamTab.tsx`
-- `src/components/project/StrategyTab.tsx`
-- `src/components/project/PerformanceTab.tsx`
-- `src/components/project/RedFlagsTab.tsx` (relabel "Risk")
-- `src/components/project/InterrogatoryTab.tsx` (add inline editing + CSV export + per-dim toggle)
-- `src/components/project/SourceFilesTab.tsx` (relabel "Sources", add A–G nav, negative ledger)
-- `src/components/project/DataRoomTab.tsx` (4 priority accordions + KPI strip)
-- `src/components/project/ProcessingState.tsx` (add 6 Analysis Log sections)
-- `src/components/project/ProjectSidebar.tsx` (reorder + relabel tabs to PRD spec)
-- `src/components/project/ProjectTopBar.tsx` (full Cover Block per PRD §3.2)
-- `src/pages/ProjectDetail.tsx` (URL `?tab=` sync, hard-floor global banner, pass missing data flags through)
-
-### Verification step (after build)
-
-I'll walk through PRD §8 (the 86-row coverage matrix) and confirm each row maps to a rendered section in the skeleton. Anything missing gets added before delivery.
-
-### Out of scope (intentional, per PRD §6.3)
-
-Pre-synthesis fact-gathering input format (Hometap 5-Pillar) is rejected upstream; no special handling here. Pipeline data shape (which JSON keypaths populate which DB columns) stays as currently mapped — this PR is **frontend rendering only**.
+- **Files added**: `src/pages/IcMemoPage.tsx`, `src/components/memo/IcMemoCanvas.tsx`, `src/components/memo/MemoToolbar.tsx`, `src/components/memo/EmbeddedIrisChat.tsx`, `src/components/memo/StageDropdown.tsx`, `src/lib/ic-memo-template.ts`, `src/hooks/use-ic-memo.ts`.
+- **Files edited**: `src/App.tsx` (new route), `src/components/project/ProjectTopBar.tsx` (add `mode` prop; swap Ask Iris for StageDropdown + Back to Reports when `mode="memo"`), `src/components/project/ProjectSidebar.tsx` (L3 navigates instead of local state), `src/components/layout/AppLayout.tsx` (suppress global drawer on memo route), `src/contexts/ChatContext.tsx` (accept optional `memoId` per send), `supabase/functions/chat-completion/index.ts` (memo context + 2 tools).
+- **DB**: one migration creating `ic_memos` table with public RLS + realtime publication.
+- **Out of scope**: PDF export, multi-user presence/cursors, version history UI (column reserved), L2 page.
 
