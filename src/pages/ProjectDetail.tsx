@@ -325,6 +325,7 @@ export default function ProjectDetail() {
                     onRefresh={fetchData}
                     onRerunAnalysis={handleRerunAnalysis}
                     submissionQuality={submissionQuality}
+                    interrogatoryItems={interrogatoryItems}
                   />
                 )}
                 {activeTab === "documents" && (
