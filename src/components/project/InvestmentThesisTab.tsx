@@ -57,12 +57,19 @@ export function InvestmentThesisTab({
   const score10 = rawScore == null ? null : rawScore > 10 ? Math.round((rawScore / 10) * 10) / 10 : rawScore;
   const tier = getSectionTier(score10);
 
-  // Takeaways: first 3–5 thesis validations or market factors
-  const takeaways = thesisValidations.slice(0, 5).map((tv) => ({
-    text: tv.claim,
-    detail: tv.validation_detail,
-    status: tv.validation_status,
-  }));
+  // Takeaways: prefer Phase 7.4 synthesized list on module_scores; fallback
+  // to thesis_validations rows so the section never goes empty mid-rollout.
+  const synthesized = (thesisModule?.takeaways as Array<{ text: string; detail?: string }> | undefined) ?? [];
+  const takeaways =
+    synthesized.length > 0
+      ? synthesized.map((t) => ({ text: t.text, detail: t.detail ?? null, status: null as string | null }))
+      : thesisValidations.slice(0, 5).map((tv) => ({
+          text: tv.claim,
+          detail: tv.validation_detail,
+          status: tv.validation_status,
+        }));
+
+  const synthSubScores = (thesisModule?.sub_scores as Array<any> | undefined) ?? [];
 
   // Three-block thesis_summary — Phase 7.4 synthesis target
   const whatBetting = thesisValidations[0]?.claim || null;
@@ -180,7 +187,7 @@ export function InvestmentThesisTab({
           subtitle="4 dimensions · weights sum to 100"
           icon={<ListChecks className="h-4 w-4" />}
         >
-          <SubScoresPanel sectionScore10={score10} />
+          <SubScoresPanel sectionScore10={score10} synthesized={synthSubScores} />
         </SectionCard>
       </BlurFade>
 
@@ -269,18 +276,32 @@ function ValidationStatus({ status }: { status: string }) {
   );
 }
 
-function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
-  // Sub-scores not yet emitted by the pipeline — show weights + N/A placeholders.
-  // Phase 4.3 will add a sub_scores column or table; Phase 7.4 will populate.
+function SubScoresPanel({
+  sectionScore10,
+  synthesized = [],
+}: {
+  sectionScore10: number | null;
+  synthesized?: Array<{ key?: string; label?: string; score?: number; weight?: number; rationale?: string }>;
+}) {
+  const synthMap = new Map(synthesized.map((s) => [s.key, s]));
   return (
     <div className="space-y-2">
       {SUB_SCORES.map((s) => {
-        const tier = getSectionTier(null);
+        const synth = synthMap.get(s.key);
+        const score = synth?.score ?? null;
+        const tier = getSectionTier(score);
         return (
           <div key={s.key} className="grid grid-cols-[1fr_60px_60px_80px] items-center gap-3 text-xs py-1.5 border-b border-border/30 last:border-0">
-            <span className="text-foreground font-medium truncate">{s.label}</span>
+            <div className="min-w-0">
+              <p className="text-foreground font-medium truncate">{s.label}</p>
+              {synth?.rationale && (
+                <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">{synth.rationale}</p>
+              )}
+            </div>
             <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
-            <span className="text-right tabular-nums text-muted-foreground">─</span>
+            <span className="text-right tabular-nums text-foreground font-medium">
+              {score != null ? score.toFixed(1) : "─"}
+            </span>
             <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
               {SCORE_TIER_LABELS[tier]}
             </span>
@@ -288,8 +309,8 @@ function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
         );
       })}
       <p className="text-[10px] italic text-muted-foreground pt-2">
-        Sub-score breakdown lands in Phase 4.3 (storage) + Phase 7.4 (synthesis).
-        Section score above ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the rolled-up dimension.
+        Section score ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the
+        weighted roll-up of the four sub-dimensions above.
       </p>
     </div>
   );

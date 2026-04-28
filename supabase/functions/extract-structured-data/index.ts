@@ -567,6 +567,324 @@ async function extractServiceProviders(markdown: string, projectId: string) {
   console.log(`Extracted ${data.providers.length} service providers`);
 }
 
+// ─── Phase 7.4 — Per-section synthesis (takeaways + sub_scores + claim_vs_market) ───
+const PRD_DIMENSIONS = [
+  { key: "investment_thesis", label: "Investment Thesis", aliases: ["thesis", "module_c", "strategy"], subs: ["coherence", "differentiation", "timing", "execution"] },
+  { key: "market_reality", label: "Market Reality", aliases: ["market", "module_d", "domain"], subs: ["sector_consensus", "treatment_vs_selection", "crowding", "macro"] },
+  { key: "team", label: "Team & Manager", aliases: ["team", "module_b", "manager"], subs: ["pedigree", "cohesion", "alignment", "track"] },
+  { key: "track_record", label: "Track Record", aliases: ["track", "performance", "module_a"], subs: ["returns", "consistency", "attribution", "drawdowns"] },
+  { key: "economics", label: "Economics", aliases: ["economics", "terms", "fee"], subs: ["fees", "carry", "alignment", "transparency"] },
+];
+
+async function extractSectionSynthesis(markdown: string, projectId: string) {
+  const result = await callOpenAI(
+    [
+      {
+        role: "system",
+        content:
+          "You are an institutional LP analyst. For each PRD dimension (investment_thesis, market_reality, team, track_record, economics), extract: (a) 3–5 institutional takeaways grounded in the report, and (b) 4 sub-scores out of 10 with rationale. Be terse, no marketing language.",
+      },
+      { role: "user", content: markdown.slice(0, 18000) },
+    ],
+    [{
+      type: "function",
+      function: {
+        name: "emit_section_synthesis",
+        parameters: {
+          type: "object",
+          properties: {
+            sections: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  dimension_key: { type: "string", enum: PRD_DIMENSIONS.map((d) => d.key) },
+                  takeaways: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        text: { type: "string" },
+                        detail: { type: "string" },
+                      },
+                      required: ["text"],
+                    },
+                  },
+                  sub_scores: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        key: { type: "string" },
+                        label: { type: "string" },
+                        score: { type: "number", minimum: 0, maximum: 10 },
+                        weight: { type: "integer" },
+                        rationale: { type: "string" },
+                      },
+                      required: ["key", "label", "score"],
+                    },
+                  },
+                },
+                required: ["dimension_key"],
+              },
+            },
+          },
+          required: ["sections"],
+        },
+      },
+    }],
+    { type: "function", function: { name: "emit_section_synthesis" } }
+  );
+
+  const data = extractToolArgs(result);
+  if (!data?.sections?.length) return;
+
+  // Update each module_score row with takeaways + sub_scores. Match by alias.
+  const { data: existing } = await supabase
+    .from("module_scores")
+    .select("id, module_key, module_label")
+    .eq("project_id", projectId);
+
+  for (const section of data.sections) {
+    const dim = PRD_DIMENSIONS.find((d) => d.key === section.dimension_key);
+    if (!dim) continue;
+    const match = (existing ?? []).find((row: any) =>
+      [dim.key, ...dim.aliases].some((a) =>
+        row.module_key?.toLowerCase().includes(a) ||
+        row.module_label?.toLowerCase().includes(a),
+      ),
+    );
+    if (!match) continue;
+
+    await supabase
+      .from("module_scores")
+      .update({
+        takeaways: section.takeaways ?? [],
+        sub_scores: section.sub_scores ?? [],
+      })
+      .eq("id", match.id);
+  }
+
+  console.log(`Section synthesis emitted for ${data.sections.length} dimensions`);
+}
+
+// ─── Phase 7.4 — Sector + Geography breakdowns ───
+async function extractDimensionalBreakdowns(markdown: string, projectId: string) {
+  const result = await callOpenAI(
+    [
+      {
+        role: "system",
+        content:
+          "Extract two structured breakdowns from the report: (1) sector_breakdown — capital allocation by sector with percentages, and (2) geography_breakdown — capital allocation by region using the PRD taxonomy (North America, Europe, UK, Asia-Pacific, LatAm, MENA, Africa, Global). Return percentages summing to 100 each. If not derivable, return empty arrays.",
+      },
+      { role: "user", content: markdown.slice(0, 16000) },
+    ],
+    [{
+      type: "function",
+      function: {
+        name: "emit_breakdowns",
+        parameters: {
+          type: "object",
+          properties: {
+            sector_breakdown: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  sector: { type: "string" },
+                  pct: { type: "number" },
+                  meta: { type: "string" },
+                },
+                required: ["sector", "pct"],
+              },
+            },
+            geography_breakdown: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  region: { type: "string" },
+                  pct: { type: "number" },
+                  detail: { type: "string" },
+                },
+                required: ["region", "pct"],
+              },
+            },
+          },
+          required: ["sector_breakdown", "geography_breakdown"],
+        },
+      },
+    }],
+    { type: "function", function: { name: "emit_breakdowns" } }
+  );
+
+  const data = extractToolArgs(result);
+  if (!data) return;
+
+  await supabase.from("projects").update({
+    sector_breakdown: data.sector_breakdown ?? [],
+    geography_breakdown: data.geography_breakdown ?? [],
+  }).eq("id", projectId);
+
+  console.log(
+    `Breakdowns: ${data.sector_breakdown?.length ?? 0} sectors, ${data.geography_breakdown?.length ?? 0} regions`,
+  );
+}
+
+// ─── Phase 7.5 — ESG payload (only emitted if mandate is ESG-eligible) ───
+async function extractEsgPayload(markdown: string, projectId: string) {
+  const result = await callOpenAI(
+    [
+      {
+        role: "system",
+        content:
+          "Determine ESG eligibility (SFDR Article 8 or 9, or explicit impact mandate). If eligible, extract: sfdr_classification, impact_focus, esg_score (1.0–4.0 scale), gp_claims (with verified/partial/unverified/contradicted validation), and process_matrix across Policy/Integration/Engagement/Reporting (robust/developing/absent/unknown). If NOT eligible, return is_eligible:false.",
+      },
+      { role: "user", content: markdown.slice(0, 18000) },
+    ],
+    [{
+      type: "function",
+      function: {
+        name: "emit_esg",
+        parameters: {
+          type: "object",
+          properties: {
+            is_eligible: { type: "boolean" },
+            sfdr_classification: { type: "string" },
+            impact_focus: { type: "string" },
+            esg_score: { type: "number", minimum: 1.0, maximum: 4.0 },
+            gp_claims: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  claim: { type: "string" },
+                  validation: { type: "string", enum: ["verified", "partial", "unverified", "contradicted"] },
+                  evidence: { type: "string" },
+                },
+                required: ["claim", "validation"],
+              },
+            },
+            process_matrix: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  pillar: { type: "string", enum: ["Policy", "Integration", "Engagement", "Reporting"] },
+                  status: { type: "string", enum: ["robust", "developing", "absent", "unknown"] },
+                  detail: { type: "string" },
+                },
+                required: ["pillar", "status"],
+              },
+            },
+          },
+          required: ["is_eligible"],
+        },
+      },
+    }],
+    { type: "function", function: { name: "emit_esg" } }
+  );
+
+  const data = extractToolArgs(result);
+  if (!data || data.is_eligible === false) {
+    // Clear stale ESG fields if no longer eligible.
+    await supabase.from("projects").update({
+      sfdr_classification: null,
+      impact_focus: null,
+      esg_score: null,
+      esg_claims: null,
+      esg_process_matrix: null,
+    }).eq("id", projectId);
+    console.log("ESG: not eligible — payload cleared");
+    return;
+  }
+
+  // Stamp UUIDs onto claims for stable React keys.
+  const claims = (data.gp_claims ?? []).map((c: any) => ({
+    id: crypto.randomUUID(),
+    ...c,
+  }));
+
+  await supabase.from("projects").update({
+    sfdr_classification: data.sfdr_classification ?? null,
+    impact_focus: data.impact_focus ?? null,
+    esg_score: data.esg_score ?? null,
+    esg_claims: claims,
+    esg_process_matrix: data.process_matrix ?? [],
+  }).eq("id", projectId);
+
+  console.log(
+    `ESG payload: score=${data.esg_score}, claims=${claims.length}, matrix=${data.process_matrix?.length ?? 0}`,
+  );
+}
+
+// ─── Phase 7.5 — Market context strip (sector dynamics) ───
+async function extractMarketContext(markdown: string, projectId: string, assetClass: string | null) {
+  const result = await callOpenAI(
+    [
+      {
+        role: "system",
+        content:
+          "Extract sector-wide market context (NEVER fund-specific) for 4 fixed tiles: dry_powder, deal_volume, multiple_compression, exit_environment. For each, provide value (string), delta (signed % vs comparison window) when stated, and a brief window descriptor. If the report has no market context grounding, return tiles:[].",
+      },
+      { role: "user", content: markdown.slice(0, 14000) },
+    ],
+    [{
+      type: "function",
+      function: {
+        name: "emit_market_context",
+        parameters: {
+          type: "object",
+          properties: {
+            scope: { type: "string", description: "Asset class / sub-class scope label" },
+            tiles: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  key: { type: "string", enum: ["dry_powder", "deal_volume", "multiple_compression", "exit_environment"] },
+                  label: { type: "string" },
+                  value: { type: "string" },
+                  delta: { type: "number" },
+                  window: { type: "string" },
+                  delta_label: { type: "string" },
+                },
+                required: ["key"],
+              },
+            },
+          },
+          required: ["tiles"],
+        },
+      },
+    }],
+    { type: "function", function: { name: "emit_market_context" } }
+  );
+
+  const data = extractToolArgs(result);
+  if (!data) return;
+
+  const tiles = (data.tiles ?? []).map((t: any) => ({
+    key: t.key,
+    label: t.label ?? null,
+    value: t.value ?? null,
+    delta: t.delta ?? null,
+    window: t.window ?? null,
+    deltaLabel: t.delta_label ?? null,
+  }));
+
+  await supabase.from("projects").update({
+    market_context: {
+      scope: data.scope ?? assetClass ?? null,
+      tiles,
+      benchmark_key: assetClass
+        ? `${assetClass}::{subAssetClass}::{marketSegment}`
+        : null,
+    },
+  }).eq("id", projectId);
+
+  console.log(`Market context: ${tiles.length} tiles populated`);
+}
+
 // ─── Main handler ───
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -621,6 +939,21 @@ serve(async (req) => {
       extractInterrogatory(markdown, project_id),
       extractDataRoom(markdown, project_id),
       extractServiceProviders(markdown, project_id),
+    ]);
+
+    // Batch 4 (Phase 7) — Synthesis payloads. Run AFTER module_scores exist
+    // so extractSectionSynthesis can match-and-update by dimension key.
+    const { data: postProject } = await supabase
+      .from("projects")
+      .select("asset_class")
+      .eq("id", project_id)
+      .single();
+
+    await Promise.all([
+      extractSectionSynthesis(markdown, project_id),
+      extractDimensionalBreakdowns(markdown, project_id),
+      extractEsgPayload(markdown, project_id),
+      extractMarketContext(markdown, project_id, postProject?.asset_class ?? null),
     ]);
 
     // Update project status to complete

@@ -924,6 +924,7 @@ export type Database = {
           score: number
           sub_scores: Json | null
           summary_assessment: string | null
+          takeaways: Json | null
           tier_label: string | null
           weight: number | null
           weighted_score: number | null
@@ -939,6 +940,7 @@ export type Database = {
           score?: number
           sub_scores?: Json | null
           summary_assessment?: string | null
+          takeaways?: Json | null
           tier_label?: string | null
           weight?: number | null
           weighted_score?: number | null
@@ -954,6 +956,7 @@ export type Database = {
           score?: number
           sub_scores?: Json | null
           summary_assessment?: string | null
+          takeaways?: Json | null
           tier_label?: string | null
           weight?: number | null
           weighted_score?: number | null
@@ -1079,16 +1082,22 @@ export type Database = {
           document_type: string | null
           domicile: string | null
           error_message: string | null
+          esg_claims: Json | null
+          esg_process_matrix: Json | null
+          esg_score: number | null
           established_year: string | null
           executive_summary_narrative: string | null
           final_assessment_narrative: string | null
           fund_inception_date: string | null
           fund_name: string
           fund_size_estimated: string | null
+          geography_breakdown: Json | null
           gp_entity_name: string | null
           id: string
+          impact_focus: string | null
           key_risks: Json | null
           key_strengths: Json | null
+          market_context: Json | null
           market_validation_points: Json | null
           module_scores: Json | null
           recommendation: string | null
@@ -1098,6 +1107,8 @@ export type Database = {
           report_markdown: string | null
           score_tier: string | null
           score_tier_v2: string | null
+          sector_breakdown: Json | null
+          sfdr_classification: string | null
           status: string
           strategy: string | null
           submitter_company: string | null
@@ -1119,16 +1130,22 @@ export type Database = {
           document_type?: string | null
           domicile?: string | null
           error_message?: string | null
+          esg_claims?: Json | null
+          esg_process_matrix?: Json | null
+          esg_score?: number | null
           established_year?: string | null
           executive_summary_narrative?: string | null
           final_assessment_narrative?: string | null
           fund_inception_date?: string | null
           fund_name: string
           fund_size_estimated?: string | null
+          geography_breakdown?: Json | null
           gp_entity_name?: string | null
           id?: string
+          impact_focus?: string | null
           key_risks?: Json | null
           key_strengths?: Json | null
+          market_context?: Json | null
           market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
@@ -1138,6 +1155,8 @@ export type Database = {
           report_markdown?: string | null
           score_tier?: string | null
           score_tier_v2?: string | null
+          sector_breakdown?: Json | null
+          sfdr_classification?: string | null
           status?: string
           strategy?: string | null
           submitter_company?: string | null
@@ -1159,16 +1178,22 @@ export type Database = {
           document_type?: string | null
           domicile?: string | null
           error_message?: string | null
+          esg_claims?: Json | null
+          esg_process_matrix?: Json | null
+          esg_score?: number | null
           established_year?: string | null
           executive_summary_narrative?: string | null
           final_assessment_narrative?: string | null
           fund_inception_date?: string | null
           fund_name?: string
           fund_size_estimated?: string | null
+          geography_breakdown?: Json | null
           gp_entity_name?: string | null
           id?: string
+          impact_focus?: string | null
           key_risks?: Json | null
           key_strengths?: Json | null
+          market_context?: Json | null
           market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
@@ -1178,6 +1203,8 @@ export type Database = {
           report_markdown?: string | null
           score_tier?: string | null
           score_tier_v2?: string | null
+          sector_breakdown?: Json | null
+          sfdr_classification?: string | null
           status?: string
           strategy?: string | null
           submitter_company?: string | null
@@ -1579,10 +1606,12 @@ export type Database = {
       }
       thesis_validations: {
         Row: {
+          benchmark_text: string | null
           citation_ids: Json | null
           claim: string
           claim_source: string | null
           confidence: string
+          deviation_flag: string | null
           id: string
           order_index: number | null
           project_id: string
@@ -1590,10 +1619,12 @@ export type Database = {
           validation_status: string
         }
         Insert: {
+          benchmark_text?: string | null
           citation_ids?: Json | null
           claim: string
           claim_source?: string | null
           confidence: string
+          deviation_flag?: string | null
           id?: string
           order_index?: number | null
           project_id: string
@@ -1601,10 +1632,12 @@ export type Database = {
           validation_status: string
         }
         Update: {
+          benchmark_text?: string | null
           citation_ids?: Json | null
           claim?: string
           claim_source?: string | null
           confidence?: string
+          deviation_flag?: string | null
           id?: string
           order_index?: number | null
           project_id?: string

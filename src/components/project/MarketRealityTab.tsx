@@ -86,8 +86,25 @@ export function MarketRealityTab({
   const score10 = rawScore == null ? null : rawScore > 10 ? Math.round((rawScore / 10) * 10) / 10 : rawScore;
   const tier = getSectionTier(score10);
 
-  // Takeaways: top 5 market factors by order_index
-  const takeaways = marketFactors.slice(0, 5);
+  // Takeaways: prefer Phase 7.4 synthesized list; fallback to market_factors.
+  const synthTakeaways =
+    (marketModule?.takeaways as Array<{ text: string; detail?: string }> | undefined) ?? [];
+  const takeaways =
+    synthTakeaways.length > 0
+      ? synthTakeaways.map((t, i) => ({
+          id: `synth-${i}`,
+          title: t.text,
+          description: t.detail ?? null,
+          factor_type: null as string | null,
+        }))
+      : marketFactors.slice(0, 5).map((m) => ({
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          factor_type: m.factor_type,
+        }));
+
+  const synthSubScores = (marketModule?.sub_scores as Array<any> | undefined) ?? [];
 
   // claim_vs_market: derive from thesis validations + market factors
   // Phase 7.4 will emit this as a structured object; today we infer.
@@ -101,14 +118,26 @@ export function MarketRealityTab({
     .slice(0, 4);
 
   const assetClass = project?.asset_class || null;
-  const benchmarkKey = assetClass
-    ? `${assetClass}::{subAssetClass}::{marketSegment}`
-    : null;
 
-  // Phase 7.4 will emit structured sector_breakdown / geography_breakdown.
-  // Until then, derive sector tiles from competitor data so the typed
-  // components render real shapes when possible.
-  const sectorSlices = deriveSectorSlices(competitors);
+  // Phase 7 — synthesis payloads now persisted on the projects row.
+  const marketContext = ((project as any)?.market_context ?? null) as
+    | { scope?: string | null; tiles?: any[]; benchmark_key?: string | null }
+    | null;
+  const benchmarkKey =
+    marketContext?.benchmark_key ??
+    (assetClass ? `${assetClass}::{subAssetClass}::{marketSegment}` : null);
+
+  const sectorBreakdown = ((project as any)?.sector_breakdown ?? null) as
+    | Array<{ sector: string; pct: number; meta?: string | null }>
+    | null;
+  const sectorSlices =
+    sectorBreakdown && sectorBreakdown.length > 0
+      ? sectorBreakdown
+      : deriveSectorSlices(competitors);
+
+  const geographyBreakdown = ((project as any)?.geography_breakdown ?? null) as
+    | Array<{ region: string; pct: number; detail?: string | null }>
+    | null;
 
   return (
     <div className="space-y-5">
@@ -133,8 +162,8 @@ export function MarketRealityTab({
       {/* 2. market_context_strip — sector_dynamics (Phase 6.5 scaffold) */}
       <BlurFade delay={0.04}>
         <MarketContextStrip
-          scope={assetClass}
-          tiles={[]}
+          scope={marketContext?.scope ?? assetClass}
+          tiles={(marketContext?.tiles ?? []) as any}
           benchmarkKey={benchmarkKey}
         />
       </BlurFade>
@@ -149,7 +178,10 @@ export function MarketRealityTab({
 
       {/* 2c. Geography map (PRD §6.3) — typed shell, awaiting synthesis */}
       <BlurFade delay={0.055}>
-        <GeographyMap slices={[]} statedMandate={project?.strategy || null} />
+        <GeographyMap
+          slices={(geographyBreakdown ?? []) as any}
+          statedMandate={project?.strategy || null}
+        />
       </BlurFade>
 
       {/* 3. Takeaways */}
@@ -206,7 +238,7 @@ export function MarketRealityTab({
           subtitle="4 dimensions · weights sum to 100"
           icon={<ListChecks className="h-4 w-4" />}
         >
-          <SubScoresPanel sectionScore10={score10} />
+          <SubScoresPanel sectionScore10={score10} synthesized={synthSubScores} />
         </SectionCard>
       </BlurFade>
 
@@ -373,22 +405,41 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
   );
 }
 
-function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
+function SubScoresPanel({
+  sectionScore10,
+  synthesized = [],
+}: {
+  sectionScore10: number | null;
+  synthesized?: Array<{ key?: string; label?: string; score?: number; weight?: number; rationale?: string }>;
+}) {
+  const synthMap = new Map(synthesized.map((s) => [s.key, s]));
   return (
     <div className="space-y-2">
-      {SUB_SCORES.map((s) => (
-        <div key={s.key} className="grid grid-cols-[1fr_60px_60px_80px] items-center gap-3 text-xs py-1.5 border-b border-border/30 last:border-0">
-          <span className="text-foreground font-medium truncate">{s.label}</span>
-          <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
-          <span className="text-right tabular-nums text-muted-foreground">─</span>
-          <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
-            {SCORE_TIER_LABELS["insufficient_data"]}
-          </span>
-        </div>
-      ))}
+      {SUB_SCORES.map((s) => {
+        const synth = synthMap.get(s.key);
+        const score = synth?.score ?? null;
+        const tier = getSectionTier(score);
+        return (
+          <div key={s.key} className="grid grid-cols-[1fr_60px_60px_80px] items-center gap-3 text-xs py-1.5 border-b border-border/30 last:border-0">
+            <div className="min-w-0">
+              <p className="text-foreground font-medium truncate">{s.label}</p>
+              {synth?.rationale && (
+                <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">{synth.rationale}</p>
+              )}
+            </div>
+            <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
+            <span className="text-right tabular-nums text-foreground font-medium">
+              {score != null ? score.toFixed(1) : "─"}
+            </span>
+            <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+              {SCORE_TIER_LABELS[tier]}
+            </span>
+          </div>
+        );
+      })}
       <p className="text-[10px] italic text-muted-foreground pt-2">
-        Sub-score breakdown lands in Phase 4.3 (storage) + Phase 7.4 (synthesis).
-        Section score above ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the rolled-up dimension.
+        Section score ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the
+        weighted roll-up of the four sub-dimensions above.
       </p>
     </div>
   );
