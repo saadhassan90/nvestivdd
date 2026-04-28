@@ -86,8 +86,25 @@ export function MarketRealityTab({
   const score10 = rawScore == null ? null : rawScore > 10 ? Math.round((rawScore / 10) * 10) / 10 : rawScore;
   const tier = getSectionTier(score10);
 
-  // Takeaways: top 5 market factors by order_index
-  const takeaways = marketFactors.slice(0, 5);
+  // Takeaways: prefer Phase 7.4 synthesized list; fallback to market_factors.
+  const synthTakeaways =
+    (marketModule?.takeaways as Array<{ text: string; detail?: string }> | undefined) ?? [];
+  const takeaways =
+    synthTakeaways.length > 0
+      ? synthTakeaways.map((t, i) => ({
+          id: `synth-${i}`,
+          title: t.text,
+          description: t.detail ?? null,
+          factor_type: null as string | null,
+        }))
+      : marketFactors.slice(0, 5).map((m) => ({
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          factor_type: m.factor_type,
+        }));
+
+  const synthSubScores = (marketModule?.sub_scores as Array<any> | undefined) ?? [];
 
   // claim_vs_market: derive from thesis validations + market factors
   // Phase 7.4 will emit this as a structured object; today we infer.
@@ -221,7 +238,7 @@ export function MarketRealityTab({
           subtitle="4 dimensions · weights sum to 100"
           icon={<ListChecks className="h-4 w-4" />}
         >
-          <SubScoresPanel sectionScore10={score10} />
+          <SubScoresPanel sectionScore10={score10} synthesized={synthSubScores} />
         </SectionCard>
       </BlurFade>
 
