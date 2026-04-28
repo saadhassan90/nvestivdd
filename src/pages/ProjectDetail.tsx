@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
-import { InsightsPanel } from "@/components/project/InsightsPanel";
+import { CommentsRail } from "@/components/project/CommentsRail";
 import { OverviewTab } from "@/components/project/OverviewTab";
 import { RedFlagsTab } from "@/components/project/RedFlagsTab";
 import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
@@ -335,7 +335,12 @@ export default function ProjectDetail() {
           </main>
         </div>
 
-        <InsightsPanel projectName={project.fund_name} isProcessing={isProcessing} />
+        <CommentsRail
+          projectId={project.id}
+          projectName={project.fund_name}
+          activeSection={activeTab}
+          isProcessing={isProcessing}
+        />
       </div>
 
       <MobileBottomNav />
