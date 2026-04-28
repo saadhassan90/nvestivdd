@@ -373,6 +373,7 @@ type ClaimRow = {
   source: string | null;
   benchmark: string | null;
   deviation: DeviationFlag;
+  citation_ids?: string[];
 };
 
 function buildClaimVsMarket(
@@ -401,6 +402,7 @@ function buildClaimVsMarket(
       source: v.claim_source,
       benchmark: benchmark?.supporting_data || benchmark?.description || null,
       deviation,
+      citation_ids: ((v.citation_ids as string[] | null) ?? []) as string[],
     };
   });
 }
@@ -423,6 +425,11 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
                 <p className="text-foreground font-medium leading-snug">{r.claim}</p>
                 {r.source && (
                   <p className="text-[10px] text-muted-foreground italic mt-0.5">Source: {r.source}</p>
+                )}
+                {r.citation_ids && r.citation_ids.length > 0 && (
+                  <div className="mt-1.5">
+                    <CitationRefs ids={r.citation_ids} sectionHint="Market Reality" />
+                  </div>
                 )}
               </td>
               <td className="py-2.5 pr-3 text-muted-foreground">
