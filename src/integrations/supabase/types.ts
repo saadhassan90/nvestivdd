@@ -146,6 +146,62 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          author_name: string
+          author_type: string
+          body_md: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          project_id: string
+          report_version: number
+          resolved_at: string | null
+          section_id: string
+          severity: string | null
+          sub_card_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          author_type?: string
+          body_md: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          project_id: string
+          report_version?: number
+          resolved_at?: string | null
+          section_id: string
+          severity?: string | null
+          sub_card_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          author_type?: string
+          body_md?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          project_id?: string
+          report_version?: number
+          resolved_at?: string | null
+          section_id?: string
+          severity?: string | null
+          sub_card_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitive_landscape: {
         Row: {
           aum: string | null

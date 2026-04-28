@@ -11,6 +11,7 @@ Tiered AI models: Claude Opus 4.6, Sonnet 4.5, gpt-4o-mini, text-embedding-3-sma
 
 ## Memories
 - [Deal Submission](mem://features/deal-submission-requirements) — Submission requirements, auto-extraction, and checklist details
+- [Comments Rail](mem://features/comments-rail) — L1 comments rail, aggregation page, AI-author distinction
 - [Mobile Patterns](mem://ux/mobile-patterns) — Responsive behaviors for dashboard, sidebars, and analytics
 - [Document Organization](mem://features/document-organization) — Research Sources list formatting and Data Room diligence tiers
 - [Data Schema](mem://architecture/data-schema) — Hybrid relational (18+ tables) and markdown approach
