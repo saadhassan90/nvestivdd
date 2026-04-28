@@ -191,6 +191,7 @@ export default function ProjectDetail() {
 
   return (
     <MeetingModeProvider dealId={project.id}>
+    <CitationsProvider projectId={project.id} initialSources={researchSources}>
     <div className="flex flex-col h-screen bg-background overflow-hidden">
       <ProjectTopBar project={project} isProcessing={isProcessing} />
 
@@ -348,7 +349,9 @@ export default function ProjectDetail() {
       </div>
 
       <MobileBottomNav />
+      <PinnedCitationsStack />
     </div>
+    </CitationsProvider>
     </MeetingModeProvider>
   );
 }
