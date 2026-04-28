@@ -6,6 +6,7 @@ import { KpiTile } from "@/components/project/primitives/KpiTile";
 import { FieldValueGrid } from "@/components/project/primitives/FieldValueGrid";
 import { TierPill, RecommendationBadge, recommendationFromScore, tierFromScore } from "@/components/project/primitives/VerdictBadges";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
+import { MethodologyModal } from "@/components/project/MethodologyModal";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -132,7 +133,10 @@ export function OverviewTab({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Composite + tier */}
             <div className="flex flex-col items-start gap-2 md:border-r md:border-border/60 md:pr-6">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Composite Score</p>
+              <div className="flex items-center justify-between w-full gap-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Composite Score</p>
+                <MethodologyModal />
+              </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-5xl font-bold tabular-nums text-foreground">
                   {composite ?? "—"}

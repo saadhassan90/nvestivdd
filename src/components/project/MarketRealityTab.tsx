@@ -2,6 +2,8 @@ import { Globe2, ListChecks, MessageSquare, TrendingUp } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { MarketContextStrip } from "@/components/project/typed/MarketContextStrip";
+import { useEffect, useState } from "react";
+import { lookupBenchmark, describeMatchLevel, type BenchmarkRecord } from "@/lib/benchmarks";
 import { SectorExposureChart } from "@/components/project/typed/SectorExposureChart";
 import { GeographyMap } from "@/components/project/typed/GeographyMap";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
@@ -127,6 +129,41 @@ export function MarketRealityTab({
     marketContext?.benchmark_key ??
     (assetClass ? `${assetClass}::{subAssetClass}::{marketSegment}` : null);
 
+  // PRD §7.2 — when no synthesized market_context, fall back to static benchmark library.
+  const [staticBench, setStaticBench] = useState<BenchmarkRecord | null>(null);
+  const hasSynthTiles = !!(marketContext?.tiles && marketContext.tiles.length);
+  useEffect(() => {
+    if (hasSynthTiles) return;
+    let cancelled = false;
+    lookupBenchmark({
+      assetClass: assetClass,
+      subAssetClass: (project as any)?.strategy ?? null,
+      marketSegment: (project as any)?.fund_size_estimated ?? null,
+    }).then((b) => {
+      if (!cancelled) setStaticBench(b);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [assetClass, hasSynthTiles, project]);
+
+  const fallbackTiles =
+    !hasSynthTiles && staticBench?.sector_dynamics?.tiles
+      ? (staticBench.sector_dynamics.tiles as any[]).map((t: any) => ({
+          key: (t.key ?? t.label?.toLowerCase().replace(/[^a-z]+/g, "_")) as any,
+          label: t.label,
+          value: t.value,
+          deltaLabel: t.delta ?? null,
+          window: t.trend ? `Trend: ${t.trend}` : null,
+        }))
+      : null;
+  const stripTiles = hasSynthTiles ? (marketContext!.tiles as any[]) : (fallbackTiles ?? []);
+  const stripBenchKey = hasSynthTiles
+    ? benchmarkKey
+    : staticBench
+      ? `${staticBench.asset_class}::${staticBench.sub_asset_class}::${staticBench.market_segment} · ${describeMatchLevel(staticBench.match_level)}`
+      : benchmarkKey;
+
   const sectorBreakdown = ((project as any)?.sector_breakdown ?? null) as
     | Array<{ sector: string; pct: number; meta?: string | null }>
     | null;
@@ -163,8 +200,8 @@ export function MarketRealityTab({
       <BlurFade delay={0.04}>
         <MarketContextStrip
           scope={marketContext?.scope ?? assetClass}
-          tiles={(marketContext?.tiles ?? []) as any}
-          benchmarkKey={benchmarkKey}
+          tiles={stripTiles as any}
+          benchmarkKey={stripBenchKey}
         />
       </BlurFade>
 
