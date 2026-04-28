@@ -364,16 +364,17 @@ type DimensionRow = {
   key: string;
   label: string;
   weight: number;
+  tab: string;
   score10: number | null;
   tier: ScoreTier;
 };
 
-const PRD_DIMENSIONS: { key: string; label: string; weight: number; aliases: string[] }[] = [
-  { key: "thesis", label: "Investment Thesis", weight: 15, aliases: ["thesis", "module_c", "strategy"] },
-  { key: "market", label: "Market Reality", weight: 20, aliases: ["market", "module_d", "domain"] },
-  { key: "team", label: "Team & Manager", weight: 25, aliases: ["team", "module_b", "manager"] },
-  { key: "track_record", label: "Track Record", weight: 20, aliases: ["track", "performance", "module_a", "financial"] },
-  { key: "economics", label: "Economics", weight: 20, aliases: ["terms", "economics", "fee", "module_d_terms"] },
+const PRD_DIMENSIONS: { key: string; label: string; weight: number; tab: string; aliases: string[] }[] = [
+  { key: "thesis", label: "Investment Thesis", weight: 15, tab: "investment_thesis", aliases: ["thesis", "module_c", "strategy"] },
+  { key: "market", label: "Market Reality", weight: 20, tab: "market_reality", aliases: ["market", "module_d", "domain"] },
+  { key: "team", label: "Team & Manager", weight: 25, tab: "team", aliases: ["team", "module_b", "manager"] },
+  { key: "track_record", label: "Track Record", weight: 20, tab: "track_record", aliases: ["track", "performance", "module_a", "financial"] },
+  { key: "economics", label: "Economics", weight: 20, tab: "economics", aliases: ["terms", "economics", "fee", "module_d_terms"] },
 ];
 
 function buildDimensionScores(modules: any[]): DimensionRow[] {
@@ -392,13 +393,14 @@ function buildDimensionScores(modules: any[]): DimensionRow[] {
       key: d.key,
       label: d.label,
       weight: d.weight,
+      tab: d.tab,
       score10,
       tier: getSectionTier(score10),
     };
   });
 }
 
-function ScoresSummaryTable({ rows }: { rows: DimensionRow[] }) {
+function ScoresSummaryTable({ rows, projectId }: { rows: DimensionRow[]; projectId?: string }) {
   const tierClass = (t: ScoreTier) => {
     switch (t) {
       case "exceptional":
@@ -423,7 +425,19 @@ function ScoresSummaryTable({ rows }: { rows: DimensionRow[] }) {
         <tbody>
           {rows.map((r) => (
             <tr key={r.key} className="border-b border-border/30 last:border-0">
-              <td className="py-2 text-foreground font-medium">{r.label}</td>
+              <td className="py-2 text-foreground font-medium">
+                {projectId ? (
+                  <RouterLink
+                    to={`/project/${projectId}?tab=${r.tab}`}
+                    className="inline-flex items-center gap-1 hover:underline"
+                  >
+                    {r.label}
+                    <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+                  </RouterLink>
+                ) : (
+                  r.label
+                )}
+              </td>
               <td className="py-2 text-right tabular-nums text-muted-foreground">{r.weight}%</td>
               <td className="py-2 text-right tabular-nums font-semibold text-foreground">
                 {r.score10 != null ? r.score10.toFixed(1) : "─"}
