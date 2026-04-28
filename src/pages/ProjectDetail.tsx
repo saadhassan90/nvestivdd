@@ -20,6 +20,8 @@ import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { MeetingModeProvider } from "@/contexts/MeetingModeContext";
+import { CitationsProvider } from "@/contexts/CitationsContext";
+import { PinnedCitationsStack } from "@/components/project/typed/PinnedCitationsStack";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
