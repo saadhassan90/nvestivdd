@@ -165,16 +165,16 @@ export function ScorecardTab({ project, moduleScores, submissionQuality = [] }: 
         </SectionCard>
       </BlurFade>
 
-      {/* Meeting Conditions Panel — only meaningful for CONDITIONAL MEET */}
+      {/* Meeting Conditions Panel — only meaningful for CONDITIONAL ADVANCE */}
       <BlurFade delay={0.1}>
         <SectionCard
           title="Meeting Conditions"
-          subtitle={rec === "CONDITIONAL MEET" ? "Conditions to satisfy before first meeting" : "Only rendered for CONDITIONAL MEET verdicts"}
+          subtitle={rec === "CONDITIONAL ADVANCE" ? "Conditions to satisfy before first meeting" : "Only rendered for CONDITIONAL ADVANCE verdicts"}
           icon={<ClipboardList className="h-4 w-4" />}
-          empty={rec !== "CONDITIONAL MEET" || !project.conditions_for_advancement}
-          emptyMessage={rec === "CONDITIONAL MEET" ? "No meeting conditions parsed at L1." : "Recommendation is not CONDITIONAL MEET — section reserved."}
+          empty={rec !== "CONDITIONAL ADVANCE" || !project.conditions_for_advancement}
+          emptyMessage={rec === "CONDITIONAL ADVANCE" ? "No meeting conditions parsed at L1." : "Recommendation is not CONDITIONAL ADVANCE — section reserved."}
         >
-          {rec === "CONDITIONAL MEET" && project.conditions_for_advancement && (
+          {rec === "CONDITIONAL ADVANCE" && project.conditions_for_advancement && (
             <ul className="space-y-2">
               {(project.conditions_for_advancement as string[]).map((c, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs">
@@ -196,20 +196,23 @@ export function ScorecardTab({ project, moduleScores, submissionQuality = [] }: 
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">UI Tier (4-step)</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Score Tier (6-step)</p>
               <ul className="space-y-1.5 text-xs">
-                <li className="flex items-center gap-2"><TierPill tier="Strong Advance" /><span className="text-muted-foreground">85–100</span></li>
-                <li className="flex items-center gap-2"><TierPill tier="Advance" /><span className="text-muted-foreground">70–84</span></li>
-                <li className="flex items-center gap-2"><TierPill tier="Review" /><span className="text-muted-foreground">50–69</span></li>
-                <li className="flex items-center gap-2"><TierPill tier="Decline" /><span className="text-muted-foreground">0–49</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Exceptional" /><span className="text-muted-foreground">90–100</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Strong" /><span className="text-muted-foreground">75–89</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Adequate" /><span className="text-muted-foreground">60–74</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Below Average" /><span className="text-muted-foreground">40–59</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Concerning" /><span className="text-muted-foreground">1–39</span></li>
+                <li className="flex items-center gap-2"><TierPill tier="Insufficient Data" /><span className="text-muted-foreground">— / 0</span></li>
               </ul>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Recommendation (3-step)</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Recommendation (4-step)</p>
               <ul className="space-y-1.5 text-xs">
-                <li className="flex items-center gap-2"><RecommendationBadge recommendation="MEET" /><span className="text-muted-foreground">≥65</span></li>
-                <li className="flex items-center gap-2"><RecommendationBadge recommendation="CONDITIONAL MEET" /><span className="text-muted-foreground">50–64</span></li>
-                <li className="flex items-center gap-2"><RecommendationBadge recommendation="NO MEET" /><span className="text-muted-foreground">&lt;50</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="ADVANCE" /><span className="text-muted-foreground">≥75</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="CONDITIONAL ADVANCE" /><span className="text-muted-foreground">60–74</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="DEFER" /><span className="text-muted-foreground">40–59 or &lt;30% complete</span></li>
+                <li className="flex items-center gap-2"><RecommendationBadge recommendation="DECLINE" /><span className="text-muted-foreground">&lt;40 or Hard Floor</span></li>
               </ul>
             </div>
           </div>
