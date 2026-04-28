@@ -405,22 +405,41 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
   );
 }
 
-function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
+function SubScoresPanel({
+  sectionScore10,
+  synthesized = [],
+}: {
+  sectionScore10: number | null;
+  synthesized?: Array<{ key?: string; label?: string; score?: number; weight?: number; rationale?: string }>;
+}) {
+  const synthMap = new Map(synthesized.map((s) => [s.key, s]));
   return (
     <div className="space-y-2">
-      {SUB_SCORES.map((s) => (
-        <div key={s.key} className="grid grid-cols-[1fr_60px_60px_80px] items-center gap-3 text-xs py-1.5 border-b border-border/30 last:border-0">
-          <span className="text-foreground font-medium truncate">{s.label}</span>
-          <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
-          <span className="text-right tabular-nums text-muted-foreground">─</span>
-          <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
-            {SCORE_TIER_LABELS["insufficient_data"]}
-          </span>
-        </div>
-      ))}
+      {SUB_SCORES.map((s) => {
+        const synth = synthMap.get(s.key);
+        const score = synth?.score ?? null;
+        const tier = getSectionTier(score);
+        return (
+          <div key={s.key} className="grid grid-cols-[1fr_60px_60px_80px] items-center gap-3 text-xs py-1.5 border-b border-border/30 last:border-0">
+            <div className="min-w-0">
+              <p className="text-foreground font-medium truncate">{s.label}</p>
+              {synth?.rationale && (
+                <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">{synth.rationale}</p>
+              )}
+            </div>
+            <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
+            <span className="text-right tabular-nums text-foreground font-medium">
+              {score != null ? score.toFixed(1) : "─"}
+            </span>
+            <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+              {SCORE_TIER_LABELS[tier]}
+            </span>
+          </div>
+        );
+      })}
       <p className="text-[10px] italic text-muted-foreground pt-2">
-        Sub-score breakdown lands in Phase 4.3 (storage) + Phase 7.4 (synthesis).
-        Section score above ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the rolled-up dimension.
+        Section score ({sectionScore10 != null ? sectionScore10.toFixed(1) : "—"}/10) reflects the
+        weighted roll-up of the four sub-dimensions above.
       </p>
     </div>
   );
