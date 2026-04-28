@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { Upload, RefreshCw, Folder, AlertTriangle, FileText, ChevronDown } from "lucide-react";
+import { Upload, RefreshCw, Folder, AlertTriangle, FileText, ChevronDown, ArrowUpRight, MessageSquare } from "lucide-react";
+import { Link as RouterLink } from "react-router-dom";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
@@ -19,13 +20,15 @@ interface DataRoomTabProps {
   onRerunAnalysis: () => void;
   reportMarkdown?: string | null;
   submissionQuality?: Tables<"submission_quality">[];
+  interrogatoryItems?: Tables<"interrogatory_items">[];
 }
 
+// PRD v2.0 §3.10 — diligence-tier framing
 const PRIORITIES = [
-  { key: "critical", label: "P1 — Deal-Breaker", description: "Required for go/no-go decision" },
-  { key: "high", label: "P2 — Essential", description: "Significant diligence value" },
-  { key: "medium", label: "P3 — Supporting", description: "Required for final investment decision" },
-  { key: "standard", label: "P4 — Nice-to-Have", description: "Enhances confidence" },
+  { key: "critical", label: "P1 — Deal-Breaker", tier: "Triage Gate", description: "Required for go/no-go decision; absence triggers No-Meet" },
+  { key: "high", label: "P2 — Essential", tier: "Deep-Dive", description: "Significant diligence value; required to advance to L2" },
+  { key: "medium", label: "P3 — Supporting", tier: "IC Memo", description: "Required for final investment decision" },
+  { key: "standard", label: "P4 — Nice-to-Have", tier: "Confirmatory", description: "Enhances confidence; not blocking" },
 ];
 
 export function DataRoomTab({
@@ -36,6 +39,7 @@ export function DataRoomTab({
   onRefresh,
   onRerunAnalysis,
   submissionQuality = [],
+  interrogatoryItems = [],
 }: DataRoomTabProps) {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -78,11 +82,21 @@ export function DataRoomTab({
   // Critical missing docs (heuristic)
   const criticalMissing = items.filter((i) => i.priority === "critical" && !i.is_received);
 
+  // Cross-link helper: find a related interrogatory question by simple keyword match on doc name
+  const findRelatedQuestion = (docName: string) => {
+    if (!docName || !interrogatoryItems.length) return null;
+    const tokens = docName.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 4);
+    if (!tokens.length) return null;
+    return interrogatoryItems.find((q) =>
+      tokens.some((t) => q.question?.toLowerCase().includes(t) || q.category?.toLowerCase().includes(t))
+    ) ?? null;
+  };
+
   return (
     <div className="space-y-5">
       {/* Submission Quality Strip */}
       <BlurFade>
-        <SectionCard title="Submission Quality" subtitle="Material type · completeness · estimated response days" icon={<FileText className="h-4 w-4" />}>
+        <SectionCard title="Submission Quality" subtitle="Inherited from Overview · material type · completeness · est. response days" icon={<FileText className="h-4 w-4" />}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KpiTile label="Material Type" value={materialType} />
             <KpiTile label="Completeness Tier" value={completenessTier} />
@@ -94,18 +108,31 @@ export function DataRoomTab({
 
       {/* Critical Missing */}
       <BlurFade delay={0.04}>
-        <SectionCard title="Critical Missing Documents" subtitle="P1 items not yet received" icon={<AlertTriangle className="h-4 w-4" />} empty={criticalMissing.length === 0} emptyMessage="No P1 items missing — submission complete.">
+        <SectionCard title="Critical Missing Documents" subtitle="P1 deal-breaker items not yet received · cross-linked to diligence questions" icon={<AlertTriangle className="h-4 w-4" />} empty={criticalMissing.length === 0} emptyMessage="No P1 items missing — submission complete.">
           {criticalMissing.length > 0 && (
             <ul className="space-y-1.5">
-              {criticalMissing.map((d) => (
-                <li key={d.id} className="text-xs flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-severity-critical mt-1.5 shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">{d.document_name}</p>
-                    {d.purpose && <p className="text-[11px] text-muted-foreground">{d.purpose}</p>}
-                  </div>
-                </li>
-              ))}
+              {criticalMissing.map((d) => {
+                const related = findRelatedQuestion(d.document_name);
+                return (
+                  <li key={d.id} className="text-xs flex items-start gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-severity-critical mt-1.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground">{d.document_name}</p>
+                      {d.purpose && <p className="text-[11px] text-muted-foreground">{d.purpose}</p>}
+                      {related && (
+                        <RouterLink
+                          to={`/project/${projectId}?tab=interrogatory`}
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground"
+                        >
+                          <MessageSquare className="h-2.5 w-2.5" />
+                          Related question
+                          <ArrowUpRight className="h-2.5 w-2.5" />
+                        </RouterLink>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </SectionCard>
@@ -113,19 +140,25 @@ export function DataRoomTab({
 
       {/* Priority Checklist Accordions */}
       <BlurFade delay={0.06}>
-        <SectionCard title="Priority Checklist" subtitle="P1 · P2 · P3 · P4 accordion groups" icon={<Folder className="h-4 w-4" />}>
+        <SectionCard title="Diligence Tier Checklist" subtitle="P1 Triage · P2 Deep-Dive · P3 IC Memo · P4 Confirmatory" icon={<Folder className="h-4 w-4" />}>
           <div className="space-y-2">
             {PRIORITIES.map((p) => {
               const groupItems = items.filter((i) => i.priority === p.key);
+              const receivedCount = groupItems.filter((i) => i.is_received).length;
               return (
                 <Collapsible key={p.key} defaultOpen={p.key === "critical"}>
                   <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="text-left">
-                      <p className="text-xs font-bold uppercase tracking-wider text-foreground">{p.label}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold uppercase tracking-wider text-foreground">{p.label}</p>
+                        <span className="text-[9px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1 py-[1px]">
+                          {p.tier}
+                        </span>
+                      </div>
                       <p className="text-[10px] text-muted-foreground">{p.description}</p>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <span>{groupItems.length} items</span>
+                      <span className="tabular-nums">{receivedCount}/{groupItems.length} received</span>
                       <ChevronDown className="h-3.5 w-3.5" />
                     </div>
                   </CollapsibleTrigger>
@@ -134,18 +167,29 @@ export function DataRoomTab({
                       {groupItems.length === 0 ? (
                         <p className="text-xs italic text-muted-foreground">No items in this priority bucket at L1.</p>
                       ) : (
-                        groupItems.map((it) => (
-                          <div key={it.id} className="flex items-start gap-2 py-1 border-b border-border/40 last:border-0 text-xs">
-                            <input type="checkbox" defaultChecked={it.is_received} className="mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className={`font-medium ${it.is_received ? "line-through text-muted-foreground" : "text-foreground"}`}>{it.document_name}</p>
-                              {it.purpose && <p className="text-[10px] text-muted-foreground">{it.purpose}</p>}
+                        groupItems.map((it) => {
+                          const related = !it.is_received ? findRelatedQuestion(it.document_name) : null;
+                          return (
+                            <div key={it.id} className="flex items-start gap-2 py-1 border-b border-border/40 last:border-0 text-xs">
+                              <input type="checkbox" defaultChecked={it.is_received} className="mt-0.5 shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className={`font-medium ${it.is_received ? "line-through text-muted-foreground" : "text-foreground"}`}>{it.document_name}</p>
+                                {it.purpose && <p className="text-[10px] text-muted-foreground">{it.purpose}</p>}
+                                {related && (
+                                  <RouterLink
+                                    to={`/project/${projectId}?tab=interrogatory`}
+                                    className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground"
+                                  >
+                                    Diligence Q <ArrowUpRight className="h-2.5 w-2.5" />
+                                  </RouterLink>
+                                )}
+                              </div>
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+                                {it.is_received ? "Received" : "Requested"}
+                              </span>
                             </div>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
-                              {it.is_received ? "Received" : "Requested"}
-                            </span>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </CollapsibleContent>
