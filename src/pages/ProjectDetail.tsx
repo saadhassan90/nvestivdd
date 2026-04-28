@@ -14,6 +14,7 @@ import { TrackRecordTab } from "@/components/project/TrackRecordTab";
 import { InvestmentThesisTab } from "@/components/project/InvestmentThesisTab";
 import { MarketRealityTab } from "@/components/project/MarketRealityTab";
 import { EconomicsTab } from "@/components/project/EconomicsTab";
+import { RegulatoryOpsTab } from "@/components/project/RegulatoryOpsTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -294,7 +295,14 @@ export default function ProjectDetail() {
                   />
                 )}
                 {activeTab === "regulatory_ops" && (
-                  <ScorecardTab project={project} moduleScores={moduleScores} submissionQuality={submissionQuality} />
+                  <RegulatoryOpsTab
+                    project={project}
+                    moduleScoresData={moduleScores}
+                    submissionQuality={submissionQuality}
+                    serviceProviders={serviceProviders}
+                    interrogatoryItems={interrogatoryItems}
+                    redFlags={redFlags}
+                  />
                 )}
                 {activeTab === "red_flags" && (
                   <RedFlagsTab
