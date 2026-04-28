@@ -347,5 +347,6 @@ export default function ProjectDetail() {
 
       <MobileBottomNav />
     </div>
+    </MeetingModeProvider>
   );
 }
