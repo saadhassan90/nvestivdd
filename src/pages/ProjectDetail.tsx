@@ -11,7 +11,7 @@ import { DataRoomTab } from "@/components/project/DataRoomTab";
 import { SourceFilesTab } from "@/components/project/SourceFilesTab";
 import { TeamTab } from "@/components/project/TeamTab";
 import { PerformanceTab } from "@/components/project/PerformanceTab";
-import { StrategyTab } from "@/components/project/StrategyTab";
+import { InvestmentThesisTab } from "@/components/project/InvestmentThesisTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -260,13 +260,12 @@ export default function ProjectDetail() {
                   />
                 )}
                 {activeTab === "investment_thesis" && (
-                  <StrategyTab
+                  <InvestmentThesisTab
                     thesisValidations={thesisValidations}
-                    competitors={competitors}
                     marketFactors={marketFactors}
-                    fees={feeStructure}
-                    redFlags={redFlags}
+                    competitors={competitors}
                     interrogatoryItems={interrogatoryItems}
+                    moduleScoresData={moduleScores}
                     project={project}
                   />
                 )}
