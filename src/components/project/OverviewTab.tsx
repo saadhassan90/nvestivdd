@@ -1,4 +1,5 @@
-import { Building2, Layers, Sparkles, ClipboardList, ListChecks, AlertTriangle, CheckCircle2, HelpCircle } from "lucide-react";
+import { Building2, Layers, Sparkles, ClipboardList, ListChecks, AlertTriangle, CheckCircle2, HelpCircle, ArrowUpRight } from "lucide-react";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { KpiTile } from "@/components/project/primitives/KpiTile";
@@ -29,6 +30,7 @@ export function OverviewTab({
   submissionQuality = [],
   criticalInfoGaps = [],
 }: OverviewTabProps) {
+  const { id: projectId } = useParams<{ id: string }>();
   const composite = project.composite_score ?? null;
   const tier = tierFromScore(composite);
   const rec = recommendationFromScore(composite);
@@ -58,22 +60,61 @@ export function OverviewTab({
   const top3Risks = keyRisks.slice(0, 3);
   const dataGaps = (criticalInfoGaps || []).slice(0, 3);
 
-  // Fund snapshot — full 6-group restructure ships in Phase 3.10. Keep flat list for now.
-  const fundSnapshotRows = [
-    { label: "Fund Name", value: project.fund_name },
-    { label: "GP Entity", value: (project as any).gp_entity_name },
-    { label: "Asset Class", value: project.asset_class },
-    { label: "Strategy", value: project.strategy },
-    { label: "Vintage", value: project.vintage },
-    { label: "Inception", value: (project as any).fund_inception_date },
-    { label: "Domicile", value: (project as any).domicile },
-    { label: "Regulatory Status", value: (project as any).regulatory_status },
-    { label: "Fund Size (target)", value: (project as any).fund_size_estimated },
-    { label: "Document Type", value: project.document_type },
-    { label: "Established", value: (project as any).established_year },
-    { label: "Submitter", value: (project as any).submitter_name },
-    { label: "Submitter Org", value: (project as any).submitter_company },
-    { label: "Analysis Date", value: (project as any).analysis_date },
+  // PRD §3.1 — Fund Snapshot grouped into 6 buckets
+  const fundSnapshotGroups = [
+    {
+      key: "identity",
+      label: "Identity",
+      rows: [
+        { label: "Fund Name", value: project.fund_name },
+        { label: "GP Entity", value: (project as any).gp_entity_name },
+        { label: "Domicile", value: (project as any).domicile },
+        { label: "Regulatory Status", value: (project as any).regulatory_status },
+      ],
+    },
+    {
+      key: "scale",
+      label: "Scale",
+      rows: [
+        { label: "Fund Size (target)", value: (project as any).fund_size_estimated },
+        { label: "Asset Class", value: project.asset_class },
+      ],
+    },
+    {
+      key: "strategy",
+      label: "Strategy",
+      rows: [
+        { label: "Strategy", value: project.strategy },
+        { label: "Document Type", value: project.document_type },
+      ],
+    },
+    {
+      key: "lifecycle",
+      label: "Lifecycle",
+      rows: [
+        { label: "Vintage", value: project.vintage },
+        { label: "Inception", value: (project as any).fund_inception_date },
+        { label: "GP Established", value: (project as any).established_year },
+      ],
+    },
+    {
+      key: "submission",
+      label: "Submission",
+      rows: [
+        { label: "Submitter", value: (project as any).submitter_name },
+        { label: "Submitter Org", value: (project as any).submitter_company },
+        { label: "Analysis Date", value: (project as any).analysis_date },
+      ],
+    },
+    {
+      key: "economics",
+      label: "Economics",
+      rows: [
+        // Economics figures are surfaced in the dedicated tab; placeholder hint here
+        { label: "Fee Detail", value: null },
+        { label: "GP Commitment", value: null },
+      ],
+    },
   ];
 
   // PRD §3.1 — All Scores Summary table (5 dimensions + Reg & Ops separate)
@@ -207,14 +248,23 @@ export function OverviewTab({
         </SectionCard>
       </BlurFade>
 
-      {/* 5. FUND SNAPSHOT — flat list today; PRD §3.10 will regroup into 6 sections */}
+      {/* 5. FUND SNAPSHOT — 6 grouped sections per PRD §3.1 */}
       <BlurFade delay={0.1}>
         <SectionCard
           title="Fund Snapshot"
-          subtitle="Identity · Scale · Strategy · Economics · Lifecycle · Portfolio (Phase 3.10 will regroup)"
+          subtitle="Identity · Scale · Strategy · Lifecycle · Submission · Economics"
           icon={<Building2 className="h-4 w-4" />}
         >
-          <FieldValueGrid rows={fundSnapshotRows} columns={2} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            {fundSnapshotGroups.map((g) => (
+              <div key={g.key}>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-1 mb-2">
+                  {g.label}
+                </p>
+                <FieldValueGrid rows={g.rows} columns={1} />
+              </div>
+            ))}
+          </div>
         </SectionCard>
       </BlurFade>
 
@@ -227,7 +277,7 @@ export function OverviewTab({
           empty={dimensionScores.length === 0}
           emptyMessage="Dimension scores not yet populated."
         >
-          {dimensionScores.length > 0 && <ScoresSummaryTable rows={dimensionScores} />}
+          {dimensionScores.length > 0 && <ScoresSummaryTable rows={dimensionScores} projectId={projectId} />}
         </SectionCard>
       </BlurFade>
     </div>
