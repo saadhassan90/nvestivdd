@@ -19,6 +19,7 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
+import { MeetingModeProvider } from "@/contexts/MeetingModeContext";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -187,6 +188,7 @@ export default function ProjectDetail() {
   })();
 
   return (
+    <MeetingModeProvider dealId={project.id}>
     <div className="flex flex-col h-screen bg-background overflow-hidden">
       <ProjectTopBar project={project} isProcessing={isProcessing} />
 
@@ -345,5 +347,6 @@ export default function ProjectDetail() {
 
       <MobileBottomNav />
     </div>
+    </MeetingModeProvider>
   );
 }

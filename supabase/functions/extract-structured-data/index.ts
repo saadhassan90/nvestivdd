@@ -582,7 +582,7 @@ async function extractSectionSynthesis(markdown: string, projectId: string) {
       {
         role: "system",
         content:
-          "You are an institutional LP analyst. For each PRD dimension (investment_thesis, market_reality, team, track_record, economics), extract: (a) 3–5 institutional takeaways grounded in the report, and (b) 4 sub-scores out of 10 with rationale. Be terse, no marketing language.",
+          "You are an institutional LP analyst writing per-section L1 reads. For each PRD dimension (investment_thesis, market_reality, team, track_record, economics), produce a structured Section: (a) section_summary (≤320 chars institutional verdict), (b) 3–5 takeaways with text + supporting detail, (c) 4 sub-scores out of 10 with weight + rationale ≤200 chars, (d) confidence label (high/medium/low/insufficient_data). Be terse. Use 'Insufficient data' explicitly when evidence is missing — never fabricate.",
       },
       { role: "user", content: markdown.slice(0, 18000) },
     ],
@@ -599,6 +599,8 @@ async function extractSectionSynthesis(markdown: string, projectId: string) {
                 type: "object",
                 properties: {
                   dimension_key: { type: "string", enum: PRD_DIMENSIONS.map((d) => d.key) },
+                  section_summary: { type: "string" },
+                  confidence: { type: "string", enum: ["high", "medium", "low", "insufficient_data"] },
                   takeaways: {
                     type: "array",
                     items: {
@@ -654,15 +656,37 @@ async function extractSectionSynthesis(markdown: string, projectId: string) {
         row.module_label?.toLowerCase().includes(a),
       ),
     );
-    if (!match) continue;
+    if (match) {
+      await supabase
+        .from("module_scores")
+        .update({
+          takeaways: section.takeaways ?? [],
+          sub_scores: section.sub_scores ?? [],
+          summary_assessment: section.section_summary ?? null,
+          confidence: section.confidence ?? null,
+        })
+        .eq("id", match.id);
+    }
 
-    await supabase
-      .from("module_scores")
-      .update({
-        takeaways: section.takeaways ?? [],
-        sub_scores: section.sub_scores ?? [],
-      })
-      .eq("id", match.id);
+    // PRD §7.4 — also persist as structured report_sections row so the section
+    // can be re-run independently and the UI can pick the latest synthesis.
+    const sectionContent = JSON.stringify({
+      summary: section.section_summary ?? null,
+      takeaways: section.takeaways ?? [],
+      sub_scores: section.sub_scores ?? [],
+    });
+    await supabase.from("report_sections").upsert(
+      {
+        project_id: projectId,
+        section_key: dim.key,
+        section_title: dim.label,
+        module_key: dim.key,
+        content: sectionContent,
+        confidence: section.confidence ?? null,
+        order_index: PRD_DIMENSIONS.findIndex((d) => d.key === dim.key),
+      },
+      { onConflict: "project_id,section_key" } as any,
+    );
   }
 
   console.log(`Section synthesis emitted for ${data.sections.length} dimensions`);

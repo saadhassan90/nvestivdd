@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, Calendar, User, FileBadge, Link2 } from "lucide-react";
+import { ArrowLeft, Share2, Sparkles, Calendar, User, FileBadge, Link2, Video, VideoOff } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
+import { useMeetingMode } from "@/contexts/MeetingModeContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
 import {
@@ -58,6 +59,7 @@ function workingNamePills(fundName: string, gpEntity?: string | null): string[] 
 export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
+  const { enabled: meetingOn, toggle: toggleMeeting } = useMeetingMode();
   const [shareOpen, setShareOpen] = useState(false);
 
   const statusColor = getStatusColor(project.status);
@@ -107,6 +109,16 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
             <NotificationsDropdown />
+            <button
+              onClick={toggleMeeting}
+              className={`p-1.5 rounded-md transition-colors ${
+                meetingOn ? "bg-foreground text-background hover:opacity-90" : "hover:bg-muted text-muted-foreground"
+              }`}
+              title={meetingOn ? "Exit Meeting Mode" : "Enter Meeting Mode (+15% font, hide log/sources)"}
+              aria-pressed={meetingOn}
+            >
+              {meetingOn ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+            </button>
             <button
               onClick={() => setShareOpen(true)}
               className="p-1.5 rounded-md hover:bg-muted transition-colors"

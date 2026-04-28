@@ -262,8 +262,10 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
             const isActive = activeTab === item.key;
             // PRD §2.3 — divider between row 9 (Diligence Questions) and row 10 (Sources)
             const showDividerBefore = !isProcessing && item.key === "documents";
+            // PRD §7.1 — Meeting Mode hides Analysis Log + Sources rows
+            const meetingHide = item.key === "analysis_log" || item.key === "documents";
             return (
-              <div key={item.key}>
+              <div key={item.key} data-meeting-hide={meetingHide ? "true" : undefined}>
                 {showDividerBefore && <div className="my-2 h-px bg-border" />}
                 <button
                   onClick={() => onTabChange(item.key)}
