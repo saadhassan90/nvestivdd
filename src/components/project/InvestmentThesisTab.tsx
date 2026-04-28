@@ -2,6 +2,7 @@ import { Lightbulb, ListChecks, Target, MessageSquare } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { EsgValidationCard } from "@/components/project/typed/EsgValidationCard";
+import { CitationRefs } from "@/components/project/typed/CitationRefs";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -62,11 +63,17 @@ export function InvestmentThesisTab({
   const synthesized = (thesisModule?.takeaways as Array<{ text: string; detail?: string }> | undefined) ?? [];
   const takeaways =
     synthesized.length > 0
-      ? synthesized.map((t) => ({ text: t.text, detail: t.detail ?? null, status: null as string | null }))
+      ? synthesized.map((t: any) => ({
+          text: t.text,
+          detail: t.detail ?? null,
+          status: null as string | null,
+          citation_ids: (t.citation_ids ?? []) as string[],
+        }))
       : thesisValidations.slice(0, 5).map((tv) => ({
           text: tv.claim,
           detail: tv.validation_detail,
           status: tv.validation_status,
+          citation_ids: ((tv.citation_ids as string[] | null) ?? []) as string[],
         }));
 
   const synthSubScores = (thesisModule?.sub_scores as Array<any> | undefined) ?? [];
@@ -130,6 +137,11 @@ export function InvestmentThesisTab({
                     <p className="text-foreground font-medium leading-snug">{t.text}</p>
                     {t.detail && (
                       <p className="text-[11px] text-muted-foreground italic mt-0.5 leading-snug">{t.detail}</p>
+                    )}
+                    {t.citation_ids && t.citation_ids.length > 0 && (
+                      <div className="mt-1.5">
+                        <CitationRefs ids={t.citation_ids} sectionHint="Investment Thesis" />
+                      </div>
                     )}
                   </div>
                   {t.status && <ValidationStatus status={t.status} />}
