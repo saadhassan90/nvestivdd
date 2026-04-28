@@ -866,6 +866,7 @@ export type Database = {
           order_index: number | null
           project_id: string
           score: number
+          sub_scores: Json | null
           summary_assessment: string | null
           tier_label: string | null
           weight: number | null
@@ -880,6 +881,7 @@ export type Database = {
           order_index?: number | null
           project_id: string
           score?: number
+          sub_scores?: Json | null
           summary_assessment?: string | null
           tier_label?: string | null
           weight?: number | null
@@ -894,6 +896,7 @@ export type Database = {
           order_index?: number | null
           project_id?: string
           score?: number
+          sub_scores?: Json | null
           summary_assessment?: string | null
           tier_label?: string | null
           weight?: number | null
