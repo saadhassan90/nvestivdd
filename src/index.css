@@ -71,6 +71,14 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
   }
+
+  /* PRD §7.1 — Meeting Mode: +15% font scaling and a few visibility hides */
+  body.meeting-mode {
+    font-size: 115%;
+  }
+  body.meeting-mode [data-meeting-hide="true"] {
+    display: none !important;
+  }
 }
 
 @layer utilities {
