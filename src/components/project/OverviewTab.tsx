@@ -274,6 +274,7 @@ export function OverviewTab({
 
       {/* 6. ALL SCORES SUMMARY table */}
       <BlurFade delay={0.12}>
+        <div data-meeting-hide="true">
         <SectionCard
           title="All Scores Summary"
           subtitle="5-dimension rubric · Reg & Ops emits Pass/Conditional/Fail (excluded from composite)"
@@ -283,6 +284,7 @@ export function OverviewTab({
         >
           {dimensionScores.length > 0 && <ScoresSummaryTable rows={dimensionScores} projectId={projectId} />}
         </SectionCard>
+        </div>
       </BlurFade>
     </div>
   );
