@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { lookupBenchmark, describeMatchLevel, type BenchmarkRecord } from "@/lib/benchmarks";
 import { SectorExposureChart } from "@/components/project/typed/SectorExposureChart";
 import { GeographyMap } from "@/components/project/typed/GeographyMap";
+import { CitationRefs } from "@/components/project/typed/CitationRefs";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -242,6 +243,11 @@ export function MarketRealityTab({
                     {t.description && (
                       <p className="text-[11px] text-muted-foreground italic mt-0.5 leading-snug">{t.description}</p>
                     )}
+                    {Array.isArray((t as any).citation_ids) && (t as any).citation_ids.length > 0 && (
+                      <div className="mt-1.5">
+                        <CitationRefs ids={(t as any).citation_ids as string[]} sectionHint="Market Reality" />
+                      </div>
+                    )}
                   </div>
                   {t.factor_type && (
                     <span className="ml-auto shrink-0 inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
@@ -367,6 +373,7 @@ type ClaimRow = {
   source: string | null;
   benchmark: string | null;
   deviation: DeviationFlag;
+  citation_ids?: string[];
 };
 
 function buildClaimVsMarket(
@@ -395,6 +402,7 @@ function buildClaimVsMarket(
       source: v.claim_source,
       benchmark: benchmark?.supporting_data || benchmark?.description || null,
       deviation,
+      citation_ids: ((v.citation_ids as string[] | null) ?? []) as string[],
     };
   });
 }
@@ -417,6 +425,11 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
                 <p className="text-foreground font-medium leading-snug">{r.claim}</p>
                 {r.source && (
                   <p className="text-[10px] text-muted-foreground italic mt-0.5">Source: {r.source}</p>
+                )}
+                {r.citation_ids && r.citation_ids.length > 0 && (
+                  <div className="mt-1.5">
+                    <CitationRefs ids={r.citation_ids} sectionHint="Market Reality" />
+                  </div>
                 )}
               </td>
               <td className="py-2.5 pr-3 text-muted-foreground">

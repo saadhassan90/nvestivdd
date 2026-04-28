@@ -2,6 +2,7 @@ import { TrendingUp, ListChecks, BarChart3, MessageSquare, Sprout, Table } from 
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { KpiTile } from "@/components/project/primitives/KpiTile";
+import { CitationRefs } from "@/components/project/typed/CitationRefs";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -358,6 +359,21 @@ function TrackRecordTable({ metrics }: { metrics: Tables<"performance_metrics">[
         Extended fields (PIC, max sub-line duration days) populate as the Phase 7.4 synthesis pipeline emits them.
         Empty cells render as ─ rather than blanks.
       </p>
+      {(() => {
+        const ids = Array.from(
+          new Set(
+            metrics
+              .flatMap((m) => ((m.citation_ids as string[] | null) ?? []) as string[])
+              .filter(Boolean),
+          ),
+        );
+        if (ids.length === 0) return null;
+        return (
+          <div className="pt-2 border-t border-border/40 mt-2">
+            <CitationRefs ids={ids} sectionHint="Track Record" />
+          </div>
+        );
+      })()}
     </div>
   );
 }
