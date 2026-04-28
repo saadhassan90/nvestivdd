@@ -1,29 +1,87 @@
-export function getScoreTier(score: number | null): 'strong_advance' | 'advance' | 'review' | 'decline' {
-  if (!score) return 'decline';
-  if (score >= 85) return 'strong_advance';
-  if (score >= 70) return 'advance';
-  if (score >= 50) return 'review';
-  return 'decline';
+/**
+ * L1 PRD v2.0 — six-tier composite score scheme (1–100):
+ *   Exceptional       90–100
+ *   Strong            75–89
+ *   Adequate          60–74
+ *   Below Average     40–59
+ *   Concerning         1–39
+ *   Insufficient Data  null / 0
+ */
+export type ScoreTier =
+  | 'exceptional'
+  | 'strong'
+  | 'adequate'
+  | 'below_average'
+  | 'concerning'
+  | 'insufficient_data';
+
+export const SCORE_TIER_LABELS: Record<ScoreTier, string> = {
+  exceptional: 'Exceptional',
+  strong: 'Strong',
+  adequate: 'Adequate',
+  below_average: 'Below Average',
+  concerning: 'Concerning',
+  insufficient_data: 'Insufficient Data',
+};
+
+export function getScoreTier(score: number | null | undefined): ScoreTier {
+  if (score == null || score <= 0) return 'insufficient_data';
+  if (score >= 90) return 'exceptional';
+  if (score >= 75) return 'strong';
+  if (score >= 60) return 'adequate';
+  if (score >= 40) return 'below_average';
+  return 'concerning';
 }
 
-export function getScoreColor(tier: string | null): string {
+/** Section-level scores are 1–10. */
+export function getSectionTier(score: number | null | undefined): ScoreTier {
+  if (score == null || score <= 0) return 'insufficient_data';
+  if (score >= 9) return 'exceptional';
+  if (score >= 7.5) return 'strong';
+  if (score >= 6) return 'adequate';
+  if (score >= 4) return 'below_average';
+  return 'concerning';
+}
+
+/** Returns a Tailwind text-* class for a tier. */
+export function getTierTextClass(tier: ScoreTier): string {
   switch (tier) {
-    case 'strong_advance': return 'score-strong';
-    case 'advance': return 'score-advance';
-    case 'review': return 'score-review';
-    case 'decline': return 'score-decline';
-    default: return 'muted-foreground';
+    case 'exceptional': return 'text-score-strong';
+    case 'strong': return 'text-score-strong';
+    case 'adequate': return 'text-score-advance';
+    case 'below_average': return 'text-score-review';
+    case 'concerning': return 'text-severity-critical';
+    case 'insufficient_data': return 'text-muted-foreground';
   }
+}
+
+/** Returns the border color class for a tier (used by ScoreBadge). */
+export function getTierBorderClass(tier: ScoreTier): string {
+  switch (tier) {
+    case 'exceptional': return 'border-score-strong';
+    case 'strong': return 'border-score-strong';
+    case 'adequate': return 'border-score-advance';
+    case 'below_average': return 'border-score-review';
+    case 'concerning': return 'border-severity-critical';
+    case 'insufficient_data': return 'border-border';
+  }
+}
+
+/**
+ * @deprecated kept as a thin shim for legacy callers; returns the tier text class.
+ */
+export function getScoreColor(tier: string | null): string {
+  return getTierTextClass((tier as ScoreTier) ?? 'insufficient_data').replace('text-', '');
 }
 
 export function getRecommendationLabel(rec: string | null): string {
-  switch (rec) {
-    case 'Strong Advance': return 'STRONG ADVANCE';
-    case 'Advance with Diligence': return 'ADVANCE';
-    case 'Review Required': return 'REVIEW';
-    case 'Decline': return 'DECLINE';
-    default: return rec?.toUpperCase() || 'N/A';
-  }
+  if (!rec) return 'N/A';
+  const r = rec.toLowerCase();
+  if (r.includes('decline')) return 'DECLINE';
+  if (r.includes('conditional')) return 'CONDITIONAL ADVANCE';
+  if (r.includes('defer') || r.includes('review') || r.includes('pass')) return 'DEFER';
+  if (r.includes('advance') || r.includes('pursue') || r.includes('meet')) return 'ADVANCE';
+  return rec.toUpperCase();
 }
 
 export function getSeverityColor(severity: string): string {

@@ -108,16 +108,7 @@ export default function Dashboard() {
       result = result.filter((p) => p.asset_class === filters.assetClass);
     }
     if (filters.scoreTier) {
-      result = result.filter((p) => {
-        const s = p.composite_score || 0;
-        switch (filters.scoreTier) {
-          case "85+": return s >= 85;
-          case "70-84": return s >= 70 && s < 85;
-          case "50-69": return s >= 50 && s < 70;
-          case "<50": return s < 50;
-          default: return true;
-        }
-      });
+      result = result.filter((p) => getScoreTier(p.composite_score) === filters.scoreTier);
     }
     if (filters.recommendation) {
       result = result.filter((p) => {

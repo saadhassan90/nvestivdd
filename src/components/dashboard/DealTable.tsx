@@ -318,7 +318,10 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
         {projects.map((project) => {
           const processing = isProcessing(project.status);
           const verdict = getVerdict(project.composite_score, project.status);
-          const verdictLabel = verdict === "pending" ? `STATUS: ${getStatusLabel(project.status).toUpperCase()}` : `VERDICT: ${verdict === "proceed" ? "PASS" : verdict === "conditional" ? "PARTIAL" : "FAILED"}`;
+          const verdictLabel =
+            verdict === "pending"
+              ? `STATUS: ${getStatusLabel(project.status).toUpperCase()}`
+              : `VERDICT: ${getVerdictLabel(verdict).toUpperCase()}`;
           const statusLabel = processing ? getStatusLabel(project.status) : project.status === "complete" ? "Under Review" : getStatusLabel(project.status);
           const statusColor = getStatusColor(project.status);
           const stage = getStage(project);

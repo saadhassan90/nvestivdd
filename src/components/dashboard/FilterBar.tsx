@@ -25,16 +25,19 @@ interface FilterBarProps {
 }
 
 const SCORE_TIERS = [
-  { value: "85+", label: "85+" },
-  { value: "70-84", label: "70–84" },
-  { value: "50-69", label: "50–69" },
-  { value: "<50", label: "Below 50" },
+  { value: "exceptional", label: "Exceptional (90–100)" },
+  { value: "strong", label: "Strong (75–89)" },
+  { value: "adequate", label: "Adequate (60–74)" },
+  { value: "below_average", label: "Below Average (40–59)" },
+  { value: "concerning", label: "Concerning (1–39)" },
+  { value: "insufficient_data", label: "Insufficient Data" },
 ];
 
 const VERDICTS = [
-  { value: "proceed", label: "Proceed to meeting" },
-  { value: "conditional", label: "Proceed with caution" },
-  { value: "hard_floor", label: "Hard floor triggered" },
+  { value: "advance", label: "Advance" },
+  { value: "conditional_advance", label: "Conditional Advance" },
+  { value: "defer", label: "Defer" },
+  { value: "decline", label: "Decline" },
 ];
 
 const STATUSES = [

@@ -1,7 +1,7 @@
 import { MagicCard } from "@/components/magicui/MagicCard";
 import { NumberTicker } from "@/components/magicui/NumberTicker";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { FolderOpen, CheckCircle2, RefreshCw, AlertCircle } from "lucide-react";
+import { FolderOpen, CheckCircle2, RefreshCw, AlertCircle, Gauge } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface AnalyticsCardsProps {
@@ -17,17 +17,32 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
   ).length;
   const failed = projects.filter(p => p.status === "failed").length;
 
+  // L1 PRD §6.5 — average completeness across completed deals (null-safe).
+  const completenessSamples = projects
+    .map((p) => (p as { completeness_pct?: number | null }).completeness_pct)
+    .filter((v): v is number => typeof v === "number");
+  const avgCompleteness = completenessSamples.length
+    ? Math.round(completenessSamples.reduce((a, b) => a + b, 0) / completenessSamples.length)
+    : null;
+
   const cards = [
     { label: "Total Funds", value: total, icon: FolderOpen, iconColor: "text-muted-foreground" },
     { label: "Completed", value: completed, icon: CheckCircle2, iconColor: "text-score-strong" },
     { label: "Processing", value: processing, icon: RefreshCw, iconColor: "text-severity-monitor" },
     { label: "Failed", value: failed, icon: AlertCircle, iconColor: "text-severity-critical" },
+    {
+      label: "Avg Confidence",
+      value: avgCompleteness ?? 0,
+      suffix: avgCompleteness == null ? "—" : "%",
+      icon: Gauge,
+      iconColor: "text-severity-monitor",
+    },
   ];
 
   return (
     <>
       {/* Desktop */}
-      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map((card, i) => (
           <BlurFade key={card.label} delay={i * 0.08}>
             <MagicCard>
@@ -37,7 +52,16 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
                     {card.label}
                   </p>
                   <span className="mt-2 block text-3xl font-bold text-foreground">
-                    <NumberTicker value={card.value} />
+                    {(card as { suffix?: string }).suffix === "—" ? (
+                      "—"
+                    ) : (
+                      <>
+                        <NumberTicker value={card.value} />
+                        {(card as { suffix?: string }).suffix === "%" && (
+                          <span className="text-lg ml-0.5">%</span>
+                        )}
+                      </>
+                    )}
                   </span>
                 </div>
                 <card.icon className={`h-5 w-5 ${card.iconColor}`} />
@@ -57,7 +81,9 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
               </p>
               <div className="flex items-baseline gap-1.5 mt-1">
                 <span className="text-lg font-bold text-foreground leading-none">
-                  {card.value}
+                  {(card as { suffix?: string }).suffix === "—"
+                    ? "—"
+                    : `${card.value}${(card as { suffix?: string }).suffix ?? ""}`}
                 </span>
               </div>
             </div>
