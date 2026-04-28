@@ -50,7 +50,15 @@ export default function ProjectDetail() {
   const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
 
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
+  // PRD v2.0 §2.1 — old → new slug redirects
+  const TAB_REDIRECTS: Record<string, string> = {
+    scorecard: "overview",      // Phase 4 will eliminate; for now route to Overview
+    strategy: "investment_thesis",
+    performance: "track_record",
+  };
+  const initialTabRaw = searchParams.get("tab") || "overview";
+  const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
 
   const isProcessing = project ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status) : false;
