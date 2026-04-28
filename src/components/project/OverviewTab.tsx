@@ -126,7 +126,17 @@ export function OverviewTab({
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <KpiTile label="Composite" value={composite != null ? `${composite}/100` : null} />
-            <KpiTile label="Recommendation" value={rec ?? null} tone={rec === "MEET" ? "good" : rec === "NO MEET" ? "bad" : "warn"} />
+            <KpiTile
+              label="Recommendation"
+              value={rec ?? null}
+              tone={
+                rec === "ADVANCE"
+                  ? "good"
+                  : rec === "DECLINE"
+                    ? "bad"
+                    : "warn"
+              }
+            />
             <KpiTile label="Hard Floor" value={hardFloorTriggered ? "TRIGGERED" : "Pass"} tone={hardFloorTriggered ? "bad" : "good"} />
             <KpiTile label="Critical Flags" value={criticalCount} tone={criticalCount > 0 ? "bad" : "good"} />
             <KpiTile label="Completeness" value={completeness != null ? `${completeness}%` : null} />
