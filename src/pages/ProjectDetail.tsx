@@ -13,6 +13,7 @@ import { TeamTab } from "@/components/project/TeamTab";
 import { TrackRecordTab } from "@/components/project/TrackRecordTab";
 import { InvestmentThesisTab } from "@/components/project/InvestmentThesisTab";
 import { MarketRealityTab } from "@/components/project/MarketRealityTab";
+import { EconomicsTab } from "@/components/project/EconomicsTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -284,12 +285,13 @@ export default function ProjectDetail() {
                   />
                 )}
                 {activeTab === "economics" && (
-                  <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
-                    <p className="text-sm font-medium text-foreground mb-1">Economics</p>
-                    <p className="text-xs text-muted-foreground">
-                      Dedicated fee benchmark tab lands in Phase 3. Fee structure currently shown under Track Record.
-                    </p>
-                  </div>
+                  <EconomicsTab
+                    fees={feeStructure}
+                    redFlags={redFlags}
+                    interrogatoryItems={interrogatoryItems}
+                    moduleScoresData={moduleScores}
+                    project={project}
+                  />
                 )}
                 {activeTab === "regulatory_ops" && (
                   <ScorecardTab project={project} moduleScores={moduleScores} submissionQuality={submissionQuality} />
