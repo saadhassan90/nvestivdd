@@ -1,86 +1,76 @@
+## Goal
 
+Generate a comprehensive Product Requirements Document (PRD) describing the **Nvestiv Institutional Archive** platform in writing, with detailed sections covering each tab, sub-section, and component.
 
-## Plan: L3 IC Memo workspace (revised — no left rail)
+## Format
 
-Drop the left stage rail. The IC memo page becomes a clean **2-column layout**: BlockNote canvas on the left, always-on Iris chat on the right. Stage switching moves into the top bar.
+Deliver as **two artifact files** in `/mnt/documents/`:
+1. `Nvestiv_Platform_PRD.md` — fully formatted markdown source
+2. `Nvestiv_Platform_PRD.docx` — Word document version (so the user can edit/share)
 
-### Layout
+## PRD Structure (sections)
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ ProjectTopBar  …  [Stage ▾ L3 — IC Memo]  [Back to Reports] │
-├────────────────────────────────────┬─────────────────────────┤
-│ Canvas (BlockNote)                 │ Iris chat (always on)   │
-│  • IC Memo title                   │                         │
-│  • Sections seeded from L1         │ Project-scoped, with    │
-│  • Inline editing                  │ memo context + tools    │
-│                                    │                         │
-│ flex-1, max-w-[820px] centered     │ 420px                   │
-└────────────────────────────────────┴─────────────────────────┘
-```
+1. **Executive Summary** — what the platform does, who it's for (LP allocators / IC analysts), the L1 → L2 → L3 diligence pipeline.
+2. **Platform Architecture Overview**
+   - React 18 + Vite + Tailwind frontend
+   - Lovable Cloud (Supabase) backend: 28 tables, RLS, realtime, pgvector knowledge graph, edge functions
+   - AI: Lovable AI Gateway (tiered Gemini / GPT-5 models), Gemini API for chat + memo editing
+3. **Top-Level Navigation**
+   - Dashboard, Project Detail, IC Memo workspace, Notifications, global Ask Iris drawer
+4. **Dashboard Page** (`/dashboard`)
+   - Top bar: logo, Command-K search, notifications, Ask Iris pill
+   - Analytics cards (totals, processing, flag counts, score distribution)
+   - Filter bar (asset class, score tier, recommendation, status, stage, search, sort)
+   - Deal table (high-density rows, sortable columns, pagination, flag indicators, recommendation pills, score badges)
+   - New Deal modal (file upload submission flow)
+   - Empty state, mobile FAB, mobile bottom nav
+5. **Project Detail Page** (`/project/:id`) — Stage L1 "Triage"
+   - Top bar with stage dropdown (L1 active, L2 locked, L3 IC Memo)
+   - Left sidebar: report-level switcher + 10 nav items
+   - Right Insights/Iris chat panel
+   - Hard-floor banner (global)
+   - Per-tab deep-dive sections:
+     - **Overview** — Hero verdict snapshot, Abstract, Findings Overview, Fund Snapshot (14-row), Source Materials, Cross-reference
+     - **Scorecard** — Composite Score, Hard Floor Gates, 5-Dimension Rubric, Verdict & Recommendation, Meeting Conditions, Score Tier Thresholds
+     - **Team** — Sponsor Entities, Person Cards, Service Providers, Network & Affiliations, Team Flags, Team Interrogatory (A-series)
+     - **Strategy** — Investment Thesis, Portfolio Construction, Target Company Profile, Term Structure, Economics, Target Returns, Fee Benchmark, Strategy Flags, Strategy Interrogatory (C-series)
+     - **Performance** — Headline Metrics, Scale & Count, In-Strategy Breakdown, Multiple Expansion, Securitizations/Placements, Investor Verification, Performance/Scale, Reconciliation Note, Benchmarks, Performance Flags
+     - **Risk (Red Flags)** — Severity Summary, Critical/Elevated/Monitor flags, Hard Floor Gate Detail, Discrepancies Found, Regulatory & Litigation, Carry-forward Risk
+     - **Interrogatory Matrix** — Question Counts, Filters, Questions Table (editable 0–3 GP score), Scoring Guidance, per-dimension view
+     - **Sources** — A–G citation taxonomy, Disambiguation, Confidence Legend, Negative-Results Ledger
+     - **Analysis Log** — 13-node real-time progress, timer, banners
+     - **Dataroom** — Submission Quality, Critical Missing Documents, Priority Checklist (P1–P4), Completeness Verification, Actions
+6. **IC Memo Workspace** (`/project/:id/memo`) — Stage L3
+   - Top bar with Stage Dropdown + "Back to Reports"
+   - BlockNote editor (Notion-style): h1–h5, body, dividers, tables, code blocks, images, weblinks, file uploads, slash menu, Cmd-Z undo
+   - Memo toolbar: fund name, save state, last-saved-at, reset to template
+   - Embedded Iris chat (always-on co-author, 420px right column)
+   - Persistence: `ic_memos` table (content_json, content_markdown, version)
+   - Seed-from-L1 skeleton (12 H2 sections, missing data → `_[NOT YET DRAFTED]_`)
+7. **Iris AI Chat (Ask Iris)**
+   - Global drawer + embedded memo variant
+   - Project-scoped retrieval, conversation history, knowledge-graph + embeddings RAG
+   - Tiered model selection
+   - Notion-style markdown rendering, institutional tone
+8. **Backend / Data Schema** — table inventory grouped by domain (Project core, Scoring, Team, Performance, Strategy, Risk, Documents, Knowledge Graph, Chat, IC Memo, Pipeline, Queue)
+9. **AI & Analysis Pipeline**
+   - Webhook dispatch + receive
+   - Task queue with retry, cron safety net
+   - Phase-level caching
+   - Knowledge graph build (Fund / Domain / Entity 3-tier with pgvector HNSW)
+   - 13-step real-time progress stream via Supabase Realtime
+10. **Notifications**
+11. **Search (Command-K)**
+12. **Mobile / Responsive Behavior**
+13. **Security & RLS Posture**
+14. **Glossary** — L1/L2/L3, hard floor, severity tiers, citation categories, GP response score, etc.
 
-### Top bar changes (memo page only)
+## Deliverables
 
-`ProjectTopBar` gets a `mode` prop. When `mode="memo"`:
+Two files in `/mnt/documents/`:
+- `Nvestiv_Platform_PRD.md`
+- `Nvestiv_Platform_PRD.docx`
 
-- **Replace the "Ask Iris" pill** with a **Stage dropdown** showing the current stage ("L3 — IC Memo") and a chevron. Menu items:
-  - L1 — Triage Report → navigates to `/project/:id?tab=overview`
-  - L2 — Deep Dive → disabled, "Locked" tag
-  - L3 — IC Memo → current, checkmark
-- Add a secondary **"Back to Reports"** ghost button to the left of the dropdown for one-click return to L1.
-- Cover Block (composite/recommendation/tier pills) stays — useful context while drafting.
-- Share + Notifications buttons stay.
+Both will be emitted as `<lov-artifact>` tags so the user can preview and download. The DOCX will use the docx-js skill (US Letter, Arial, proper headings/lists/tables) and will be QA'd by converting to images.
 
-On the L1 tabs page nothing changes (Ask Iris pill stays).
-
-### Routing & navigation
-
-- New route `/project/:id/memo` renders `IcMemoPage`.
-- `ProjectSidebar` Report picker: clicking **L3** navigates to `/project/:id/memo`. L1 stays on tabs page. L2 still locked.
-- `AppLayout` suppresses the global Iris drawer on `/project/*/memo` since the page hosts its own embedded chat.
-
-### Canvas (BlockNote)
-
-- Deps: `@blocknote/core`, `@blocknote/react`, `@blocknote/mantine`.
-- `IcMemoCanvas` wraps `useCreateBlockNote` + `<BlockNoteView />` themed to our HSL tokens (monochrome cool-gray).
-- **Seeded skeleton** when no memo exists yet, derived from L1 data — same skeleton-first rule as the report:
-  H1 `{fund_name} — Investment Committee Memo`, then H2 sections: Recommendation · Executive Summary · Fund Overview · Team & Governance · Strategy · Performance & Track Record · Fees & Terms · Risks & Mitigants · Diligence Status · Conditions for Advancement · Appendix. Each seeded with a paragraph from matching L1 fields or a muted `[NOT YET DRAFTED]` block.
-- Small toolbar above canvas: "Saved · 2s ago" indicator, Export menu (download Markdown / copy), "Reset to template" (with confirm).
-
-### Persistence
-
-- New `ic_memos` table: `id`, `project_id` (unique), `content_json` (jsonb BlockNote doc), `content_markdown` (text), `version` (int), `updated_at`. Public RLS matching the rest of the app.
-- Load → fetch row; if absent, generate seeded skeleton and insert.
-- Edit → debounced (1.5s) upsert of `content_json` + regenerated `content_markdown` via BlockNote's `blocksToMarkdownLossy`.
-- Realtime subscription so chat-driven edits appear in the editor live.
-
-### Iris chat (embedded, agentic)
-
-- Reuse `ChatProvider` / `useChatContext`. On mount, page calls `setProjectScope({ id, name })` so messages are scoped to this fund.
-- New `EmbeddedIrisChat` renders the same UI as `ChatSidebar` (history, model picker, suggested prompts, bubbles, input) but mounted inside the right column instead of as a fixed drawer. Header omits the close button since it's permanent here.
-- Send requests include optional `memo_id`. `chat-completion` edge function:
-  - When `memo_id` is present, injects current `content_markdown` into the system prompt: "You are co-authoring an IC memo for {fund_name}…"
-  - Registers two new tools:
-    - `propose_memo_edit({ section_heading, new_markdown, mode: "replace" | "append" | "insert_after" })` → returns a diff preview to the client.
-    - `apply_memo_edit({ edit_id })` → server applies edit to `ic_memos` (markdown → blocks via `tryParseMarkdownToBlocks`) and broadcasts via realtime.
-- Client renders proposed edits as compact diff cards inside chat bubbles with **Apply** / **Discard** buttons. Apply round-trips and the canvas updates from the realtime sub.
-- Suggested prompts (memo scope): "Tighten the executive summary", "Draft the recommendation paragraph", "Pull the fee table into Fees & Terms", "Add mitigants column to Risks".
-
-### Mobile (< lg)
-
-Top bar stage dropdown stays. Canvas full-width; chat collapses into a bottom-docked drawer toggle.
-
-### Memory updates
-
-- New `mem://features/ic-memo-workspace.md` documenting: route, 2-column layout, top-bar stage dropdown (no left rail), BlockNote choice, `ic_memos` schema, seed-from-L1 rule, agentic edit tool contract.
-- Index gets one new line under Memories.
-
----
-
-### Technical notes
-
-- **Files added**: `src/pages/IcMemoPage.tsx`, `src/components/memo/IcMemoCanvas.tsx`, `src/components/memo/MemoToolbar.tsx`, `src/components/memo/EmbeddedIrisChat.tsx`, `src/components/memo/StageDropdown.tsx`, `src/lib/ic-memo-template.ts`, `src/hooks/use-ic-memo.ts`.
-- **Files edited**: `src/App.tsx` (new route), `src/components/project/ProjectTopBar.tsx` (add `mode` prop; swap Ask Iris for StageDropdown + Back to Reports when `mode="memo"`), `src/components/project/ProjectSidebar.tsx` (L3 navigates instead of local state), `src/components/layout/AppLayout.tsx` (suppress global drawer on memo route), `src/contexts/ChatContext.tsx` (accept optional `memoId` per send), `supabase/functions/chat-completion/index.ts` (memo context + 2 tools).
-- **DB**: one migration creating `ic_memos` table with public RLS + realtime publication.
-- **Out of scope**: PDF export, multi-user presence/cursors, version history UI (column reserved), L2 page.
-
+No code changes to the application itself.
