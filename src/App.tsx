@@ -10,6 +10,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import IcMemoPage from "./pages/IcMemoPage";
+import CommentsPage from "./pages/CommentsPage";
 
 const queryClient = new QueryClient();
 
