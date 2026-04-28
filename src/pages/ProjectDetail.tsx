@@ -10,7 +10,7 @@ import { InterrogatoryTab } from "@/components/project/InterrogatoryTab";
 import { DataRoomTab } from "@/components/project/DataRoomTab";
 import { SourceFilesTab } from "@/components/project/SourceFilesTab";
 import { TeamTab } from "@/components/project/TeamTab";
-import { PerformanceTab } from "@/components/project/PerformanceTab";
+import { TrackRecordTab } from "@/components/project/TrackRecordTab";
 import { InvestmentThesisTab } from "@/components/project/InvestmentThesisTab";
 import { MarketRealityTab } from "@/components/project/MarketRealityTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
@@ -249,15 +249,18 @@ export default function ProjectDetail() {
                     redFlags={redFlags}
                     interrogatoryItems={interrogatoryItems}
                     gpEntityName={project.gp_entity_name}
+                    moduleScoresData={moduleScores}
                   />
                 )}
                 {activeTab === "track_record" && (
-                  <PerformanceTab
+                  <TrackRecordTab
                     metrics={performanceMetrics}
                     fees={feeStructure}
                     engagementCaseStudies={engagementCaseStudies}
                     redFlags={redFlags}
                     interrogatoryItems={interrogatoryItems}
+                    moduleScoresData={moduleScores}
+                    project={project}
                   />
                 )}
                 {activeTab === "investment_thesis" && (
