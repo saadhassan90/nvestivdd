@@ -526,6 +526,92 @@ export type Database = {
           },
         ]
       }
+      hard_floor_evaluations: {
+        Row: {
+          created_at: string
+          evidence_text: string | null
+          floor_id: string
+          id: string
+          override_at: string | null
+          override_author: string | null
+          override_reason: string | null
+          override_state: string
+          project_id: string
+          source_refs: Json | null
+          status: string
+          triggered_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_text?: string | null
+          floor_id: string
+          id?: string
+          override_at?: string | null
+          override_author?: string | null
+          override_reason?: string | null
+          override_state?: string
+          project_id: string
+          source_refs?: Json | null
+          status?: string
+          triggered_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          evidence_text?: string | null
+          floor_id?: string
+          id?: string
+          override_at?: string | null
+          override_author?: string | null
+          override_reason?: string | null
+          override_state?: string
+          project_id?: string
+          source_refs?: Json | null
+          status?: string
+          triggered_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hard_floor_evaluations_floor_id_fkey"
+            columns: ["floor_id"]
+            isOneToOne: false
+            referencedRelation: "hard_floors"
+            referencedColumns: ["floor_id"]
+          },
+        ]
+      }
+      hard_floors: {
+        Row: {
+          active: boolean
+          asset_class: string
+          created_at: string
+          display_order: number
+          floor_id: string
+          title: string
+          trigger_description: string
+        }
+        Insert: {
+          active?: boolean
+          asset_class?: string
+          created_at?: string
+          display_order: number
+          floor_id: string
+          title: string
+          trigger_description: string
+        }
+        Update: {
+          active?: boolean
+          asset_class?: string
+          created_at?: string
+          display_order?: number
+          floor_id?: string
+          title?: string
+          trigger_description?: string
+        }
+        Relationships: []
+      }
       ic_memos: {
         Row: {
           content_json: Json
@@ -781,6 +867,7 @@ export type Database = {
           project_id: string
           score: number
           summary_assessment: string | null
+          tier_label: string | null
           weight: number | null
           weighted_score: number | null
         }
@@ -794,6 +881,7 @@ export type Database = {
           project_id: string
           score?: number
           summary_assessment?: string | null
+          tier_label?: string | null
           weight?: number | null
           weighted_score?: number | null
         }
@@ -807,6 +895,7 @@ export type Database = {
           project_id?: string
           score?: number
           summary_assessment?: string | null
+          tier_label?: string | null
           weight?: number | null
           weighted_score?: number | null
         }
@@ -921,9 +1010,12 @@ export type Database = {
         Row: {
           analysis_date: string | null
           asset_class: string | null
+          completeness_pct: number | null
           completeness_score: number | null
           composite_score: number | null
           conditions_for_advancement: Json | null
+          confidence_reason: string | null
+          confidence_tier: string | null
           created_at: string
           document_type: string | null
           domicile: string | null
@@ -941,10 +1033,12 @@ export type Database = {
           market_validation_points: Json | null
           module_scores: Json | null
           recommendation: string | null
+          recommendation_v2: string | null
           recommended_timeline: string | null
           regulatory_status: string | null
           report_markdown: string | null
           score_tier: string | null
+          score_tier_v2: string | null
           status: string
           strategy: string | null
           submitter_company: string | null
@@ -956,9 +1050,12 @@ export type Database = {
         Insert: {
           analysis_date?: string | null
           asset_class?: string | null
+          completeness_pct?: number | null
           completeness_score?: number | null
           composite_score?: number | null
           conditions_for_advancement?: Json | null
+          confidence_reason?: string | null
+          confidence_tier?: string | null
           created_at?: string
           document_type?: string | null
           domicile?: string | null
@@ -976,10 +1073,12 @@ export type Database = {
           market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
+          recommendation_v2?: string | null
           recommended_timeline?: string | null
           regulatory_status?: string | null
           report_markdown?: string | null
           score_tier?: string | null
+          score_tier_v2?: string | null
           status?: string
           strategy?: string | null
           submitter_company?: string | null
@@ -991,9 +1090,12 @@ export type Database = {
         Update: {
           analysis_date?: string | null
           asset_class?: string | null
+          completeness_pct?: number | null
           completeness_score?: number | null
           composite_score?: number | null
           conditions_for_advancement?: Json | null
+          confidence_reason?: string | null
+          confidence_tier?: string | null
           created_at?: string
           document_type?: string | null
           domicile?: string | null
@@ -1011,10 +1113,12 @@ export type Database = {
           market_validation_points?: Json | null
           module_scores?: Json | null
           recommendation?: string | null
+          recommendation_v2?: string | null
           recommended_timeline?: string | null
           regulatory_status?: string | null
           report_markdown?: string | null
           score_tier?: string | null
+          score_tier_v2?: string | null
           status?: string
           strategy?: string | null
           submitter_company?: string | null
