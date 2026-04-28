@@ -12,6 +12,7 @@ import { SourceFilesTab } from "@/components/project/SourceFilesTab";
 import { TeamTab } from "@/components/project/TeamTab";
 import { PerformanceTab } from "@/components/project/PerformanceTab";
 import { InvestmentThesisTab } from "@/components/project/InvestmentThesisTab";
+import { MarketRealityTab } from "@/components/project/MarketRealityTab";
 import { ProcessingState } from "@/components/project/ProcessingState";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { ShimmerButton } from "@/components/magicui/ShimmerButton";
@@ -270,13 +271,14 @@ export default function ProjectDetail() {
                   />
                 )}
                 {activeTab === "market_reality" && (
-                  <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
-                    <p className="text-sm font-medium text-foreground mb-1">Market Reality</p>
-                    <p className="text-xs text-muted-foreground">
-                      Dedicated tab content lands in Phase 3 (claim_vs_market table, sector dynamics strip, sub-scores).
-                      Currently surfaced inside Investment Thesis.
-                    </p>
-                  </div>
+                  <MarketRealityTab
+                    marketFactors={marketFactors}
+                    competitors={competitors}
+                    thesisValidations={thesisValidations}
+                    interrogatoryItems={interrogatoryItems}
+                    moduleScoresData={moduleScores}
+                    project={project}
+                  />
                 )}
                 {activeTab === "economics" && (
                   <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
