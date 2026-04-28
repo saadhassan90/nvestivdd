@@ -101,14 +101,26 @@ export function MarketRealityTab({
     .slice(0, 4);
 
   const assetClass = project?.asset_class || null;
-  const benchmarkKey = assetClass
-    ? `${assetClass}::{subAssetClass}::{marketSegment}`
-    : null;
 
-  // Phase 7.4 will emit structured sector_breakdown / geography_breakdown.
-  // Until then, derive sector tiles from competitor data so the typed
-  // components render real shapes when possible.
-  const sectorSlices = deriveSectorSlices(competitors);
+  // Phase 7 — synthesis payloads now persisted on the projects row.
+  const marketContext = ((project as any)?.market_context ?? null) as
+    | { scope?: string | null; tiles?: any[]; benchmark_key?: string | null }
+    | null;
+  const benchmarkKey =
+    marketContext?.benchmark_key ??
+    (assetClass ? `${assetClass}::{subAssetClass}::{marketSegment}` : null);
+
+  const sectorBreakdown = ((project as any)?.sector_breakdown ?? null) as
+    | Array<{ sector: string; pct: number; meta?: string | null }>
+    | null;
+  const sectorSlices =
+    sectorBreakdown && sectorBreakdown.length > 0
+      ? sectorBreakdown
+      : deriveSectorSlices(competitors);
+
+  const geographyBreakdown = ((project as any)?.geography_breakdown ?? null) as
+    | Array<{ region: string; pct: number; detail?: string | null }>
+    | null;
 
   return (
     <div className="space-y-5">
@@ -133,8 +145,8 @@ export function MarketRealityTab({
       {/* 2. market_context_strip — sector_dynamics (Phase 6.5 scaffold) */}
       <BlurFade delay={0.04}>
         <MarketContextStrip
-          scope={assetClass}
-          tiles={[]}
+          scope={marketContext?.scope ?? assetClass}
+          tiles={(marketContext?.tiles ?? []) as any}
           benchmarkKey={benchmarkKey}
         />
       </BlurFade>
@@ -149,7 +161,10 @@ export function MarketRealityTab({
 
       {/* 2c. Geography map (PRD §6.3) — typed shell, awaiting synthesis */}
       <BlurFade delay={0.055}>
-        <GeographyMap slices={[]} statedMandate={project?.strategy || null} />
+        <GeographyMap
+          slices={(geographyBreakdown ?? []) as any}
+          statedMandate={project?.strategy || null}
+        />
       </BlurFade>
 
       {/* 3. Takeaways */}
