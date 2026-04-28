@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { lookupBenchmark, describeMatchLevel, type BenchmarkRecord } from "@/lib/benchmarks";
 import { SectorExposureChart } from "@/components/project/typed/SectorExposureChart";
 import { GeographyMap } from "@/components/project/typed/GeographyMap";
+import { CitationRefs } from "@/components/project/typed/CitationRefs";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -241,6 +242,11 @@ export function MarketRealityTab({
                     <p className="text-foreground font-medium leading-snug">{t.title}</p>
                     {t.description && (
                       <p className="text-[11px] text-muted-foreground italic mt-0.5 leading-snug">{t.description}</p>
+                    )}
+                    {Array.isArray((t as any).citation_ids) && (t as any).citation_ids.length > 0 && (
+                      <div className="mt-1.5">
+                        <CitationRefs ids={(t as any).citation_ids as string[]} sectionHint="Market Reality" />
+                      </div>
                     )}
                   </div>
                   {t.factor_type && (
