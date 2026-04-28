@@ -51,11 +51,11 @@ function findScore(modules: any[] | undefined, scoreKey: string): number | null 
   if (!modules?.length) return null;
   const needle = scoreKey.toLowerCase();
   const aliases: Record<string, string[]> = {
-    thesis: ["thesis", "strategy", "module_c"],
-    market: ["market", "domain", "module_d"],
+    thesis: ["investment_thesis", "thesis", "strategy", "module_c"],
+    market: ["market_reality", "market", "domain", "module_d"],
     team: ["team", "module_b", "manager"],
-    performance: ["performance", "track", "financial", "module_a"],
-    terms: ["terms", "economics", "fee", "module_d_terms"],
+    performance: ["track_record", "performance", "track", "financial", "module_a"],
+    terms: ["economics", "terms", "fee", "module_d_terms"],
   };
   const keys = aliases[needle] || [needle];
   const m = modules.find((row) =>
