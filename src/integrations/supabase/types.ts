@@ -64,6 +64,54 @@ export type Database = {
           },
         ]
       }
+      benchmarks: {
+        Row: {
+          asset_class: string
+          created_at: string
+          id: string
+          is_stale: boolean
+          market_segment: string
+          refreshed_at: string
+          sector_dynamics: Json | null
+          sources: Json | null
+          sub_asset_class: string
+          term_standards: Json | null
+          version: string
+          vintage_performance: Json | null
+          vintage_range: string | null
+        }
+        Insert: {
+          asset_class: string
+          created_at?: string
+          id?: string
+          is_stale?: boolean
+          market_segment?: string
+          refreshed_at?: string
+          sector_dynamics?: Json | null
+          sources?: Json | null
+          sub_asset_class: string
+          term_standards?: Json | null
+          version?: string
+          vintage_performance?: Json | null
+          vintage_range?: string | null
+        }
+        Update: {
+          asset_class?: string
+          created_at?: string
+          id?: string
+          is_stale?: boolean
+          market_segment?: string
+          refreshed_at?: string
+          sector_dynamics?: Json | null
+          sources?: Json | null
+          sub_asset_class?: string
+          term_standards?: Json | null
+          version?: string
+          vintage_performance?: Json | null
+          vintage_range?: string | null
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string
