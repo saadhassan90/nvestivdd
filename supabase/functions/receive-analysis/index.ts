@@ -11,6 +11,44 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// PRD §7.3 — composite weights (sum 100). Insufficient Data sections are
+// excluded from numerator AND denominator (renormalized).
+const DIMENSION_WEIGHTS: Record<string, number> = {
+  investment_thesis: 15,
+  market_reality: 20,
+  team: 25,
+  track_record: 20,
+  economics: 20,
+};
+
+function computeComposite(rows: Array<{ module_key: string; score: number | null }>) {
+  let weightedSum = 0;
+  let weightTotal = 0;
+  const excluded: string[] = [];
+  for (const k of Object.keys(DIMENSION_WEIGHTS)) {
+    const r = rows.find((x) => x.module_key === k);
+    const s = r?.score == null || (r.score as number) <= 0 ? null : r.score;
+    if (s == null) { excluded.push(k); continue; }
+    weightedSum += (s / 10) * 100 * DIMENSION_WEIGHTS[k];
+    weightTotal += DIMENSION_WEIGHTS[k];
+  }
+  if (weightTotal === 0) return { composite: null as number | null, excluded };
+  return { composite: Math.round(weightedSum / weightTotal), excluded };
+}
+
+function deriveRecommendation(
+  composite: number | null,
+  opts: { hardFloorTriggered: boolean; completenessPct: number | null },
+): "Advance" | "Conditional Advance" | "Defer" | "Decline" | null {
+  if (opts.hardFloorTriggered) return "Decline";
+  if (opts.completenessPct != null && opts.completenessPct < 30) return "Defer";
+  if (composite == null) return null;
+  if (composite >= 75) return "Advance";
+  if (composite >= 60) return "Conditional Advance";
+  if (composite >= 40) return "Defer";
+  return "Decline";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -137,6 +175,40 @@ serve(async (req) => {
             console.log(`Inserted ${rows.length} rows into ${table}`);
           }
         }
+      }
+
+      // 2b. PRD §7.3 — recompute composite (Insufficient Data renormalized) and
+      //     resolve verdict using the canonical recommendation ladder.
+      try {
+        const { data: msRows } = await supabase
+          .from("module_scores")
+          .select("module_key, score")
+          .eq("project_id", project_id);
+        const { data: hfRows } = await supabase
+          .from("hard_floor_evaluations")
+          .select("status, override_state")
+          .eq("project_id", project_id);
+        const hardFloorTriggered = (hfRows || []).some(
+          (h: any) => h.status === "triggered" && h.override_state !== "overridden",
+        );
+        const { data: proj } = await supabase
+          .from("projects")
+          .select("completeness_pct, completeness_score")
+          .eq("id", project_id)
+          .maybeSingle();
+        const completenessPct = (proj as any)?.completeness_pct ?? (proj as any)?.completeness_score ?? null;
+        const { composite, excluded } = computeComposite((msRows || []) as any);
+        const rec = deriveRecommendation(composite, { hardFloorTriggered, completenessPct });
+        await supabase.from("projects").update({
+          composite_score: composite,
+          recommendation_v2: rec,
+          confidence_reason: excluded.length
+            ? `Renormalized — ${excluded.length} dimension(s) Insufficient Data: ${excluded.join(", ")}.`
+            : null,
+        }).eq("id", project_id);
+        console.log(`Composite recomputed: ${composite} → ${rec} (excluded: ${excluded.join(",") || "none"})`);
+      } catch (e) {
+        console.error("Composite recalc failed:", e);
       }
 
       // 3. Mark analysis logs as complete
