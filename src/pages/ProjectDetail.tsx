@@ -50,7 +50,15 @@ export default function ProjectDetail() {
   const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
 
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
+  // PRD v2.0 §2.1 — old → new slug redirects
+  const TAB_REDIRECTS: Record<string, string> = {
+    scorecard: "overview",      // Phase 4 will eliminate; for now route to Overview
+    strategy: "investment_thesis",
+    performance: "track_record",
+  };
+  const initialTabRaw = searchParams.get("tab") || "overview";
+  const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
 
   const isProcessing = project ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status) : false;
@@ -167,21 +175,44 @@ export default function ProjectDetail() {
   const hardFloors = submissionQuality.filter((sq) => sq.severity === "hard_floor" || sq.category?.includes("hard_floor"));
   const hardFloorTriggered = hardFloors.some((h: any) => h.status === "fail" || h.status === "flagged");
 
+  // PRD §2.2 — Reg & Ops chip status: derived from hard floor + submission_quality severities
+  const regOpsStatus: "pass" | "conditional" | "fail" | null = (() => {
+    if (hardFloorTriggered) return "fail";
+    const hasElevated = submissionQuality.some((sq: any) => sq.severity === "elevated" || sq.status === "warning" || sq.status === "flagged");
+    if (hasElevated) return "conditional";
+    if (submissionQuality.length > 0) return "pass";
+    return null;
+  })();
+
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
       <ProjectTopBar project={project} isProcessing={isProcessing} />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
+        <ProjectSidebar
+          project={project}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          moduleScoresData={moduleScores}
+          redFlagsCount={redFlags.length}
+          regOpsStatus={regOpsStatus}
+        />
 
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <div className="lg:hidden">
-            <ProjectSidebar project={project} activeTab={activeTab} onTabChange={setActiveTab} moduleScoresData={moduleScores} />
+            <ProjectSidebar
+              project={project}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              moduleScoresData={moduleScores}
+              redFlagsCount={redFlags.length}
+              regOpsStatus={regOpsStatus}
+            />
           </div>
 
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6 space-y-4">
             {/* Global hard-floor banner */}
-            {hardFloorTriggered && activeTab !== "scorecard" && activeTab !== "red_flags" && activeTab !== "overview" && (
+            {hardFloorTriggered && activeTab !== "regulatory_ops" && activeTab !== "red_flags" && activeTab !== "overview" && (
               <HardFloorBanner triggered />
             )}
 
@@ -210,9 +241,6 @@ export default function ProjectDetail() {
                     onRerunAnalysis={handleRerunAnalysis}
                   />
                 )}
-                {activeTab === "scorecard" && (
-                  <ScorecardTab project={project} moduleScores={moduleScores} submissionQuality={submissionQuality} />
-                )}
                 {activeTab === "team" && (
                   <TeamTab
                     teamMembers={teamMembers}
@@ -222,7 +250,7 @@ export default function ProjectDetail() {
                     gpEntityName={project.gp_entity_name}
                   />
                 )}
-                {activeTab === "performance" && (
+                {activeTab === "track_record" && (
                   <PerformanceTab
                     metrics={performanceMetrics}
                     fees={feeStructure}
@@ -231,7 +259,7 @@ export default function ProjectDetail() {
                     interrogatoryItems={interrogatoryItems}
                   />
                 )}
-                {activeTab === "strategy" && (
+                {activeTab === "investment_thesis" && (
                   <StrategyTab
                     thesisValidations={thesisValidations}
                     competitors={competitors}
@@ -241,6 +269,26 @@ export default function ProjectDetail() {
                     interrogatoryItems={interrogatoryItems}
                     project={project}
                   />
+                )}
+                {activeTab === "market_reality" && (
+                  <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
+                    <p className="text-sm font-medium text-foreground mb-1">Market Reality</p>
+                    <p className="text-xs text-muted-foreground">
+                      Dedicated tab content lands in Phase 3 (claim_vs_market table, sector dynamics strip, sub-scores).
+                      Currently surfaced inside Investment Thesis.
+                    </p>
+                  </div>
+                )}
+                {activeTab === "economics" && (
+                  <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
+                    <p className="text-sm font-medium text-foreground mb-1">Economics</p>
+                    <p className="text-xs text-muted-foreground">
+                      Dedicated fee benchmark tab lands in Phase 3. Fee structure currently shown under Track Record.
+                    </p>
+                  </div>
+                )}
+                {activeTab === "regulatory_ops" && (
+                  <ScorecardTab project={project} moduleScores={moduleScores} submissionQuality={submissionQuality} />
                 )}
                 {activeTab === "red_flags" && (
                   <RedFlagsTab
