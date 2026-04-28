@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
-import { Folder, ExternalLink, BookOpen, AlertTriangle, ListX } from "lucide-react";
+import { Folder, ExternalLink, BookOpen, AlertTriangle, ListX, Search, Star, ArrowUpRight } from "lucide-react";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { KpiTile } from "@/components/project/primitives/KpiTile";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface SourceFilesTabProps {
@@ -31,8 +33,36 @@ function categorize(s: Tables<"research_sources">): string {
   return "D";
 }
 
+// Map linked_sections strings → project tab slugs
+const SECTION_TO_TAB: Record<string, { tab: string; label: string }> = {
+  team: { tab: "team", label: "Team" },
+  manager: { tab: "team", label: "Team" },
+  track_record: { tab: "track_record", label: "Track Record" },
+  performance: { tab: "track_record", label: "Track Record" },
+  thesis: { tab: "investment_thesis", label: "Thesis" },
+  strategy: { tab: "investment_thesis", label: "Thesis" },
+  market: { tab: "market_reality", label: "Market" },
+  domain: { tab: "market_reality", label: "Market" },
+  economics: { tab: "economics", label: "Economics" },
+  fees: { tab: "economics", label: "Economics" },
+  terms: { tab: "economics", label: "Economics" },
+  regulatory: { tab: "regulatory_ops", label: "Reg & Ops" },
+  ops: { tab: "regulatory_ops", label: "Reg & Ops" },
+};
+
+function resolveSectionLink(section: string): { tab: string; label: string } | null {
+  const s = section.toLowerCase();
+  for (const key of Object.keys(SECTION_TO_TAB)) {
+    if (s.includes(key)) return SECTION_TO_TAB[key];
+  }
+  return null;
+}
+
 export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
   const [active, setActive] = useState<string>("A");
+  const [query, setQuery] = useState("");
+  const [primaryOnly, setPrimaryOnly] = useState(false);
+  const { id: projectId } = useParams<{ id: string }>();
 
   const grouped = useMemo(() => {
     const m: Record<string, Tables<"research_sources">[]> = {};
@@ -44,12 +74,61 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
     return m;
   }, [researchSources]);
 
-  const negativeResults = grouped["F"].concat(grouped["G"]);
+  const negativeResults = grouped["G"];
+  const primaryCount = researchSources.filter((s) => s.is_primary).length;
+
+  const filtered = useMemo(() => {
+    let list = grouped[active] || [];
+    if (primaryOnly) list = list.filter((s) => s.is_primary);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (s) =>
+          s.title?.toLowerCase().includes(q) ||
+          s.url?.toLowerCase().includes(q) ||
+          s.description?.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [grouped, active, primaryOnly, query]);
 
   return (
     <div className="space-y-5">
+      {/* Citation Summary KPIs */}
+      <BlurFade>
+        <SectionCard title="Citation Summary" subtitle="Total · primary · negative-result audit trail" icon={<BookOpen className="h-4 w-4" />}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <KpiTile label="Total Citations" value={researchSources.length || null} />
+            <KpiTile label="Primary Sources" value={primaryCount || null} tone={primaryCount > 0 ? "good" : "neutral"} />
+            <KpiTile label="Regulatory" value={grouped["B"].length || null} />
+            <KpiTile label="Negative Results" value={negativeResults.length || null} tone="neutral" />
+          </div>
+        </SectionCard>
+      </BlurFade>
+
       <BlurFade>
         <SectionCard title="Source Categories" subtitle="A–G citation taxonomy (variant-aware)" icon={<Folder className="h-4 w-4" />}>
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-border">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Filter by title, URL, or description"
+                className="w-full pl-7 pr-2 py-1.5 text-xs rounded-md border border-border bg-background placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30"
+              />
+            </div>
+            <button
+              onClick={() => setPrimaryOnly((v) => !v)}
+              className={`inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1.5 rounded-md border transition-colors ${
+                primaryOnly ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Star className="h-3 w-3" /> Primary only
+            </button>
+          </div>
+
           <div className="flex flex-col md:flex-row gap-4">
             <nav className="md:w-56 shrink-0 flex md:flex-col flex-wrap gap-1">
               {CATEGORIES.map((c) => (
@@ -66,32 +145,75 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
             </nav>
 
             <div className="flex-1 min-w-0">
-              {grouped[active].length === 0 ? (
-                <p className="text-xs italic text-muted-foreground">No citations in this category at L1.</p>
+              {filtered.length === 0 ? (
+                <p className="text-xs italic text-muted-foreground">
+                  {grouped[active].length === 0
+                    ? "No citations in this category at L1."
+                    : "No citations match the current filter."}
+                </p>
               ) : (
                 <ul className="space-y-2">
-                  {grouped[active].map((s, i) => (
-                    <li key={s.id} className="border-b border-border/40 pb-2">
-                      <div className="flex items-start gap-2">
-                        <span className="text-[10px] font-mono text-muted-foreground shrink-0 mt-0.5">{i + 1}.</span>
-                        <div className="min-w-0">
-                          <p className="text-xs italic text-foreground">{s.title}</p>
-                          {s.description && <p className="text-[11px] text-muted-foreground mt-0.5">{s.description}</p>}
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <a
-                              href={s.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[10px] text-foreground hover:underline inline-flex items-center gap-1 truncate max-w-xs"
-                            >
-                              {s.url} <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                            {s.accessed_date && <span className="text-[10px] text-muted-foreground">Accessed {s.accessed_date}</span>}
+                  {filtered.map((s, i) => {
+                    const linkedSections = Array.isArray(s.linked_sections) ? (s.linked_sections as string[]) : [];
+                    return (
+                      <li key={s.id} className="border-b border-border/40 pb-2">
+                        <div className="flex items-start gap-2">
+                          <span className="text-[10px] font-mono text-muted-foreground shrink-0 mt-0.5">{i + 1}.</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start gap-1.5">
+                              <p className="text-xs italic text-foreground flex-1">{s.title}</p>
+                              {s.is_primary && (
+                                <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-score-strong border border-score-strong/30 rounded px-1 py-[1px] shrink-0">
+                                  <Star className="h-2 w-2" /> Primary
+                                </span>
+                              )}
+                              {s.citation_id && (
+                                <span className="text-[9px] font-mono text-muted-foreground border border-border rounded px-1 py-[1px] shrink-0">
+                                  {s.citation_id}
+                                </span>
+                              )}
+                            </div>
+                            {s.description && <p className="text-[11px] text-muted-foreground mt-0.5">{s.description}</p>}
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <a
+                                href={s.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-foreground hover:underline inline-flex items-center gap-1 truncate max-w-xs"
+                              >
+                                {s.url} <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                              {s.accessed_date && <span className="text-[10px] text-muted-foreground">Accessed {s.accessed_date}</span>}
+                            </div>
+                            {linkedSections.length > 0 && projectId && (
+                              <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Cited in:</span>
+                                {linkedSections.map((sec, idx) => {
+                                  const link = resolveSectionLink(sec);
+                                  if (!link) {
+                                    return (
+                                      <span key={idx} className="text-[9px] text-muted-foreground border border-border rounded px-1 py-[1px]">
+                                        {sec}
+                                      </span>
+                                    );
+                                  }
+                                  return (
+                                    <RouterLink
+                                      key={idx}
+                                      to={`/project/${projectId}?tab=${link.tab}`}
+                                      className="inline-flex items-center gap-0.5 text-[9px] font-medium text-foreground border border-border hover:border-foreground/40 rounded px-1 py-[1px]"
+                                    >
+                                      {link.label} <ArrowUpRight className="h-2 w-2" />
+                                    </RouterLink>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
