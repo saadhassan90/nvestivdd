@@ -1,6 +1,7 @@
-import { Lightbulb, ListChecks, Target, MessageSquare, Leaf } from "lucide-react";
+import { Lightbulb, ListChecks, Target, MessageSquare } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { EsgValidationCard } from "@/components/project/typed/EsgValidationCard";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -162,12 +163,12 @@ export function InvestmentThesisTab({
       {/* 4. ESG validation (CONDITIONAL — Phase 6.1) */}
       {esgEligible && (
         <BlurFade delay={0.08}>
-          <SectionCard
-            title="ESG Validation"
-            subtitle="GP claims · process matrix · ESG score (separate 1.0–4.0 scale)"
-            icon={<Leaf className="h-4 w-4" />}
-            empty
-            emptyMessage="ESG validation card scaffolded — full implementation lands in Phase 6.1 (gp_claims[], process_matrix, esg_score)."
+          <EsgValidationCard
+            sfdrClass={sfdrClass}
+            impactFocus={impactFocus}
+            esgScore={(project as any)?.esg_score ?? null}
+            claims={(project as any)?.esg_claims ?? []}
+            process={(project as any)?.esg_process_matrix ?? []}
           />
         </BlurFade>
       )}
