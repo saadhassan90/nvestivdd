@@ -88,7 +88,12 @@ export function DataRoomTab({
     const tokens = docName.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 4);
     if (!tokens.length) return null;
     return interrogatoryItems.find((q) =>
-      tokens.some((t) => q.question?.toLowerCase().includes(t) || q.category?.toLowerCase().includes(t))
+      tokens.some(
+        (t) =>
+          q.question?.toLowerCase().includes(t) ||
+          q.source_module?.toLowerCase().includes(t) ||
+          q.source_module_label?.toLowerCase().includes(t)
+      )
     ) ?? null;
   };
 
