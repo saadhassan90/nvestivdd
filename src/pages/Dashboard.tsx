@@ -18,12 +18,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { getScoreTier } from "@/lib/score-utils";
 import { getVerdict } from "@/lib/verdict-utils";
 import type { Tables } from "@/integrations/supabase/types";
+import type { CitationChip } from "@/components/project/typed/CitationChips";
 
 const PAGE_SIZE = 100;
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Tables<"projects">[]>([]);
   const [flagCounts, setFlagCounts] = useState<Record<string, { critical: number; elevated: number }>>({});
+  const [citationsByProject, setCitationsByProject] = useState<Record<string, CitationChip[]>>({});
   const [totalFlags, setTotalFlags] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -79,6 +81,34 @@ export default function Dashboard() {
     });
     setFlagCounts(counts);
     setTotalFlags(total);
+
+    // PRD §6.4 — top-3 primary citations per project, surfaced on dashboard rows.
+    const projectIds = allProjects.map((p) => p.id);
+    if (projectIds.length) {
+      const { data: srcRows } = await supabase
+        .from("research_sources")
+        .select("id, project_id, title, url, source_type, accessed_date, is_primary")
+        .in("project_id", projectIds)
+        .order("is_primary", { ascending: false })
+        .order("added_at", { ascending: false });
+
+      const grouped: Record<string, CitationChip[]> = {};
+      (srcRows ?? []).forEach((s) => {
+        const list = grouped[s.project_id] ?? (grouped[s.project_id] = []);
+        if (list.length >= 3) return;
+        list.push({
+          id: s.id,
+          label: s.title || (s.url ? new URL(s.url).hostname.replace(/^www\./, "") : "source"),
+          url: s.url,
+          type: s.source_type,
+          date: s.accessed_date,
+        });
+      });
+      setCitationsByProject(grouped);
+    } else {
+      setCitationsByProject({});
+    }
+
     setLoading(false);
   };
 
@@ -220,6 +250,7 @@ export default function Dashboard() {
               <DealTable
                 projects={paginatedProjects}
                 flagCounts={flagCounts}
+                citationsByProject={citationsByProject}
                 totalCount={filteredProjects.length}
                 page={page}
                 totalPages={totalPages}

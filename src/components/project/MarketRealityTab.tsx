@@ -1,6 +1,9 @@
-import { Globe2, ListChecks, BarChart3, MessageSquare, TrendingUp } from "lucide-react";
+import { Globe2, ListChecks, MessageSquare, TrendingUp } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
+import { MarketContextStrip } from "@/components/project/typed/MarketContextStrip";
+import { SectorExposureChart } from "@/components/project/typed/SectorExposureChart";
+import { GeographyMap } from "@/components/project/typed/GeographyMap";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -98,6 +101,14 @@ export function MarketRealityTab({
     .slice(0, 4);
 
   const assetClass = project?.asset_class || null;
+  const benchmarkKey = assetClass
+    ? `${assetClass}::{subAssetClass}::{marketSegment}`
+    : null;
+
+  // Phase 7.4 will emit structured sector_breakdown / geography_breakdown.
+  // Until then, derive sector tiles from competitor data so the typed
+  // components render real shapes when possible.
+  const sectorSlices = deriveSectorSlices(competitors);
 
   return (
     <div className="space-y-5">
@@ -121,13 +132,24 @@ export function MarketRealityTab({
 
       {/* 2. market_context_strip — sector_dynamics (Phase 6.5 scaffold) */}
       <BlurFade delay={0.04}>
-        <SectionCard
-          title="Sector Dynamics"
-          subtitle={`Market context strip${assetClass ? ` · ${assetClass}` : ""} · Never references the specific fund`}
-          icon={<BarChart3 className="h-4 w-4" />}
-        >
-          <SectorDynamicsScaffold assetClass={assetClass} />
-        </SectionCard>
+        <MarketContextStrip
+          scope={assetClass}
+          tiles={[]}
+          benchmarkKey={benchmarkKey}
+        />
+      </BlurFade>
+
+      {/* 2b. Sector exposure chart (PRD §6.2) — derived from competitive landscape */}
+      <BlurFade delay={0.05}>
+        <SectorExposureChart
+          slices={sectorSlices}
+          denominator={project?.fund_size_estimated || null}
+        />
+      </BlurFade>
+
+      {/* 2c. Geography map (PRD §6.3) — typed shell, awaiting synthesis */}
+      <BlurFade delay={0.055}>
+        <GeographyMap slices={[]} statedMandate={project?.strategy || null} />
       </BlurFade>
 
       {/* 3. Takeaways */}
@@ -212,13 +234,6 @@ export function MarketRealityTab({
         </SectionCard>
       </BlurFade>
 
-      {/* Footer note: competitors data exists but full sector chart lands in Phase 6.2 */}
-      {competitors.length > 0 && (
-        <p className="text-[10px] italic text-muted-foreground px-1">
-          Competitive landscape ({competitors.length} peers) currently surfaced via Knowledge Graph; full
-          sector_exposure_chart and geography_map render in Phase 6.2 / 6.3.
-        </p>
-      )}
     </div>
   );
 }
@@ -249,35 +264,30 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
   );
 }
 
-function SectorDynamicsScaffold({ assetClass }: { assetClass: string | null }) {
-  // Phase 6.5 will populate this from the static benchmarks DB (Phase 7.2).
-  // Today we render the 4-card skeleton with "Awaiting benchmark" markers.
-  const cards = [
-    { label: "Dry Powder Trend", note: "vs prior 4 quarters" },
-    { label: "Deal Volume", note: "rolling 12-month" },
-    { label: "Multiple Compression", note: "EV/EBITDA Δ" },
-    { label: "Exit Environment", note: "DPI vintage avg" },
-  ];
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {cards.map((c) => (
-          <div key={c.label} className="rounded-md border border-dashed border-border bg-muted/20 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-              {c.label}
-            </p>
-            <p className="text-base font-bold text-muted-foreground tabular-nums mt-1">─</p>
-            <p className="text-[10px] text-muted-foreground/70 mt-0.5">{c.note}</p>
-          </div>
-        ))}
-      </div>
-      <p className="text-[10px] italic text-muted-foreground">
-        Sector dynamics benchmarks load from the static benchmark DB (Phase 7.2) keyed by{" "}
-        <code className="font-mono text-[10px] text-foreground/70">{`{${assetClass || "assetClass"}}::{subAssetClass}::{marketSegment}`}</code>.
-        Strip is omitted entirely if no benchmark match. Never references the specific fund.
-      </p>
-    </div>
-  );
+/** Derive a best-effort sector breakdown from the competitive landscape rows.
+ * Phase 7.4 will replace this with a real `sector_breakdown[]` payload. */
+function deriveSectorSlices(
+  competitors: Tables<"competitive_landscape">[],
+): Array<{ sector: string; pct: number; meta?: string | null }> {
+  if (!competitors.length) return [];
+  const counts = new Map<string, number>();
+  for (const c of competitors) {
+    const key = (c.competitor_type || c.strategy_description || "Other")
+      .toString()
+      .split(/[·,/]/)[0]
+      .trim();
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
+  if (!total) return [];
+  return Array.from(counts.entries())
+    .map(([sector, n]) => ({
+      sector,
+      pct: (n / total) * 100,
+      meta: `${n} peer${n === 1 ? "" : "s"}`,
+    }))
+    .filter((s) => s.pct > 0);
 }
 
 /* ─── claim_vs_market table ─────────────────────────────────────────── */

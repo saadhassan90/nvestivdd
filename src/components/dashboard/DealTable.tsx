@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, MoreHorizontal, Eye, RefreshCw, Trash2, Download, Share2 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
 import { BlurFade } from "@/components/magicui/BlurFade";
+import { CitationChips, type CitationChip } from "@/components/project/typed/CitationChips";
 import { getVerdict, getVerdictLabel, getVerdictColor, getStatusLabel, getStatusColor, formatSubmittedDate } from "@/lib/verdict-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import type { Tables } from "@/integrations/supabase/types";
 interface DealTableProps {
   projects: Tables<"projects">[];
   flagCounts: Record<string, { critical: number; elevated: number }>;
+  citationsByProject?: Record<string, CitationChip[]>;
   totalCount?: number;
   page: number;
   totalPages: number;
@@ -188,7 +190,7 @@ function RowActionsMenu({ project, onRefresh }: { project: Tables<"projects">; o
   );
 }
 
-export function DealTable({ projects, flagCounts, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort, onRefresh }: DealTableProps) {
+export function DealTable({ projects, flagCounts, citationsByProject = {}, totalCount, page, totalPages, onPageChange, sortBy, sortDir, onSort, onRefresh }: DealTableProps) {
   const navigate = useNavigate();
 
   if (projects.length === 0) {
@@ -260,6 +262,11 @@ export function DealTable({ projects, flagCounts, totalCount, page, totalPages, 
                   {/* Fund Name */}
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground text-sm">{project.fund_name}</p>
+                    {citationsByProject[project.id]?.length ? (
+                      <div className="mt-1.5">
+                        <CitationChips citations={citationsByProject[project.id]} max={3} />
+                      </div>
+                    ) : null}
                   </td>
 
                   {/* GP */}
