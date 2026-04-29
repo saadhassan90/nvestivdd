@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { MessageSquare, Plus, Send, Sparkles, Check, X, ListFilter, MessagesSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { sectionLabel, cardLabelFromId, cardDomId } from "@/lib/card-labels";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CommentRow = Tables<"comments">;
@@ -21,21 +22,6 @@ interface CommentsRailProps {
 const FILTERS = ["All", "Team", "AI", "Section"] as const;
 type Filter = typeof FILTERS[number];
 
-const SECTION_LABELS: Record<string, string> = {
-  overview: "Overview",
-  investment_thesis: "Investment Thesis",
-  market_reality: "Market Reality",
-  team: "Team & Manager",
-  track_record: "Track Record",
-  economics: "Economics",
-  regulatory_ops: "Regulatory & Ops",
-  red_flags: "Risk Flags",
-  interrogatory: "Diligence Questions",
-  documents: "Sources",
-  data_room: "Dataroom",
-  analysis_log: "Analysis Log",
-};
-
 function formatTime(iso: string) {
   const d = new Date(iso);
   const diffMin = Math.floor((Date.now() - d.getTime()) / 60000);
@@ -48,6 +34,7 @@ function formatTime(iso: string) {
 
 export function CommentsRail({ projectId, projectName, activeSection, isProcessing }: CommentsRailProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [filter, setFilter] = useState<Filter>("All");
   const [open, setOpen] = useState(false);
@@ -111,6 +98,24 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
       .from("comments")
       .update({ resolved_at: c.resolved_at ? null : new Date().toISOString() })
       .eq("id", c.id);
+  };
+
+  const goToCard = (c: CommentRow) => {
+    if (c.section_id && c.section_id !== activeSection) {
+      navigate(`/project/${projectId}?tab=${c.section_id}`);
+    }
+    if (c.section_id && c.sub_card_id) {
+      const id = cardDomId(c.section_id, c.sub_card_id);
+      // wait a tick for tab switch / mount
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary/40");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary/40"), 1800);
+        }
+      }, 120);
+    }
   };
 
   const counts = useMemo(
@@ -183,9 +188,10 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
             <article
               key={c.id}
               className={cn(
-                "rounded-md border bg-card p-2.5",
+                "rounded-md border bg-card p-2.5 cursor-pointer hover:border-foreground/30 transition-colors",
                 c.resolved_at ? "opacity-50 border-border/40" : "border-border"
               )}
+              onClick={() => goToCard(c)}
             >
               <header className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -199,7 +205,7 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
                   <span className="text-[9px] text-muted-foreground">· {formatTime(c.created_at)}</span>
                 </div>
                 <button
-                  onClick={() => toggleResolve(c)}
+                  onClick={(e) => { e.stopPropagation(); toggleResolve(c); }}
                   className="text-muted-foreground hover:text-foreground"
                   title={c.resolved_at ? "Reopen" : "Resolve"}
                 >
@@ -209,7 +215,18 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
               <p className="text-xs text-foreground/85 whitespace-pre-wrap leading-snug">{c.body_md}</p>
               {c.section_id && (
                 <p className="mt-1.5 text-[9px] text-muted-foreground">
-                  in <span className="font-medium">{SECTION_LABELS[c.section_id] ?? c.section_id}</span>
+                  in{" "}
+                  <span className="font-medium text-foreground/80">
+                    {sectionLabel(c.section_id)}
+                  </span>
+                  {c.sub_card_id && (
+                    <>
+                      <span className="mx-1 text-muted-foreground/60">›</span>
+                      <span className="font-medium text-foreground/80">
+                        {cardLabelFromId(c.sub_card_id)}
+                      </span>
+                    </>
+                  )}
                   {c.severity && (
                     <span className="ml-1.5 inline-flex items-center rounded border border-severity-critical/30 px-1 py-[1px] text-severity-critical">
                       {c.severity}
@@ -227,7 +244,7 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-sm">
-              Add comment to <span className="font-semibold">{SECTION_LABELS[activeSection] ?? activeSection}</span>
+              Add comment to <span className="font-semibold">{sectionLabel(activeSection)}</span>
             </DialogTitle>
           </DialogHeader>
           <Textarea
