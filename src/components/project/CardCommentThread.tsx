@@ -156,7 +156,7 @@ export function CardCommentThread({
         <div className="px-5 py-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Thread · {open.length}
+              Comments on this {cardLabel ?? "section"} · {open.length}
               {resolved.length > 0 && (
                 <span className="ml-1 font-normal normal-case tracking-normal">
                   ({resolved.length} resolved)
