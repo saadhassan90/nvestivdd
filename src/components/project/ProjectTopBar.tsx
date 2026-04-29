@@ -75,7 +75,7 @@ export function ProjectTopBar({
             )}
 
             {/* Report-level tabs (L1 / L2 / L3) — always visible */}
-            <div className="ml-3 hidden sm:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
+            <div className="ml-3 hidden lg:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
                 {levels.map((lvl) => {
                   const active = reportLevel === lvl;
                   const { label, available } = levelMeta[lvl];
