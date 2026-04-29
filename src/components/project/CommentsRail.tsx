@@ -129,7 +129,7 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
   );
 
   return (
-    <aside className="hidden xl:flex w-80 shrink-0 border-l border-border bg-background flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center justify-between gap-2">
@@ -261,6 +261,6 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
           </div>
         </DialogContent>
       </Dialog>
-    </aside>
+    </div>
   );
 }
