@@ -1,5 +1,8 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useSectionContext } from "@/contexts/SectionContext";
+import { CardCommentThread } from "@/components/project/CardCommentThread";
+import { slugify, cardDomId } from "@/lib/card-labels";
 
 interface SectionCardProps {
   title: string;
@@ -13,6 +16,13 @@ interface SectionCardProps {
   className?: string;
   bodyClassName?: string;
   id?: string;
+  /**
+   * Override the auto-derived card slug (defaults to slugify(title)).
+   * Stable identity is important — changing this orphans existing comments.
+   */
+  cardId?: string;
+  /** Set to true to suppress the attached comment thread on this card. */
+  disableComments?: boolean;
 }
 
 /**
@@ -31,10 +41,16 @@ export function SectionCard({
   className,
   bodyClassName,
   id,
+  cardId,
+  disableComments = false,
 }: SectionCardProps) {
+  const ctx = useSectionContext();
+  const resolvedCardId = cardId ?? slugify(title);
+  const showComments = !disableComments && !!ctx && !!resolvedCardId;
+  const domId = id ?? (showComments ? cardDomId(ctx!.sectionId, resolvedCardId) : undefined);
   return (
     <section
-      id={id}
+      id={domId}
       className={cn(
         "rounded-xl border border-border bg-card overflow-hidden",
         className,
@@ -59,6 +75,14 @@ export function SectionCard({
           children
         )}
       </div>
+      {showComments && (
+        <CardCommentThread
+          projectId={ctx!.projectId}
+          sectionId={ctx!.sectionId}
+          cardId={resolvedCardId}
+          cardLabel={title}
+        />
+      )}
     </section>
   );
 }
