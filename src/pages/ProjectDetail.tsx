@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";
+import { ShareModal } from "@/components/project/ShareModal";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { CommentsRail } from "@/components/project/CommentsRail";
 import { OverviewTab } from "@/components/project/OverviewTab";
@@ -59,6 +60,8 @@ export default function ProjectDetail() {
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
+  const { setIsOpen: setChatOpen } = useChatContext();
 
   // PRD v2.0 §2.1 — old → new slug redirects
   const TAB_REDIRECTS: Record<string, string> = {
@@ -382,7 +385,18 @@ export default function ProjectDetail() {
 
       </div>
 
-      <MobileBottomNav />
+      <MobileBottomNav
+        onOpenComments={() => setCommentsOpen(true)}
+        commentsCount={commentsCount}
+        onOpenShare={() => setShareOpen(true)}
+        onOpenAskIris={() => setChatOpen(true)}
+      />
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        fundName={project.fund_name}
+        projectId={project.id}
+      />
       <PinnedCitationsStack />
 
       {/* Slide-in comments drawer (opens from the top-bar Comments button) */}
