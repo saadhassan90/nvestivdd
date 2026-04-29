@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, Video, VideoOff, MessagesSquare } from "lucide-react";
+import { ArrowLeft, Share2, Sparkles, MessagesSquare } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
-import { useMeetingMode } from "@/contexts/MeetingModeContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
@@ -36,7 +35,6 @@ export function ProjectTopBar({
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
-  const { enabled: meetingOn, toggle: toggleMeeting } = useMeetingMode();
   const [shareOpen, setShareOpen] = useState(false);
 
   const statusColor = getStatusColor(project.status);
@@ -52,11 +50,11 @@ export function ProjectTopBar({
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-border/50 bg-background shrink-0">
-        <div className="flex h-12 items-center justify-between px-4 sm:px-5">
+        <div className="flex h-12 items-center justify-between px-3 sm:px-5">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-3 text-sm min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm min-w-0">
             <Link to="/dashboard" className="shrink-0">
-              <img src={logo} alt="Nvestiv" className="h-5" />
+              <img src={logo} alt="Nvestiv" className="h-4 sm:h-5" />
             </Link>
             <span className="text-muted-foreground shrink-0">›</span>
             <button
@@ -77,7 +75,7 @@ export function ProjectTopBar({
             )}
 
             {/* Report-level tabs (L1 / L2 / L3) — always visible */}
-            <div className="ml-3 hidden sm:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
+            <div className="ml-3 hidden lg:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
                 {levels.map((lvl) => {
                   const active = reportLevel === lvl;
                   const { label, available } = levelMeta[lvl];
@@ -106,15 +104,15 @@ export function ProjectTopBar({
             </div>
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1.5">
+          {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
+          <div className="hidden lg:flex items-center gap-1.5">
             <NotificationsDropdown />
             {onOpenComments && !isMemoMode && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={onOpenComments}
-                    className="relative hidden lg:inline-flex p-1.5 rounded-md hover:bg-muted transition-colors"
+                    className="relative p-1.5 rounded-md hover:bg-muted transition-colors"
                   >
                     <MessagesSquare className="h-4 w-4 text-muted-foreground" />
                     {commentsCount > 0 && (
@@ -130,24 +128,8 @@ export function ProjectTopBar({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={toggleMeeting}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    meetingOn ? "bg-foreground text-background hover:opacity-90" : "hover:bg-muted text-muted-foreground"
-                  }`}
-                  aria-pressed={meetingOn}
-                >
-                  {meetingOn ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {meetingOn ? "Exit Meeting Mode" : "Enter Meeting Mode (+15% font, hide log/sources)"}
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
                   onClick={() => setShareOpen(true)}
-                  className="hidden lg:inline-flex p-1.5 rounded-md hover:bg-muted transition-colors"
+                  className="p-1.5 rounded-md hover:bg-muted transition-colors"
                 >
                   <Share2 className="h-4 w-4 text-muted-foreground" />
                 </button>
@@ -172,10 +154,10 @@ export function ProjectTopBar({
               !isOpen && (
               <button
                 onClick={() => setIsOpen(true)}
-                className="ml-1 hidden lg:inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
+                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Ask Iris</span>
+                Ask Iris
               </button>
               )
             )}
