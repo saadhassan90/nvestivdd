@@ -234,14 +234,16 @@ export default function ProjectDetail() {
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        <ProjectSidebar
-          project={project}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          moduleScoresData={moduleScores}
-          redFlagsCount={redFlags.length}
-          regOpsStatus={regOpsStatus}
-        />
+        <div className="hidden lg:contents">
+          <ProjectSidebar
+            project={project}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            moduleScoresData={moduleScores}
+            redFlagsCount={redFlags.length}
+            regOpsStatus={regOpsStatus}
+          />
+        </div>
 
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <div className="lg:hidden">
