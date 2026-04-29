@@ -1,6 +1,4 @@
-import { LayoutDashboard, Lightbulb, Globe2, Users, TrendingUp, DollarSign, Shield, AlertTriangle, MessageSquare, FileText, FileBarChart, FolderOpen, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { LayoutDashboard, Lightbulb, Globe2, Users, TrendingUp, DollarSign, Shield, AlertTriangle, MessageSquare, FileText, FileBarChart, FolderOpen } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
@@ -145,30 +143,9 @@ function FlagsChip({ count }: { count: number }) {
   );
 }
 
-type ReportLevel = "L1" | "L2" | "L3";
-
-const REPORT_LEVELS: { key: ReportLevel; label: string }[] = [
-  { key: "L1", label: "Triage" },
-  { key: "L2", label: "Deep Dive" },
-  { key: "L3", label: "IC Memo" },
-];
-
 export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresData, redFlagsCount = 0, regOpsStatus = null }: ProjectSidebarProps) {
   const isProcessing = ["pending", "uploading", "processing", "analyzing", "extracting"].includes(project.status);
-  const [activeLevel, setActiveLevel] = useState<ReportLevel>("L1");
-  const [reportExpanded, setReportExpanded] = useState(true);
-  const navigate = useNavigate();
-
-  const isLevelAvailable = (level: ReportLevel) => level === "L1" || level === "L3";
   const navItems = isProcessing ? PROCESSING_NAV_ITEMS : L1_NAV_ITEMS;
-
-  const handleLevelClick = (level: ReportLevel) => {
-    if (level === "L1") {
-      setActiveLevel("L1");
-    } else if (level === "L3") {
-      navigate(`/project/${project.id}/memo`);
-    }
-  };
 
   const renderRightChip = (item: NavItem) => {
     if (item.variant === "score" && item.scoreKey) {
@@ -217,46 +194,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
           </div>
         </div>
 
-        <div className="px-3 pt-3">
-          <button
-            onClick={() => setReportExpanded(!reportExpanded)}
-            className="flex w-full items-center gap-1.5 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {reportExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-            Report
-          </button>
-          {reportExpanded && (
-            <div className="mt-0.5 space-y-0.5">
-              {REPORT_LEVELS.map((level) => {
-                const available = isLevelAvailable(level.key);
-                const isActive = activeLevel === level.key;
-                return (
-                  <button
-                    key={level.key}
-                    onClick={() => available && handleLevelClick(level.key)}
-                    disabled={!available}
-                    className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors ${
-                      isActive
-                        ? "bg-primary/10 text-foreground font-medium border border-primary/20"
-                        : available
-                          ? "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                          : "text-muted-foreground/40 cursor-not-allowed"
-                    }`}
-                  >
-                    <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[9px] font-bold ${
-                      isActive ? "bg-foreground text-background" : available ? "bg-muted text-muted-foreground" : "bg-muted/50 text-muted-foreground/40"
-                    }`}>{level.key}</span>
-                    <span className="truncate">{level.label}</span>
-                    {!available && <span className="ml-auto text-[9px] text-muted-foreground/40 font-medium">Locked</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
         <nav className="flex-1 overflow-y-auto p-3 pt-2 space-y-0.5">
-          <div className="h-px bg-border mb-2" />
           {navItems.map((item, idx) => {
             const Icon = item.icon;
             const isActive = activeTab === item.key;

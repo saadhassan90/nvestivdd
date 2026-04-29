@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { CommentsRail } from "@/components/project/CommentsRail";
@@ -33,6 +33,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const { toast } = useToast();
   const { setProjectScope } = useChatContext();
@@ -224,6 +225,10 @@ export default function ProjectDetail() {
         project={project}
         isProcessing={isProcessing}
         reportLevel="L1"
+        onReportLevelChange={(lvl) => {
+          if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+          // L1 is current; L2 is locked (no-op)
+        }}
         onOpenComments={() => setCommentsOpen(true)}
         commentsCount={commentsCount}
       />
