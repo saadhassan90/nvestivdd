@@ -22,6 +22,7 @@ import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { MeetingModeProvider } from "@/contexts/MeetingModeContext";
 import { CitationsProvider } from "@/contexts/CitationsContext";
 import { PinnedCitationsStack } from "@/components/project/typed/PinnedCitationsStack";
+import { SectionProvider } from "@/contexts/SectionContext";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -234,7 +235,7 @@ export default function ProjectDetail() {
                 </div>
               </BlurFade>
             ) : (
-              <>
+              <SectionProvider projectId={project.id} sectionId={activeTab}>
                 {activeTab === "overview" && (
                   <OverviewTab
                     project={project}
@@ -335,7 +336,7 @@ export default function ProjectDetail() {
                 {activeTab === "documents" && (
                   <SourceFilesTab researchSources={researchSources} />
                 )}
-              </>
+              </SectionProvider>
             )}
           </main>
         </div>
