@@ -37,7 +37,7 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
 
   const { toast } = useToast();
-  const { setProjectScope } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [redFlags, setRedFlags] = useState<Tables<"red_flags">[]>([]);
@@ -61,7 +61,6 @@ export default function ProjectDetail() {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
-  const { setIsOpen: setChatOpen } = useChatContext();
 
   // PRD v2.0 §2.1 — old → new slug redirects
   const TAB_REDIRECTS: Record<string, string> = {
