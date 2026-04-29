@@ -114,7 +114,7 @@ export function ProjectTopBar({
                 <TooltipTrigger asChild>
                   <button
                     onClick={onOpenComments}
-                    className="relative p-1.5 rounded-md hover:bg-muted transition-colors"
+                    className="relative hidden lg:inline-flex p-1.5 rounded-md hover:bg-muted transition-colors"
                   >
                     <MessagesSquare className="h-4 w-4 text-muted-foreground" />
                     {commentsCount > 0 && (
@@ -147,7 +147,7 @@ export function ProjectTopBar({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShareOpen(true)}
-                  className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                  className="hidden lg:inline-flex p-1.5 rounded-md hover:bg-muted transition-colors"
                 >
                   <Share2 className="h-4 w-4 text-muted-foreground" />
                 </button>
@@ -172,7 +172,7 @@ export function ProjectTopBar({
               !isOpen && (
               <button
                 onClick={() => setIsOpen(true)}
-                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
+                className="ml-1 hidden lg:inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Ask Iris</span>

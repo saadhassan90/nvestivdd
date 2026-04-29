@@ -6,6 +6,8 @@ import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MemoToolbar } from "@/components/memo/MemoToolbar";
 import { EmbeddedIrisChat } from "@/components/memo/EmbeddedIrisChat";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { ShareModal } from "@/components/project/ShareModal";
 import { useIcMemo } from "@/hooks/use-ic-memo";
 import { buildIcMemoSkeletonMarkdown } from "@/lib/ic-memo-template";
 import type { Tables } from "@/integrations/supabase/types";
@@ -13,7 +15,8 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function IcMemoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setProjectScope } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const [shareOpen, setShareOpen] = useState(false);
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [redFlags, setRedFlags] = useState<Tables<"red_flags">[]>([]);
@@ -132,6 +135,17 @@ export default function IcMemoPage() {
           <EmbeddedIrisChat fundName={project.fund_name} memoId={memo?.id ?? null} />
         </div>
       </div>
+
+      <MobileBottomNav
+        onOpenShare={() => setShareOpen(true)}
+        onOpenAskIris={() => setChatOpen(true)}
+      />
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        fundName={project.fund_name}
+        projectId={project.id}
+      />
     </div>
   );
 }
