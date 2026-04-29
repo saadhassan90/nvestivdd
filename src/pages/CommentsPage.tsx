@@ -6,6 +6,7 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { sectionLabel as fmtSection, cardLabelFromId, cardDomId } from "@/lib/card-labels";
 import type { Tables } from "@/integrations/supabase/types";
 
 const SECTION_LABELS: Record<string, string> = {
@@ -153,10 +154,18 @@ export default function CommentsPage() {
                           )}
                           <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
                           <RouterLink
-                            to={`/project/${id}?tab=${c.section_id}`}
+                            to={`/project/${id}?tab=${c.section_id}${c.sub_card_id ? `#${cardDomId(c.section_id, c.sub_card_id)}` : ""}`}
                             className="text-[10px] text-muted-foreground hover:text-foreground hover:underline"
                           >
-                            in {SECTION_LABELS[c.section_id] ?? c.section_id} →
+                            in {fmtSection(c.section_id)}
+                            {c.sub_card_id && (
+                              <>
+                                {" "}
+                                <span className="text-muted-foreground/60">›</span>{" "}
+                                {cardLabelFromId(c.sub_card_id)}
+                              </>
+                            )}{" "}
+                            →
                           </RouterLink>
                         </div>
                         <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{c.body_md}</p>
