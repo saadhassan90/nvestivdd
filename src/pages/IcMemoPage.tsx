@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
@@ -12,6 +12,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 export default function IcMemoPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { setProjectScope } = useChatContext();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
