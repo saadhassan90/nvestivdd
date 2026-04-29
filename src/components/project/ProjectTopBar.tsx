@@ -76,9 +76,8 @@ export function ProjectTopBar({
               </span>
             )}
 
-            {/* Report-level tabs (L1 / L2 / L3) */}
-            {!isMemoMode && (
-              <div className="ml-3 hidden sm:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
+            {/* Report-level tabs (L1 / L2 / L3) — always visible */}
+            <div className="ml-3 hidden sm:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
                 {levels.map((lvl) => {
                   const active = reportLevel === lvl;
                   const { label, available } = levelMeta[lvl];
@@ -104,8 +103,7 @@ export function ProjectTopBar({
                     </Tooltip>
                   );
                 })}
-              </div>
-            )}
+            </div>
           </div>
 
           {/* Right actions */}
