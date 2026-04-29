@@ -89,7 +89,16 @@ export default function IcMemoPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
-      <ProjectTopBar project={project} isProcessing={false} mode="memo" />
+      <ProjectTopBar
+        project={project}
+        isProcessing={false}
+        mode="memo"
+        reportLevel="L3"
+        onReportLevelChange={(lvl) => {
+          if (lvl === "L1") navigate(`/project/${project.id}?tab=overview`);
+          else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+        }}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Canvas column */}
