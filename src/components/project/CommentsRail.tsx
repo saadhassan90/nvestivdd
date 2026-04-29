@@ -131,7 +131,7 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border">
+      <div className="px-4 py-3 pr-12 border-b border-border">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
@@ -140,16 +140,9 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
             </p>
             <p className="text-[10px] text-muted-foreground truncate">{projectName || "Deal"}</p>
           </div>
-          <button
-            onClick={() => setOpen(true)}
-            disabled={isProcessing}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-foreground hover:bg-muted/50 disabled:opacity-50"
-          >
-            <Plus className="h-3 w-3" /> Add
-          </button>
         </div>
         {/* Filter tabs */}
-        <div className="mt-3 flex items-center gap-1">
+        <div className="mt-3 flex items-center gap-1 flex-wrap">
           {FILTERS.map((f) => (
             <button
               key={f}
@@ -166,6 +159,13 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
               <span className="opacity-70 tabular-nums">{counts[f]}</span>
             </button>
           ))}
+          <button
+            onClick={() => setOpen(true)}
+            disabled={isProcessing}
+            className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-foreground hover:bg-muted/50 disabled:opacity-50"
+          >
+            <Plus className="h-3 w-3" /> Add
+          </button>
         </div>
         <RouterLink
           to={`/project/${projectId}/comments`}
