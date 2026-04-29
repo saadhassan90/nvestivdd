@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, Calendar, User, FileBadge, Link2, Video, VideoOff } from "lucide-react";
+import { ArrowLeft, Share2, Sparkles, Video, VideoOff, MessagesSquare } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
 import { useMeetingMode } from "@/contexts/MeetingModeContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
-import {
-  RecommendationBadge,
-  TierPill,
-  recommendationFromScore,
-  tierFromScore,
-} from "@/components/project/primitives/VerdictBadges";
+import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProjectTopBarProps {
@@ -21,62 +16,32 @@ interface ProjectTopBarProps {
   /** When set to "memo", the Ask Iris pill is replaced with a Stage dropdown
    *  + Back-to-Reports button. Defaults to undefined (= L1 tabs page). */
   mode?: "memo";
+  /** Selected report level (defaults to "L1"). L2/L3 are placeholders for now. */
+  reportLevel?: "L1" | "L2" | "L3";
+  onReportLevelChange?: (level: "L1" | "L2" | "L3") => void;
+  /** Opens the slide-in comments drawer. */
+  onOpenComments?: () => void;
+  commentsCount?: number;
 }
 
-function getReportLevel(status: string): "L1" | "L2" | "L3" | null {
-  if (["complete", "completed"].includes(status)) return "L1";
-  return null;
-}
-
-function getCtaButton(level: "L1" | "L2" | "L3" | null) {
-  switch (level) {
-    case "L1":
-      return { label: "Request DataRoom", variant: "default" as const };
-    case "L2":
-      return { label: "Generate IC Memo", variant: "default" as const };
-    case "L3":
-    default:
-      return null;
-  }
-}
-
-/** Parses fund name into the canonical "working name" pills the PRD wants
- *  (full name + abbreviated form). Falls back to a single chip. */
-function workingNamePills(fundName: string, gpEntity?: string | null): string[] {
-  const pills: string[] = [];
-  if (gpEntity && gpEntity !== fundName) pills.push(gpEntity);
-  pills.push(fundName);
-  // produce a short alias (e.g., first letters of each capitalized word)
-  const alias = fundName
-    .split(/\s+/)
-    .filter((w) => /^[A-Z]/.test(w))
-    .map((w) => w[0])
-    .join("");
-  if (alias.length >= 2 && alias.length <= 6 && !pills.includes(alias)) pills.push(alias);
-  return pills;
-}
-
-export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProps) {
+export function ProjectTopBar({
+  project,
+  isProcessing,
+  mode,
+  reportLevel = "L1",
+  onReportLevelChange,
+  onOpenComments,
+  commentsCount = 0,
+}: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
   const { enabled: meetingOn, toggle: toggleMeeting } = useMeetingMode();
   const [shareOpen, setShareOpen] = useState(false);
 
   const statusColor = getStatusColor(project.status);
-  const reportLevel = getReportLevel(project.status);
-  const cta = getCtaButton(reportLevel);
-
-  const composite = project.composite_score ?? null;
-  const tier = tierFromScore(composite);
-  const rec = recommendationFromScore(composite);
-
-  const pills = workingNamePills(project.fund_name, project.gp_entity_name);
-  const analysisDate =
-    (project as any).analysis_date ||
-    (project.updated_at ? new Date(project.updated_at).toLocaleDateString() : null);
-
   const isMemoMode = mode === "memo";
-  const showCoverBlock = !isProcessing && !isMemoMode;
+
+  const levels: Array<"L1" | "L2" | "L3"> = ["L1", "L2", "L3"];
 
   return (
     <>
@@ -104,11 +69,52 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
                 L1 Processing
               </span>
             )}
+
+            {/* Report-level tabs (L1 / L2 / L3) */}
+            {!isMemoMode && (
+              <div className="ml-3 hidden sm:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
+                {levels.map((lvl) => {
+                  const active = reportLevel === lvl;
+                  return (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => onReportLevelChange?.(lvl)}
+                      disabled={lvl !== "L1"}
+                      className={cn(
+                        "px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-colors",
+                        active
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                        lvl !== "L1" && "opacity-40 cursor-not-allowed hover:text-muted-foreground",
+                      )}
+                      title={lvl === "L1" ? "L1 Triage Report" : `${lvl} (coming soon)`}
+                    >
+                      {lvl}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
             <NotificationsDropdown />
+            {onOpenComments && !isMemoMode && (
+              <button
+                onClick={onOpenComments}
+                className="relative p-1.5 rounded-md hover:bg-muted transition-colors"
+                title="Open comments"
+              >
+                <MessagesSquare className="h-4 w-4 text-muted-foreground" />
+                {commentsCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-foreground text-background text-[9px] font-bold leading-none min-w-[14px] h-[14px] px-1">
+                    {commentsCount > 99 ? "99+" : commentsCount}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               onClick={toggleMeeting}
               className={`p-1.5 rounded-md transition-colors ${
@@ -126,12 +132,6 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
             >
               <Share2 className="h-4 w-4 text-muted-foreground" />
             </button>
-
-            {cta && !isProcessing && !isMemoMode && (
-              <button className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-muted active:scale-95">
-                {cta.label}
-              </button>
-            )}
 
             {isMemoMode ? (
               <button
@@ -155,81 +155,6 @@ export function ProjectTopBar({ project, isProcessing, mode }: ProjectTopBarProp
             )}
           </div>
         </div>
-
-        {/* PRD §3.2 — Cover Block */}
-        {showCoverBlock && (
-          <div className="border-t border-border/40 bg-muted/20 px-4 sm:px-5 py-2.5">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              {/* Report type label */}
-              <span className="inline-flex items-center gap-1 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                <FileBadge className="h-3 w-3" />
-                L1 Triage Report
-              </span>
-
-              {/* Working-name pills */}
-              <div className="flex items-center gap-1 flex-wrap">
-                {pills.map((p, i) => (
-                  <span
-                    key={`${p}-${i}`}
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      i === 0
-                        ? "bg-foreground text-background"
-                        : "border border-border text-muted-foreground"
-                    }`}
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-
-              {/* Sponsor line */}
-              {project.gp_entity_name && (
-                <span className="text-[11px] text-muted-foreground">
-                  Sponsor: <span className="text-foreground font-medium">{project.gp_entity_name}</span>
-                </span>
-              )}
-
-              {/* Spacer */}
-              <div className="flex-1 min-w-0" />
-
-              {/* Analysis date */}
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                {analysisDate || "—"}
-              </span>
-
-              {/* Analyst */}
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                <User className="h-3 w-3" />
-                nvestiv-pipeline
-              </span>
-
-              {/* Scorecard version */}
-              <span className="inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-                Scorecard v1.0
-              </span>
-
-              {/* Related prior report — placeholder chip */}
-              <span className="inline-flex items-center gap-1 rounded border border-dashed border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                <Link2 className="h-2.5 w-2.5" />
-                No prior report
-              </span>
-
-              {/* Composite badge */}
-              <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-bold tabular-nums">
-                <span className="text-muted-foreground text-[9px] uppercase tracking-wider mr-0.5">
-                  Composite
-                </span>
-                <span className="text-foreground">{composite ?? "—"}</span>
-                <span className="text-muted-foreground text-[10px]">/100</span>
-              </span>
-
-              {/* Recommendation + Tier */}
-              <RecommendationBadge recommendation={rec} />
-              <TierPill tier={tier} />
-            </div>
-          </div>
-        )}
       </header>
 
       <ShareModal

@@ -26,6 +26,7 @@ import { SectionProvider } from "@/contexts/SectionContext";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -55,6 +56,8 @@ export default function ProjectDetail() {
   const [criticalInfoGaps, setCriticalInfoGaps] = useState<any[]>([]);
   const [engagementCaseStudies, setEngagementCaseStudies] = useState<any[]>([]);
   const [reportSections, setReportSections] = useState<Tables<"report_sections">[]>([]);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(0);
 
   // PRD v2.0 §2.1 — old → new slug redirects
   const TAB_REDIRECTS: Record<string, string> = {
@@ -146,6 +149,29 @@ export default function ProjectDetail() {
     return () => { supabase.removeChannel(ch); };
   }, [id, fetchData, toast]);
 
+  // Live unread/total comment count for the top-bar badge
+  useEffect(() => {
+    if (!id) return;
+    const loadCount = async () => {
+      const { count } = await supabase
+        .from("comments")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", id)
+        .is("resolved_at", null);
+      setCommentsCount(count ?? 0);
+    };
+    loadCount();
+    const ch = supabase
+      .channel(`comments-count-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "comments", filter: `project_id=eq.${id}` },
+        loadCount,
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id]);
+
   useEffect(() => {
     if (project) setProjectScope({ id: project.id, name: project.fund_name });
     return () => { setProjectScope(null); };
@@ -194,7 +220,13 @@ export default function ProjectDetail() {
     <MeetingModeProvider dealId={project.id}>
     <CitationsProvider projectId={project.id} initialSources={researchSources}>
     <div className="flex flex-col h-screen bg-background overflow-hidden">
-      <ProjectTopBar project={project} isProcessing={isProcessing} />
+      <ProjectTopBar
+        project={project}
+        isProcessing={isProcessing}
+        reportLevel="L1"
+        onOpenComments={() => setCommentsOpen(true)}
+        commentsCount={commentsCount}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectSidebar
@@ -341,16 +373,25 @@ export default function ProjectDetail() {
           </main>
         </div>
 
-        <CommentsRail
-          projectId={project.id}
-          projectName={project.fund_name}
-          activeSection={activeTab}
-          isProcessing={isProcessing}
-        />
       </div>
 
       <MobileBottomNav />
       <PinnedCitationsStack />
+
+      {/* Slide-in comments drawer (opens from the top-bar Comments button) */}
+      <Sheet open={commentsOpen} onOpenChange={setCommentsOpen}>
+        <SheetContent
+          side="right"
+          className="p-0 w-full sm:max-w-[33vw] sm:w-[33vw]"
+        >
+          <CommentsRail
+            projectId={project.id}
+            projectName={project.fund_name}
+            activeSection={activeTab}
+            isProcessing={isProcessing}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
     </CitationsProvider>
     </MeetingModeProvider>
