@@ -262,11 +262,6 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
                   {/* Fund Name */}
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground text-sm">{project.fund_name}</p>
-                    {citationsByProject[project.id]?.length ? (
-                      <div className="mt-1.5">
-                        <CitationChips citations={citationsByProject[project.id]} max={3} />
-                      </div>
-                    ) : null}
                   </td>
 
                   {/* GP */}
