@@ -1,112 +1,56 @@
 ## Goal
 
-Every section card (across all tabs) gets an attached comment thread directly underneath it. Two visual states:
-- **Empty state** — single inline composer: text input with placeholder "Add a comment…" + Send button.
-- **Populated state** — stacked thread of comments (chronological, oldest → newest) attached to the card with a clear "joined" visual (no gap, shared border feel), plus a compact composer pinned at the bottom.
+Introduce a UI variant switcher on the dashboard top row so the app can host two parallel experiences:
 
-The right-hand `CommentsRail` keeps aggregating all comments but each entry now shows **Section → Card** so the linkage is obvious, and clicking scrolls to the exact card.
+- **Adia** (new default) — a tailored user journey we will build out next.
+- **General** — everything that exists today, untouched.
 
----
+The switcher is the foundation. After it lands, future prompts can scope changes to one variant without bleeding into the other.
 
-## Approach
+## What you'll see
 
-### 1. Stable card identity
+Dashboard top bar, left side, on the same line as the logo and search:
 
-Introduce a `cardId` prop on the two card primitives so each card on a page has a deterministic id used for `comments.sub_card_id`:
-
-- `SectionCard` (`src/components/project/primitives/SectionCard.tsx`) — add optional `cardId: string` and `sectionId: string` props. When both present, render the new `<CardCommentThread>` slot at the bottom.
-- `MarkdownSectionCards` (`src/components/project/MarkdownSectionCards.tsx`) — derive a stable `cardId` from a slugified card title (e.g. `card-investment-thesis-overview`), accept a `sectionId` prop from the parent tab, and render `<CardCommentThread>` per card.
-
-Convention: `sub_card_id` = short slug (e.g. `executive_summary`, `verdict_snapshot`, `findings_overview`). `section_id` = the existing tab key (`overview`, `economics`, …). The DB already has both columns, so no schema change needed.
-
-### 2. New `CardCommentThread` component
-
-`src/components/project/CardCommentThread.tsx`
-
-Responsibilities:
-- Subscribe to `comments` rows where `project_id = X AND section_id = Y AND sub_card_id = Z` via Supabase Realtime (one channel per card; cheap because postgres_changes filters server-side).
-- Render two states:
-  - **Empty**: a compact attached strip (top border merges with the card via `-mt-px rounded-t-none border-t-0`), containing a single-line input + ghost Send icon button. Placeholder: "Add a comment…". Pressing Enter (no Shift) or the icon submits.
-  - **Populated**: thread list (each comment as a small bubble with author chip, relative time, body, resolve toggle), then the same compact composer at the bottom.
-- Inserts go directly to `supabase.from("comments").insert({ project_id, section_id, sub_card_id, author_type: 'human', author_name: 'You', body_md })`.
-- AI authored comments render with the existing "Nvestiv AI" badge convention.
-- Resolved comments dim to 50% and collapse into "N resolved · show" disclosure to keep the thread tidy.
-
-Visual style matches existing primitives (small text, `border-border/60`, `bg-muted/20` for the composer strip) so it reads as the bottom of the card, not a separate block.
-
-### 3. Wire `cardId`/`sectionId` into every tab
-
-Each tab already calls `<SectionCard title=…>` multiple times. Add `sectionId` (the tab key) and `cardId` (a short kebab slug) to each call. Tabs to update:
-
-- `OverviewTab` — verdict_snapshot, findings_overview, executive_summary, fund_snapshot, all_scores
-- `InvestmentThesisTab`, `MarketRealityTab`, `TeamTab`, `TrackRecordTab`, `EconomicsTab`, `RegulatoryOpsTab`, `RedFlagsTab`, `InterrogatoryTab`, `DataRoomTab`, `SourceFilesTab`
-- `MarkdownSectionCards` consumers (the markdown-driven sub-sections in some tabs) — pass `sectionId` from caller, slug derived from heading.
-
-No content changes required — purely additive props.
-
-### 4. Update `CommentsRail` (right-hand panel)
-
-`src/components/project/CommentsRail.tsx`:
-- Group comments by `section_id` → `sub_card_id` instead of a flat list.
-- Each comment shows `Section › Card` breadcrumb (e.g. `Overview › Executive Summary`). When `sub_card_id` is null, fall back to current section-only label.
-- Card label resolution: a small registry `CARD_LABELS: Record<string, string>` keyed by `${section_id}::${sub_card_id}` so the rail shows human names. Anything missing falls back to titlecased slug.
-- Click on a comment scrolls to `#card-${section_id}-${sub_card_id}` (we add this `id` to the `<section>` element in `SectionCard` when `cardId` is provided) and switches tabs if needed via the existing tab query param.
-- The rail's existing "Add" modal becomes a fallback only — primary entry is the inline composer on the card. Keep the modal for quick top-level notes.
-
-### 5. Aggregation page
-
-`src/pages/CommentsPage.tsx` gets the same `Section › Card` label treatment and the section deep-link becomes `/project/:id?tab=…#card-…-…` so clicking jumps straight to the card.
-
----
-
-## Technical details
-
-**Files created**
-- `src/components/project/CardCommentThread.tsx` — the attached thread + composer
-- `src/lib/card-labels.ts` — registry mapping `${sectionId}::${cardId}` → human label, plus `slugify` helper
-
-**Files edited**
-- `src/components/project/primitives/SectionCard.tsx` — accept `sectionId`, `cardId`; render thread; set DOM `id`
-- `src/components/project/MarkdownSectionCards.tsx` — accept `sectionId`; auto-slug per card; render thread
-- All tab files in `src/components/project/*Tab.tsx` — pass `sectionId` + `cardId` per card (mechanical)
-- `src/components/project/CommentsRail.tsx` — group/label by card, deep-link scroll
-- `src/pages/CommentsPage.tsx` — same label treatment
-
-**No DB changes** — `comments.sub_card_id` already exists; realtime is already enabled on `comments`.
-
-**Realtime hygiene** — each `CardCommentThread` opens its own filtered channel. Channels auto-clean on unmount. For pages with ~6–10 cards this is well within Supabase realtime limits.
-
-**Meeting Mode** — wrap the thread in `data-meeting-hide="true"` so presentations stay clean (consistent with existing pattern).
-
----
-
-## ASCII layout
-
-```text
-┌────────────────────────────────── Card ─┐
-│ Header: Title · subtitle                │
-├─────────────────────────────────────────┤
-│ Card body (existing content)            │
-├──── attached comment strip ─────────────┤  ← empty state
-│  [ Add a comment…              ] [↵]    │
-└─────────────────────────────────────────┘
-
-┌────────────────────────────────── Card ─┐
-│ Header                                  │
-├─────────────────────────────────────────┤
-│ Card body                               │
-├──── thread (2) ─────────────────────────┤  ← populated
-│ • Sara · 2h     "Push back on IRR…" [✓] │
-│ • Nvestiv AI    "Track-record claims …" │
-│ ─────────────────────────────────────── │
-│  [ Reply…                      ] [↵]    │
-└─────────────────────────────────────────┘
+```
+[Nvestiv logo]  [Adia ▾]   [Search…]                [Notifications] [Ask Iris]
 ```
 
----
+- Dropdown options: **Adia** (default) and **General**.
+- Selection persists across reloads (per browser) and is shared across every page.
+- No visible change anywhere else yet — both variants render identically today.
 
-## Out of scope
+## How variants work going forward
 
-- Threaded replies (parent_comment_id) — the column exists but UI stays flat for now.
-- @mentions / notifications.
-- Edit/delete of own comments (only resolve toggle ships).
+- A single `useUiVariant()` hook returns the current variant.
+- Variant-specific work is **additive and conditional**: when we build an Adia-only screen or component, we branch on `variant === "adia"`. The General path keeps its current code unchanged.
+- Variants share routes and the backend. The journey divergence lives in the UI layer (pages, components, navigation), so nothing in Supabase or the analysis pipeline needs to fork.
+- Routes stay shared. If an Adia-specific page is needed, it renders behind the variant check on the same URL, so links don't break when toggling.
+
+## Implementation
+
+1. **`UiVariantContext`** (`src/contexts/UiVariantContext.tsx`)
+   - `variant: "adia" | "general"`, `setVariant`, default `"adia"`.
+   - Persists to `localStorage` under `nvestiv.ui-variant`; rehydrates on mount.
+   - Provider mounted in `src/App.tsx` alongside `ChatProvider`.
+
+2. **`VariantSwitcher`** (`src/components/layout/VariantSwitcher.tsx`)
+   - Compact monochrome dropdown built on existing `DropdownMenu` primitives.
+   - Shows current variant label with a chevron; menu lists Adia and General with a checkmark on the active option.
+   - Sized to sit inline next to the logo on desktop; collapses to icon-only label on small screens to avoid crowding the search input.
+
+3. **Dashboard top bar** (`src/pages/Dashboard.tsx`)
+   - Insert `<VariantSwitcher />` between the logo `Link` and `<CommandSearch />`.
+   - No other layout changes.
+
+## Out of scope (handled in follow-up prompts)
+
+- No actual divergence between Adia and General is introduced yet.
+- No new routes, no schema changes, no backend changes.
+- The Adia journey itself will be defined and built in subsequent prompts.
+
+## Files touched
+
+- add `src/contexts/UiVariantContext.tsx`
+- add `src/components/layout/VariantSwitcher.tsx`
+- edit `src/App.tsx`
+- edit `src/pages/Dashboard.tsx`
