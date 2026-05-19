@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { CommandSearch } from "@/components/search/CommandSearch";
+import { VariantSwitcher } from "@/components/layout/VariantSwitcher";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
@@ -200,6 +201,7 @@ export default function Dashboard() {
             <Link to="/dashboard" className="flex items-center shrink-0">
               <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
             </Link>
+            <VariantSwitcher />
 
             <CommandSearch />
 
