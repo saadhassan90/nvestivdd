@@ -187,7 +187,7 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
 
       {/* Right rail — desktop only */}
       <div className="hidden lg:block w-[380px] shrink-0 border-l border-border">
-        <EmbeddedIrisChat fundName={project.fund_name} memoId={null} />
+        <EmbeddedIrisChat fundName={project.fund_name} memoId={null} oddProjectId={project.id} />
       </div>
 
       <OddImportModal
