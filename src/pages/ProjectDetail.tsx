@@ -28,6 +28,8 @@ import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useUiVariant } from "@/contexts/UiVariantContext";
+import { OddWorkspace } from "@/components/odd/OddWorkspace";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -38,6 +40,7 @@ export default function ProjectDetail() {
 
   const { toast } = useToast();
   const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const { variant } = useUiVariant();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [redFlags, setRedFlags] = useState<Tables<"red_flags">[]>([]);
@@ -69,6 +72,9 @@ export default function ProjectDetail() {
     performance: "track_record",
   };
   const initialTabRaw = searchParams.get("tab") || "overview";
+  const stageParam = searchParams.get("stage");
+  // ADIA variant defaults to ODD stage; General never sees ODD.
+  const isOddStage = variant === "adia" && (stageParam === "odd" || (!stageParam && !searchParams.get("tab")));
   const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
@@ -226,15 +232,29 @@ export default function ProjectDetail() {
       <ProjectTopBar
         project={project}
         isProcessing={isProcessing}
-        reportLevel="L1"
+        reportLevel={isOddStage ? "ODD" : "L1"}
         onReportLevelChange={(lvl) => {
           if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+          else if (lvl === "ODD") {
+            const p = new URLSearchParams(searchParams);
+            p.set("stage", "odd");
+            p.delete("tab");
+            setSearchParams(p, { replace: true });
+          } else if (lvl === "L1") {
+            const p = new URLSearchParams(searchParams);
+            p.delete("stage");
+            if (!p.get("tab")) p.set("tab", "overview");
+            setSearchParams(p, { replace: true });
+          }
           // L1 is current; L2 is locked (no-op)
         }}
         onOpenComments={() => setCommentsOpen(true)}
         commentsCount={commentsCount}
       />
 
+      {isOddStage ? (
+        <OddWorkspace project={project} />
+      ) : (
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <div className="hidden lg:contents">
           <ProjectSidebar
@@ -383,6 +403,7 @@ export default function ProjectDetail() {
         </div>
 
       </div>
+      )}
 
       <MobileBottomNav
         onOpenComments={() => setCommentsOpen(true)}

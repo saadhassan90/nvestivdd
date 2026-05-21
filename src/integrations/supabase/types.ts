@@ -1019,6 +1019,78 @@ export type Database = {
           },
         ]
       }
+      odd_reports: {
+        Row: {
+          content_json: Json
+          content_markdown: string
+          created_at: string
+          id: string
+          project_id: string
+          risk_rating: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content_json?: Json
+          content_markdown?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          risk_rating?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          content_json?: Json
+          content_markdown?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          risk_rating?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      odd_section_results: {
+        Row: {
+          content_markdown: string | null
+          created_at: string
+          error_message: string | null
+          flag_count: number
+          id: string
+          project_id: string
+          section_key: string
+          status: string
+          updated_at: string
+          verification_status: string | null
+        }
+        Insert: {
+          content_markdown?: string | null
+          created_at?: string
+          error_message?: string | null
+          flag_count?: number
+          id?: string
+          project_id: string
+          section_key: string
+          status?: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Update: {
+          content_markdown?: string | null
+          created_at?: string
+          error_message?: string | null
+          flag_count?: number
+          id?: string
+          project_id?: string
+          section_key?: string
+          status?: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
       performance_metrics: {
         Row: {
           alpha: string | null
