@@ -28,6 +28,8 @@ import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useUiVariant } from "@/contexts/UiVariantContext";
+import { OddWorkspace } from "@/components/odd/OddWorkspace";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -38,6 +40,7 @@ export default function ProjectDetail() {
 
   const { toast } = useToast();
   const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const { variant } = useUiVariant();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
   const [redFlags, setRedFlags] = useState<Tables<"red_flags">[]>([]);
@@ -69,6 +72,9 @@ export default function ProjectDetail() {
     performance: "track_record",
   };
   const initialTabRaw = searchParams.get("tab") || "overview";
+  const stageParam = searchParams.get("stage");
+  // ADIA variant defaults to ODD stage; General never sees ODD.
+  const isOddStage = variant === "adia" && (stageParam === "odd" || (!stageParam && !searchParams.get("tab")));
   const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
