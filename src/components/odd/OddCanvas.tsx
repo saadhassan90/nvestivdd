@@ -63,7 +63,7 @@ export function OddCanvas({
   return (
     <div ref={scrollerRef} className="flex-1 overflow-y-auto bg-background">
       <div className="mx-auto w-full max-w-[820px] px-6 sm:px-10 py-10">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+        <h1 className="text-xl font-semibold text-foreground tracking-tight mb-1">
           {fundName}
         </h1>
         <p className="text-sm text-muted-foreground mb-8">Operational Due Diligence Report</p>
@@ -79,7 +79,7 @@ export function OddCanvas({
               }}
               className="mb-10 scroll-mt-6"
             >
-              <h2 className="text-3xl font-bold text-foreground tracking-tight mb-4 pb-2 border-b border-border">
+              <h2 className="text-lg font-semibold text-foreground tracking-tight mb-3 pb-2 border-b border-border">
                 {s.title}
               </h2>
 
