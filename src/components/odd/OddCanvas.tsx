@@ -79,7 +79,7 @@ export function OddCanvas({
               }}
               className="mb-10 scroll-mt-6"
             >
-              <h2 className="text-lg font-semibold text-foreground tracking-tight mb-3 pb-1 border-b border-border">
+              <h2 className="text-3xl font-bold text-foreground tracking-tight mb-4 pb-2 border-b border-border">
                 {s.title}
               </h2>
 
