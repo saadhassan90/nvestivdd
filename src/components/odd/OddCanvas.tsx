@@ -74,7 +74,7 @@ export function OddCanvas({
             <section
               key={s.key}
               id={`odd-section-${s.key}`}
-              ref={(el) => {
+              ref={(el: HTMLDivElement | null) => {
                 sectionRefs.current[s.key] = el;
               }}
               className="mb-10 scroll-mt-6"
