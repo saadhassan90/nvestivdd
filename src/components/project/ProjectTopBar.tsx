@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, MessagesSquare } from "lucide-react";
+import { ArrowLeft, Share2, Sparkles, MessagesSquare, Lock } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useUiVariant } from "@/contexts/UiVariantContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProjectTopBarProps {
@@ -17,8 +18,8 @@ interface ProjectTopBarProps {
    *  + Back-to-Reports button. Defaults to undefined (= L1 tabs page). */
   mode?: "memo";
   /** Selected report level (defaults to "L1"). L2/L3 are placeholders for now. */
-  reportLevel?: "L1" | "L2" | "L3";
-  onReportLevelChange?: (level: "L1" | "L2" | "L3") => void;
+  reportLevel?: "L1" | "L2" | "L3" | "ODD";
+  onReportLevelChange?: (level: "L1" | "L2" | "L3" | "ODD") => void;
   /** Opens the slide-in comments drawer. */
   onOpenComments?: () => void;
   commentsCount?: number;
@@ -35,16 +36,30 @@ export function ProjectTopBar({
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
+  const { variant } = useUiVariant();
   const [shareOpen, setShareOpen] = useState(false);
 
   const statusColor = getStatusColor(project.status);
   const isMemoMode = mode === "memo";
 
-  const levels: Array<"L1" | "L2" | "L3"> = ["L1", "L2", "L3"];
-  const levelMeta: Record<"L1" | "L2" | "L3", { label: string; available: boolean }> = {
-    L1: { label: "L1 — Triage Report", available: true },
-    L2: { label: "L2 — Deep Dive (coming soon)", available: false },
-    L3: { label: "L3 — IC Memo", available: true },
+  const isAdia = variant === "adia";
+  const levels: Array<"L1" | "L2" | "L3" | "ODD"> = isAdia
+    ? ["L1", "L2", "ODD", "L3"]
+    : ["L1", "L2", "L3"];
+  const levelMeta: Record<"L1" | "L2" | "L3" | "ODD", { label: string; available: boolean }> = {
+    L1: {
+      label: isAdia ? "L1 — Locked in ADIA demo" : "L1 — Triage Report",
+      available: !isAdia,
+    },
+    L2: {
+      label: isAdia ? "L2 — Locked in ADIA demo" : "L2 — Deep Dive (coming soon)",
+      available: false,
+    },
+    ODD: { label: "ODD — Operational Due Diligence", available: isAdia },
+    L3: {
+      label: isAdia ? "L3 — Locked in ADIA demo" : "L3 — IC Memo",
+      available: !isAdia,
+    },
   };
 
   return (
