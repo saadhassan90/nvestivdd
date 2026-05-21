@@ -43,7 +43,39 @@ const MODEL_MAP: Record<string, string> = {
   "gemini-pro": "claude-sonnet-4-5-20250929",
 };
 
-function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
+function buildSystemPrompt(
+  projectContext?: any,
+  memoContext?: { id: string; markdown: string } | null,
+  oddContext?: { projectId: string; sections: { key: string; title: string; content: string }[] } | null,
+) {
+  // FAST PATH: in ODD mode, single-purpose tool + tight prompt.
+  if (oddContext) {
+    let oddBase = `You are Iris, co-authoring an ADIA Operational Due Diligence (ODD) report. You have direct write access to the report sections via the \`edit_odd_section\` tool.
+
+## RULES (ODD mode)
+- For ANY user request to draft / write / add / append / prepend / tighten / rewrite / restructure / expand / shorten / change ANY part of the report: call \`edit_odd_section\` immediately. Do not explain first, do not ask permission, do not say "I'll do that" — just call the tool.
+- Never refuse or defer canvas edits. Never tell the user to edit it themselves. Do NOT mention IC memos — this is an ODD report.
+- Operations: \`replace_section\`, \`append_to_section\`, \`prepend_to_section\`. Match \`section_key\` exactly to one of the six allowed keys.
+- After the edit succeeds, reply with ONE short sentence summarizing what changed.
+- For pure questions about the report content, answer directly without calling tools.
+
+## Section keys (use these exact values)
+${ODD_SECTION_KEYS.map((k) => `- \`${k}\` — ${ODD_SECTION_TITLES[k]}`).join("\n")}
+
+If the user asks for a generic addition (e.g. "add a footer") that doesn't name a section, append to \`sources_appendix\`.`;
+
+    if (projectContext) {
+      oddBase += `\n\nFund: "${projectContext.fund_name}" (project_id: ${projectContext.id}).`;
+    }
+
+    // Tight per-section excerpts (1.2k chars each — enough for orientation, full body fetched on edit).
+    oddBase += `\n\n## Current report sections (truncated)\n\n`;
+    for (const s of oddContext.sections) {
+      oddBase += `### ${s.title} (\`${s.key}\`)\n\n\`\`\`markdown\n${(s.content || "").slice(0, 1200)}\n\`\`\`\n\n`;
+    }
+    return oddBase;
+  }
+
   // FAST PATH: in IC Memo mode we want minimal prompt + single-purpose tool to keep TTFT low.
   if (memoContext) {
     let memoBase = `You are Iris, co-authoring an IC memo. You have direct write access to the canvas via the \`edit_memo\` tool.
