@@ -5,6 +5,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import "@blocknote/core/fonts/inter.css";
 import "@/components/memo/ic-memo-canvas.css";
+import "./odd-section-editor.css";
 
 interface OddSectionEditorProps {
   /** Markdown seed for this section's body (no H2 — header rendered outside). */
@@ -49,7 +50,7 @@ export function OddSectionEditor({ seedMarkdown, resetKey, onChange }: OddSectio
   }, [editor, resetKey]);
 
   return (
-    <div className="ic-memo-canvas -mx-3">
+    <div className="ic-memo-canvas odd-section-canvas -mx-3">
       <BlockNoteView
         editor={editor}
         theme="light"
