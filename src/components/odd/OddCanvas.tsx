@@ -30,7 +30,7 @@ export function OddCanvas({
   onRegisterScroll,
   onActiveSectionChange,
 }: OddCanvasProps) {
-  const sectionRefs = useRef<Partial<Record<OddSectionKey, HTMLDivElement | null>>>({});
+  const sectionRefs = useRef<Partial<Record<OddSectionKey, HTMLElement | null>>>({});
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export function OddCanvas({
             <section
               key={s.key}
               id={`odd-section-${s.key}`}
-              ref={(el: HTMLDivElement | null) => {
+              ref={(el: HTMLElement | null) => {
                 sectionRefs.current[s.key] = el;
               }}
               className="mb-10 scroll-mt-6"
