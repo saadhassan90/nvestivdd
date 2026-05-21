@@ -403,6 +403,7 @@ export default function ProjectDetail() {
         </div>
 
       </div>
+      )}
 
       <MobileBottomNav
         onOpenComments={() => setCommentsOpen(true)}
