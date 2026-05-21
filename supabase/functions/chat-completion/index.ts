@@ -524,9 +524,67 @@ function applyMemoEdit(
   return { ok: true, markdown: out.join("\n") };
 }
 
-async function executeTool(name: string, input: any, ctx: { memoId?: string | null } = {}): Promise<string> {
+async function executeTool(
+  name: string,
+  input: any,
+  ctx: { memoId?: string | null; oddProjectId?: string | null } = {},
+): Promise<string> {
   try {
     switch (name) {
+      case "edit_odd_section": {
+        if (!ctx.oddProjectId) {
+          return JSON.stringify({ error: "No ODD report is currently open. edit_odd_section can only be used in the ODD workspace." });
+        }
+        const key = input.section_key;
+        if (!ODD_SECTION_KEYS.includes(key)) {
+          return JSON.stringify({ error: `Invalid section_key "${key}". Must be one of: ${ODD_SECTION_KEYS.join(", ")}` });
+        }
+        const { data: row, error: fetchErr } = await supabase
+          .from("odd_section_results")
+          .select("id, content_markdown")
+          .eq("project_id", ctx.oddProjectId)
+          .eq("section_key", key)
+          .maybeSingle();
+        if (fetchErr) {
+          return JSON.stringify({ error: `Could not load section: ${fetchErr.message}` });
+        }
+        const current = row?.content_markdown || "";
+        const incoming = input.markdown || "";
+        let next: string;
+        if (input.operation === "replace_section") {
+          next = incoming;
+        } else if (input.operation === "append_to_section") {
+          next = current.trimEnd() + (current.trim() ? "\n\n" : "") + incoming;
+        } else if (input.operation === "prepend_to_section") {
+          next = incoming + (incoming.trim() ? "\n\n" : "") + current;
+        } else {
+          return JSON.stringify({ error: `Unknown operation: ${input.operation}` });
+        }
+        const { error: upErr } = await supabase
+          .from("odd_section_results")
+          .upsert(
+            {
+              project_id: ctx.oddProjectId,
+              section_key: key,
+              status: "complete" as const,
+              content_markdown: next,
+              verification_status: "verified" as const,
+              flag_count: 0,
+              error_message: null,
+            },
+            { onConflict: "project_id,section_key" },
+          );
+        if (upErr) {
+          return JSON.stringify({ error: `Failed to save edit: ${upErr.message}` });
+        }
+        return JSON.stringify({
+          success: true,
+          operation: input.operation,
+          section_key: key,
+          section_title: ODD_SECTION_TITLES[key],
+          summary: `${ODD_SECTION_TITLES[key]} updated (${input.operation})`,
+        });
+      }
       case "edit_memo": {
         if (!ctx.memoId) {
           return JSON.stringify({ error: "No memo is currently open. edit_memo can only be used in the IC Memo workspace." });
