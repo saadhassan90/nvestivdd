@@ -102,13 +102,14 @@ export function ProjectTopBar({
                           onClick={() => available && onReportLevelChange?.(lvl)}
                           disabled={!available}
                           className={cn(
-                            "px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-colors",
+                            "inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-colors",
                             active
                               ? "bg-background text-foreground shadow-sm"
                               : "text-muted-foreground hover:text-foreground",
                             !available && "opacity-40 cursor-not-allowed hover:text-muted-foreground",
                           )}
                         >
+                          {!available && <Lock className="h-2.5 w-2.5" />}
                           {lvl}
                         </button>
                       </TooltipTrigger>
