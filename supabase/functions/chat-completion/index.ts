@@ -926,15 +926,16 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model, project_id, conversation_id, memo_id } = await req.json();
+    const { messages, model, project_id, conversation_id, memo_id, odd_project_id } = await req.json();
 
-    // In memo mode, default to flash-lite for the fastest possible tool calls.
-    const effectiveModel = model || (memo_id ? "haiku-3.5" : "sonnet-4");
+    // In edit modes, default to haiku for fast tool calls.
+    const effectiveModel = model || (memo_id || odd_project_id ? "haiku-3.5" : "sonnet-4");
 
     // Get project context if scoped
     let projectContext = null;
-    if (project_id) {
-      const { data } = await supabase.from("projects").select("*").eq("id", project_id).single();
+    const effectiveProjectId = project_id || odd_project_id;
+    if (effectiveProjectId) {
+      const { data } = await supabase.from("projects").select("*").eq("id", effectiveProjectId).single();
       projectContext = data;
     }
 
@@ -949,11 +950,33 @@ serve(async (req) => {
       if (data) memoContext = { id: data.id, markdown: data.content_markdown || "" };
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext, memoContext);
+    // Get ODD context if in ODD workspace
+    let oddContext: { projectId: string; sections: { key: string; title: string; content: string }[] } | null = null;
+    if (odd_project_id) {
+      const { data } = await supabase
+        .from("odd_section_results")
+        .select("section_key, content_markdown")
+        .eq("project_id", odd_project_id);
+      const byKey = new Map((data || []).map((r: any) => [r.section_key, r.content_markdown || ""]));
+      oddContext = {
+        projectId: odd_project_id,
+        sections: ODD_SECTION_KEYS.map((k) => ({
+          key: k,
+          title: ODD_SECTION_TITLES[k],
+          content: byKey.get(k) || "",
+        })),
+      };
+    }
+
+    const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
-    // In memo mode, expose ONLY edit_memo to force fast tool selection.
-    const activeTools = memo_id ? tools.filter((t) => t.name === "edit_memo") : tools;
+    // In edit modes, expose ONLY the relevant edit tool to force fast tool selection.
+    const activeTools = oddContext
+      ? tools.filter((t) => t.name === "edit_odd_section")
+      : memo_id
+        ? tools.filter((t) => t.name === "edit_memo")
+        : tools;
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -965,8 +988,8 @@ serve(async (req) => {
         system: systemPrompt,
         messages: msgs,
         tools: anthropicTools,
-        max_tokens: memo_id ? 4096 : 8192,
-        temperature: memo_id ? 0.3 : 0.7,
+        max_tokens: memo_id || odd_project_id ? 4096 : 8192,
+        temperature: memo_id || odd_project_id ? 0.3 : 0.7,
         stream: true,
       };
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1109,7 +1132,7 @@ serve(async (req) => {
               const toolResultBlocks = await Promise.all(
                 pendingFunctionCalls.map(async (fc) => {
                   send("tool_executing", { name: fc.name, id: fc.id });
-                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id });
+                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id, oddProjectId: odd_project_id });
                   let parsed: any;
                   try { parsed = JSON.parse(result); } catch { parsed = { raw: result }; }
                   allToolCalls.push({ name: fc.name, input: fc.args, output: parsed });
