@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { ODD_SECTIONS, type OddSectionKey } from "@/lib/odd-template";
-import { MarkdownContent } from "@/components/project/MarkdownContent";
 import { OddSectionSkeleton } from "./OddSectionSkeleton";
+import { OddSectionEditor } from "./OddSectionEditor";
 
 export type OddSectionRuntimeStatus = "pending" | "running" | "complete" | "error";
 
@@ -84,8 +84,9 @@ export function OddCanvas({
               </h2>
 
               {state?.status === "complete" && state.content ? (
-                <EditableSection
-                  initial={state.content}
+                <OddSectionEditor
+                  seedMarkdown={state.content}
+                  resetKey={`${s.key}-${state.content.length}`}
                   onChange={(md) => onSectionEdit?.(s.key, md)}
                 />
               ) : state?.status === "error" ? (
@@ -102,20 +103,6 @@ export function OddCanvas({
       </div>
     </div>
   );
-}
-
-function EditableSection({
-  initial,
-  onChange,
-}: {
-  initial: string;
-  onChange: (md: string) => void;
-}) {
-  // V1: rendered markdown is read-only; the analyst edits via Iris in the right rail
-  // or via direct editing once we wire BlockNote per-section. This component is the
-  // future hook-point.
-  void onChange;
-  return <MarkdownContent content={initial} />;
 }
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry?: () => void }) {
