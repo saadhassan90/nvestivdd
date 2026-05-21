@@ -102,6 +102,23 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
     scrollFnRef.current?.(key);
   }, []);
 
+  // Debounced per-section persistence of inline edits
+  const saveTimers = useRef<Partial<Record<OddSectionKey, ReturnType<typeof setTimeout>>>>({});
+  const handleSectionEdit = useCallback(
+    (key: OddSectionKey, markdown: string) => {
+      const existing = saveTimers.current[key];
+      if (existing) clearTimeout(existing);
+      saveTimers.current[key] = setTimeout(async () => {
+        await supabase
+          .from("odd_section_results")
+          .update({ content_markdown: markdown })
+          .eq("project_id", project.id)
+          .eq("section_key", key);
+      }, 800);
+    },
+    [project.id],
+  );
+
   const handleTestRun = useCallback(async () => {
     await generateMockOddReport(project.id, project.fund_name);
     toast({
@@ -148,6 +165,7 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
             fundName={project.fund_name}
             sections={sections}
             onRetrySection={retrySection}
+            onSectionEdit={handleSectionEdit}
             onRegisterScroll={(fn) => {
               scrollFnRef.current = fn;
             }}
