@@ -15,6 +15,24 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// ODD report section keys (must mirror src/lib/odd-template.ts)
+const ODD_SECTION_KEYS = [
+  "firm_stability",
+  "staffing",
+  "people_process_systems",
+  "fund_terms",
+  "discrepancy_register",
+  "sources_appendix",
+] as const;
+const ODD_SECTION_TITLES: Record<string, string> = {
+  firm_stability: "Firm Stability",
+  staffing: "Staffing",
+  people_process_systems: "People / Process / Systems",
+  fund_terms: "Fund Terms",
+  discrepancy_register: "Discrepancy Register",
+  sources_appendix: "Sources & Appendix",
+};
+
 // Map legacy model aliases (used by the client) to Gemini model IDs.
 // Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
@@ -25,7 +43,39 @@ const MODEL_MAP: Record<string, string> = {
   "gemini-pro": "claude-sonnet-4-5-20250929",
 };
 
-function buildSystemPrompt(projectContext?: any, memoContext?: { id: string; markdown: string } | null) {
+function buildSystemPrompt(
+  projectContext?: any,
+  memoContext?: { id: string; markdown: string } | null,
+  oddContext?: { projectId: string; sections: { key: string; title: string; content: string }[] } | null,
+) {
+  // FAST PATH: in ODD mode, single-purpose tool + tight prompt.
+  if (oddContext) {
+    let oddBase = `You are Iris, co-authoring an ADIA Operational Due Diligence (ODD) report. You have direct write access to the report sections via the \`edit_odd_section\` tool.
+
+## RULES (ODD mode)
+- For ANY user request to draft / write / add / append / prepend / tighten / rewrite / restructure / expand / shorten / change ANY part of the report: call \`edit_odd_section\` immediately. Do not explain first, do not ask permission, do not say "I'll do that" — just call the tool.
+- Never refuse or defer canvas edits. Never tell the user to edit it themselves. Do NOT mention IC memos — this is an ODD report.
+- Operations: \`replace_section\`, \`append_to_section\`, \`prepend_to_section\`. Match \`section_key\` exactly to one of the six allowed keys.
+- After the edit succeeds, reply with ONE short sentence summarizing what changed.
+- For pure questions about the report content, answer directly without calling tools.
+
+## Section keys (use these exact values)
+${ODD_SECTION_KEYS.map((k) => `- \`${k}\` — ${ODD_SECTION_TITLES[k]}`).join("\n")}
+
+If the user asks for a generic addition (e.g. "add a footer") that doesn't name a section, append to \`sources_appendix\`.`;
+
+    if (projectContext) {
+      oddBase += `\n\nFund: "${projectContext.fund_name}" (project_id: ${projectContext.id}).`;
+    }
+
+    // Tight per-section excerpts (1.2k chars each — enough for orientation, full body fetched on edit).
+    oddBase += `\n\n## Current report sections (truncated)\n\n`;
+    for (const s of oddContext.sections) {
+      oddBase += `### ${s.title} (\`${s.key}\`)\n\n\`\`\`markdown\n${(s.content || "").slice(0, 1200)}\n\`\`\`\n\n`;
+    }
+    return oddBase;
+  }
+
   // FAST PATH: in IC Memo mode we want minimal prompt + single-purpose tool to keep TTFT low.
   if (memoContext) {
     let memoBase = `You are Iris, co-authoring an IC memo. You have direct write access to the canvas via the \`edit_memo\` tool.
@@ -364,6 +414,37 @@ const tools = [
       required: ["operation", "markdown"],
     },
   },
+  {
+    name: "edit_odd_section",
+    description: "Edit a section of the ADIA Operational Due Diligence (ODD) report. Use this for ANY user request to draft, write, add, append, prepend, tighten, rewrite, restructure, expand, shorten, or otherwise modify the ODD report — including section bodies, paragraphs, tables, and footers. Edits persist immediately and stream live to the user's canvas via realtime. Never refuse or defer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        operation: {
+          type: "string",
+          enum: ["replace_section", "append_to_section", "prepend_to_section"],
+          description: "How to apply the edit within the target section body.",
+        },
+        section_key: {
+          type: "string",
+          enum: [
+            "firm_stability",
+            "staffing",
+            "people_process_systems",
+            "fund_terms",
+            "discrepancy_register",
+            "sources_appendix",
+          ],
+          description: "Which ODD report section to edit. Must match exactly.",
+        },
+        markdown: {
+          type: "string",
+          description: "The markdown content to write. Do NOT include the section's H2 heading — that is rendered separately. Just write the body.",
+        },
+      },
+      required: ["operation", "section_key", "markdown"],
+    },
+  },
 ];
 
 function applyMemoEdit(
@@ -443,9 +524,67 @@ function applyMemoEdit(
   return { ok: true, markdown: out.join("\n") };
 }
 
-async function executeTool(name: string, input: any, ctx: { memoId?: string | null } = {}): Promise<string> {
+async function executeTool(
+  name: string,
+  input: any,
+  ctx: { memoId?: string | null; oddProjectId?: string | null } = {},
+): Promise<string> {
   try {
     switch (name) {
+      case "edit_odd_section": {
+        if (!ctx.oddProjectId) {
+          return JSON.stringify({ error: "No ODD report is currently open. edit_odd_section can only be used in the ODD workspace." });
+        }
+        const key = input.section_key;
+        if (!ODD_SECTION_KEYS.includes(key)) {
+          return JSON.stringify({ error: `Invalid section_key "${key}". Must be one of: ${ODD_SECTION_KEYS.join(", ")}` });
+        }
+        const { data: row, error: fetchErr } = await supabase
+          .from("odd_section_results")
+          .select("id, content_markdown")
+          .eq("project_id", ctx.oddProjectId)
+          .eq("section_key", key)
+          .maybeSingle();
+        if (fetchErr) {
+          return JSON.stringify({ error: `Could not load section: ${fetchErr.message}` });
+        }
+        const current = row?.content_markdown || "";
+        const incoming = input.markdown || "";
+        let next: string;
+        if (input.operation === "replace_section") {
+          next = incoming;
+        } else if (input.operation === "append_to_section") {
+          next = current.trimEnd() + (current.trim() ? "\n\n" : "") + incoming;
+        } else if (input.operation === "prepend_to_section") {
+          next = incoming + (incoming.trim() ? "\n\n" : "") + current;
+        } else {
+          return JSON.stringify({ error: `Unknown operation: ${input.operation}` });
+        }
+        const { error: upErr } = await supabase
+          .from("odd_section_results")
+          .upsert(
+            {
+              project_id: ctx.oddProjectId,
+              section_key: key,
+              status: "complete" as const,
+              content_markdown: next,
+              verification_status: "verified" as const,
+              flag_count: 0,
+              error_message: null,
+            },
+            { onConflict: "project_id,section_key" },
+          );
+        if (upErr) {
+          return JSON.stringify({ error: `Failed to save edit: ${upErr.message}` });
+        }
+        return JSON.stringify({
+          success: true,
+          operation: input.operation,
+          section_key: key,
+          section_title: ODD_SECTION_TITLES[key],
+          summary: `${ODD_SECTION_TITLES[key]} updated (${input.operation})`,
+        });
+      }
       case "edit_memo": {
         if (!ctx.memoId) {
           return JSON.stringify({ error: "No memo is currently open. edit_memo can only be used in the IC Memo workspace." });
@@ -787,15 +926,16 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model, project_id, conversation_id, memo_id } = await req.json();
+    const { messages, model, project_id, conversation_id, memo_id, odd_project_id } = await req.json();
 
-    // In memo mode, default to flash-lite for the fastest possible tool calls.
-    const effectiveModel = model || (memo_id ? "haiku-3.5" : "sonnet-4");
+    // In edit modes, default to haiku for fast tool calls.
+    const effectiveModel = model || (memo_id || odd_project_id ? "haiku-3.5" : "sonnet-4");
 
     // Get project context if scoped
     let projectContext = null;
-    if (project_id) {
-      const { data } = await supabase.from("projects").select("*").eq("id", project_id).single();
+    const effectiveProjectId = project_id || odd_project_id;
+    if (effectiveProjectId) {
+      const { data } = await supabase.from("projects").select("*").eq("id", effectiveProjectId).single();
       projectContext = data;
     }
 
@@ -810,11 +950,33 @@ serve(async (req) => {
       if (data) memoContext = { id: data.id, markdown: data.content_markdown || "" };
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext, memoContext);
+    // Get ODD context if in ODD workspace
+    let oddContext: { projectId: string; sections: { key: string; title: string; content: string }[] } | null = null;
+    if (odd_project_id) {
+      const { data } = await supabase
+        .from("odd_section_results")
+        .select("section_key, content_markdown")
+        .eq("project_id", odd_project_id);
+      const byKey = new Map((data || []).map((r: any) => [r.section_key, r.content_markdown || ""]));
+      oddContext = {
+        projectId: odd_project_id,
+        sections: ODD_SECTION_KEYS.map((k) => ({
+          key: k,
+          title: ODD_SECTION_TITLES[k],
+          content: byKey.get(k) || "",
+        })),
+      };
+    }
+
+    const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
-    // In memo mode, expose ONLY edit_memo to force fast tool selection.
-    const activeTools = memo_id ? tools.filter((t) => t.name === "edit_memo") : tools;
+    // In edit modes, expose ONLY the relevant edit tool to force fast tool selection.
+    const activeTools = oddContext
+      ? tools.filter((t) => t.name === "edit_odd_section")
+      : memo_id
+        ? tools.filter((t) => t.name === "edit_memo")
+        : tools;
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -826,8 +988,8 @@ serve(async (req) => {
         system: systemPrompt,
         messages: msgs,
         tools: anthropicTools,
-        max_tokens: memo_id ? 4096 : 8192,
-        temperature: memo_id ? 0.3 : 0.7,
+        max_tokens: memo_id || odd_project_id ? 4096 : 8192,
+        temperature: memo_id || odd_project_id ? 0.3 : 0.7,
         stream: true,
       };
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -970,7 +1132,7 @@ serve(async (req) => {
               const toolResultBlocks = await Promise.all(
                 pendingFunctionCalls.map(async (fc) => {
                   send("tool_executing", { name: fc.name, id: fc.id });
-                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id });
+                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id, oddProjectId: odd_project_id });
                   let parsed: any;
                   try { parsed = JSON.parse(result); } catch { parsed = { raw: result }; }
                   allToolCalls.push({ name: fc.name, input: fc.args, output: parsed });

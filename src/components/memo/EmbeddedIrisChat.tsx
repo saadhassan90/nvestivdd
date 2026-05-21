@@ -18,7 +18,15 @@ const MEMO_PROMPTS = [
  * Reuses the ChatProvider state but renders inline (not as a fixed drawer).
  * The close button is omitted because the chat is permanent here.
  */
-export function EmbeddedIrisChat({ fundName, memoId }: { fundName: string; memoId?: string | null }) {
+export function EmbeddedIrisChat({
+  fundName,
+  memoId,
+  oddProjectId,
+}: {
+  fundName: string;
+  memoId?: string | null;
+  oddProjectId?: string | null;
+}) {
   const {
     messages,
     isLoading,
@@ -26,6 +34,7 @@ export function EmbeddedIrisChat({ fundName, memoId }: { fundName: string; memoI
     projectScope,
     setProjectScope,
     setMemoContext,
+    setOddContext,
   } = useChatContext();
 
   const [input, setInput] = useState("");
@@ -39,6 +48,12 @@ export function EmbeddedIrisChat({ fundName, memoId }: { fundName: string; memoI
     setMemoContext(memoId ? { memoId } : null);
     return () => setMemoContext(null);
   }, [memoId, setMemoContext]);
+
+  // Register the active ODD report so every send carries odd_project_id.
+  useEffect(() => {
+    setOddContext(oddProjectId ? { projectId: oddProjectId } : null);
+    return () => setOddContext(null);
+  }, [oddProjectId, setOddContext]);
 
   useEffect(() => {
     if (!userScrolled && messagesEndRef.current) {
