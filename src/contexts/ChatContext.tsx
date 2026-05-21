@@ -23,6 +23,8 @@ type ChatContextType = {
   setProjectScope: (scope: { id: string; name: string } | null) => void;
   memoContext: { memoId: string } | null;
   setMemoContext: (ctx: { memoId: string } | null) => void;
+  oddContext: { projectId: string } | null;
+  setOddContext: (ctx: { projectId: string } | null) => void;
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   sendMessage: (content: string) => Promise<void>;
@@ -52,6 +54,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [projectScope, setProjectScope] = useState<{ id: string; name: string } | null>(null);
   const [memoContext, setMemoContext] = useState<{ memoId: string } | null>(null);
+  const [oddContext, setOddContext] = useState<{ projectId: string } | null>(null);
   const [selectedModel, setSelectedModel] = useState("sonnet-4");
   const [conversations, setConversations] = useState<any[]>([]);
   const abortRef = useRef<AbortController | null>(null);
@@ -173,6 +176,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
               project_id: projectScope?.id || null,
               conversation_id: convId,
               memo_id: memoContext?.memoId || null,
+              odd_project_id: oddContext?.projectId || null,
             }),
           }
         );
@@ -269,7 +273,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [isLoading, conversationId, messages, selectedModel, projectScope, memoContext]
+    [isLoading, conversationId, messages, selectedModel, projectScope, memoContext, oddContext]
   );
 
   return (
@@ -284,6 +288,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setProjectScope,
         memoContext,
         setMemoContext,
+        oddContext,
+        setOddContext,
         selectedModel,
         setSelectedModel,
         sendMessage,
