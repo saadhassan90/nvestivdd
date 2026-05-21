@@ -15,6 +15,24 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// ODD report section keys (must mirror src/lib/odd-template.ts)
+const ODD_SECTION_KEYS = [
+  "firm_stability",
+  "staffing",
+  "people_process_systems",
+  "fund_terms",
+  "discrepancy_register",
+  "sources_appendix",
+] as const;
+const ODD_SECTION_TITLES: Record<string, string> = {
+  firm_stability: "Firm Stability",
+  staffing: "Staffing",
+  people_process_systems: "People / Process / Systems",
+  fund_terms: "Fund Terms",
+  discrepancy_register: "Discrepancy Register",
+  sources_appendix: "Sources & Appendix",
+};
+
 // Map legacy model aliases (used by the client) to Gemini model IDs.
 // Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
