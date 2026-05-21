@@ -11,6 +11,7 @@ import { OddLeftRail, type OddSectionStatusUi } from "./OddLeftRail";
 import { OddCanvas } from "./OddCanvas";
 import { OddEmptyState } from "./OddEmptyState";
 import { OddImportModal } from "./OddImportModal";
+import { generateMockOddReport } from "@/lib/odd-mock-generator";
 
 interface OddWorkspaceProps {
   project: Tables<"projects">;
@@ -101,6 +102,14 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
     scrollFnRef.current?.(key);
   }, []);
 
+  const handleTestRun = useCallback(async () => {
+    await generateMockOddReport(project.id, project.fund_name);
+    toast({
+      title: "Mock ODD report generated",
+      description: "Populated from existing fund data — for demo purposes only.",
+    });
+  }, [project.id, project.fund_name, toast]);
+
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       <OddLeftRail
@@ -167,6 +176,7 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onSubmit={handleImportSubmit}
+        onTestRun={handleTestRun}
         hasExistingReport={hasImport}
       />
     </div>
