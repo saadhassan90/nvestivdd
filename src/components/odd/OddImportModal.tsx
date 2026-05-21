@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import { Upload, X, FileText, Loader2 } from "lucide-react";
+import { Upload, X, FileText, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OddImportModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (files: { daseti: File; supporting: File[] }) => Promise<void>;
+  onTestRun?: () => Promise<void>;
   hasExistingReport?: boolean;
 }
 
@@ -15,12 +16,13 @@ const isAccepted = (f: File) => {
   return ACCEPTED.some((ext) => name.endsWith(ext));
 };
 
-export function OddImportModal({ open, onClose, onSubmit, hasExistingReport }: OddImportModalProps) {
+export function OddImportModal({ open, onClose, onSubmit, onTestRun, hasExistingReport }: OddImportModalProps) {
   const [daseti, setDaseti] = useState<File | null>(null);
   const [supporting, setSupporting] = useState<File[]>([]);
   const [dasetiError, setDasetiError] = useState<string | null>(null);
   const [supportingError, setSupportingError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [testRunning, setTestRunning] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const dasetiInputRef = useRef<HTMLInputElement>(null);
   const supportingInputRef = useRef<HTMLInputElement>(null);
@@ -84,6 +86,19 @@ export function OddImportModal({ open, onClose, onSubmit, hasExistingReport }: O
       return;
     }
     runSubmit();
+  };
+
+  const handleTestRun = async () => {
+    if (!onTestRun) return;
+    setTestRunning(true);
+    try {
+      await onTestRun();
+      reset();
+      onClose();
+    } catch (e) {
+      setTestRunning(false);
+      setDasetiError("Test run failed. Please try again.");
+    }
   };
 
   return (
@@ -195,19 +210,34 @@ export function OddImportModal({ open, onClose, onSubmit, hasExistingReport }: O
         </div>
 
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border">
+          {onTestRun && (
+            <button
+              onClick={handleTestRun}
+              disabled={submitting || testRunning}
+              className="mr-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-border text-foreground hover:bg-muted disabled:opacity-40"
+              title="Generate a mock ODD report from existing fund data"
+            >
+              {testRunning ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              Test Run
+            </button>
+          )}
           <button
             onClick={handleClose}
-            disabled={submitting}
+            disabled={submitting || testRunning}
             className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40"
           >
             Cancel
           </button>
           <button
             onClick={handlePrimary}
-            disabled={!daseti || submitting}
+            disabled={!daseti || submitting || testRunning}
             className={cn(
               "inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all",
-              daseti && !submitting
+              daseti && !submitting && !testRunning
                 ? "bg-foreground text-background hover:opacity-90"
                 : "bg-muted text-muted-foreground cursor-not-allowed",
             )}
