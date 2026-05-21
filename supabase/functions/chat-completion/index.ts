@@ -755,15 +755,23 @@ function toGeminiTools(toolList: any[]) {
   ];
 }
 
-// Convert chat history to Gemini `contents` format.
-// Gemini uses { role: "user" | "model", parts: [{ text }] } and requires alternating roles.
-function toGeminiContents(messages: any[]) {
+// Convert chat history to Anthropic `messages` format.
+// Anthropic uses { role: "user" | "assistant", content: string | ContentBlock[] }
+function toAnthropicMessages(messages: any[]) {
   return messages
     .filter((m) => m.role !== "system")
     .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: typeof m.content === "string" ? [{ text: m.content }] : m.content,
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
     }));
+}
+
+function toAnthropicTools(toolList: any[]) {
+  return toolList.map((t) => ({
+    name: t.name,
+    description: t.description,
+    input_schema: t.input_schema,
+  }));
 }
 
 serve(async (req) => {
@@ -772,8 +780,8 @@ serve(async (req) => {
   }
 
   try {
-    if (!GEMINI_API_KEY) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY is not configured" }), {
+    if (!ANTHROPIC_API_KEY) {
+      return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -803,40 +811,38 @@ serve(async (req) => {
     }
 
     const systemPrompt = buildSystemPrompt(projectContext, memoContext);
-    const modelId = MODEL_MAP[effectiveModel] || "gemini-2.0-flash";
+    const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
     // In memo mode, expose ONLY edit_memo to force fast tool selection.
     const activeTools = memo_id ? tools.filter((t) => t.name === "edit_memo") : tools;
-    const geminiTools = toGeminiTools(activeTools);
+    const anthropicTools = toAnthropicTools(activeTools);
 
-    const baseContents = toGeminiContents(messages);
+    const baseMessages = toAnthropicMessages(messages);
     const startTime = Date.now();
 
-    const makeGeminiCall = async (contents: any[]) => {
-      const body: any = {
-        contents,
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        tools: geminiTools,
-        generationConfig: {
-          temperature: memo_id ? 0.3 : 0.7,
-          maxOutputTokens: memo_id ? 4096 : 8192,
-        },
+    const makeAnthropicCall = async (msgs: any[]) => {
+      const body = {
+        model: modelId,
+        system: systemPrompt,
+        messages: msgs,
+        tools: anthropicTools,
+        max_tokens: memo_id ? 4096 : 8192,
+        temperature: memo_id ? 0.3 : 0.7,
+        stream: true,
       };
-      // Force tool calling in memo mode so the model never just chats about edits.
-      if (memo_id) {
-        body.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
-      }
-
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
-      const resp = await fetch(url, {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY!,
+          "anthropic-version": "2023-06-01",
+        },
         body: JSON.stringify(body),
       });
       if (!resp.ok) {
         const errorText = await resp.text();
-        console.error("Gemini error:", resp.status, errorText);
-        throw new Error(`Gemini API error: ${resp.status} ${errorText}`);
+        console.error("Anthropic error:", resp.status, errorText);
+        throw new Error(`Anthropic API error: ${resp.status} ${errorText}`);
       }
       return resp;
     };
@@ -849,7 +855,7 @@ serve(async (req) => {
         };
 
         try {
-          const allContents = [...baseContents];
+          const allMessages = [...baseMessages];
           let fullContent = "";
           const allToolCalls: any[] = [];
           let tokensInput = 0;
@@ -861,19 +867,21 @@ serve(async (req) => {
             continueLoop = false;
             safetyHops++;
 
-            const resp = await makeGeminiCall(allContents);
+            const resp = await makeAnthropicCall(allMessages);
             const reader = resp.body!.getReader();
             const decoder = new TextDecoder();
             let buffer = "";
             const pendingFunctionCalls: { id: string; name: string; args: any }[] = [];
-            const assistantParts: any[] = [];
+            const assistantBlocks: any[] = [];
+            // Per content_block index: accumulating state.
+            const blockState: Record<number, { type: string; text?: string; toolUseId?: string; toolName?: string; jsonBuf?: string }> = {};
 
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
               buffer += decoder.decode(value, { stream: true });
 
-              // Gemini streams as SSE: lines beginning with "data: " separated by blank lines.
+              // Anthropic streams as SSE: `event: <name>\ndata: <json>\n\n`.
               let nlIdx: number;
               while ((nlIdx = buffer.indexOf("\n")) !== -1) {
                 const rawLine = buffer.slice(0, nlIdx);
@@ -883,44 +891,83 @@ serve(async (req) => {
                 const jsonStr = line.slice(6).trim();
                 if (!jsonStr || jsonStr === "[DONE]") continue;
 
-                let event: any;
+                let evt: any;
                 try {
-                  event = JSON.parse(jsonStr);
+                  evt = JSON.parse(jsonStr);
                 } catch {
-                  // Partial JSON across chunks — push back and wait.
                   buffer = line + "\n" + buffer;
                   break;
                 }
 
-                if (event.usageMetadata) {
-                  tokensInput = event.usageMetadata.promptTokenCount || tokensInput;
-                  tokensOutput = event.usageMetadata.candidatesTokenCount || tokensOutput;
-                }
-
-                const candidate = event.candidates?.[0];
-                const parts = candidate?.content?.parts || [];
-                for (const part of parts) {
-                  if (part.text) {
-                    fullContent += part.text;
-                    assistantParts.push({ text: part.text });
-                    send("content_delta", { text: part.text });
-                  } else if (part.functionCall) {
-                    const callId = `call_${pendingFunctionCalls.length}_${Date.now()}`;
-                    pendingFunctionCalls.push({
-                      id: callId,
-                      name: part.functionCall.name,
-                      args: part.functionCall.args || {},
-                    });
-                    assistantParts.push({ functionCall: part.functionCall });
-                    send("tool_start", { name: part.functionCall.name, id: callId });
+                switch (evt.type) {
+                  case "message_start":
+                    tokensInput = evt.message?.usage?.input_tokens ?? tokensInput;
+                    break;
+                  case "content_block_start": {
+                    const idx = evt.index as number;
+                    const block = evt.content_block;
+                    if (block.type === "text") {
+                      blockState[idx] = { type: "text", text: "" };
+                    } else if (block.type === "tool_use") {
+                      blockState[idx] = {
+                        type: "tool_use",
+                        toolUseId: block.id,
+                        toolName: block.name,
+                        jsonBuf: "",
+                      };
+                      send("tool_start", { name: block.name, id: block.id });
+                    }
+                    break;
                   }
+                  case "content_block_delta": {
+                    const idx = evt.index as number;
+                    const st = blockState[idx];
+                    if (!st) break;
+                    const d = evt.delta;
+                    if (d.type === "text_delta") {
+                      st.text = (st.text || "") + d.text;
+                      fullContent += d.text;
+                      send("content_delta", { text: d.text });
+                    } else if (d.type === "input_json_delta") {
+                      st.jsonBuf = (st.jsonBuf || "") + (d.partial_json || "");
+                    }
+                    break;
+                  }
+                  case "content_block_stop": {
+                    const idx = evt.index as number;
+                    const st = blockState[idx];
+                    if (!st) break;
+                    if (st.type === "text" && st.text) {
+                      assistantBlocks.push({ type: "text", text: st.text });
+                    } else if (st.type === "tool_use") {
+                      let args: any = {};
+                      if (st.jsonBuf && st.jsonBuf.trim().length > 0) {
+                        try { args = JSON.parse(st.jsonBuf); } catch { args = {}; }
+                      }
+                      assistantBlocks.push({
+                        type: "tool_use",
+                        id: st.toolUseId,
+                        name: st.toolName,
+                        input: args,
+                      });
+                      pendingFunctionCalls.push({
+                        id: st.toolUseId!,
+                        name: st.toolName!,
+                        args,
+                      });
+                    }
+                    break;
+                  }
+                  case "message_delta":
+                    tokensOutput = evt.usage?.output_tokens ?? tokensOutput;
+                    break;
                 }
               }
             }
 
             if (pendingFunctionCalls.length > 0) {
               // Execute all function calls in parallel
-              const responseParts = await Promise.all(
+              const toolResultBlocks = await Promise.all(
                 pendingFunctionCalls.map(async (fc) => {
                   send("tool_executing", { name: fc.name, id: fc.id });
                   const result = await executeTool(fc.name, fc.args, { memoId: memo_id });
@@ -934,17 +981,16 @@ serve(async (req) => {
                       : parsed?.success ? "done" : "done";
                   send("tool_complete", { name: fc.name, id: fc.id, resultSummary: summary });
                   return {
-                    functionResponse: {
-                      name: fc.name,
-                      response: typeof parsed === "object" && parsed !== null ? parsed : { result: parsed },
-                    },
+                    type: "tool_result",
+                    tool_use_id: fc.id,
+                    content: typeof parsed === "string" ? parsed : JSON.stringify(parsed),
                   };
                 })
               );
 
-              // Push assistant turn (with the function calls) and the function responses, then loop.
-              allContents.push({ role: "model", parts: assistantParts });
-              allContents.push({ role: "user", parts: responseParts });
+              // Push assistant turn (with the function calls) and the tool results, then loop.
+              allMessages.push({ role: "assistant", content: assistantBlocks });
+              allMessages.push({ role: "user", content: toolResultBlocks });
               continueLoop = true;
             }
           }
