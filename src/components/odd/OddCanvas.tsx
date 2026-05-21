@@ -100,6 +100,10 @@ export function OddCanvas({
             </section>
           );
         })}
+
+        <footer className="mt-12 pt-6 border-t border-border text-center text-xs text-muted-foreground">
+          testing testing
+        </footer>
       </div>
     </div>
   );
