@@ -414,6 +414,37 @@ const tools = [
       required: ["operation", "markdown"],
     },
   },
+  {
+    name: "edit_odd_section",
+    description: "Edit a section of the ADIA Operational Due Diligence (ODD) report. Use this for ANY user request to draft, write, add, append, prepend, tighten, rewrite, restructure, expand, shorten, or otherwise modify the ODD report — including section bodies, paragraphs, tables, and footers. Edits persist immediately and stream live to the user's canvas via realtime. Never refuse or defer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        operation: {
+          type: "string",
+          enum: ["replace_section", "append_to_section", "prepend_to_section"],
+          description: "How to apply the edit within the target section body.",
+        },
+        section_key: {
+          type: "string",
+          enum: [
+            "firm_stability",
+            "staffing",
+            "people_process_systems",
+            "fund_terms",
+            "discrepancy_register",
+            "sources_appendix",
+          ],
+          description: "Which ODD report section to edit. Must match exactly.",
+        },
+        markdown: {
+          type: "string",
+          description: "The markdown content to write. Do NOT include the section's H2 heading — that is rendered separately. Just write the body.",
+        },
+      },
+      required: ["operation", "section_key", "markdown"],
+    },
+  },
 ];
 
 function applyMemoEdit(
