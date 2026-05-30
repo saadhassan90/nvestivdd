@@ -33,6 +33,7 @@ type ChatContextType = {
   conversations: { id: string; title: string; created_at: string; project_id: string | null }[];
   loadConversations: () => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
+  stopGeneration: () => void;
 };
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -78,6 +79,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setConversations((prev) => prev.filter((c) => c.id !== id));
     if (conversationId === id) startNewConversation();
   }, [conversationId, startNewConversation]);
+
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
+    setMessages((prev) =>
+      prev.map((m) => (m.isStreaming || m.isThinking ? { ...m, isStreaming: false, isThinking: false } : m)),
+    );
+  }, []);
 
   const loadConversation = useCallback(async (id: string) => {
     const { data } = await supabase
@@ -162,6 +172,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       try {
         const thinkingStart = Date.now();
+        const controller = new AbortController();
+        abortRef.current = controller;
         const resp = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-completion`,
           {
@@ -178,6 +190,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
               memo_id: memoContext?.memoId || null,
               odd_project_id: oddContext?.projectId || null,
             }),
+            signal: controller.signal,
           }
         );
 
@@ -298,6 +311,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         conversations,
         loadConversations,
         deleteConversation,
+        stopGeneration,
       }}
     >
       {children}
