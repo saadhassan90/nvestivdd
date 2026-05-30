@@ -86,7 +86,7 @@ export default function IcMemoPage() {
   if (loading || !project) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-foreground" />
+        <NvestivLoader size={140} />
       </div>
     );
   }
@@ -116,9 +116,7 @@ export default function IcMemoPage() {
           />
           <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
             {memoLoading || !memo ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-foreground" />
-              </div>
+              <NvestivLoader fullscreen size={96} />
             ) : (
               <IcMemoCanvas
                 contentJson={memo.content_json}
