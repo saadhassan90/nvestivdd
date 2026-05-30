@@ -218,7 +218,7 @@ export function ChatSidebar() {
           </div>
 
           {/* Input dock (in-flow so messages can't slide underneath) */}
-            <div className="shrink-0 p-3 bg-muted border-t border-border">
+            <div className="shrink-0 p-3 bg-muted border-t border-transparent">
               {/* Suggested follow-up prompts */}
               {suggestedPrompts.length > 0 && !isLoading && (
                 <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
