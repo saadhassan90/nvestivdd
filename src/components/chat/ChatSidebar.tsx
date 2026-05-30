@@ -1,6 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X, SquarePen, Menu, ChevronDown, Check, Paperclip, ArrowUp, Loader2 } from "lucide-react";
+import { X, SquarePen, Menu, ChevronDown, Check, Paperclip, ArrowUp, Square } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
@@ -46,7 +46,7 @@ function getSuggestedPrompts(lastAssistantMsg: ChatMessage | undefined, isScoped
 export function ChatSidebar() {
   const {
     isOpen, setIsOpen, messages, isLoading, sendMessage,
-    startNewConversation, selectedModel, setSelectedModel,
+    startNewConversation, selectedModel, setSelectedModel, stopGeneration,
     projectScope, setProjectScope, loadConversations
   } = useChatContext();
 
@@ -214,16 +214,19 @@ export function ChatSidebar() {
                   <Paperclip className="h-4 w-4" />
                 </button>
                 <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
+                onClick={isLoading ? stopGeneration : handleSend}
+                disabled={!isLoading && !input.trim()}
+                title={isLoading ? "Stop generating" : "Send"}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full transition-all",
-                  input.trim() && !isLoading ?
-                  "bg-foreground text-background" :
-                  "bg-muted text-muted-foreground opacity-50"
+                  isLoading
+                    ? "bg-foreground text-background"
+                    : input.trim()
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-muted-foreground opacity-50"
                 )}>
                 
-                  {isLoading ? <NvestivPulse size={18} /> : <ArrowUp className="h-4 w-4" />}
+                  {isLoading ? <Square className="h-3 w-3 fill-current" /> : <ArrowUp className="h-4 w-4" />}
                 </button>
               </div>
             
