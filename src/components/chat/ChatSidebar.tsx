@@ -1,7 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X, SquarePen, Menu, ChevronDown, Check, Paperclip, ArrowUp, Square } from "lucide-react";
-import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
@@ -116,7 +115,6 @@ export function ChatSidebar() {
             <button onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
               <Menu className="h-4 w-4 text-muted-foreground" />
             </button>
-            <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
             <span className="text-sm font-semibold text-foreground">Ask Iris</span>
           </div>
 
