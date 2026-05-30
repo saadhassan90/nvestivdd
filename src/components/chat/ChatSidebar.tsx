@@ -7,6 +7,7 @@ import { ChatHistory } from "./ChatHistory";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
+import irisHelmet from "@/assets/iris-avatar-helmet.png";
 
 const MODELS = [
 { id: "sonnet-4", label: "Sonnet 4", desc: "Default" },
@@ -115,6 +116,7 @@ export function ChatSidebar() {
             <button onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
               <Menu className="h-4 w-4 text-muted-foreground" />
             </button>
+            <img src={irisHelmet} alt="Iris" className="h-6 w-6 rounded-full object-cover" />
             <span className="text-sm font-semibold text-foreground">Ask Iris</span>
           </div>
 
@@ -189,7 +191,7 @@ export function ChatSidebar() {
                         setUserScrolled(false);
                         setTimeout(() => sendMessage(prompt), 0);
                       }}
-                      className="shrink-0 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors whitespace-nowrap"
+                      className="shrink-0 rounded-full border border-[hsl(var(--nvestiv-teal))] bg-card/80 backdrop-blur-sm px-3 py-1.5 text-[11px] text-[hsl(var(--nvestiv-teal))] hover:bg-[hsl(var(--nvestiv-teal)/0.08)] transition-colors whitespace-nowrap"
                     >
                       {prompt}
                     </button>
