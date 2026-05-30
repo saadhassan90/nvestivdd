@@ -1,3 +1,4 @@
+import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Paperclip, ArrowUp, Loader2, X } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
