@@ -151,7 +151,7 @@ export function ChatSidebar() {
           <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="absolute inset-0 overflow-y-auto px-4 pt-3 pb-28 space-y-3 bg-muted">
+          className="absolute inset-0 overflow-y-auto px-4 pt-3 pb-28 bg-muted">
           
             <DotPattern
             className="fill-muted-foreground/10"
@@ -166,14 +166,20 @@ export function ChatSidebar() {
             isScoped={!!projectScope} /> :
 
 
-          messages.map((msg) =>
-          <ChatMessageBubble key={msg.id} message={msg} />
-          )
+          messages.map((msg, i) => {
+            const prev = messages[i - 1];
+            const sameRole = prev && prev.role === msg.role;
+            return (
+              <div key={msg.id} className={sameRole ? "mt-2" : prev ? "mt-5" : ""}>
+                <ChatMessageBubble message={msg} />
+              </div>
+            );
+          })
           }
             {isLoading && (() => {
               const last = messages[messages.length - 1];
               const showPulse = !last || last.role === "user" || (last.role === "assistant" && !last.content);
-              return showPulse ? <NvestivPulse /> : null;
+              return showPulse ? <div className="mt-5"><NvestivPulse /></div> : null;
             })()}
             <div ref={messagesEndRef} />
           </div>
