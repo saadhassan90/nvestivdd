@@ -47,7 +47,7 @@ export function ChatSidebar() {
   const {
     isOpen, setIsOpen, messages, isLoading, sendMessage,
     startNewConversation, selectedModel, setSelectedModel, stopGeneration,
-    projectScope, setProjectScope, loadConversations
+    projectScope, setProjectScope, loadConversations, setChatWidth
   } = useChatContext();
 
   const [input, setInput] = useState("");
@@ -107,8 +107,41 @@ export function ChatSidebar() {
 
   if (!isOpen) return null;
 
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth =
+      (document.querySelector("[data-chat-drawer]") as HTMLElement)?.offsetWidth ?? 420;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    const onMove = (ev: MouseEvent) => {
+      const delta = startX - ev.clientX;
+      const next = Math.min(
+        Math.max(360, startWidth + delta),
+        Math.round(window.innerWidth * 0.75)
+      );
+      setChatWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
   return (
-    <div className="flex flex-col h-full w-full bg-card border-l border-border">
+    <div data-chat-drawer className="relative flex flex-col h-full w-full bg-card border-l border-border">
+      {/* Resize handle */}
+      <div
+        onMouseDown={startResize}
+        title="Drag to resize"
+        className="group absolute left-0 top-0 bottom-0 z-50 w-1.5 -translate-x-1/2 cursor-col-resize"
+      >
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-1 rounded-full bg-border group-hover:bg-foreground/40 transition-colors" />
+      </div>
       {/* Header */}
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
