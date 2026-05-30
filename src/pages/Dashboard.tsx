@@ -1,4 +1,4 @@
-import { NvestivLoader } from "@/components/ui/NvestivLoader";
+import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -240,7 +240,7 @@ export default function Dashboard() {
             </div>
           </BlurFade>
 
-          {loading ? (
+          {useNvestivLoaderGate(loading) ? (
             <NvestivLoader fullscreen size={120} />
           ) : projects.length === 0 ? (
             <EmptyState onNewDeal={() => setModalOpen(true)} />
