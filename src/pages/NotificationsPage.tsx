@@ -1,3 +1,4 @@
+import { NvestivLoader } from "@/components/ui/NvestivLoader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft } from "lucide-react";
