@@ -1,3 +1,4 @@
+import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useState } from "react";
 import { ChevronRight, Check, Loader2, User } from "lucide-react"; // avatar uses iris image
 import ReactMarkdown from "react-markdown";
@@ -102,9 +103,9 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
           </div>
         )}
 
-        {/* Streaming cursor */}
-        {message.isStreaming && !message.isThinking && (
-          <span className="inline-block w-2 h-4 bg-foreground animate-pulse rounded-sm" />
+        {/* Streaming / thinking indicator */}
+        {message.isStreaming && (
+          <NvestivPulse size={22} className="mt-1" />
         )}
       </div>
     </div>
