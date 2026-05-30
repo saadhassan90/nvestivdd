@@ -198,7 +198,8 @@ export default function ProjectDetail() {
     toast({ title: "Analysis dispatched" });
   };
 
-  if (loading) {
+  const showLoader = useNvestivLoaderGate(loading);
+  if (showLoader) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <NvestivLoader size={140} />

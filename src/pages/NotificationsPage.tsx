@@ -54,6 +54,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { isOpen, setIsOpen } = useChatContext();
+  const showLoader = useNvestivLoaderGate(loading);
 
   useEffect(() => {
     (async () => {
@@ -141,7 +142,7 @@ export default function NotificationsPage() {
       </header>
 
       <main className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-        {loading ? (
+        {showLoader ? (
           <NvestivLoader fullscreen size={96} />
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
