@@ -164,7 +164,7 @@ export function ChatSidebar() {
         </div>
         {projectScope &&
         <div className="flex items-center gap-2 px-4 pb-2.5">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Current context</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Context</span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground">
               📎 {projectScope.name}
               <button onClick={() => setProjectScope(null)} className="hover:text-destructive ml-0.5">
