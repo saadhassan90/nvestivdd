@@ -30,6 +30,7 @@ const TOOL_LABELS: Record<string, string> = {
 
 export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   const [thinkingOpen, setThinkingOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   if (message.role === "user") {
     return (
@@ -70,24 +71,70 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
         )}
 
         {/* Tool use indicators */}
-        {message.activeTools && message.activeTools.length > 0 && (
-          <div className="space-y-1">
-            {message.activeTools.map((tool) => (
-              <div key={tool.id} className="flex items-center gap-2 border-l-2 border-border pl-2.5 py-0.5">
-                {tool.status === "executing" ? (
-                  <Loader2 className="h-3 w-3 text-muted-foreground animate-spin shrink-0" />
-                ) : (
-                  <Check className="h-3 w-3 text-score-strong shrink-0" />
-                )}
-                <span className="text-[11px] text-muted-foreground">
-                  {tool.status === "executing"
-                    ? `🔍 ${TOOL_LABELS[tool.name] || tool.name}...`
-                    : `✓ ${TOOL_LABELS[tool.name] || tool.name} — ${tool.resultSummary || "done"}`}
-                </span>
+        {message.activeTools && message.activeTools.length > 0 && (() => {
+          const tools = message.activeTools;
+          const anyExecuting = tools.some((t) => t.status === "executing");
+          // While running, show live steps. Once complete, collapse into an accordion.
+          if (anyExecuting) {
+            return (
+              <div className="space-y-1">
+                {tools.map((tool) => (
+                  <div key={tool.id} className="flex items-center gap-2 border-l-2 border-border pl-2.5 py-0.5">
+                    {tool.status === "executing" ? (
+                      <Loader2 className="h-3 w-3 text-muted-foreground animate-spin shrink-0" />
+                    ) : (
+                      <Check className="h-3 w-3 text-score-strong shrink-0" />
+                    )}
+                    <span className="text-[11px] text-muted-foreground">
+                      {tool.status === "executing"
+                        ? `🔍 ${TOOL_LABELS[tool.name] || tool.name}...`
+                        : `✓ ${TOOL_LABELS[tool.name] || tool.name} — ${tool.resultSummary || "done"}`}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          }
+          return (
+            <div className="rounded-lg border border-border bg-muted/30 overflow-hidden">
+              <button
+                onClick={() => setToolsOpen((o) => !o)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors"
+              >
+                <ChevronRight
+                  className={cn(
+                    "h-3 w-3 text-muted-foreground transition-transform duration-200",
+                    toolsOpen && "rotate-90"
+                  )}
+                />
+                <Check className="h-3 w-3 text-score-strong shrink-0" />
+                <span className="text-muted-foreground">
+                  {tools.length} {tools.length === 1 ? "step" : "steps"} taken
+                </span>
+              </button>
+              <div
+                className={cn(
+                  "grid transition-all duration-200 ease-out",
+                  toolsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="space-y-1 px-3 pb-3 pt-1 border-t border-border">
+                    {tools.map((tool) => (
+                      <div key={tool.id} className="flex items-center gap-2 border-l-2 border-border pl-2.5 py-0.5">
+                        <Check className="h-3 w-3 text-score-strong shrink-0" />
+                        <span className="text-[11px] text-muted-foreground">
+                          ✓ {TOOL_LABELS[tool.name] || tool.name}
+                          {tool.resultSummary ? ` — ${tool.resultSummary}` : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Content */}
         {message.content && (
