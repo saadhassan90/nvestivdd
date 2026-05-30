@@ -1,6 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Paperclip, ArrowUp, Loader2, X } from "lucide-react";
+import { Paperclip, ArrowUp, Square, X } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
@@ -36,6 +36,7 @@ export function EmbeddedIrisChat({
     setProjectScope,
     setMemoContext,
     setOddContext,
+    stopGeneration,
   } = useChatContext();
 
   const [input, setInput] = useState("");
@@ -211,17 +212,18 @@ export function EmbeddedIrisChat({
                   <Paperclip className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
+                  onClick={isLoading ? stopGeneration : handleSend}
+                  disabled={!isLoading && !input.trim()}
+                  title={isLoading ? "Stop generating" : "Send"}
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-full transition-all",
-                    input.trim() && !isLoading
+                    isLoading || input.trim()
                       ? "bg-foreground text-background"
                       : "bg-muted text-muted-foreground opacity-50",
                   )}
                 >
                   {isLoading ? (
-                    <NvestivPulse size={18} />
+                    <Square className="h-3 w-3 fill-current" />
                   ) : (
                     <ArrowUp className="h-4 w-4" />
                   )}
