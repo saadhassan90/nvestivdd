@@ -103,10 +103,8 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
           </div>
         )}
 
-        {/* Streaming / thinking indicator */}
-        {message.isStreaming && (
-          <NvestivPulse size={22} className="mt-1" />
-        )}
+        {/* No inline cursor — the standalone pulse below the thread covers
+            thinking/streaming states. */}
       </div>
     </div>
   );
