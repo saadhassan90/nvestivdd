@@ -1,5 +1,34 @@
 import nvestivAssemble from "@/assets/nvestiv-assemble.svg";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+
+/** Length of one full assemble→hold→fade cycle in the SVG (keep in sync with the SVG keyframes). */
+export const NVESTIV_LOADER_CYCLE_MS = 2200;
+
+/**
+ * Keeps `loading` true until the next animation-cycle boundary, so the
+ * loader never disappears mid-animation. Loops as many cycles as needed
+ * while the underlying state is still loading.
+ */
+export function useNvestivLoaderGate(loading: boolean): boolean {
+  const [shown, setShown] = useState(loading);
+  const startRef = useRef<number>(typeof performance !== "undefined" ? performance.now() : 0);
+
+  useEffect(() => {
+    if (loading) {
+      if (!shown) startRef.current = performance.now();
+      setShown(true);
+      return;
+    }
+    if (!shown) return;
+    const elapsed = performance.now() - startRef.current;
+    const remaining = NVESTIV_LOADER_CYCLE_MS - (elapsed % NVESTIV_LOADER_CYCLE_MS);
+    const t = window.setTimeout(() => setShown(false), remaining);
+    return () => window.clearTimeout(t);
+  }, [loading, shown]);
+
+  return shown;
+}
 
 interface NvestivLoaderProps {
   size?: number;

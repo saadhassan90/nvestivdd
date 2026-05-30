@@ -1,4 +1,4 @@
-import { NvestivLoader } from "@/components/ui/NvestivLoader";
+import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,7 +84,9 @@ export default function IcMemoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memo?.id]);
 
-  if (loading || !project) {
+  const showInitialLoader = useNvestivLoaderGate(loading || !project);
+  const showMemoLoader = useNvestivLoaderGate(memoLoading || !memo);
+  if (showInitialLoader) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <NvestivLoader size={140} />
@@ -116,7 +118,7 @@ export default function IcMemoPage() {
             onResetToTemplate={resetToTemplate}
           />
           <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
-            {memoLoading || !memo ? (
+            {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
             ) : (
               <IcMemoCanvas
