@@ -118,7 +118,7 @@ export function ChatSidebar() {
       const delta = startX - ev.clientX;
       const next = Math.min(
         Math.max(360, startWidth + delta),
-        Math.round(window.innerWidth * 0.75)
+        Math.round(window.innerWidth * 0.5)
       );
       setChatWidth(next);
     };
