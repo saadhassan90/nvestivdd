@@ -2,6 +2,7 @@ import { LayoutDashboard, Lightbulb, Globe2, Users, TrendingUp, DollarSign, Shie
 import type { Tables } from "@/integrations/supabase/types";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProjectSidebarProps {
   project: Tables<"projects">;
@@ -10,6 +11,7 @@ interface ProjectSidebarProps {
   moduleScoresData?: any[];
   redFlagsCount?: number;
   regOpsStatus?: "pass" | "conditional" | "fail" | null;
+  collapsed?: boolean;
 }
 
 type NavItem = {
@@ -143,7 +145,7 @@ function FlagsChip({ count }: { count: number }) {
   );
 }
 
-export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresData, redFlagsCount = 0, regOpsStatus = null }: ProjectSidebarProps) {
+export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresData, redFlagsCount = 0, regOpsStatus = null, collapsed = false }: ProjectSidebarProps) {
   const isProcessing = ["pending", "uploading", "processing", "analyzing", "extracting"].includes(project.status);
   const navItems = isProcessing ? PROCESSING_NAV_ITEMS : L1_NAV_ITEMS;
 
@@ -153,6 +155,20 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
     }
     if (item.variant === "regops") return <RegOpsChip status={regOpsStatus} />;
     if (item.variant === "flags") return <FlagsChip count={redFlagsCount} />;
+    return null;
+  };
+
+  const getTooltipMeta = (item: NavItem): string | null => {
+    if (item.variant === "score" && item.scoreKey) {
+      const s = findScore(moduleScoresData, item.scoreKey);
+      if (s == null) return "N/A";
+      return `${s.toFixed(1)} · ${tierShortLabel(getSectionTier(s))}`;
+    }
+    if (item.variant === "regops") {
+      if (!regOpsStatus) return null;
+      return regOpsStatus === "pass" ? "Pass" : regOpsStatus === "conditional" ? "Conditional" : "Fail";
+    }
+    if (item.variant === "flags") return redFlagsCount > 0 ? `${redFlagsCount} flag${redFlagsCount === 1 ? "" : "s"}` : null;
     return null;
   };
 
@@ -181,44 +197,72 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
       </div>
 
       {/* Desktop */}
-      <aside className="hidden lg:flex w-56 shrink-0 bg-background flex-col h-full">
-        <div className="p-4 pb-3">
+      <aside
+        className={cn(
+          "hidden lg:flex shrink-0 bg-background flex-col h-full transition-[width] duration-200 ease-out overflow-hidden",
+          collapsed ? "w-14" : "w-56"
+        )}
+      >
+        <div className={cn("pb-3", collapsed ? "p-2" : "p-4")}>
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
               <span className="text-xs font-bold text-background">N</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight truncate">{project.fund_name}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{project.gp_entity_name || "Due Diligence"}</p>
-            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-foreground leading-tight truncate">{project.fund_name}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{project.gp_entity_name || "Due Diligence"}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3 pt-2 space-y-0.5">
-          {navItems.map((item, idx) => {
+        <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+          <nav className={cn("flex-1 overflow-y-auto pt-2 space-y-0.5", collapsed ? "p-1.5" : "p-3")}>
+            {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.key;
             // PRD §2.3 — divider between row 9 (Diligence Questions) and row 10 (Sources)
             const showDividerBefore = !isProcessing && item.key === "documents";
             // PRD §7.1 — Meeting Mode hides Analysis Log + Sources rows
             const meetingHide = item.key === "analysis_log" || item.key === "documents";
+            const meta = getTooltipMeta(item);
+            const button = (
+              <button
+                onClick={() => onTabChange(item.key)}
+                className={cn(
+                  "flex w-full items-center rounded-lg text-sm transition-colors",
+                  collapsed ? "justify-center p-2" : "gap-2.5 px-3 py-2",
+                  isActive ? "bg-muted text-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+                aria-label={item.label}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && renderRightChip(item)}
+              </button>
+            );
             return (
               <div key={item.key} data-meeting-hide={meetingHide ? "true" : undefined}>
                 {showDividerBefore && <div className="my-2 h-px bg-border" />}
-                <button
-                  onClick={() => onTabChange(item.key)}
-                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                    isActive ? "bg-muted text-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                  {renderRightChip(item)}
-                </button>
+                {collapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>{button}</TooltipTrigger>
+                    <TooltipContent side="right" className="flex items-center gap-2">
+                      <span className="font-medium">{item.label}</span>
+                      {meta && (
+                        <span className="text-[10px] text-muted-foreground tabular-nums">{meta}</span>
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  button
+                )}
               </div>
             );
-          })}
-        </nav>
+            })}
+          </nav>
+        </TooltipProvider>
       </aside>
     </>
   );

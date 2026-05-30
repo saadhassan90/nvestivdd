@@ -40,7 +40,8 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
 
   const { toast } = useToast();
-  const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen, chatExpanded, isOpen: chatIsOpen } = useChatContext();
+  const sidebarCollapsed = chatIsOpen && chatExpanded;
   const { variant } = useUiVariant();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
@@ -266,6 +267,7 @@ export default function ProjectDetail() {
             moduleScoresData={moduleScores}
             redFlagsCount={redFlags.length}
             regOpsStatus={regOpsStatus}
+            collapsed={sidebarCollapsed}
           />
         </div>
 
