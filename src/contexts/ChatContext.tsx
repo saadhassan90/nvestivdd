@@ -80,6 +80,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (conversationId === id) startNewConversation();
   }, [conversationId, startNewConversation]);
 
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
+    setMessages((prev) =>
+      prev.map((m) => (m.isStreaming || m.isThinking ? { ...m, isStreaming: false, isThinking: false } : m)),
+    );
+  }, []);
+
   const loadConversation = useCallback(async (id: string) => {
     const { data } = await supabase
       .from("chat_messages")
@@ -302,6 +311,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         conversations,
         loadConversations,
         deleteConversation,
+        stopGeneration,
       }}
     >
       {children}
