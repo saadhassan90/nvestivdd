@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ChatMessage = {
@@ -16,6 +16,9 @@ export type ChatMessage = {
 type ChatContextType = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  chatWidth: number;
+  setChatWidth: (width: number) => void;
+  chatExpanded: boolean;
   messages: ChatMessage[];
   isLoading: boolean;
   conversationId: string | null;
@@ -50,6 +53,19 @@ export function useOptionalChatContext() {
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [chatWidth, setChatWidthState] = useState<number>(() => {
+    if (typeof window === "undefined") return 420;
+    const raw = window.localStorage.getItem("chatWidth");
+    const n = raw ? parseInt(raw, 10) : NaN;
+    return Number.isFinite(n) && n >= 360 ? n : 420;
+  });
+  const setChatWidth = useCallback((w: number) => {
+    setChatWidthState(w);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("chatWidth", String(Math.round(w)));
+    }
+  }, []);
+  const chatExpanded = chatWidth > 460;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -294,6 +310,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       value={{
         isOpen,
         setIsOpen,
+        chatWidth,
+        setChatWidth,
+        chatExpanded,
         messages,
         isLoading,
         conversationId,
