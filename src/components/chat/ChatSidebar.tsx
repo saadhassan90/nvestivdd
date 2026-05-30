@@ -223,7 +223,7 @@ export function ChatSidebar() {
                   "bg-muted text-muted-foreground opacity-50"
                 )}>
                 
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+                  {isLoading ? <NvestivPulse size={18} /> : <ArrowUp className="h-4 w-4" />}
                 </button>
               </div>
             
