@@ -1,7 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Paperclip, ArrowUp, Square, X } from "lucide-react";
-import irisAvatar from "@/assets/iris-avatar.png";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { DotPattern } from "@/components/magicui/DotPattern";
@@ -99,7 +98,6 @@ export function EmbeddedIrisChat({
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src={irisAvatar} alt="Iris" className="h-5 w-5 rounded-full" />
             <span className="text-sm font-semibold text-foreground">Put Iris to work</span>
             <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
               Memo
@@ -140,7 +138,6 @@ export function EmbeddedIrisChat({
 
             {messages.length === 0 ? (
               <div className="relative z-10 flex flex-col items-center justify-center text-center pt-12 px-4">
-                <img src={irisAvatar} alt="Iris" className="h-12 w-12 rounded-full mb-3" />
                 <h3 className="text-sm font-semibold text-foreground mb-1">
                   Co-author the {fundName} memo
                 </h3>

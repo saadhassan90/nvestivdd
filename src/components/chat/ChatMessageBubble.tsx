@@ -1,10 +1,9 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useState } from "react";
-import { ChevronRight, Check, Loader2, User } from "lucide-react"; // avatar uses iris image
+import { ChevronRight, Check, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import irisAvatar from "@/assets/iris-avatar.png";
 import type { ChatMessage } from "@/contexts/ChatContext";
 
 const TOOL_LABELS: Record<string, string> = {
@@ -34,12 +33,9 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
   if (message.role === "user") {
     return (
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end">
         <div className="max-w-[85%] rounded-2xl rounded-br-md bg-muted-foreground/15 px-4 py-2.5 text-sm text-foreground">
           {message.content}
-        </div>
-        <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-muted">
-          <User className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
       </div>
     );
@@ -47,10 +43,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
   // Assistant message
   return (
-    <div className="flex gap-2">
-      <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full overflow-hidden mt-0.5">
-        <img src={irisAvatar} alt="Iris" className="h-full w-full object-cover" />
-      </div>
+    <div className="flex">
       <div className="flex-1 min-w-0 space-y-2">
         {/* Thinking block */}
         {(message.isThinking || message.thinkingContent) && (
