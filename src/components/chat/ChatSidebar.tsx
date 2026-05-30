@@ -179,12 +179,12 @@ export function ChatSidebar() {
       {showHistory ?
       <ChatHistory onBack={() => setShowHistory(false)} /> :
 
-      <div className="relative flex-1 min-h-0">
+      <div className="relative flex-1 min-h-0 flex flex-col">
           {/* Messages */}
           <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="absolute inset-0 overflow-y-auto px-4 pt-3 pb-28 bg-muted">
+          className="relative flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-3 bg-muted">
           
             <DotPattern
             className="fill-muted-foreground/10"
@@ -217,11 +217,11 @@ export function ChatSidebar() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Floating Input */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+          {/* Input dock (in-flow so messages can't slide underneath) */}
+            <div className="shrink-0 p-3 bg-muted border-t border-border">
               {/* Suggested follow-up prompts */}
               {suggestedPrompts.length > 0 && !isLoading && (
-                <div className="pointer-events-auto flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
+                <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
                   {suggestedPrompts.map((prompt) => (
                     <button
                       key={prompt}
@@ -237,7 +237,7 @@ export function ChatSidebar() {
                   ))}
                 </div>
               )}
-            <div className="pointer-events-auto rounded-2xl border border-border bg-card shadow-lg p-3">
+            <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
               <textarea
               ref={textareaRef}
               value={input}

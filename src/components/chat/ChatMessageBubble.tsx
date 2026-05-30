@@ -1,6 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useState } from "react";
-import { ChevronRight, Check, Loader2 } from "lucide-react";
+import { ChevronRight, Check, Loader2, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,8 @@ const TOOL_LABELS: Record<string, string> = {
 export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   const [thinkingOpen, setThinkingOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
 
   if (message.role === "user") {
     return (
@@ -41,6 +43,15 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
       </div>
     );
   }
+
+  const isComplete = !!message.content && !message.isStreaming && !message.isThinking;
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
 
   // Assistant message
   return (
@@ -145,6 +156,39 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
         {/* No inline cursor — the standalone pulse below the thread covers
             thinking/streaming states. */}
+
+        {/* Response actions (copy + feedback) */}
+        {isComplete && (
+          <div className="flex items-center gap-1 pt-1 -ml-1">
+            <button
+              onClick={handleCopy}
+              title={copied ? "Copied" : "Copy"}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-score-strong" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+            <button
+              onClick={() => setFeedback(feedback === "up" ? null : "up")}
+              title="Good response"
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted",
+                feedback === "up" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <ThumbsUp className={cn("h-3.5 w-3.5", feedback === "up" && "fill-current")} />
+            </button>
+            <button
+              onClick={() => setFeedback(feedback === "down" ? null : "down")}
+              title="Bad response"
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted",
+                feedback === "down" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <ThumbsDown className={cn("h-3.5 w-3.5", feedback === "down" && "fill-current")} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
