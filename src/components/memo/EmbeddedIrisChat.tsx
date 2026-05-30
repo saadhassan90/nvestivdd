@@ -1,3 +1,4 @@
+import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Paperclip, ArrowUp, Loader2, X } from "lucide-react";
 import irisAvatar from "@/assets/iris-avatar.png";
@@ -164,6 +165,11 @@ export function EmbeddedIrisChat({
             ) : (
               messages.map((msg) => <ChatMessageBubble key={msg.id} message={msg} />)
             )}
+            {isLoading && (() => {
+              const last = messages[messages.length - 1];
+              const showPulse = !last || last.role === "user" || (last.role === "assistant" && !last.content);
+              return showPulse ? <NvestivPulse /> : null;
+            })()}
             <div ref={messagesEndRef} />
           </div>
 
