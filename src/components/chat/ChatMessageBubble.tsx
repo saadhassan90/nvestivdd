@@ -1,3 +1,4 @@
+import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useState } from "react";
 import { ChevronRight, Check, Loader2, User } from "lucide-react"; // avatar uses iris image
 import ReactMarkdown from "react-markdown";
