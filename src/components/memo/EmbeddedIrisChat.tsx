@@ -164,6 +164,11 @@ export function EmbeddedIrisChat({
             ) : (
               messages.map((msg) => <ChatMessageBubble key={msg.id} message={msg} />)
             )}
+            {isLoading && (() => {
+              const last = messages[messages.length - 1];
+              const showPulse = !last || last.role === "user" || (last.role === "assistant" && !last.content);
+              return showPulse ? <NvestivPulse /> : null;
+            })()}
             <div ref={messagesEndRef} />
           </div>
 
