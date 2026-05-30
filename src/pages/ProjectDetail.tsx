@@ -1,4 +1,4 @@
-import { NvestivLoader } from "@/components/ui/NvestivLoader";
+import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useChatContext } from "@/contexts/ChatContext";

@@ -43,6 +43,7 @@ export default function Dashboard() {
     sortDir: "desc",
   });
   const { isOpen, setIsOpen } = useChatContext();
+  const showLoader = useNvestivLoaderGate(loading);
 
   const fetchData = async () => {
     let allProjects: Tables<"projects">[] = [];
@@ -240,7 +241,7 @@ export default function Dashboard() {
             </div>
           </BlurFade>
 
-          {useNvestivLoaderGate(loading) ? (
+          {showLoader ? (
             <NvestivLoader fullscreen size={120} />
           ) : projects.length === 0 ? (
             <EmptyState onNewDeal={() => setModalOpen(true)} />
