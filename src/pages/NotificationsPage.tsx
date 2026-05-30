@@ -1,3 +1,4 @@
+import { NvestivLoader } from "@/components/ui/NvestivLoader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft } from "lucide-react";
@@ -141,9 +142,7 @@ export default function NotificationsPage() {
 
       <main className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-          </div>
+          <NvestivLoader fullscreen size={96} />
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Bell className="h-12 w-12 text-muted-foreground/20 mb-3" />
