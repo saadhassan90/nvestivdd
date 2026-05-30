@@ -33,6 +33,7 @@ type ChatContextType = {
   conversations: { id: string; title: string; created_at: string; project_id: string | null }[];
   loadConversations: () => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
+  stopGeneration: () => void;
 };
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -162,6 +163,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       try {
         const thinkingStart = Date.now();
+        const controller = new AbortController();
+        abortRef.current = controller;
         const resp = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-completion`,
           {
@@ -178,6 +181,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
               memo_id: memoContext?.memoId || null,
               odd_project_id: oddContext?.projectId || null,
             }),
+            signal: controller.signal,
           }
         );
 
