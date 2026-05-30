@@ -221,7 +221,7 @@ export function EmbeddedIrisChat({
                   )}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <NvestivPulse size={18} />
                   ) : (
                     <ArrowUp className="h-4 w-4" />
                   )}
