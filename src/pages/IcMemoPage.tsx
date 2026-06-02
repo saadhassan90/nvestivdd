@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
+import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MemoToolbar } from "@/components/memo/MemoToolbar";
 import { EmbeddedIrisChat } from "@/components/memo/EmbeddedIrisChat";
@@ -103,11 +104,20 @@ export default function IcMemoPage() {
         reportLevel="L3"
         onReportLevelChange={(lvl) => {
           if (lvl === "L1") navigate(`/project/${project.id}?tab=overview`);
+          else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
           else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
         }}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
+        <ProjectStageRail
+          reportLevel="L3"
+          onReportLevelChange={(lvl) => {
+            if (lvl === "L1") navigate(`/project/${project.id}?tab=overview`);
+            else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
+            else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+          }}
+        />
         {/* Canvas column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <MemoToolbar
