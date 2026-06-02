@@ -1,211 +1,183 @@
-/* ============================================================
- * IC Memo Canvas — Notion-inspired styling
- * Reduces BlockNote default text sizes and tightens spacing
- * to match a polished editorial document.
- * ============================================================ */
+/* =============================================================================
+   IC Memo (L4) — BlockNote canvas typography
+   Calmer, tighter hierarchy tuned for long-form reading. Font: Inter.
+   All colors use design-system tokens — no hard-coded hex.
+   Scoped under .ic-memo-canvas so other BlockNote editors are unaffected.
+   ============================================================================= */
 
-.ic-memo-canvas .bn-container {
+/* ---- root / reading surface ---- */
+.ic-memo-canvas .bn-editor {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
-  line-height: 1.6;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
   color: hsl(var(--foreground));
-  background-color: transparent;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 8px;
+  background-color: transparent !important;
 }
 
-/* Remove BlockNote's default editor background so the canvas blends with the page */
+.ic-memo-canvas .bn-container,
 .ic-memo-canvas [data-theme],
-.ic-memo-canvas .bn-editor,
 .ic-memo-canvas .bn-default-styles {
   background-color: transparent !important;
 }
 
-/* Editor padding — Notion-like generous whitespace */
-.ic-memo-canvas .bn-editor {
-  padding: 0 8px;
+/* even vertical rhythm between blocks */
+.ic-memo-canvas .bn-block-content { padding: 3px 0; }
+
+/* the first block should never be pushed down by a heading's top margin */
+.ic-memo-canvas .bn-block-outer:first-child .bn-block-content { margin-top: 0 !important; }
+
+/* ---- paragraph ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="paragraph"] {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.7 !important;
+  letter-spacing: 0 !important;
 }
 
-/* ---- Block paragraph (body text) ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="paragraph"] {
-  font-size: 15px;
-  line-height: 1.6;
+/* ---- headings (H1–H5; BlockNote has no H6) ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="heading"] {
   color: hsl(var(--foreground));
 }
-
-/* ---- Headings: Notion-style scale ---- */
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  margin-top: 28px;
-  margin-bottom: 4px;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.021em !important;
+  margin-top: 32px;
+  margin-bottom: 8px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] {
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  margin-top: 22px;
-  margin-bottom: 4px;
+  font-size: 19px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.015em !important;
+  margin-top: 28px;
+  margin-bottom: 6px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  margin-top: 18px;
-  margin-bottom: 2px;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.01em !important;
+  margin-top: 20px;
+  margin-bottom: 4px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-top: 14px;
-  margin-bottom: 2px;
-  text-transform: none;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0 !important;
+  margin-top: 16px;
+  margin-bottom: 3px;
 }
+/* H5 = small uppercase label / eyebrow */
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-top: 12px;
-  margin-bottom: 2px;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.07em !important;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--muted-foreground)) !important;
+  margin-top: 16px;
+  margin-bottom: 6px;
 }
 
-/* ---- Lists ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="bulletListItem"],
-.ic-memo-canvas .bn-block-content[data-content-type="numberedListItem"],
-.ic-memo-canvas .bn-block-content[data-content-type="checkListItem"] {
-  font-size: 15px;
-  line-height: 1.55;
+/* ---- lists (bullet, numbered, check) ---- */
+.ic-memo-canvas .bn-block-content[data-content-type$="ListItem"] {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  padding: 1px 0;
 }
 
-/* ---- Quote ---- */
+/* ---- quote ---- */
 .ic-memo-canvas .bn-block-content[data-content-type="quote"] {
-  font-size: 15px;
-  font-style: italic;
-  border-left: 3px solid hsl(var(--border));
-  padding-left: 14px;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  font-style: normal;
   color: hsl(var(--muted-foreground));
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 16px;
+  margin: 10px 0;
 }
 
-/* ---- Code blocks ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"] {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-  font-size: 13px;
-  background-color: hsl(var(--muted));
-  border: 1px solid hsl(var(--border));
-  border-radius: 6px;
-  padding: 12px 14px;
-  line-height: 1.5;
-}
-
-/* Inline code */
-.ic-memo-canvas code {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-  font-size: 0.88em;
-  background-color: hsl(var(--muted));
+/* ---- inline code ---- */
+.ic-memo-canvas .bn-inline-content code,
+.ic-memo-canvas .bn-editor code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.85em;
+  background: hsl(var(--muted));
   border: 1px solid hsl(var(--border));
   border-radius: 4px;
   padding: 1px 5px;
-  color: hsl(var(--foreground));
 }
 
-/* ---- Tables ---- */
+/* ---- code block ---- */
+.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"],
+.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"] pre,
+.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"] code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+.ic-memo-canvas .bn-block-content[data-content-type="codeBlock"] {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+/* ---- tables ---- */
 .ic-memo-canvas .bn-block-content[data-content-type="table"] table {
-  font-size: 13px;
   border-collapse: separate;
   border-spacing: 0;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="table"] td,
 .ic-memo-canvas .bn-block-content[data-content-type="table"] th {
+  font-size: 13px !important;
+  font-weight: 400;
+  line-height: 1.45;
+  padding: 7px 11px;
   border: 1px solid hsl(var(--border));
-  padding: 6px 10px;
-  background-color: hsl(var(--background));
 }
 .ic-memo-canvas .bn-block-content[data-content-type="table"] th {
-  background-color: hsl(var(--muted));
   font-weight: 600;
+  background: hsl(var(--muted));
+  text-align: left;
 }
 
-/* ---- Divider ---- */
+/* ---- divider ---- */
 .ic-memo-canvas .bn-block-content[data-content-type="divider"] {
-  margin: 16px 0;
-}
-.ic-memo-canvas .bn-block-content[data-content-type="divider"] hr {
-  border: none;
+  margin: 24px 0;
   border-top: 1px solid hsl(var(--border));
 }
 
-/* ---- Image / file embeds ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="image"],
-.ic-memo-canvas .bn-block-content[data-content-type="file"],
-.ic-memo-canvas .bn-block-content[data-content-type="video"],
-.ic-memo-canvas .bn-block-content[data-content-type="audio"] {
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 8px 0;
-}
-
-/* ---- Links ---- */
-.ic-memo-canvas a {
+/* ---- links ---- */
+.ic-memo-canvas .bn-inline-content a,
+.ic-memo-canvas .bn-editor a {
   color: hsl(var(--primary));
   text-decoration: underline;
   text-decoration-color: hsl(var(--border));
   text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
 }
-.ic-memo-canvas a:hover {
+.ic-memo-canvas .bn-inline-content a:hover,
+.ic-memo-canvas .bn-editor a:hover {
   text-decoration-color: hsl(var(--primary));
 }
 
-/* ---- Slash menu / formatting toolbar refinement ---- */
+/* ---- editor chrome (slash / formatting / side / link toolbars) ---- */
 .bn-suggestion-menu,
 .bn-formatting-toolbar,
 .bn-side-menu,
 .bn-link-toolbar {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
-}
-
-/* Reduce default block padding for tighter Notion-like rhythm */
-.ic-memo-canvas .bn-block {
-  padding-top: 1px;
-  padding-bottom: 1px;
-}
-
-/* ---- Side menu (drag handle + add button) alignment ----
- * BlockNote's side menu is absolutely positioned and defaults to the
- * top of the block. Because our headings have larger line-heights and
- * top margins, the handles appear to float above the text. Shift them
- * down slightly so they sit on the baseline of the first line of each
- * block's content.
- */
-.ic-memo-canvas .bn-side-menu {
-  align-items: center;
-  height: 1.6em; /* match body line-height */
-}
-
-/* Heading-specific handle offsets — match each heading's line-height */
-.ic-memo-canvas .bn-block[data-content-type="heading"][data-level="1"] .bn-side-menu {
-  height: 1.25em;
-  margin-top: 28px; /* match h1 margin-top */
-}
-.ic-memo-canvas .bn-block[data-content-type="heading"][data-level="2"] .bn-side-menu {
-  height: 1.3em;
-  margin-top: 22px;
-}
-.ic-memo-canvas .bn-block[data-content-type="heading"][data-level="3"] .bn-side-menu {
-  height: 1.35em;
-  margin-top: 18px;
-}
-.ic-memo-canvas .bn-block[data-content-type="heading"][data-level="4"] .bn-side-menu {
-  height: 1.4em;
-  margin-top: 14px;
-}
-.ic-memo-canvas .bn-block[data-content-type="heading"][data-level="5"] .bn-side-menu {
-  height: 1.4em;
-  margin-top: 12px;
 }
