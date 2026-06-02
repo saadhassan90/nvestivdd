@@ -4,53 +4,7 @@
  * spacing, muted color gradation for hierarchy.
  * ============================================================ */
 
-.odd-section-canvas .bn-block-content[data-content-type="heading"][data-level="1"] {
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  margin-top: 28px;
-  margin-bottom: 6px;
-  color: hsl(var(--foreground));
-}
-.odd-section-canvas .bn-block-content[data-content-type="heading"][data-level="2"] {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  margin-top: 22px;
-  margin-bottom: 5px;
-  color: hsl(var(--foreground));
-}
-.odd-section-canvas .bn-block-content[data-content-type="heading"][data-level="3"] {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: -0.005em;
-  margin-top: 18px;
-  margin-bottom: 4px;
-  color: hsl(var(--foreground) / 0.92);
-}
-.odd-section-canvas .bn-block-content[data-content-type="heading"][data-level="4"] {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.45;
-  margin-top: 14px;
-  margin-bottom: 2px;
-  text-transform: none;
-  letter-spacing: 0;
-  color: hsl(var(--foreground) / 0.78);
-}
-.odd-section-canvas .bn-block-content[data-content-type="heading"][data-level="5"] {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.45;
-  margin-top: 12px;
-  margin-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: hsl(var(--muted-foreground));
-}
+/* Heading typography is shared with the memo canvas in ic-memo-canvas.css. */
 
 /* Side-menu handle alignment */
 .odd-section-canvas .bn-block[data-content-type="heading"][data-level="1"] .bn-side-menu {
