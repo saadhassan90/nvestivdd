@@ -32,6 +32,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useUiVariant } from "@/contexts/UiVariantContext";
 import { OddWorkspace } from "@/components/odd/OddWorkspace";
 import { L1SnapshotPage } from "@/components/project/L1SnapshotPage";
+import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 
 import type { Tables } from "@/integrations/supabase/types";
 
