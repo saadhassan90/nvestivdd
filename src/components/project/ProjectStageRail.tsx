@@ -41,7 +41,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
                   disabled={!available}
                   className={cn(
                     "w-full justify-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wide",
-                    "data-[state=active]:bg-background data-[state=active]:shadow-sm",
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-primary/30",
                     !available && "opacity-40 cursor-not-allowed",
                   )}
                 >
