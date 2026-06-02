@@ -257,37 +257,58 @@ export default function ProjectDetail() {
         commentsCount={commentsCount}
       />
 
-      {isOddStage ? (
-        <OddWorkspace project={project} />
-      ) : isProcessing ? (
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <ProcessingState startedAt={project.updated_at} projectId={project.id} />
-        </main>
-      ) : project.status === "error" ? (
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <BlurFade>
-            <div className="flex flex-col items-center justify-center py-20">
-              <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
-              <p className="text-sm text-muted-foreground mb-4 text-center px-4">
-                {project.error_message || "An unexpected error occurred."}
-              </p>
-              <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
-            </div>
-          </BlurFade>
-        </main>
-      ) : (
-      <SectionProvider projectId={project.id} sectionId="overview">
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          <L1SnapshotPage
-            project={project}
-            redFlags={redFlags}
-            moduleScores={moduleScores}
-            criticalInfoGaps={criticalInfoGaps}
-            submissionQuality={submissionQuality}
-          />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <ProjectStageRail
+          reportLevel={isOddStage ? "ODD" : "L1"}
+          onReportLevelChange={(lvl) => {
+            if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+            else if (lvl === "ODD") {
+              const p = new URLSearchParams(searchParams);
+              p.set("stage", "odd");
+              p.delete("tab");
+              setSearchParams(p, { replace: true });
+            } else if (lvl === "L1") {
+              const p = new URLSearchParams(searchParams);
+              p.delete("stage");
+              if (!p.get("tab")) p.set("tab", "overview");
+              setSearchParams(p, { replace: true });
+            }
+          }}
+        />
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          {isOddStage ? (
+            <OddWorkspace project={project} />
+          ) : isProcessing ? (
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <ProcessingState startedAt={project.updated_at} projectId={project.id} />
+            </main>
+          ) : project.status === "error" ? (
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <BlurFade>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
+                  <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+                    {project.error_message || "An unexpected error occurred."}
+                  </p>
+                  <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
+                </div>
+              </BlurFade>
+            </main>
+          ) : (
+            <SectionProvider projectId={project.id} sectionId="overview">
+              <div className="flex flex-1 min-h-0 overflow-hidden">
+                <L1SnapshotPage
+                  project={project}
+                  redFlags={redFlags}
+                  moduleScores={moduleScores}
+                  criticalInfoGaps={criticalInfoGaps}
+                  submissionQuality={submissionQuality}
+                />
+              </div>
+            </SectionProvider>
+          )}
         </div>
-      </SectionProvider>
-      )}
+      </div>
 
       {/* Legacy sidebar+tabs layout (disabled — kept for reference, never rendered) */}
       {false && (
