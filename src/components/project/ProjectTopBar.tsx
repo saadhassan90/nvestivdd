@@ -48,16 +48,16 @@ export function ProjectTopBar({
     : ["L1", "L2", "L3"];
   const levelMeta: Record<"L1" | "L2" | "L3" | "ODD", { label: string; available: boolean }> = {
     L1: {
-      label: isAdia ? "L1 — Locked in ADIA demo" : "L1 — Triage Report",
+      label: isAdia ? "Triage — Locked in ADIA demo" : "Triage Report",
       available: !isAdia,
     },
     L2: {
-      label: isAdia ? "L2 — Locked in ADIA demo" : "L2 — Deep Dive (coming soon)",
+      label: isAdia ? "IDD — Locked in ADIA demo" : "IDD (coming soon)",
       available: false,
     },
-    ODD: { label: "ODD — Operational Due Diligence", available: isAdia },
+    ODD: { label: "Operational Due Diligence", available: isAdia },
     L3: {
-      label: isAdia ? "L3 — Locked in ADIA demo" : "L3 — IC Memo",
+      label: isAdia ? "IC Memo — Locked in ADIA demo" : "IC Memo",
       available: !isAdia,
     },
   };
