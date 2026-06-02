@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useUiVariant } from "@/contexts/UiVariantContext";
 import { OddWorkspace } from "@/components/odd/OddWorkspace";
+import { L1SnapshotPage } from "@/components/project/L1SnapshotPage";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -257,7 +258,38 @@ export default function ProjectDetail() {
 
       {isOddStage ? (
         <OddWorkspace project={project} />
+      ) : isProcessing ? (
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <ProcessingState startedAt={project.updated_at} projectId={project.id} />
+        </main>
+      ) : project.status === "error" ? (
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <BlurFade>
+            <div className="flex flex-col items-center justify-center py-20">
+              <p className="text-severity-critical font-semibold text-lg mb-2">Analysis Error</p>
+              <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+                {project.error_message || "An unexpected error occurred."}
+              </p>
+              <ShimmerButton onClick={handleRerunAnalysis}>Retry Analysis</ShimmerButton>
+            </div>
+          </BlurFade>
+        </main>
       ) : (
+      <SectionProvider projectId={project.id} sectionId="overview">
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          <L1SnapshotPage
+            project={project}
+            redFlags={redFlags}
+            moduleScores={moduleScores}
+            criticalInfoGaps={criticalInfoGaps}
+            submissionQuality={submissionQuality}
+          />
+        </div>
+      </SectionProvider>
+      )}
+
+      {/* Legacy sidebar+tabs layout (disabled — kept for reference, never rendered) */}
+      {false && (
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <div className="hidden lg:contents">
           <ProjectSidebar
