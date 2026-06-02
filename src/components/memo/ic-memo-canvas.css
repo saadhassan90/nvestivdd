@@ -6,7 +6,9 @@
    ============================================================================= */
 
 /* ---- root / reading surface ---- */
-.ic-memo-canvas .bn-editor {
+.ic-memo-canvas .bn-editor,
+.ic-memo-canvas .ic-memo-editor-root,
+.ic-memo-canvas .ic-memo-editor-shell {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
   font-weight: 400;
@@ -32,7 +34,10 @@
 .ic-memo-canvas .bn-block-outer:first-child .bn-block-content { margin-top: 0 !important; }
 
 /* ---- paragraph ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="paragraph"] {
+.ic-memo-canvas .bn-block-content[data-content-type="paragraph"],
+.ic-memo-canvas .bn-block-content[data-content-type="paragraph"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"] .ic-memo-inline-content {
   font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.7 !important;
@@ -40,10 +45,16 @@
 }
 
 /* ---- headings (H1–H5; BlockNote has no H6) ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="heading"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"] .ic-memo-inline-content {
   color: hsl(var(--foreground));
 }
-.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] .ic-memo-inline-content {
   font-size: 24px !important;
   font-weight: 700 !important;
   line-height: 1.3 !important;
@@ -51,7 +62,10 @@
   margin-top: 32px;
   margin-bottom: 8px;
 }
-.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] .ic-memo-inline-content {
   font-size: 19px !important;
   font-weight: 600 !important;
   line-height: 1.35 !important;
@@ -59,7 +73,10 @@
   margin-top: 28px;
   margin-bottom: 6px;
 }
-.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] .ic-memo-inline-content {
   font-size: 16px !important;
   font-weight: 600 !important;
   line-height: 1.4 !important;
@@ -67,7 +84,10 @@
   margin-top: 20px;
   margin-bottom: 4px;
 }
-.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] .ic-memo-inline-content {
   font-size: 14px !important;
   font-weight: 600 !important;
   line-height: 1.45 !important;
@@ -76,7 +96,10 @@
   margin-bottom: 3px;
 }
 /* H5 = small uppercase label / eyebrow */
-.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] {
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"],
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"] .ic-memo-inline-content {
   font-size: 12px !important;
   font-weight: 650 !important;
   line-height: 1.4 !important;
@@ -88,7 +111,10 @@
 }
 
 /* ---- lists (bullet, numbered, check) ---- */
-.ic-memo-canvas .bn-block-content[data-content-type$="ListItem"] {
+.ic-memo-canvas .bn-block-content[data-content-type$="ListItem"],
+.ic-memo-canvas .bn-block-content[data-content-type$="ListItem"] .bn-inline-content,
+.ic-memo-canvas .ic-memo-block-content[data-content-type$="ListItem"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type$="ListItem"] .ic-memo-inline-content {
   font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.6 !important;
@@ -96,7 +122,10 @@
 }
 
 /* ---- quote ---- */
-.ic-memo-canvas .bn-block-content[data-content-type="quote"] {
+.ic-memo-canvas .bn-block-content[data-content-type="quote"],
+.ic-memo-canvas .bn-block-content[data-content-type="quote"] blockquote,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="quote"],
+.ic-memo-canvas .ic-memo-block-content[data-content-type="quote"] blockquote {
   font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.6 !important;
