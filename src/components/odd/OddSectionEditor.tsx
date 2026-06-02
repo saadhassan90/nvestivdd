@@ -28,6 +28,12 @@ export function OddSectionEditor({ seedMarkdown, resetKey, onChange }: OddSectio
   const editor = useCreateBlockNote(
     {
       schema,
+      defaultStyles: false,
+      domAttributes: {
+        editor: { class: "ic-memo-editor-root" },
+        blockContent: { class: "ic-memo-block-content" },
+        inlineContent: { class: "ic-memo-inline-content" },
+      },
       heading: { levels: [1, 2, 3, 4, 5] },
     },
     [resetKey],
@@ -54,6 +60,7 @@ export function OddSectionEditor({ seedMarkdown, resetKey, onChange }: OddSectio
       <BlockNoteView
         editor={editor}
         theme="light"
+        className="ic-memo-editor-shell"
         onChange={async () => {
           if (!onChange) return;
           const md = await editor.blocksToMarkdownLossy(editor.document);
