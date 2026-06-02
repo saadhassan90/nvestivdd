@@ -89,7 +89,7 @@ export function L1SnapshotPage({
               </p>
             )}
             {thesis && (
-              <p className="px-7 pl-[68px] pt-2 text-[14.5px] leading-relaxed text-muted-foreground max-w-[74ch]">
+              <p className="px-7 pl-[68px] pr-7 pt-2 text-[14.5px] leading-relaxed text-muted-foreground">
                 {thesis}
               </p>
             )}
@@ -510,7 +510,7 @@ function ModuleAccordion({
         )}
       >
         <div className="min-h-0">
-          <div className="mx-3 mb-4 flex flex-col gap-4 rounded-lg border border-border border-l-[3px] border-l-[hsl(var(--nvestiv-teal))] bg-muted/30 px-5 py-4">
+          <div className="mb-4 flex flex-col gap-4 px-3 pb-2 pt-1">
             {row.positives.length > 0 && (
               <DetailCol heading="Positive" tone="good" items={row.positives} />
             )}
