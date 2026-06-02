@@ -1,7 +1,6 @@
-import { Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useUiVariant } from "@/contexts/UiVariantContext";
 import { cn } from "@/lib/utils";
+import { Lock } from "lucide-react";
 
 type Level = "L1" | "L2" | "L3" | "ODD";
 
@@ -11,26 +10,12 @@ interface ProjectStageRailProps {
 }
 
 export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectStageRailProps) {
-  const { variant } = useUiVariant();
-  const isAdia = variant === "adia";
-  const levels: Level[] = isAdia ? ["L1", "L2", "ODD", "L3"] : ["L1", "L2", "L3"];
+  const levels: Level[] = ["L1", "L2", "ODD", "L3"];
   const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
-    L1: {
-      label: isAdia ? "Triage — Locked in ADIA demo" : "Triage Report",
-      display: "Triage",
-      available: !isAdia,
-    },
-    L2: {
-      label: isAdia ? "IDD — Locked in ADIA demo" : "IDD (coming soon)",
-      display: "IDD",
-      available: false,
-    },
-    ODD: { label: "Operational Due Diligence", display: "ODD", available: isAdia },
-    L3: {
-      label: isAdia ? "IC Memo — Locked in ADIA demo" : "IC Memo",
-      display: "IC Memo",
-      available: !isAdia,
-    },
+    L1: { label: "Triage Report", display: "Triage", available: true },
+    L2: { label: "IDD (coming soon)", display: "IDD", available: false },
+    ODD: { label: "Operational Due Diligence", display: "ODD", available: true },
+    L3: { label: "IC Memo", display: "IC Memo", available: true },
   };
 
   return (
