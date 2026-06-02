@@ -26,6 +26,12 @@ export function IcMemoCanvas({ contentJson, seedMarkdown, onChange, resetKey }: 
   const editor = useCreateBlockNote(
     {
       schema,
+      defaultStyles: false,
+      domAttributes: {
+        editor: { class: "ic-memo-editor-root" },
+        blockContent: { class: "ic-memo-block-content" },
+        inlineContent: { class: "ic-memo-inline-content" },
+      },
       // Allow all 5 heading levels for the IC memo (default is 3)
       heading: { levels: [1, 2, 3, 4, 5] },
       initialContent:
@@ -58,6 +64,7 @@ export function IcMemoCanvas({ contentJson, seedMarkdown, onChange, resetKey }: 
       <BlockNoteView
         editor={editor}
         theme="light"
+        className="ic-memo-editor-shell"
         onChange={async () => {
           const json = editor.document;
           const md = await editor.blocksToMarkdownLossy(editor.document);
