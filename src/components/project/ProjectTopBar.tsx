@@ -134,7 +134,7 @@ export function ProjectTopBar({
                     <span className="hidden sm:inline">Back to Reports</span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Back to L1 report</TooltipContent>
+                <TooltipContent side="bottom">Back to Triage report</TooltipContent>
               </Tooltip>
             ) : (
               !isOpen && (
