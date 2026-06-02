@@ -73,7 +73,7 @@ export function L1SnapshotPage({
   const [openId, setOpenId] = useState<string | null>(modules[0]?.id ?? null);
 
   return (
-    <main className="min-h-full bg-background overflow-y-auto">
+    <main className="flex-1 min-w-0 bg-background overflow-y-auto">
       <div className="mx-auto flex max-w-[1080px] flex-col gap-5 px-6 py-8 pb-16">
         {/* ─── Card 1: Verdict Snapshot ─── */}
         <BlurFade delay={0.02}>
