@@ -88,36 +88,6 @@ export function ProjectTopBar({
                 L1 Processing
               </span>
             )}
-
-            {/* Report-level tabs (L1 / L2 / L3) — always visible */}
-            <div className="ml-3 hidden lg:inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5">
-                {levels.map((lvl) => {
-                  const active = reportLevel === lvl;
-                  const { label, available } = levelMeta[lvl];
-                  return (
-                    <Tooltip key={lvl}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => available && onReportLevelChange?.(lvl)}
-                          disabled={!available}
-                          className={cn(
-                            "inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-colors",
-                            active
-                              ? "bg-background text-foreground shadow-sm"
-                              : "text-muted-foreground hover:text-foreground",
-                            !available && "opacity-40 cursor-not-allowed hover:text-muted-foreground",
-                          )}
-                        >
-                          {!available && <Lock className="h-2.5 w-2.5" />}
-                          {lvl}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">{label}</TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-            </div>
           </div>
 
           {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
