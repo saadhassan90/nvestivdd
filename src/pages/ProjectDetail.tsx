@@ -77,8 +77,9 @@ export default function ProjectDetail() {
   };
   const initialTabRaw = searchParams.get("tab") || "overview";
   const stageParam = searchParams.get("stage");
-  // ADIA variant defaults to ODD stage; General never sees ODD.
-  const isOddStage = variant === "adia" && (stageParam === "odd" || (!stageParam && !searchParams.get("tab")));
+  // ADIA variant defaults to ODD; General must opt in via ?stage=odd. Both variants can access ODD.
+  const isOddStage =
+    stageParam === "odd" || (variant === "adia" && !stageParam && !searchParams.get("tab"));
   const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
