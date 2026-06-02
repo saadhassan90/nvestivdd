@@ -14,18 +14,21 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
   const { variant } = useUiVariant();
   const isAdia = variant === "adia";
   const levels: Level[] = isAdia ? ["L1", "L2", "ODD", "L3"] : ["L1", "L2", "L3"];
-  const levelMeta: Record<Level, { label: string; available: boolean }> = {
+  const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
     L1: {
-      label: isAdia ? "L1 — Locked in ADIA demo" : "L1 — Triage Report",
+      label: isAdia ? "Triage — Locked in ADIA demo" : "Triage Report",
+      display: "Triage",
       available: !isAdia,
     },
     L2: {
-      label: isAdia ? "L2 — Locked in ADIA demo" : "L2 — Deep Dive (coming soon)",
+      label: isAdia ? "IDD — Locked in ADIA demo" : "IDD (coming soon)",
+      display: "IDD",
       available: false,
     },
-    ODD: { label: "ODD — Operational Due Diligence", available: isAdia },
+    ODD: { label: "Operational Due Diligence", display: "ODD", available: isAdia },
     L3: {
-      label: isAdia ? "L3 — Locked in ADIA demo" : "L3 — IC Memo",
+      label: isAdia ? "IC Memo — Locked in ADIA demo" : "IC Memo",
+      display: "IC Memo",
       available: !isAdia,
     },
   };
@@ -37,7 +40,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
     >
       {levels.map((lvl) => {
         const active = reportLevel === lvl;
-        const { label, available } = levelMeta[lvl];
+        const { label, display, available } = levelMeta[lvl];
         return (
           <Tooltip key={lvl}>
             <TooltipTrigger asChild>
@@ -46,7 +49,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
                 onClick={() => available && onReportLevelChange(lvl)}
                 disabled={!available}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1 px-2 py-2 text-[11px] font-bold uppercase tracking-wider rounded-md transition-colors",
+                  "inline-flex items-center justify-center gap-1 px-2 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-colors",
                   active
                     ? "bg-muted text-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
@@ -54,7 +57,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
                 )}
               >
                 {!available && <Lock className="h-2.5 w-2.5" />}
-                {lvl}
+                {display}
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">{label}</TooltipContent>
