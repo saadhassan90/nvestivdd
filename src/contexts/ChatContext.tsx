@@ -54,16 +54,30 @@ export function useOptionalChatContext() {
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chatWidth, setChatWidthState] = useState<number>(() => {
-    if (typeof window === "undefined") return 420;
+    if (typeof window === "undefined") return 480;
+    const defaultW = Math.round(window.innerWidth * 0.3);
+    const maxW = Math.round(window.innerWidth * 0.5);
     const raw = window.localStorage.getItem("chatWidth");
     const n = raw ? parseInt(raw, 10) : NaN;
-    return Number.isFinite(n) && n >= 360 ? n : 420;
+    if (Number.isFinite(n) && n >= 360) return Math.min(n, maxW);
+    return Math.max(360, defaultW);
   });
   const setChatWidth = useCallback((w: number) => {
     setChatWidthState(w);
     if (typeof window !== "undefined") {
       window.localStorage.setItem("chatWidth", String(Math.round(w)));
     }
+  }, []);
+  // Re-clamp chat width to <= 50vw whenever the viewport resizes.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => {
+      const maxW = Math.round(window.innerWidth * 0.5);
+      const minW = Math.min(360, maxW);
+      setChatWidthState((prev) => Math.min(Math.max(prev, minW), maxW));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
   const chatExpanded = chatWidth > 460;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
