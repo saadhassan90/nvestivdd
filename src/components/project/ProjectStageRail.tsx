@@ -30,7 +30,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
       className="hidden lg:block shrink-0 py-6 px-3"
       aria-label="Report stage"
     >
-      <TabsList className="flex h-auto flex-col gap-1.5 bg-muted/40 p-1.5 w-24">
+      <TabsList className="flex h-auto flex-col items-stretch gap-1 bg-transparent p-0 w-28">
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
           return (
@@ -40,9 +40,10 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
                   value={lvl}
                   disabled={!available}
                   className={cn(
-                    "w-full justify-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wide",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-primary/30",
-                    !available && "opacity-40 cursor-not-allowed",
+                    "w-full justify-start gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-md text-muted-foreground transition-colors",
+                    "hover:bg-muted hover:text-foreground",
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
+                    !available && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground",
                   )}
                 >
                   {!available && <Lock className="h-3 w-3" />}
