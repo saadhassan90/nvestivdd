@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Check,
   AlertTriangle,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
@@ -53,6 +54,7 @@ interface Props {
   moduleScores: any[];
   criticalInfoGaps: any[];
   submissionQuality: any[];
+  interrogatoryItems?: Tables<"interrogatory_items">[];
 }
 
 export function L1SnapshotPage({
@@ -61,6 +63,7 @@ export function L1SnapshotPage({
   moduleScores,
   criticalInfoGaps,
   submissionQuality,
+  interrogatoryItems = [],
 }: Props) {
   const strategyTag = [project.strategy, project.asset_class, project.document_type]
     .filter(Boolean)
