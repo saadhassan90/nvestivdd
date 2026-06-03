@@ -814,7 +814,15 @@ function buildModules(
       concerns = redFlags
         .filter((f) => (f.module || f.source_module) === m.module_key)
         .slice(0, 3)
-        .map((f) => ({ text: f.title || f.issue || f.description || "Flagged item" }));
+        .map((f) => {
+          const sev = (f.severity || "").toLowerCase();
+          const tone: BulletTone =
+            sev === "critical" ? "critical" : sev === "elevated" ? "elevated" : "neutral";
+          return {
+            text: f.title || f.issue || f.description || "Flagged item",
+            tone,
+          };
+        });
     }
     // Fallback: derive a positive from summary_assessment if no positives
     if (positives.length === 0 && m.summary_assessment) {
