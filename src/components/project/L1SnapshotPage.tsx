@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Sparkles, Layers, LineChart, ChevronDown, HelpCircle } from "lucide-react";
+import {
+  Sparkles,
+  Layers,
+  LineChart,
+  ChevronDown,
+  HelpCircle,
+  Check,
+  AlertTriangle,
+} from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
 import { cn } from "@/lib/utils";
@@ -26,7 +34,8 @@ type Verdict = {
   risk_flags: number;
   completeness_pct: number | null;
 };
-type Bullet = { text: string };
+type BulletTone = "critical" | "elevated" | "neutral";
+type Bullet = { text: string; tone?: BulletTone };
 type ModuleRow = {
   id: string;
   name: string;
@@ -510,58 +519,158 @@ function ModuleAccordion({
         )}
       >
         <div className="min-h-0">
-          <div className="mb-4 flex flex-col gap-4 px-3 pb-2 pt-1">
-            {row.positives.length > 0 && (
-              <DetailCol heading="Positive" tone="good" items={row.positives} />
-            )}
-            {row.concerns.length > 0 && (
-              <DetailCol heading="Concerns" tone="bad" items={row.concerns} />
-            )}
-            {!row.positives.length && !row.concerns.length && (
-              <EmptyLine text="No detailed bullets available for this module." />
-            )}
-            {row.note && (
-              <p className="border-t border-dashed border-border pt-3 text-[11.5px] italic text-muted-foreground">
-                {row.note}
-              </p>
-            )}
-          </div>
+          <DetailBody row={row} />
         </div>
       </div>
     </div>
   );
 }
 
-function DetailCol({
-  heading,
+function DetailBody({ row }: { row: ModuleRow }) {
+  const posCount = row.positives.length;
+  const negCount = row.concerns.length;
+  const total = posCount + negCount;
+  const posPct = total === 0 ? 50 : Math.round((posCount / total) * 100);
+  const negPct = 100 - posPct;
+
+  // Implication tone keyed off rating
+  const impTone: "str" | "adq" | "ba" | "cond" =
+    row.rating === "Strong"
+      ? "str"
+      : row.rating === "Adequate"
+        ? "adq"
+        : row.rating === "Conditional"
+          ? "cond"
+          : "ba";
+
+  const impClass: Record<typeof impTone, string> = {
+    str: "bg-score-strong/12 text-score-strong",
+    adq: "bg-[hsl(var(--nvestiv-teal)/0.12)] text-[hsl(var(--nvestiv-teal))]",
+    ba: "bg-severity-elevated/12 text-severity-elevated",
+    cond: "bg-score-review/12 text-score-review",
+  };
+
+  const implication = row.read || row.note;
+
+  return (
+    <div className="mx-2.5 mb-4 rounded-[10px] border border-border bg-muted/30 p-5">
+      {total === 0 ? (
+        <EmptyLine text="No detailed bullets available for this module." />
+      ) : (
+        <>
+          {/* Tier 0 — proportion topper */}
+          <div className="mb-5 flex h-1 overflow-hidden rounded-full bg-muted">
+            <span className="bg-score-strong" style={{ width: `${posPct}%` }} />
+            <span className="bg-severity-critical/70" style={{ width: `${negPct}%` }} />
+          </div>
+
+          {/* Tier 1 — Strengths */}
+          {posCount > 0 && (
+            <EvidenceGroup
+              tone="pos"
+              label="Strengths"
+              count={posCount}
+              items={row.positives}
+            />
+          )}
+
+          {/* Tier 1 — Concerns */}
+          {negCount > 0 && (
+            <EvidenceGroup
+              tone="neg"
+              label="Concerns"
+              count={negCount}
+              items={row.concerns}
+            />
+          )}
+
+          {/* Tier 2 — Implication */}
+          {implication && (
+            <div
+              className={cn(
+                "mt-5 flex flex-col gap-0.5 rounded-[10px] px-4 py-3",
+                impClass[impTone],
+              )}
+            >
+              <span className="text-[9.5px] font-bold uppercase tracking-[0.1em] opacity-70">
+                Implication
+              </span>
+              <span className="text-[13px] font-medium leading-snug">{implication}</span>
+            </div>
+          )}
+
+          {/* Tier 3 — Sources footer */}
+          {row.note && implication !== row.note && (
+            <p className="mt-4 text-[11px] italic text-muted-foreground">{row.note}</p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function EvidenceGroup({
   tone,
+  label,
+  count,
   items,
 }: {
-  heading: string;
-  tone: "good" | "bad";
+  tone: "pos" | "neg";
+  label: string;
+  count: number;
   items: Bullet[];
 }) {
-  const headCls = tone === "good" ? "text-score-strong" : "text-severity-critical";
-  const dotCls = tone === "good" ? "bg-score-strong" : "bg-severity-critical opacity-70";
-  const swCls = tone === "good" ? "bg-score-strong" : "bg-severity-critical";
+  const headCls = tone === "pos" ? "text-score-strong" : "text-severity-critical";
   return (
-    <div>
-      <h4
+    <div className="mt-0 [&+&]:mt-[18px]">
+      <div
         className={cn(
-          "mb-2.5 flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.11em]",
+          "mb-2.5 flex items-center gap-2 text-[12.5px] font-bold tracking-tight",
           headCls,
         )}
       >
-        <span className={cn("h-2 w-2 rounded-sm", swCls)} />
-        {heading}
-      </h4>
+        {tone === "pos" ? (
+          <Check className="h-[15px] w-[15px]" strokeWidth={2.5} />
+        ) : (
+          <AlertTriangle className="h-[15px] w-[15px]" strokeWidth={2.5} />
+        )}
+        <span>{label}</span>
+        <span className="inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-bold text-muted-foreground">
+          {count}
+        </span>
+      </div>
       <ul className="flex flex-col gap-2.5">
-        {items.map((b, i) => (
-          <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed text-foreground">
-            <span className={cn("mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full", dotCls)} />
-            <span>{b.text}</span>
-          </li>
-        ))}
+        {items.map((b, i) =>
+          tone === "pos" ? (
+            <li
+              key={i}
+              className="flex gap-2.5 text-[13.5px] leading-[1.55] text-foreground"
+            >
+              <Check
+                className="mt-[3px] h-3 w-3 shrink-0 text-score-strong"
+                strokeWidth={3}
+              />
+              <span>{b.text}</span>
+            </li>
+          ) : (
+            <li
+              key={i}
+              className="flex items-start gap-2.5 text-[13.5px] leading-[1.55] text-foreground"
+            >
+              <span
+                className={cn(
+                  "mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full",
+                  b.tone === "critical"
+                    ? "bg-severity-critical"
+                    : b.tone === "elevated"
+                      ? "bg-severity-elevated"
+                      : "bg-muted-foreground",
+                )}
+              />
+              <span>{b.text}</span>
+            </li>
+          ),
+        )}
       </ul>
     </div>
   );
@@ -705,7 +814,15 @@ function buildModules(
       concerns = redFlags
         .filter((f) => (f.module || f.source_module) === m.module_key)
         .slice(0, 3)
-        .map((f) => ({ text: f.title || f.issue || f.description || "Flagged item" }));
+        .map((f) => {
+          const sev = (f.severity || "").toLowerCase();
+          const tone: BulletTone =
+            sev === "critical" ? "critical" : sev === "elevated" ? "elevated" : "neutral";
+          return {
+            text: f.title || f.issue || f.description || "Flagged item",
+            tone,
+          };
+        });
     }
     // Fallback: derive a positive from summary_assessment if no positives
     if (positives.length === 0 && m.summary_assessment) {
