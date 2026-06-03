@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Check,
   AlertTriangle,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
@@ -53,6 +54,7 @@ interface Props {
   moduleScores: any[];
   criticalInfoGaps: any[];
   submissionQuality: any[];
+  interrogatoryItems?: Tables<"interrogatory_items">[];
 }
 
 export function L1SnapshotPage({
@@ -61,6 +63,7 @@ export function L1SnapshotPage({
   moduleScores,
   criticalInfoGaps,
   submissionQuality,
+  interrogatoryItems = [],
 }: Props) {
   const strategyTag = [project.strategy, project.asset_class, project.document_type]
     .filter(Boolean)
@@ -240,6 +243,18 @@ export function L1SnapshotPage({
                 ))
               )}
             </div>
+          </Card>
+        </BlurFade>
+
+        {/* ─── Card 4: Initial Questions ─── */}
+        <BlurFade delay={0.2}>
+          <Card>
+            <CardHead
+              icon={<MessageCircleQuestion className="h-4 w-4" />}
+              title="Initial Questions"
+              subtitle="Open items raised by the triage research — to put to the GP"
+            />
+            <InitialQuestionsList items={interrogatoryItems} />
           </Card>
         </BlurFade>
 
@@ -677,6 +692,96 @@ function EvidenceGroup({
 }
 
 /* ─── Data adapters (derive from existing tables) ────────────────────── */
+
+function InitialQuestionsList({
+  items,
+}: {
+  items: Tables<"interrogatory_items">[];
+}) {
+  const PRIORITY_ORDER: Record<string, number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
+  const sorted = [...items]
+    .filter((q) => q.status !== "resolved")
+    .sort((a, b) => {
+      const pa = PRIORITY_ORDER[(a.priority || "").toLowerCase()] ?? 9;
+      const pb = PRIORITY_ORDER[(b.priority || "").toLowerCase()] ?? 9;
+      if (pa !== pb) return pa - pb;
+      return (a.order_index ?? 0) - (b.order_index ?? 0);
+    });
+  const visible = sorted.slice(0, 6);
+
+  if (items.length === 0) {
+    return (
+      <p className="px-7 py-8 text-center text-sm italic text-muted-foreground">
+        No outstanding questions yet — they appear here as findings raise them.
+      </p>
+    );
+  }
+
+  return (
+    <div className="px-7 pb-6 pt-4">
+      <ol className="flex flex-col">
+        {visible.map((q, i) => (
+          <li
+            key={q.id}
+            className="grid grid-cols-[28px_84px_1fr] items-start gap-3 border-b border-border/60 py-3.5 last:border-b-0"
+          >
+            <span className="mt-[2px] text-[12px] font-bold tabular-nums text-muted-foreground">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <PriorityChip priority={q.priority} />
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-medium leading-[1.5] text-foreground">
+                {q.question}
+              </p>
+              {q.rationale && (
+                <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
+                  {q.rationale}
+                </p>
+              )}
+              {(q.source_module_label || q.source_module || q.module) && (
+                <span className="mt-1.5 inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  {q.source_module_label || q.source_module || q.module}
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+      {sorted.length > visible.length && (
+        <p className="mt-3 text-[11.5px] text-muted-foreground">
+          +{sorted.length - visible.length} more open question
+          {sorted.length - visible.length === 1 ? "" : "s"}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function PriorityChip({ priority }: { priority: string }) {
+  const p = (priority || "").toLowerCase();
+  const map: Record<string, string> = {
+    critical: "bg-severity-critical/15 text-severity-critical",
+    high: "bg-severity-elevated/15 text-severity-elevated",
+    medium: "bg-[hsl(var(--nvestiv-teal)/0.15)] text-[hsl(var(--nvestiv-teal))]",
+    low: "bg-muted text-muted-foreground",
+  };
+  const cls = map[p] || "bg-muted text-muted-foreground";
+  return (
+    <span
+      className={cn(
+        "inline-flex w-[84px] items-center justify-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.06em]",
+        cls,
+      )}
+    >
+      {p || "open"}
+    </span>
+  );
+}
 
 function extractStrings(arr: unknown): string[] {
   if (!Array.isArray(arr)) return [];

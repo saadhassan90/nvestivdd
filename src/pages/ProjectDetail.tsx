@@ -304,6 +304,7 @@ export default function ProjectDetail() {
                   moduleScores={moduleScores}
                   criticalInfoGaps={criticalInfoGaps}
                   submissionQuality={submissionQuality}
+                  interrogatoryItems={interrogatoryItems}
                 />
               </div>
             </SectionProvider>
