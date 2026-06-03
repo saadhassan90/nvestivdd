@@ -8,6 +8,7 @@ import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MemoToolbar } from "@/components/memo/MemoToolbar";
 import { EmbeddedIrisChat } from "@/components/memo/EmbeddedIrisChat";
+import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
 import { useIcMemo } from "@/hooks/use-ic-memo";
@@ -17,7 +18,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function IcMemoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen, chatWidth } = useChatContext();
   const [shareOpen, setShareOpen] = useState(false);
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
@@ -142,7 +143,11 @@ export default function IcMemoPage() {
         </div>
 
         {/* Chat column — desktop only */}
-        <div className="hidden lg:block w-[420px] shrink-0 border-l border-border">
+        <div
+          className="hidden lg:block relative shrink-0 border-l border-border"
+          style={{ width: chatWidth }}
+        >
+          <ChatResizeHandle />
           <EmbeddedIrisChat fundName={project.fund_name} memoId={memo?.id ?? null} />
         </div>
       </div>
