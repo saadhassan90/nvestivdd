@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Sparkles, Layers, LineChart, ChevronDown, HelpCircle } from "lucide-react";
+import {
+  Sparkles,
+  Layers,
+  LineChart,
+  ChevronDown,
+  HelpCircle,
+  Check,
+  AlertTriangle,
+} from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
 import { cn } from "@/lib/utils";
@@ -26,7 +34,8 @@ type Verdict = {
   risk_flags: number;
   completeness_pct: number | null;
 };
-type Bullet = { text: string };
+type BulletTone = "critical" | "elevated" | "neutral";
+type Bullet = { text: string; tone?: BulletTone };
 type ModuleRow = {
   id: string;
   name: string;
