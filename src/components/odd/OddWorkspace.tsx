@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useChatContext } from "@/contexts/ChatContext";
 import { EmbeddedIrisChat } from "@/components/memo/EmbeddedIrisChat";
+import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
 import { ODD_SECTIONS, type OddSectionKey } from "@/lib/odd-template";
 import { useOddReport } from "@/hooks/use-odd-report";
 import { OddLeftRail, type OddSectionStatusUi } from "./OddLeftRail";
@@ -19,7 +20,7 @@ interface OddWorkspaceProps {
 
 export function OddWorkspace({ project }: OddWorkspaceProps) {
   const { toast } = useToast();
-  const { setIsOpen: setChatOpen } = useChatContext();
+  const { setIsOpen: setChatOpen, chatWidth } = useChatContext();
   const {
     sections,
     hasImport,
@@ -186,7 +187,11 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
       </div>
 
       {/* Right rail — desktop only */}
-      <div className="hidden lg:block w-[380px] shrink-0 border-l border-border">
+      <div
+        className="hidden lg:block relative shrink-0 border-l border-border"
+        style={{ width: chatWidth }}
+      >
+        <ChatResizeHandle />
         <EmbeddedIrisChat fundName={project.fund_name} memoId={null} oddProjectId={project.id} />
       </div>
 
