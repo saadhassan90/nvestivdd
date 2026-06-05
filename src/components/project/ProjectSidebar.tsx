@@ -28,7 +28,7 @@ type NavItem = {
 const L1_NAV_ITEMS: NavItem[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard, variant: "none" },
   { key: "investment_thesis", label: "Investment Thesis", icon: Lightbulb, scoreKey: "thesis", variant: "score" },
-  { key: "market_reality", label: "Market Reality", icon: Globe2, scoreKey: "market", variant: "score" },
+  { key: "market_reality", label: "Macro Context", icon: Globe2, scoreKey: "market", variant: "score" },
   { key: "team", label: "Team & Manager", icon: Users, scoreKey: "team", variant: "score" },
   { key: "track_record", label: "Track Record", icon: TrendingUp, scoreKey: "performance", variant: "score" },
   { key: "economics", label: "Economics", icon: DollarSign, scoreKey: "terms", variant: "score" },

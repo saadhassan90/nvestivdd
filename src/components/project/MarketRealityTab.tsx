@@ -1,4 +1,4 @@
-import { Globe2, ListChecks, MessageSquare, TrendingUp } from "lucide-react";
+import { Globe2, ListChecks, TrendingUp } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { SectionCard } from "@/components/project/primitives/SectionCard";
 import { MarketContextStrip } from "@/components/project/typed/MarketContextStrip";
@@ -7,6 +7,9 @@ import { lookupBenchmark, describeMatchLevel, type BenchmarkRecord } from "@/lib
 import { SectorExposureChart } from "@/components/project/typed/SectorExposureChart";
 import { GeographyMap } from "@/components/project/typed/GeographyMap";
 import { CitationRefs } from "@/components/project/typed/CitationRefs";
+import { ModuleVerdictHeader } from "@/components/project/primitives/ModuleVerdictHeader";
+import { ModuleFlagBlock } from "@/components/project/primitives/ModuleFlagBlock";
+import { BenchmarkChip } from "@/components/project/primitives/BenchmarkChip";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -30,6 +33,7 @@ interface MarketRealityTabProps {
   interrogatoryItems: Tables<"interrogatory_items">[];
   moduleScoresData?: any[];
   project?: Tables<"projects">;
+  redFlags?: Tables<"red_flags">[];
 }
 
 const SUB_SCORES = [
@@ -76,6 +80,7 @@ export function MarketRealityTab({
   interrogatoryItems,
   moduleScoresData = [],
   project,
+  redFlags = [],
 }: MarketRealityTabProps) {
   // Locate the Market Reality dimension score
   const marketModule = moduleScoresData.find((m) =>
@@ -112,13 +117,6 @@ export function MarketRealityTab({
   // claim_vs_market: derive from thesis validations + market factors
   // Phase 7.4 will emit this as a structured object; today we infer.
   const claims = buildClaimVsMarket(thesisValidations, marketFactors);
-
-  // Diligence Qs scoped to market/domain
-  const marketQs = interrogatoryItems
-    .filter((q) =>
-      (q.module || q.source_module || "").toLowerCase().match(/market|domain|module_d/),
-    )
-    .slice(0, 4);
 
   const assetClass = project?.asset_class || null;
 
@@ -182,18 +180,21 @@ export function MarketRealityTab({
       {/* 1. Score header */}
       <BlurFade>
         <SectionCard
-          title="Market Reality"
-          subtitle="How does the GP's read of the market square with consensus, peer activity, and macro?"
+          title="Macro Context"
+          subtitle="Why this strategy and why this geography/sector right now — peer activity, consensus, macro tailwinds"
           icon={<Globe2 className="h-4 w-4" />}
-          actions={<ScoreHeader score10={score10} tier={tier} />}
+          actions={<ModuleVerdictHeader score10={score10} />}
         >
-          {marketModule?.summary_assessment ? (
-            <p className="text-sm leading-relaxed text-foreground/90">{marketModule.summary_assessment}</p>
-          ) : (
-            <p className="text-xs italic text-muted-foreground">
-              Section summary not yet synthesized at L1 — awaiting Phase 7.4 per-section synthesis.
-            </p>
-          )}
+          <div className="space-y-2">
+            {marketModule?.summary_assessment ? (
+              <p className="text-sm leading-relaxed text-foreground/90">{marketModule.summary_assessment}</p>
+            ) : (
+              <p className="text-xs italic text-muted-foreground">
+                Section summary not yet synthesized at L1 — awaiting Phase 7.4 per-section synthesis.
+              </p>
+            )}
+            <BenchmarkChip score10={score10} />
+          </div>
         </SectionCard>
       </BlurFade>
 
@@ -285,28 +286,14 @@ export function MarketRealityTab({
         </SectionCard>
       </BlurFade>
 
-      {/* 6. Diligence Questions */}
+      {/* 6. Flags + flag-bound questions (rationale, good/bad answers) */}
       <BlurFade delay={0.12}>
-        <SectionCard
-          title="Diligence Questions"
-          subtitle="2–4 market-scoped questions · L1 view"
-          icon={<MessageSquare className="h-4 w-4" />}
-          empty={marketQs.length === 0}
-          emptyMessage="No market-scoped diligence questions emitted yet."
-        >
-          {marketQs.length > 0 && (
-            <ul className="space-y-2">
-              {marketQs.map((q) => (
-                <li key={q.id} className="text-xs border-l-2 border-border pl-3">
-                  <p className="text-foreground font-medium leading-snug">{q.question}</p>
-                  {q.rationale && (
-                    <p className="text-[11px] text-muted-foreground italic mt-1 leading-snug">{q.rationale}</p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
+        <ModuleFlagBlock
+          moduleKeys={["market", "domain", "competit", "module_d"]}
+          redFlags={redFlags}
+          interrogatoryItems={interrogatoryItems}
+          moduleLabel="Macro Context"
+        />
       </BlurFade>
 
     </div>

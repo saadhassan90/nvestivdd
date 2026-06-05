@@ -19,7 +19,7 @@ export function slugify(input: string): string {
 export const SECTION_LABELS: Record<string, string> = {
   overview: "Overview",
   investment_thesis: "Investment Thesis",
-  market_reality: "Market Reality",
+  market_reality: "Macro Context",
   team: "Team & Manager",
   track_record: "Track Record",
   economics: "Economics",

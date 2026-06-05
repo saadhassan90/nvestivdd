@@ -35,7 +35,7 @@ const CAT_LABEL: Record<Cat, string> = {
   team: "Team",
   track_record: "Track Record",
   investment_thesis: "Investment Thesis",
-  market_reality: "Market Reality",
+  market_reality: "Macro Context",
   economics: "Economics",
   regulatory_ops: "Reg & Ops",
 };

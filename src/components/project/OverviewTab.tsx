@@ -7,6 +7,8 @@ import { FieldValueGrid } from "@/components/project/primitives/FieldValueGrid";
 import { TierPill, RecommendationBadge, recommendationFromScore, tierFromScore } from "@/components/project/primitives/VerdictBadges";
 import { HardFloorBanner } from "@/components/project/primitives/HardFloorBanner";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
+import { FundFactSheet } from "@/components/project/FundFactSheet";
+import { compositeVerdict } from "@/lib/verdict-labels";
 import { getSectionTier, SCORE_TIER_LABELS, type ScoreTier } from "@/lib/score-utils";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -22,6 +24,7 @@ interface OverviewTabProps {
   criticalInfoGaps?: any[];
   onRerunAnalysis: () => void;
   reportMarkdown?: string | null;
+  fees?: Tables<"fee_structure">[];
 }
 
 export function OverviewTab({
@@ -30,9 +33,11 @@ export function OverviewTab({
   moduleScoresData = [],
   submissionQuality = [],
   criticalInfoGaps = [],
+  fees = [],
 }: OverviewTabProps) {
   const { id: projectId } = useParams<{ id: string }>();
   const composite = project.composite_score ?? null;
+  const verdict = compositeVerdict(composite);
   const tier = tierFromScore(composite);
   const rec = recommendationFromScore(composite);
   const criticalCount = redFlags.filter((f) => f.severity === "critical").length;
@@ -123,6 +128,9 @@ export function OverviewTab({
 
   return (
     <div className="space-y-5">
+      {/* 0. FUND FACT SHEET — one-pager on the fund itself */}
+      <FundFactSheet project={project} fees={fees} />
+
       {/* 1. HERO — Composite + tier + Recommendation + Confidence */}
       <BlurFade>
         <SectionCard
@@ -130,6 +138,10 @@ export function OverviewTab({
           subtitle="Composite score · Recommendation · Confidence"
           icon={<Sparkles className="h-4 w-4" />}
         >
+          <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2.5 mb-4">
+            <p className="text-sm font-semibold text-foreground leading-snug">{verdict.headline}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{verdict.detail}</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Composite + tier */}
             <div className="flex flex-col items-start gap-2 md:border-r md:border-border/60 md:pr-6">
@@ -377,7 +389,7 @@ type DimensionRow = {
 
 const PRD_DIMENSIONS: { key: string; label: string; weight: number; tab: string; aliases: string[] }[] = [
   { key: "investment_thesis", label: "Investment Thesis", weight: 15, tab: "investment_thesis", aliases: ["investment_thesis", "thesis", "module_c", "strategy"] },
-  { key: "market_reality", label: "Market Reality", weight: 20, tab: "market_reality", aliases: ["market_reality", "market", "module_d", "domain"] },
+  { key: "market_reality", label: "Macro Context", weight: 20, tab: "market_reality", aliases: ["market_reality", "market", "module_d", "domain"] },
   { key: "team", label: "Team & Manager", weight: 25, tab: "team", aliases: ["team", "module_b", "manager"] },
   { key: "track_record", label: "Track Record", weight: 20, tab: "track_record", aliases: ["track_record", "track", "performance", "module_a", "financial"] },
   { key: "economics", label: "Economics", weight: 20, tab: "economics", aliases: ["economics", "terms", "fee", "module_d_terms"] },

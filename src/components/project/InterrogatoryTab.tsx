@@ -23,7 +23,7 @@ const CATEGORIES: { key: Category; label: string; tab?: string }[] = [
   { key: "team", label: "Team", tab: "team" },
   { key: "track_record", label: "Track Record", tab: "track_record" },
   { key: "investment_thesis", label: "Investment Thesis", tab: "investment_thesis" },
-  { key: "market_reality", label: "Market Reality", tab: "market_reality" },
+  { key: "market_reality", label: "Macro Context", tab: "market_reality" },
   { key: "economics", label: "Economics", tab: "economics" },
   { key: "regulatory_ops", label: "Reg & Ops", tab: "regulatory_ops" },
 ];
