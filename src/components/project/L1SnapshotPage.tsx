@@ -477,7 +477,12 @@ function SignalCol({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn(full && "md:col-span-2")}>
+    <div
+      className={cn(
+        "rounded-xl border border-border/70 bg-background/40 p-4",
+        full && "md:col-span-2",
+      )}
+    >
       <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
         <span className={cn("h-[2px] w-[18px] rounded-full", accent)} />
         {label}
