@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Check,
   AlertTriangle,
-  MessageCircleQuestion,
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
@@ -285,18 +284,6 @@ export function L1SnapshotPage({
                 ))
               )}
             </div>
-          </Card>
-        </BlurFade>
-
-        {/* ─── Card 4: Initial Questions ─── */}
-        <BlurFade delay={0.2}>
-          <Card>
-            <CardHead
-              icon={<MessageCircleQuestion className="h-4 w-4" />}
-              title="Initial Questions"
-              subtitle="Open items raised by the triage research — to put to the GP"
-            />
-            <InitialQuestionsList items={interrogatoryItems} />
           </Card>
         </BlurFade>
 
@@ -638,29 +625,33 @@ function DetailBody({ row }: { row: ModuleRow }) {
 
           {/* Tier 1 — Strengths */}
           {posCount > 0 && (
-            <EvidenceGroup
-              tone="pos"
-              label="Strengths"
-              count={posCount}
-              items={row.positives}
-            />
+            <div className="rounded-xl border border-border/70 bg-background/60 p-4">
+              <EvidenceGroup
+                tone="pos"
+                label="Strengths"
+                count={posCount}
+                items={row.positives}
+              />
+            </div>
           )}
 
           {/* Tier 1 — Concerns */}
           {negCount > 0 && (
-            <EvidenceGroup
-              tone="neg"
-              label="Concerns"
-              count={negCount}
-              items={row.concerns}
-            />
+            <div className="mt-3 rounded-xl border border-border/70 bg-background/60 p-4">
+              <EvidenceGroup
+                tone="neg"
+                label="Concerns"
+                count={negCount}
+                items={row.concerns}
+              />
+            </div>
           )}
 
           {/* Tier 2 — Implication */}
           {implication && (
             <div
               className={cn(
-                "mt-5 flex flex-col gap-0.5 rounded-[10px] px-4 py-3",
+                "mt-3 flex flex-col gap-0.5 rounded-xl border border-border/70 px-4 py-3",
                 impClass[impTone],
               )}
             >
