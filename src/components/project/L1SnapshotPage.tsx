@@ -12,6 +12,7 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
 import { FundFactSheet } from "@/components/project/FundFactSheet";
 import { BenchmarkChip } from "@/components/project/primitives/BenchmarkChip";
+import { CardCommentThread } from "@/components/project/CardCommentThread";
 import {
   BENCHMARK_LABEL_TEXT,
   compositeVerdict,
@@ -116,6 +117,8 @@ export function L1SnapshotPage({
 
   const [openId, setOpenId] = useState<string | null>(modules[0]?.id ?? null);
 
+  const projectId = (project as any).id as string;
+
   return (
     <main className="flex-1 min-w-0 bg-background overflow-y-auto">
       <div className="mx-auto flex max-w-[1080px] flex-col gap-5 px-6 py-8 pb-16">
@@ -186,6 +189,12 @@ export function L1SnapshotPage({
                 }
               />
             </div>
+            <CardCommentThread
+              projectId={projectId}
+              sectionId="l1-overview"
+              cardId="verdict-snapshot"
+              cardLabel="Verdict Snapshot"
+            />
           </Card>
         </BlurFade>
 
@@ -257,6 +266,12 @@ export function L1SnapshotPage({
                 )}
               </SignalCol>
             </div>
+            <CardCommentThread
+              projectId={projectId}
+              sectionId="l1-overview"
+              cardId="findings-overview"
+              cardLabel="Findings Overview"
+            />
           </Card>
         </BlurFade>
 
@@ -280,6 +295,7 @@ export function L1SnapshotPage({
                     row={m}
                     open={openId === m.id}
                     onToggle={() => setOpenId(openId === m.id ? null : m.id)}
+                    projectId={projectId}
                   />
                 ))
               )}
@@ -515,10 +531,12 @@ function ModuleAccordion({
   row,
   open,
   onToggle,
+  projectId,
 }: {
   row: ModuleRow;
   open: boolean;
   onToggle: () => void;
+  projectId: string;
 }) {
   const barColor =
     row.rating === "Strong"
@@ -579,6 +597,16 @@ function ModuleAccordion({
       >
         <div className="min-h-0">
           <DetailBody row={row} />
+          {open && (
+            <div className="mx-3 mb-3 rounded-lg overflow-hidden border border-border/70">
+              <CardCommentThread
+                projectId={projectId}
+                sectionId="l1-modules"
+                cardId={row.module_key || row.id}
+                cardLabel={row.name}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -612,7 +640,7 @@ function DetailBody({ row }: { row: ModuleRow }) {
   const implication = row.read || row.note;
 
   return (
-    <div className="mx-3 mb-3 mt-1 rounded-xl border border-border/70 bg-background/40 p-4">
+    <div className="px-4 pb-4 pt-1">
       {total === 0 ? (
         <EmptyLine text="No detailed bullets available for this module." />
       ) : (
@@ -625,33 +653,29 @@ function DetailBody({ row }: { row: ModuleRow }) {
 
           {/* Tier 1 — Strengths */}
           {posCount > 0 && (
-            <div className="rounded-xl border border-border/70 bg-background/60 p-4">
-              <EvidenceGroup
-                tone="pos"
-                label="Strengths"
-                count={posCount}
-                items={row.positives}
-              />
-            </div>
+            <EvidenceGroup
+              tone="pos"
+              label="Strengths"
+              count={posCount}
+              items={row.positives}
+            />
           )}
 
           {/* Tier 1 — Concerns */}
           {negCount > 0 && (
-            <div className="mt-3 rounded-xl border border-border/70 bg-background/60 p-4">
-              <EvidenceGroup
-                tone="neg"
-                label="Concerns"
-                count={negCount}
-                items={row.concerns}
-              />
-            </div>
+            <EvidenceGroup
+              tone="neg"
+              label="Concerns"
+              count={negCount}
+              items={row.concerns}
+            />
           )}
 
           {/* Tier 2 — Implication */}
           {implication && (
             <div
               className={cn(
-                "mt-3 flex flex-col gap-0.5 rounded-xl border border-border/70 px-4 py-3",
+                "mt-4 flex flex-col gap-0.5 rounded-lg px-4 py-3",
                 impClass[impTone],
               )}
             >
@@ -679,7 +703,7 @@ function DetailBody({ row }: { row: ModuleRow }) {
 
 function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }) {
   return (
-    <div className="mt-3 rounded-xl border border-border/70 bg-background/60 p-4">
+    <div className="mt-5 border-t border-border/60 pt-4">
       <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-foreground">
         <AlertTriangle className="h-3.5 w-3.5 text-severity-elevated" />
         Flags in this module
@@ -687,17 +711,17 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
           {items.length}
         </span>
       </div>
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-5">
         {items.map((f) => {
           const sev = (f.severity || "monitor").toLowerCase();
-          const sevBar =
+          const sevAccent =
             sev === "critical"
-              ? "border-l-severity-critical bg-severity-critical/5"
+              ? "border-l-severity-critical"
               : sev === "elevated"
-                ? "border-l-severity-elevated bg-severity-elevated/5"
-                : "border-l-muted-foreground bg-muted/30";
+                ? "border-l-severity-elevated"
+                : "border-l-muted-foreground";
           return (
-            <li key={f.id} className={cn("rounded-md border border-border border-l-4 p-3", sevBar)}>
+            <li key={f.id} className={cn("border-l-2 pl-3", sevAccent)}>
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-[13px] font-semibold text-foreground leading-snug">{f.title}</p>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
@@ -721,13 +745,13 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                 </div>
               )}
               {f.questions.length > 0 && (
-                <div className="mt-3 border-t border-border/40 pt-2.5">
+                <div className="mt-3">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
                     Questions to ask ({f.questions.length})
                   </p>
-                  <ul className="flex flex-col gap-2.5">
+                  <ul className="flex flex-col gap-4">
                     {f.questions.map((q) => (
-                      <li key={q.id} className="rounded border border-border bg-card px-2.5 py-2">
+                      <li key={q.id}>
                         <p className="text-[12.5px] font-medium leading-snug text-foreground">{q.question}</p>
                         {q.rationale && (
                           <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">
