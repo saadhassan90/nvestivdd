@@ -11,6 +11,14 @@ import {
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
+import { FundFactSheet } from "@/components/project/FundFactSheet";
+import { BenchmarkChip } from "@/components/project/primitives/BenchmarkChip";
+import {
+  BENCHMARK_LABEL_TEXT,
+  compositeVerdict,
+  moduleBenchmark,
+  moduleVerdictLine,
+} from "@/lib/verdict-labels";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -46,6 +54,24 @@ type ModuleRow = {
   positives: Bullet[];
   concerns: Bullet[];
   note?: string | null;
+  module_key?: string | null;
+  flagsAndQuestions?: ModuleFlagWithQuestions[];
+};
+
+type ModuleFlagWithQuestions = {
+  id: string;
+  title: string;
+  severity: string;
+  why: string | null;
+  implication: string | null;
+  questions: Array<{
+    id: string;
+    question: string;
+    rationale: string | null;
+    good: string | null;
+    bad: string | null;
+    priority: string | null;
+  }>;
 };
 
 interface Props {
@@ -55,6 +81,7 @@ interface Props {
   criticalInfoGaps: any[];
   submissionQuality: any[];
   interrogatoryItems?: Tables<"interrogatory_items">[];
+  feeStructure?: Tables<"fee_structure">[];
 }
 
 export function L1SnapshotPage({
@@ -64,6 +91,7 @@ export function L1SnapshotPage({
   criticalInfoGaps,
   submissionQuality,
   interrogatoryItems = [],
+  feeStructure = [],
 }: Props) {
   const strategyTag = [project.strategy, project.asset_class, project.document_type]
     .filter(Boolean)
@@ -77,10 +105,15 @@ export function L1SnapshotPage({
     () => buildVerdict(project, redFlags, submissionQuality),
     [project, redFlags, submissionQuality],
   );
+  const compVerdict = useMemo(() => compositeVerdict(verdict.composite), [verdict.composite]);
   const fit = useMemo(() => extractStrings((project as any).key_strengths).slice(0, 4), [project]);
   const watch = useMemo(() => buildWatch(redFlags), [redFlags]);
   const doNext = useMemo(() => buildDoNext(project, criticalInfoGaps), [project, criticalInfoGaps]);
   const modules = useMemo(() => buildModules(moduleScores, redFlags), [moduleScores, redFlags]);
+  const modulesEnriched = useMemo(
+    () => attachFlagsAndQuestions(modules, redFlags, interrogatoryItems),
+    [modules, redFlags, interrogatoryItems],
+  );
 
   const [openId, setOpenId] = useState<string | null>(modules[0]?.id ?? null);
 
@@ -114,9 +147,15 @@ export function L1SnapshotPage({
               </VCell>
               <VCell label="Recommendation" borderLeft>
                 <RecoBadge label={verdict.recommendation} tone={verdict.recommendationTone} />
-                <p className="mt-3 text-[13px] leading-snug text-muted-foreground">
+                <p className="mt-3 text-[13px] font-semibold leading-snug text-foreground">
+                  {compVerdict.headline}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-snug text-muted-foreground">
+                  {compVerdict.detail}
+                </p>
+                <p className="mt-2 text-[11.5px] italic leading-snug text-muted-foreground">
                   {verdict.hard_floor === "Pass"
-                    ? "Clears the hard floor; proceed per recommendation."
+                    ? "Clears the hard floor."
                     : "Hard floor failed — verdict gated."}
                 </p>
               </VCell>
@@ -150,6 +189,9 @@ export function L1SnapshotPage({
             </div>
           </Card>
         </BlurFade>
+
+        {/* ─── Card 1.5: Fund Fact Sheet ─── */}
+        <FundFactSheet project={project} fees={feeStructure} />
 
         {/* ─── Card 2: Findings Overview ─── */}
         <BlurFade delay={0.08}>
@@ -233,7 +275,7 @@ export function L1SnapshotPage({
                   Module scores not yet available.
                 </p>
               ) : (
-                modules.map((m) => (
+                modulesEnriched.map((m) => (
                   <ModuleAccordion
                     key={m.id}
                     row={m}
@@ -497,17 +539,30 @@ function ModuleAccordion({
             ? "bg-score-review"
             : "bg-severity-critical";
   const pct = row.score == null ? 0 : Math.max(0, Math.min(100, row.score * 10));
+  const bench = moduleBenchmark(row.score);
+  const verdictLine = moduleVerdictLine(row.score);
 
   return (
     <div className="border-b border-border/60 last:border-b-0">
       <button
         type="button"
         onClick={onToggle}
-        className="grid w-full grid-cols-[180px_1fr_auto] items-center gap-4 rounded-lg px-3 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
+        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-lg px-3 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
       >
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+        />
         <span className="text-[14px] font-bold text-foreground">{row.name}</span>
-        <span className="hidden text-[13px] leading-snug text-muted-foreground md:block">
-          {row.read || "—"}
+        <span className="hidden flex-col gap-0.5 md:flex">
+          <span className="text-[13px] leading-snug text-foreground">
+            {row.read || verdictLine}
+          </span>
+          <span className="text-[11px] italic leading-snug text-muted-foreground">
+            {BENCHMARK_LABEL_TEXT[bench]} · {verdictLine}
+          </span>
         </span>
         <span className="flex items-center gap-3.5">
           <span className="relative h-1.5 w-[54px] overflow-hidden rounded-full bg-muted">
@@ -520,10 +575,7 @@ function ModuleAccordion({
             {row.score == null ? "—" : row.score.toFixed(1)}
             <span className="text-[11px] font-semibold text-muted-foreground">/10</span>
           </span>
-          <RatingChip rating={row.rating} />
-          <ChevronDown
-            className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")}
-          />
+          <BenchmarkChip score10={row.score} text={BENCHMARK_LABEL_TEXT[bench]} />
         </span>
       </button>
 
@@ -620,6 +672,102 @@ function DetailBody({ row }: { row: ModuleRow }) {
           )}
         </>
       )}
+
+      {/* Flags & questions tied to this module */}
+      {row.flagsAndQuestions && row.flagsAndQuestions.length > 0 && (
+        <ModuleFlagsAndQuestions items={row.flagsAndQuestions} />
+      )}
+    </div>
+  );
+}
+
+function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }) {
+  return (
+    <div className="mt-5 rounded-[10px] border border-border bg-background p-4">
+      <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-foreground">
+        <AlertTriangle className="h-3.5 w-3.5 text-severity-elevated" />
+        Flags in this module
+        <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-muted px-1.5 text-[10px] font-bold text-muted-foreground">
+          {items.length}
+        </span>
+      </div>
+      <ul className="flex flex-col gap-3">
+        {items.map((f) => {
+          const sev = (f.severity || "monitor").toLowerCase();
+          const sevBar =
+            sev === "critical"
+              ? "border-l-severity-critical bg-severity-critical/5"
+              : sev === "elevated"
+                ? "border-l-severity-elevated bg-severity-elevated/5"
+                : "border-l-muted-foreground bg-muted/30";
+          return (
+            <li key={f.id} className={cn("rounded-md border border-border border-l-4 p-3", sevBar)}>
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="text-[13px] font-semibold text-foreground leading-snug">{f.title}</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                  {f.severity}
+                </span>
+              </div>
+              {f.why && (
+                <div className="mt-1.5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+                    Why it was raised
+                  </p>
+                  <p className="text-[12.5px] text-foreground/85 leading-snug">{f.why}</p>
+                </div>
+              )}
+              {f.implication && (
+                <div className="mt-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+                    Implication
+                  </p>
+                  <p className="text-[12.5px] text-foreground/85 leading-snug">{f.implication}</p>
+                </div>
+              )}
+              {f.questions.length > 0 && (
+                <div className="mt-3 border-t border-border/40 pt-2.5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                    Questions to ask ({f.questions.length})
+                  </p>
+                  <ul className="flex flex-col gap-2.5">
+                    {f.questions.map((q) => (
+                      <li key={q.id} className="rounded border border-border bg-card px-2.5 py-2">
+                        <p className="text-[12.5px] font-medium leading-snug text-foreground">{q.question}</p>
+                        {q.rationale && (
+                          <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">
+                            <span className="text-[10px] uppercase tracking-wider font-semibold mr-1">
+                              Rationale
+                            </span>
+                            {q.rationale}
+                          </p>
+                        )}
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
+                            <p className="text-[9.5px] uppercase tracking-wider font-bold text-score-strong mb-0.5">
+                              Good answer
+                            </p>
+                            <p className="text-[11.5px] leading-snug text-foreground/85">
+                              {q.good && q.good.trim() ? q.good : <span className="italic text-muted-foreground">—</span>}
+                            </p>
+                          </div>
+                          <div className="rounded border border-severity-critical/30 bg-severity-critical/5 px-2 py-1.5">
+                            <p className="text-[9.5px] uppercase tracking-wider font-bold text-severity-critical mb-0.5">
+                              Bad answer
+                            </p>
+                            <p className="text-[11.5px] leading-snug text-foreground/85">
+                              {q.bad && q.bad.trim() ? q.bad : <span className="italic text-muted-foreground">—</span>}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -944,7 +1092,50 @@ function buildModules(
       positives,
       concerns,
       note: m.confidence_rationale || null,
+      module_key: m.module_key || null,
     };
+  });
+}
+
+function attachFlagsAndQuestions(
+  rows: ModuleRow[],
+  redFlags: Tables<"red_flags">[],
+  questions: Tables<"interrogatory_items">[],
+): ModuleRow[] {
+  return rows.map((row) => {
+    const keyTokens = [row.module_key, row.name]
+      .filter(Boolean)
+      .map((k) => String(k).toLowerCase());
+    const matches = (val: string | null | undefined) => {
+      if (!val) return false;
+      const v = val.toLowerCase();
+      return keyTokens.some((k) => v.includes(k) || k.includes(v));
+    };
+    const flags = redFlags.filter(
+      (f) => matches(f.module) || matches(f.source_module),
+    );
+    const flagsAndQuestions: ModuleFlagWithQuestions[] = flags.map((f) => {
+      const linked = questions.filter((q) => {
+        const ids = (q.related_red_flag_ids as string[] | null) || [];
+        return ids.includes(f.id);
+      });
+      return {
+        id: f.id,
+        title: f.title,
+        severity: f.severity,
+        why: f.issue || f.description || null,
+        implication: f.implication || null,
+        questions: linked.map((q) => ({
+          id: q.id,
+          question: q.question,
+          rationale: q.rationale ?? null,
+          good: (q as any).good_answer_direction ?? null,
+          bad: (q as any).bad_answer_direction ?? null,
+          priority: q.priority ?? null,
+        })),
+      };
+    });
+    return { ...row, flagsAndQuestions };
   });
 }
 
