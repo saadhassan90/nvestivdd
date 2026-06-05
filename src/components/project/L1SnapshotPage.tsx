@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Check,
   AlertTriangle,
-  MessageCircleQuestion,
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
@@ -285,18 +284,6 @@ export function L1SnapshotPage({
                 ))
               )}
             </div>
-          </Card>
-        </BlurFade>
-
-        {/* ─── Card 4: Initial Questions ─── */}
-        <BlurFade delay={0.2}>
-          <Card>
-            <CardHead
-              icon={<MessageCircleQuestion className="h-4 w-4" />}
-              title="Initial Questions"
-              subtitle="Open items raised by the triage research — to put to the GP"
-            />
-            <InitialQuestionsList items={interrogatoryItems} />
           </Card>
         </BlurFade>
 
