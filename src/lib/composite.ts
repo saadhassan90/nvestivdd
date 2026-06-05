@@ -33,7 +33,7 @@ export const DIMENSION_WEIGHTS: Record<string, number> = {
 
 export const DIMENSION_LABELS: Record<string, string> = {
   investment_thesis: "Investment Thesis",
-  market_reality: "Market Reality",
+  market_reality: "Macro Context",
   team: "Team & Manager",
   track_record: "Track Record",
   economics: "Economics",
