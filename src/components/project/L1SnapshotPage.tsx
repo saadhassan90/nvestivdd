@@ -535,11 +535,11 @@ function ModuleAccordion({
   const verdictLine = moduleVerdictLine(row.score);
 
   return (
-    <div className="border-b border-border/60 last:border-b-0">
+    <div className="mb-2 rounded-xl border border-border/70 bg-background/40 last:mb-0">
       <button
         type="button"
         onClick={onToggle}
-        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-lg px-3 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
+        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-xl px-4 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
       >
         <ChevronDown
           className={cn(
@@ -612,7 +612,7 @@ function DetailBody({ row }: { row: ModuleRow }) {
   const implication = row.read || row.note;
 
   return (
-    <div className="mx-2.5 mb-4 rounded-[10px] border border-border bg-muted/30 p-5">
+    <div className="mx-3 mb-3 mt-1 rounded-xl border border-border/70 bg-background/40 p-4">
       {total === 0 ? (
         <EmptyLine text="No detailed bullets available for this module." />
       ) : (
@@ -679,7 +679,7 @@ function DetailBody({ row }: { row: ModuleRow }) {
 
 function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }) {
   return (
-    <div className="mt-5 rounded-[10px] border border-border bg-background p-4">
+    <div className="mt-3 rounded-xl border border-border/70 bg-background/60 p-4">
       <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-foreground">
         <AlertTriangle className="h-3.5 w-3.5 text-severity-elevated" />
         Flags in this module
