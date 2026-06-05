@@ -531,10 +531,12 @@ function ModuleAccordion({
   row,
   open,
   onToggle,
+  projectId,
 }: {
   row: ModuleRow;
   open: boolean;
   onToggle: () => void;
+  projectId: string;
 }) {
   const barColor =
     row.rating === "Strong"
@@ -595,6 +597,16 @@ function ModuleAccordion({
       >
         <div className="min-h-0">
           <DetailBody row={row} />
+          {open && (
+            <div className="mx-3 mb-3 rounded-lg overflow-hidden border border-border/70">
+              <CardCommentThread
+                projectId={projectId}
+                sectionId="l1-modules"
+                cardId={row.module_key || row.id}
+                cardLabel={row.name}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
