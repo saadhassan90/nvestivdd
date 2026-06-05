@@ -54,6 +54,24 @@ type ModuleRow = {
   positives: Bullet[];
   concerns: Bullet[];
   note?: string | null;
+  module_key?: string | null;
+  flagsAndQuestions?: ModuleFlagWithQuestions[];
+};
+
+type ModuleFlagWithQuestions = {
+  id: string;
+  title: string;
+  severity: string;
+  why: string | null;
+  implication: string | null;
+  questions: Array<{
+    id: string;
+    question: string;
+    rationale: string | null;
+    good: string | null;
+    bad: string | null;
+    priority: string | null;
+  }>;
 };
 
 interface Props {
@@ -92,6 +110,10 @@ export function L1SnapshotPage({
   const watch = useMemo(() => buildWatch(redFlags), [redFlags]);
   const doNext = useMemo(() => buildDoNext(project, criticalInfoGaps), [project, criticalInfoGaps]);
   const modules = useMemo(() => buildModules(moduleScores, redFlags), [moduleScores, redFlags]);
+  const modulesEnriched = useMemo(
+    () => attachFlagsAndQuestions(modules, redFlags, interrogatoryItems),
+    [modules, redFlags, interrogatoryItems],
+  );
 
   const [openId, setOpenId] = useState<string | null>(modules[0]?.id ?? null);
 
@@ -253,7 +275,7 @@ export function L1SnapshotPage({
                   Module scores not yet available.
                 </p>
               ) : (
-                modules.map((m) => (
+                modulesEnriched.map((m) => (
                   <ModuleAccordion
                     key={m.id}
                     row={m}
