@@ -305,6 +305,7 @@ export default function ProjectDetail() {
                   criticalInfoGaps={criticalInfoGaps}
                   submissionQuality={submissionQuality}
                   interrogatoryItems={interrogatoryItems}
+                  feeStructure={feeStructure}
                 />
               </div>
             </SectionProvider>
