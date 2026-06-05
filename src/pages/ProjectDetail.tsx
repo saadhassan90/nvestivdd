@@ -368,6 +368,7 @@ export default function ProjectDetail() {
                     docQualityFlags={docQualityFlags}
                     criticalInfoGaps={criticalInfoGaps}
                     onRerunAnalysis={handleRerunAnalysis}
+                    fees={feeStructure}
                   />
                 )}
                 {activeTab === "team" && (
@@ -409,6 +410,7 @@ export default function ProjectDetail() {
                     interrogatoryItems={interrogatoryItems}
                     moduleScoresData={moduleScores}
                     project={project}
+                    redFlags={redFlags}
                   />
                 )}
                 {activeTab === "economics" && (
