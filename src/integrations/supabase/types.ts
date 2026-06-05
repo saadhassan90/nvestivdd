@@ -748,6 +748,8 @@ export type Database = {
       }
       interrogatory_items: {
         Row: {
+          bad_answer_direction: string | null
+          good_answer_direction: string | null
           gp_response_notes: string | null
           gp_response_score: number | null
           id: string
@@ -764,6 +766,8 @@ export type Database = {
           status: string
         }
         Insert: {
+          bad_answer_direction?: string | null
+          good_answer_direction?: string | null
           gp_response_notes?: string | null
           gp_response_score?: number | null
           id?: string
@@ -780,6 +784,8 @@ export type Database = {
           status?: string
         }
         Update: {
+          bad_answer_direction?: string | null
+          good_answer_direction?: string | null
           gp_response_notes?: string | null
           gp_response_score?: number | null
           id?: string
