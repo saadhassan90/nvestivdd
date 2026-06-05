@@ -12,6 +12,7 @@ import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
 import { FundFactSheet } from "@/components/project/FundFactSheet";
 import { BenchmarkChip } from "@/components/project/primitives/BenchmarkChip";
+import { CardCommentThread } from "@/components/project/CardCommentThread";
 import {
   BENCHMARK_LABEL_TEXT,
   compositeVerdict,
@@ -116,6 +117,8 @@ export function L1SnapshotPage({
 
   const [openId, setOpenId] = useState<string | null>(modules[0]?.id ?? null);
 
+  const projectId = (project as any).id as string;
+
   return (
     <main className="flex-1 min-w-0 bg-background overflow-y-auto">
       <div className="mx-auto flex max-w-[1080px] flex-col gap-5 px-6 py-8 pb-16">
@@ -186,6 +189,12 @@ export function L1SnapshotPage({
                 }
               />
             </div>
+            <CardCommentThread
+              projectId={projectId}
+              sectionId="l1-overview"
+              cardId="verdict-snapshot"
+              cardLabel="Verdict Snapshot"
+            />
           </Card>
         </BlurFade>
 
@@ -257,6 +266,12 @@ export function L1SnapshotPage({
                 )}
               </SignalCol>
             </div>
+            <CardCommentThread
+              projectId={projectId}
+              sectionId="l1-overview"
+              cardId="findings-overview"
+              cardLabel="Findings Overview"
+            />
           </Card>
         </BlurFade>
 
@@ -280,6 +295,7 @@ export function L1SnapshotPage({
                     row={m}
                     open={openId === m.id}
                     onToggle={() => setOpenId(openId === m.id ? null : m.id)}
+                    projectId={projectId}
                   />
                 ))
               )}
