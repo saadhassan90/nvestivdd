@@ -377,7 +377,7 @@ type DimensionRow = {
 
 const PRD_DIMENSIONS: { key: string; label: string; weight: number; tab: string; aliases: string[] }[] = [
   { key: "investment_thesis", label: "Investment Thesis", weight: 15, tab: "investment_thesis", aliases: ["investment_thesis", "thesis", "module_c", "strategy"] },
-  { key: "market_reality", label: "Market Reality", weight: 20, tab: "market_reality", aliases: ["market_reality", "market", "module_d", "domain"] },
+  { key: "market_reality", label: "Macro Context", weight: 20, tab: "market_reality", aliases: ["market_reality", "market", "module_d", "domain"] },
   { key: "team", label: "Team & Manager", weight: 25, tab: "team", aliases: ["team", "module_b", "manager"] },
   { key: "track_record", label: "Track Record", weight: 20, tab: "track_record", aliases: ["track_record", "track", "performance", "module_a", "financial"] },
   { key: "economics", label: "Economics", weight: 20, tab: "economics", aliases: ["economics", "terms", "fee", "module_d_terms"] },
