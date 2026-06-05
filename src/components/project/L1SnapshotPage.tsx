@@ -11,6 +11,14 @@ import {
 } from "lucide-react";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MethodologyModal } from "@/components/project/MethodologyModal";
+import { FundFactSheet } from "@/components/project/FundFactSheet";
+import { BenchmarkChip } from "@/components/project/primitives/BenchmarkChip";
+import {
+  BENCHMARK_LABEL_TEXT,
+  compositeVerdict,
+  moduleBenchmark,
+  moduleVerdictLine,
+} from "@/lib/verdict-labels";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -55,6 +63,7 @@ interface Props {
   criticalInfoGaps: any[];
   submissionQuality: any[];
   interrogatoryItems?: Tables<"interrogatory_items">[];
+  feeStructure?: Tables<"fee_structure">[];
 }
 
 export function L1SnapshotPage({
@@ -64,6 +73,7 @@ export function L1SnapshotPage({
   criticalInfoGaps,
   submissionQuality,
   interrogatoryItems = [],
+  feeStructure = [],
 }: Props) {
   const strategyTag = [project.strategy, project.asset_class, project.document_type]
     .filter(Boolean)
@@ -77,6 +87,7 @@ export function L1SnapshotPage({
     () => buildVerdict(project, redFlags, submissionQuality),
     [project, redFlags, submissionQuality],
   );
+  const compVerdict = useMemo(() => compositeVerdict(verdict.composite), [verdict.composite]);
   const fit = useMemo(() => extractStrings((project as any).key_strengths).slice(0, 4), [project]);
   const watch = useMemo(() => buildWatch(redFlags), [redFlags]);
   const doNext = useMemo(() => buildDoNext(project, criticalInfoGaps), [project, criticalInfoGaps]);
@@ -114,9 +125,15 @@ export function L1SnapshotPage({
               </VCell>
               <VCell label="Recommendation" borderLeft>
                 <RecoBadge label={verdict.recommendation} tone={verdict.recommendationTone} />
-                <p className="mt-3 text-[13px] leading-snug text-muted-foreground">
+                <p className="mt-3 text-[13px] font-semibold leading-snug text-foreground">
+                  {compVerdict.headline}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-snug text-muted-foreground">
+                  {compVerdict.detail}
+                </p>
+                <p className="mt-2 text-[11.5px] italic leading-snug text-muted-foreground">
                   {verdict.hard_floor === "Pass"
-                    ? "Clears the hard floor; proceed per recommendation."
+                    ? "Clears the hard floor."
                     : "Hard floor failed — verdict gated."}
                 </p>
               </VCell>
@@ -150,6 +167,9 @@ export function L1SnapshotPage({
             </div>
           </Card>
         </BlurFade>
+
+        {/* ─── Card 1.5: Fund Fact Sheet ─── */}
+        <FundFactSheet project={project} fees={feeStructure} />
 
         {/* ─── Card 2: Findings Overview ─── */}
         <BlurFade delay={0.08}>
