@@ -32,22 +32,26 @@ export function AgendaSection() {
         {a.standalone_asks.length > 0 && (
           <Card className="p-4" commentId="agenda-standalone-asks" commentLabel="Standalone asks">
             <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Standalone asks</p>
-            <div className="flex flex-wrap gap-1.5">
+            <ul className="space-y-2">
               {a.standalone_asks.map((qid) => {
                 const q = questions.get(qid);
+                if (!q) return null;
                 return (
-                  <button
-                    key={qid}
-                    type="button"
-                    onClick={() => { scrollTo(`q-${qid}`); highlight(`q-${qid}`); }}
-                    className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-[11px] font-mono text-foreground/80 hover:bg-muted"
-                    title={q?.text ?? qid}
-                  >
-                    {qid}
-                  </button>
+                  <Subcard key={qid}>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-sm text-foreground/90 leading-snug flex-1">{q.text}</p>
+                      <span className="font-mono text-[10px] text-muted-foreground shrink-0">{qid}</span>
+                    </div>
+                    {q.why && (
+                      <p className="text-[11px] text-muted-foreground italic leading-snug">
+                        <span className="not-italic uppercase tracking-wider text-[9px] font-semibold mr-1">Why</span>
+                        {q.why}
+                      </p>
+                    )}
+                  </Subcard>
                 );
               })}
-            </div>
+            </ul>
           </Card>
         )}
 
