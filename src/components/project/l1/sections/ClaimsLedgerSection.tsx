@@ -97,38 +97,27 @@ export function ClaimsLedgerSection() {
         </div>
 
         {visible.length === 0 ? (
-          <div className="p-5"><EmptyNotice>No claims match these filters.</EmptyNotice></div>
+          <div className="p-4"><EmptyNotice>No claims match these filters.</EmptyNotice></div>
         ) : (
-          <div className="divide-y divide-border/60">
-            {grouped.map(({ cat, rows }) =>
-              rows.length === 0 ? null : (
-                <div key={cat} className="p-4">
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
-                    {cat} claims <span className="tabular-nums">({rows.length})</span>
-                  </p>
-                  <ul className="space-y-2">
-                    {rows.map((c) => (
-                      <li key={c.id} className="rounded-lg border border-border/60 bg-background/40 p-3">
-                        <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <DispositionBadge d={c.disposition} />
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.entity}</span>
-                            {c.severity !== "INFO" && (
-                              <span className="text-[10px] font-bold uppercase text-severity-elevated">· {c.severity}</span>
-                            )}
-                          </div>
-                          <span className="font-mono text-[10px] text-muted-foreground">{c.id}</span>
-                        </div>
-                        <p className="text-sm text-foreground/90 leading-snug">{c.claim}</p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-snug">{c.evidence}</p>
-                        <div className="mt-1.5"><CitationChipRow ids={c.citation_ids} /></div>
-                      </li>
-                    ))}
-                  </ul>
+          <ul className="p-4 space-y-3">
+            {grouped.flatMap(({ rows }) => rows).map((c) => (
+              <li key={c.id} className="rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <DispositionBadge d={c.disposition} />
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.entity}</span>
+                    {c.severity !== "INFO" && (
+                      <span className="text-[10px] font-bold uppercase text-severity-elevated">· {c.severity}</span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[10px] text-muted-foreground">{c.id}</span>
                 </div>
-              ),
-            )}
-          </div>
+                <p className="text-sm text-foreground/90 leading-snug">{c.claim}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-snug">{c.evidence}</p>
+                <div className="mt-1.5"><CitationChipRow ids={c.citation_ids} /></div>
+              </li>
+            ))}
+          </ul>
         )}
       </Card>
     </SectionShell>
