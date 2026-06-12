@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { useRefs } from "../primitives/RefsContext";
 import { Card, SectionShell, Subcard } from "../primitives/SectionShell";
 import { CitationChip, CitationChipRow } from "../primitives/CitationChip";
-import { SourceTierBadge } from "../primitives/badges";
+import { SourceTierBadge, FlagSeverityBadge } from "../primitives/badges";
 import { MODULE_LABEL, MODULE_ORDER, type Module, type ModuleKey } from "@/types/renderContract";
 import { cn } from "@/lib/utils";
 
@@ -106,20 +106,58 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.flag_refs.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-1.5">Related flags</p>
-              <div className="flex flex-wrap gap-1.5">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Related flags</p>
+              <div className="space-y-2">
                 {m.flag_refs.map((fid) => {
                   const f = payload.flags.items.find((x) => x.id === fid);
+                  if (!f) return null;
+                  const linked = f.question_refs
+                    .map((qid) => payload.flags.questions.find((q) => q.id === qid))
+                    .filter((q): q is NonNullable<typeof q> => !!q);
+                  const accent = f.severity === "CRITICAL"
+                    ? "border-l-4 border-l-severity-critical"
+                    : "border-l-4 border-l-severity-elevated";
                   return (
-                    <button
+                    <div
                       key={fid}
-                      type="button"
-                      onClick={() => { scrollTo(`flag-${fid}`); highlight(`flag-${fid}`); }}
-                      className="inline-flex items-center rounded border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-mono text-foreground/80 hover:bg-muted"
-                      title={f?.statement}
+                      id={`flag-${fid}`}
+                      className={cn("scroll-mt-28 rounded-md border border-border bg-background/60 p-3", accent)}
                     >
-                      {fid}{f ? ` · ${f.category}` : ""}
-                    </button>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <FlagSeverityBadge s={f.severity} />
+                          <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal">{f.category}</span>
+                          <span className="font-mono text-[10px] text-muted-foreground">{f.id}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground leading-snug">{f.statement}</p>
+                      {f.evidence && (
+                        <p className="text-xs text-muted-foreground mt-1 leading-snug">{f.evidence}</p>
+                      )}
+                      <div className="mt-1.5"><CitationChipRow ids={f.citation_ids} /></div>
+
+                      {linked.length > 0 && (
+                        <div className="mt-2.5 space-y-2">
+                          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal">
+                            Questions to ask <span className="tabular-nums">({linked.length})</span>
+                          </p>
+                          {linked.map((q) => (
+                            <Subcard key={q.id} id={`q-${q.id}`} className="scroll-mt-28">
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <p className="text-sm text-foreground/90 leading-snug flex-1">{q.text}</p>
+                                <span className="font-mono text-[10px] text-muted-foreground shrink-0">{q.id}</span>
+                              </div>
+                              {q.why && (
+                                <p className="text-[11px] text-muted-foreground italic leading-snug">
+                                  <span className="not-italic uppercase tracking-wider text-[9px] font-semibold mr-1">Why</span>
+                                  {q.why}
+                                </p>
+                              )}
+                            </Subcard>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
