@@ -32,7 +32,7 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
       </header>
       {children}
       {!disableComments && ctx && (
-        <div className="mt-3 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="border-t border-border bg-muted/30">
           <CardCommentThread
             projectId={ctx.projectId}
             sectionId={ctx.sectionId}
