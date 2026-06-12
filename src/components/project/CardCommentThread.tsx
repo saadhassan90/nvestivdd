@@ -124,7 +124,7 @@ export function CardCommentThread({
   return (
     <div
       data-meeting-hide="true"
-      className="border-t border-border/60 bg-muted/20"
+      className="border-t border-border bg-muted/30"
       aria-label={cardLabel ? `Comments on ${cardLabel}` : "Comments"}
     >
       {open.length === 0 && !showResolved ? (
