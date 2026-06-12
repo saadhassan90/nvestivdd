@@ -107,7 +107,7 @@ export function VerdictSection() {
               <button
                 key={d}
                 type="button"
-                onClick={() => handleTallyClick(d)}
+                onClick={() => handleTallyClick()}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                   TALLY_TONE[d],
@@ -117,7 +117,7 @@ export function VerdictSection() {
                 <span className="lowercase">{TALLY_LABEL[d]}</span>
               </button>
             ))}
-            <span className="text-[10px] text-muted-foreground self-center ml-1">Click to jump to ledger, pre-filtered.</span>
+            <span className="text-[10px] text-muted-foreground self-center ml-1">Click to jump to ledger.</span>
           </div>
         </div>
 
