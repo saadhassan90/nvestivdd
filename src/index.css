@@ -140,3 +140,13 @@
     background-color: hsl(var(--severity-monitor));
   }
 }
+
+/* L1 OnePager — anchor flash for citation/question/flag deep-links */
+.l1-flash {
+  animation: l1-flash-ring 1.6s ease-out;
+}
+@keyframes l1-flash-ring {
+  0%   { box-shadow: 0 0 0 0 hsl(var(--foreground) / 0.45); }
+  60%  { box-shadow: 0 0 0 6px hsl(var(--foreground) / 0.10); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--foreground) / 0); }
+}
