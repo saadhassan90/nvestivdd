@@ -69,22 +69,28 @@ export function Card({
 }) {
   const ctx = useSectionContext();
   const showComments = !!ctx && !!commentId;
-  return (
-    <>
+  if (!showComments) {
+    return (
       <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
         {children}
       </div>
-      {showComments && (
-        <div className="mt-2 rounded-xl border border-border bg-card overflow-hidden">
-          <CardCommentThread
-            projectId={ctx!.projectId}
-            sectionId={ctx!.sectionId}
-            cardId={commentId!}
-            cardLabel={commentLabel}
-          />
-        </div>
-      )}
-    </>
+    );
+  }
+  // Split spacing utilities onto the content wrapper so the comment footer
+  // stays full-bleed at the bottom edge of the card.
+  const tokens = (className ?? "").split(/\s+/).filter(Boolean);
+  const innerCls = tokens.filter((t) => /^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
+  const outerCls = tokens.filter((t) => !/^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
+  return (
+    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", outerCls)}>
+      <div className={innerCls || undefined}>{children}</div>
+      <CardCommentThread
+        projectId={ctx!.projectId}
+        sectionId={ctx!.sectionId}
+        cardId={commentId!}
+        cardLabel={commentLabel}
+      />
+    </div>
   );
 }
 
