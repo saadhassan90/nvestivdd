@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useSectionContext } from "@/contexts/SectionContext";
+import { CardCommentThread } from "@/components/project/CardCommentThread";
 
 interface Props {
   id: string;
@@ -9,9 +11,12 @@ interface Props {
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Set to true to suppress the attached comment thread on this section. */
+  disableComments?: boolean;
 }
 
-export function SectionShell({ id, eyebrow, title, description, actions, children, className }: Props) {
+export function SectionShell({ id, eyebrow, title, description, actions, children, className, disableComments }: Props) {
+  const ctx = useSectionContext();
   return (
     <section id={id} className={cn("scroll-mt-24", className)}>
       <header className="flex items-start justify-between gap-3 mb-3">
@@ -23,6 +28,16 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
         {actions && <div className="shrink-0">{actions}</div>}
       </header>
       {children}
+      {!disableComments && ctx && (
+        <div className="mt-3 rounded-xl border border-border bg-card overflow-hidden">
+          <CardCommentThread
+            projectId={ctx.projectId}
+            sectionId={ctx.sectionId}
+            cardId={id}
+            cardLabel={title}
+          />
+        </div>
+      )}
     </section>
   );
 }
