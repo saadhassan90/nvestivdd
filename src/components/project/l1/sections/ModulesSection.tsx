@@ -66,7 +66,7 @@ function ModuleCard({ m }: { m: Module }) {
         <div className="border-t border-border/60 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {m.kpis.map((k, i) => (
             <div key={i} className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-foreground truncate">{k.label}</p>
+              <p className="text-[10px] uppercase tracking-wider text-nvestiv-teal truncate">{k.label}</p>
               <p className="text-sm font-semibold text-foreground tabular-nums">
                 {k.value}{k.unit ? <span className="text-[10px] text-muted-foreground ml-0.5">{k.unit}</span> : null}
               </p>
@@ -89,7 +89,7 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.facts.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Facts</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Facts</p>
               <ul className="space-y-2">
                 {m.facts.map((f, i) => (
                   <Subcard key={i}>
@@ -106,7 +106,7 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.flag_refs.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-1.5">Related flags</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-1.5">Related flags</p>
               <div className="flex flex-wrap gap-1.5">
                 {m.flag_refs.map((fid) => {
                   const f = payload.flags.items.find((x) => x.id === fid);

@@ -24,7 +24,7 @@ export function FactsheetSection() {
           if (!fields.length) return null;
           return (
             <Card key={g} className="p-4" commentId={`factsheet-${g}`} commentLabel={GROUP_LABEL[g]}>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">{GROUP_LABEL[g]}</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">{GROUP_LABEL[g]}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
                 {fields.map((f) => <FieldRow key={f.key} f={f} />)}
               </div>
@@ -44,7 +44,7 @@ function FieldRow({ f }: { f: FactsheetField }) {
       : f.value ?? "";
   return (
     <div className="flex flex-col gap-0.5 border-b border-border/40 pb-2">
-      <span className="text-[10px] uppercase tracking-wider text-foreground">{f.label}</span>
+      <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal">{f.label}</span>
       <div className="flex items-start justify-between gap-2">
         <span className={cn("text-sm font-semibold", f.provenance === "not_disclosed" ? "text-muted-foreground" : "text-foreground")}>
           {display}

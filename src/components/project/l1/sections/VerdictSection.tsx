@@ -64,7 +64,7 @@ export function VerdictSection() {
 
         {/* Module chips */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Five modules</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Five modules</p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {v.modules.map((m) => {
               const open = openModule === m.key;
@@ -80,7 +80,7 @@ export function VerdictSection() {
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-wider font-semibold">{m.label}</span>
+                    <span className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal">{m.label}</span>
                     <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
                   </div>
                   <div className="text-xl font-bold tabular-nums leading-none mt-1">{m.score}</div>
@@ -102,7 +102,7 @@ export function VerdictSection() {
 
         {/* Tally pills */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Claims tally</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Claims tally</p>
           <div className="flex flex-wrap gap-2">
             {(["CONFIRMED", "CONTRADICTED", "UNVERIFIABLE"] as Disposition[]).map((d) => (
               <button
@@ -124,7 +124,7 @@ export function VerdictSection() {
 
         {/* What would change our mind */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">What would change our mind</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">What would change our mind</p>
           <ul className="space-y-2">
             {v.change_our_mind.map((c, i) => (
               <li key={i} className={cn("rounded-md border-l-2 pl-3 py-1", CHANGE_TONE[c.direction])}>
