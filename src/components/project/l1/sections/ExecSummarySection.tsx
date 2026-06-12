@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { useRefs } from "../primitives/RefsContext";
 import { Card, SectionShell, Subcard } from "../primitives/SectionShell";
 import { CitationChipRow } from "../primitives/CitationChip";
@@ -15,10 +16,10 @@ export function ExecSummarySection() {
           <ColumnHeader title="Key strengths" tone="strong" />
           <ColumnHeader title="Key risks" tone="critical" />
           {Array.from({ length: rowCount }).map((_, i) => (
-            <>
-              <BulletCell key={`s-${i}`} bullet={s.key_strengths[i]} />
-              <BulletCell key={`r-${i}`} bullet={s.key_risks[i]} />
-            </>
+            <Fragment key={i}>
+              <BulletCell bullet={s.key_strengths[i]} />
+              <BulletCell bullet={s.key_risks[i]} />
+            </Fragment>
           ))}
         </div>
       </Card>
