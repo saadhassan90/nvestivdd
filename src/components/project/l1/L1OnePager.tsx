@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 import type { RenderPayload, SectionKey } from "@/types/renderContract";
 import { RefsProvider } from "./primitives/RefsContext";
 import { StickySectionNav, type NavEntry } from "./primitives/StickySectionNav";
