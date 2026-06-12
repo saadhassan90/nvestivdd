@@ -50,9 +50,9 @@ export function ClaimsLedgerSection() {
       description="Every deck claim, once, with disposition, evidence, and citations."
       disableComments
     >
-      <Card commentId="claims-ledger" commentLabel="Claims Ledger">
-        {/* Sticky tally bar inside the card */}
-        <div className="sticky top-[44px] z-10 bg-card/95 backdrop-blur border-b border-border px-4 py-3 flex flex-wrap items-center gap-3">
+      <div className="space-y-2">
+        {/* Tab selector card */}
+        <div className="rounded-xl border border-border bg-card px-4 py-3 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
             <FilterPill
               active={filters.disposition === "ALL"}
@@ -96,6 +96,8 @@ export function ClaimsLedgerSection() {
           </span>
         </div>
 
+        {/* Claims list card — separate, attached below the tab selector */}
+        <Card commentId="claims-ledger" commentLabel="Claims Ledger">
         {visible.length === 0 ? (
           <div className="p-4"><EmptyNotice>No claims match these filters.</EmptyNotice></div>
         ) : (
@@ -119,7 +121,8 @@ export function ClaimsLedgerSection() {
             ))}
           </ul>
         )}
-      </Card>
+        </Card>
+      </div>
     </SectionShell>
   );
 }
