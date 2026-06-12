@@ -14,7 +14,7 @@ export function AgendaSection() {
       id="l1-agenda"
       eyebrow="07"
       title="Meeting Agenda"
-      description={`${a.items.length} topics · ${totalMin} min total. Question chips anchor back to the owning flag.`}
+      description={`${a.items.length} topics · ${totalMin} min total.`}
       disableComments
     >
       <div className="space-y-3">
@@ -95,7 +95,6 @@ export function AgendaSection() {
 }
 
 function AgendaRow({ item }: { item: AgendaItem }) {
-  const { questions, scrollTo, highlight, flags } = useRefs();
   return (
     <li className="px-4 py-3">
       <div className="flex items-start gap-3">
@@ -113,27 +112,6 @@ function AgendaRow({ item }: { item: AgendaItem }) {
             <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal font-semibold mr-1">What to validate</span>
             {item.what_to_validate}
           </p>
-          {item.question_refs.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {item.question_refs.map((qid) => {
-                const q = questions.get(qid);
-                const fid = q?.flag_ref;
-                const target = fid ? `flag-${fid}` : `q-${qid}`;
-                const label = fid ? `${qid} → ${flags.get(fid)?.category ?? "flag"}` : qid;
-                return (
-                  <button
-                    key={qid}
-                    type="button"
-                    onClick={() => { scrollTo(target); highlight(target); }}
-                    className="inline-flex items-center rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono text-foreground/80 hover:bg-muted"
-                    title={q?.text ?? qid}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
               <p className="text-[10px] uppercase tracking-wider font-bold text-score-strong mb-0.5">Strong answer</p>
