@@ -47,18 +47,15 @@ function ModuleCard({ m }: { m: Module }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full text-left px-4 py-3 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors"
+        className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors"
       >
-        <div className="flex items-center gap-3 flex-wrap min-w-0">
-          <span className="text-sm font-semibold text-foreground">{MODULE_LABEL[m.key]}</span>
-          <span className={cn("text-[11px] font-semibold uppercase tracking-wider", tone)}>{m.verdict_chip}</span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {score != null && (
-            <span className={cn("text-lg font-bold tabular-nums", tone)}>{score}<span className="text-[10px] text-muted-foreground">/100</span></span>
-          )}
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
-        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform shrink-0", open && "rotate-180")} />
+        <span className="text-sm font-semibold text-foreground">{MODULE_LABEL[m.key]}</span>
+        <span className={cn("text-[11px] font-semibold uppercase tracking-wider", tone)}>{m.verdict_chip}</span>
+        <div className="flex-1" />
+        {score != null && (
+          <span className={cn("text-lg font-bold tabular-nums shrink-0", tone)}>{score}<span className="text-[10px] text-muted-foreground">/100</span></span>
+        )}
       </button>
 
       {/* KPI strip always visible */}
