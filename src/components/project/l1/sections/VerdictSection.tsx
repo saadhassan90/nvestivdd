@@ -4,7 +4,7 @@ import { useRefs } from "../primitives/RefsContext";
 import { Card, SectionShell } from "../primitives/SectionShell";
 import { CitationChipRow } from "../primitives/CitationChip";
 import { NorthStarBadge, TierBadge } from "../primitives/badges";
-import { LEDGER_SECTION_ID, setLedgerFilters } from "../primitives/ledgerFilters";
+import { LEDGER_SECTION_ID } from "../primitives/ledgerFilters";
 import { cn } from "@/lib/utils";
 import type { ChangeOurMindDirection, Disposition } from "@/types/renderContract";
 
@@ -39,8 +39,7 @@ export function VerdictSection() {
   const v = payload.verdict;
   const [openModule, setOpenModule] = useState<string | null>(null);
 
-  const handleTallyClick = (d: Disposition) => {
-    setLedgerFilters({ disposition: d, category: "ALL" });
+  const handleTallyClick = () => {
     scrollTo(LEDGER_SECTION_ID);
   };
 
@@ -108,7 +107,7 @@ export function VerdictSection() {
               <button
                 key={d}
                 type="button"
-                onClick={() => handleTallyClick(d)}
+                onClick={() => handleTallyClick()}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                   TALLY_TONE[d],
@@ -118,7 +117,7 @@ export function VerdictSection() {
                 <span className="lowercase">{TALLY_LABEL[d]}</span>
               </button>
             ))}
-            <span className="text-[10px] text-muted-foreground self-center ml-1">Click to jump to ledger, pre-filtered.</span>
+            <span className="text-[10px] text-muted-foreground self-center ml-1">Click to jump to ledger.</span>
           </div>
         </div>
 

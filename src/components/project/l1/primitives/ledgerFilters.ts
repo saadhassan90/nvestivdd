@@ -1,12 +1,11 @@
 import { useSyncExternalStore } from "react";
-import type { ClaimCategory, Disposition } from "@/types/renderContract";
+import type { ClaimCategory } from "@/types/renderContract";
 
 export interface LedgerFilters {
-  disposition: Disposition | "ALL";
   category: ClaimCategory | "ALL";
 }
 
-let state: LedgerFilters = { disposition: "ALL", category: "ALL" };
+let state: LedgerFilters = { category: "ALL" };
 const listeners = new Set<() => void>();
 
 function emit() { listeners.forEach((l) => l()); }
