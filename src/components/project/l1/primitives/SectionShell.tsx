@@ -18,13 +18,17 @@ interface Props {
 export function SectionShell({ id, eyebrow, title, description, actions, children, className, disableComments }: Props) {
   const ctx = useSectionContext();
   return (
-    <section id={id} className={cn("scroll-mt-24", className)}>
-      <header className="flex items-start justify-between gap-3 mb-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            <span className="text-muted-foreground font-medium">Section {eyebrow} —</span> {title}
-          </h2>
-          {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
+    <section id={id} className={cn("scroll-mt-24 relative", className)}>
+      {/* Section index ribbon — anchors the eye on the left edge */}
+      <header className="flex items-start justify-between gap-3 mb-4 pb-3 border-b-2 border-foreground/80">
+        <div className="flex items-baseline gap-3 min-w-0">
+          <span className="text-[11px] font-mono font-bold tracking-[0.2em] text-foreground uppercase shrink-0">
+            S.{eyebrow}
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-foreground leading-tight">{title}</h2>
+            {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
+          </div>
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
       </header>
