@@ -35,10 +35,10 @@ export function EmptyNotice({ children }: { children: ReactNode }) {
   );
 }
 
-export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-xl border border-border bg-card", className)}>{children}</div>;
+export function Card({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
+  return <div id={id} className={cn("rounded-xl border border-border bg-card", className)}>{children}</div>;
 }
 
-export function Subcard({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-lg border border-border/60 bg-background/40 p-3", className)}>{children}</div>;
+export function Subcard({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
+  return <div id={id} className={cn("rounded-lg border border-border/60 bg-background/40 p-3", className)}>{children}</div>;
 }
