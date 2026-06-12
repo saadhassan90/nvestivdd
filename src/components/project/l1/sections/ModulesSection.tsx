@@ -106,7 +106,7 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.flag_refs.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-1.5">Related flags</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-1.5">Related flags</p>
               <div className="flex flex-wrap gap-1.5">
                 {m.flag_refs.map((fid) => {
                   const f = payload.flags.items.find((x) => x.id === fid);
