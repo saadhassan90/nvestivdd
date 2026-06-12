@@ -31,7 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useUiVariant } from "@/contexts/UiVariantContext";
 import { OddWorkspace } from "@/components/odd/OddWorkspace";
-import { L1SnapshotPage } from "@/components/project/L1SnapshotPage";
+import { L1OnePager } from "@/components/project/l1/L1OnePager";
+import { payloadFor } from "@/mocks/renderPayloads";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 
 import type { Tables } from "@/integrations/supabase/types";
@@ -298,15 +299,7 @@ export default function ProjectDetail() {
           ) : (
             <SectionProvider projectId={project.id} sectionId="overview">
               <div className="flex flex-1 min-h-0 overflow-hidden">
-                <L1SnapshotPage
-                  project={project}
-                  redFlags={redFlags}
-                  moduleScores={moduleScores}
-                  criticalInfoGaps={criticalInfoGaps}
-                  submissionQuality={submissionQuality}
-                  interrogatoryItems={interrogatoryItems}
-                  feeStructure={feeStructure}
-                />
+                <L1OnePager payload={payloadFor(project.id, project.fund_name)} />
               </div>
             </SectionProvider>
           )}
