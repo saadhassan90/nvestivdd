@@ -4,7 +4,7 @@ import { useRefs } from "../primitives/RefsContext";
 import { Card, SectionShell } from "../primitives/SectionShell";
 import { CitationChipRow } from "../primitives/CitationChip";
 import { NorthStarBadge, TierBadge } from "../primitives/badges";
-import { LEDGER_SECTION_ID, setLedgerFilters } from "../primitives/ledgerFilters";
+import { LEDGER_SECTION_ID } from "../primitives/ledgerFilters";
 import { cn } from "@/lib/utils";
 import type { ChangeOurMindDirection, Disposition } from "@/types/renderContract";
 
