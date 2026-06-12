@@ -72,17 +72,21 @@ export function Card({
   const ctx = useSectionContext();
   const showComments = !!ctx && !!commentId;
   return (
-    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
-      {children}
+    <>
+      <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
+        {children}
+      </div>
       {showComments && (
-        <CardCommentThread
-          projectId={ctx!.projectId}
-          sectionId={ctx!.sectionId}
-          cardId={commentId!}
-          cardLabel={commentLabel}
-        />
+        <div className="mt-2 rounded-xl border border-border bg-card overflow-hidden">
+          <CardCommentThread
+            projectId={ctx!.projectId}
+            sectionId={ctx!.sectionId}
+            cardId={commentId!}
+            cardLabel={commentLabel}
+          />
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
