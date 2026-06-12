@@ -107,7 +107,7 @@ export function ClaimsLedgerSection() {
                 <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <DispositionBadge d={c.disposition} />
-                    <span className="text-[10px] uppercase tracking-wider text-foreground">{c.entity}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal">{c.entity}</span>
                     {c.severity !== "INFO" && (
                       <span className="text-[10px] font-bold uppercase text-severity-elevated">· {c.severity}</span>
                     )}

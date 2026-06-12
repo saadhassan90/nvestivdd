@@ -75,6 +75,9 @@ export default {
           positive: "hsl(var(--trend-positive))",
           negative: "hsl(var(--trend-negative))",
         },
+        nvestiv: {
+          teal: "hsl(var(--nvestiv-teal))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
