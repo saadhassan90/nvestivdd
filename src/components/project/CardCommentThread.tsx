@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef, KeyboardEvent } from "react";
-import { Send, Sparkles, Check, X, MessageSquarePlus } from "lucide-react";
+import { Send, Sparkles, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -130,7 +130,6 @@ export function CardCommentThread({
       {open.length === 0 && !showResolved ? (
         // ─── EMPTY STATE ────────────────────────────────────────────────
         <div className="px-5 py-2.5 flex items-center gap-2">
-          <MessageSquarePlus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           <Composer
             inputRef={inputRef}
             value={body}
