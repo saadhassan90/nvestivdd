@@ -17,18 +17,16 @@ interface Props {
 
 export function SectionShell({ id, eyebrow, title, description, actions, children, className, disableComments }: Props) {
   const ctx = useSectionContext();
+  const sectionNum = parseInt(eyebrow, 10);
   return (
     <section id={id} className={cn("scroll-mt-24 relative", className)}>
       {/* Section index ribbon — anchors the eye on the left edge */}
       <header className="flex items-start justify-between gap-3 mb-4 pb-3 border-b-2 border-foreground/80">
-        <div className="flex items-baseline gap-3 min-w-0">
-          <span className="text-[11px] font-mono font-bold tracking-[0.2em] text-foreground uppercase shrink-0">
-            S.{eyebrow}
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-xl font-bold text-foreground leading-tight">{title}</h2>
-            {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
-          </div>
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold text-foreground leading-tight">
+            Section {Number.isFinite(sectionNum) ? sectionNum : eyebrow} - {title}
+          </h2>
+          {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
       </header>
@@ -72,21 +70,17 @@ export function Card({
   const ctx = useSectionContext();
   const showComments = !!ctx && !!commentId;
   return (
-    <>
-      <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
-        {children}
-      </div>
+    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
+      {children}
       {showComments && (
-        <div className="mt-2 rounded-xl border border-border bg-card overflow-hidden">
-          <CardCommentThread
-            projectId={ctx!.projectId}
-            sectionId={ctx!.sectionId}
-            cardId={commentId!}
-            cardLabel={commentLabel}
-          />
-        </div>
+        <CardCommentThread
+          projectId={ctx!.projectId}
+          sectionId={ctx!.sectionId}
+          cardId={commentId!}
+          cardLabel={commentLabel}
+        />
       )}
-    </>
+    </div>
   );
 }
 
