@@ -13,8 +13,9 @@ export function SourcesSection() {
       title="Sources & Methodology"
       description="Every citation chip on the page anchors to a row here."
       actions={<MethodologyDialog methodology={payload.methodology} />}
+      disableComments
     >
-      <Card className="p-0">
+      <Card className="p-0" commentId="sources-list" commentLabel="Sources">
         <ul className="divide-y divide-border/60">
           {payload.sources.map((s) => (
             <li id={`src-${s.id}`} key={s.id} className="px-4 py-3 scroll-mt-28 flex items-start justify-between gap-3">

@@ -7,8 +7,8 @@ export function ExecSummarySection() {
   const { payload } = useRefs();
   const s = payload.executive_summary;
   return (
-    <SectionShell id="l1-exec" eyebrow="02" title="Executive Summary" description="Narrative plus the strengths and risks an analyst would lead with.">
-      <Card className="p-5 space-y-5">
+    <SectionShell id="l1-exec" eyebrow="02" title="Executive Summary" description="Narrative plus the strengths and risks an analyst would lead with." disableComments>
+      <Card className="p-5 space-y-5" commentId="executive-summary" commentLabel="Executive Summary">
         <p className="text-sm text-foreground/85 leading-relaxed">{s.narrative}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Column title="Key strengths" tone="strong" items={s.key_strengths} />

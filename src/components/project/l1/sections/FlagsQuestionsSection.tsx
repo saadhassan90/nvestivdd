@@ -18,11 +18,12 @@ export function FlagsQuestionsSection() {
       eyebrow="05"
       title="Flags & Questions"
       description="Each flag carries the clarifying question(s) inline. Question text appears here only."
+      disableComments
     >
       <div className="space-y-3">
         {items.map((f) => <FlagCard key={f.id} flag={f} />)}
         {standalone.length > 0 && (
-          <Card className="p-4">
+          <Card className="p-4" commentId="flags-additional-asks" commentLabel="Additional asks">
             <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
               Additional asks <span className="tabular-nums">({standalone.length})</span>
             </p>
@@ -45,7 +46,7 @@ function FlagCard({ flag }: { flag: Flag }) {
     ? "border-l-4 border-l-severity-critical"
     : "border-l-4 border-l-severity-elevated";
   return (
-    <Card id={`flag-${flag.id}`} className={cn("p-4 scroll-mt-28", accent)}>
+    <Card id={`flag-${flag.id}`} className={cn("p-4 scroll-mt-28", accent)} commentId={`flag-${flag.id}`} commentLabel={flag.category}>
       <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
         <div className="flex items-center gap-2 flex-wrap">
           <FlagSeverityBadge s={flag.severity} />

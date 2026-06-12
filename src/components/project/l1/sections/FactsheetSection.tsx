@@ -17,13 +17,13 @@ const GROUP_ORDER: FactsheetGroup[] = ["identity", "scale", "economics", "govern
 export function FactsheetSection() {
   const { payload } = useRefs();
   return (
-    <SectionShell id="l1-factsheet" eyebrow="03" title="Fund Factsheet" description="Every figure declares its provenance — verified, GP-stated, or not disclosed.">
+    <SectionShell id="l1-factsheet" eyebrow="03" title="Fund Factsheet" description="Every figure declares its provenance — verified, GP-stated, or not disclosed." disableComments>
       <div className="space-y-3">
         {GROUP_ORDER.map((g) => {
           const fields = payload.factsheet.fields.filter((f) => f.group === g);
           if (!fields.length) return null;
           return (
-            <Card key={g} className="p-4">
+            <Card key={g} className="p-4" commentId={`factsheet-${g}`} commentLabel={GROUP_LABEL[g]}>
               <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">{GROUP_LABEL[g]}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
                 {fields.map((f) => <FieldRow key={f.key} f={f} />)}

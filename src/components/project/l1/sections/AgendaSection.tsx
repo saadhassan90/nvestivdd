@@ -15,21 +15,22 @@ export function AgendaSection() {
       eyebrow="07"
       title="Meeting Agenda"
       description={`${a.items.length} topics · ${totalMin} min total. Question chips anchor back to the owning flag.`}
+      disableComments
     >
       <div className="space-y-3">
-        <Card className="p-4 bg-muted/20">
+        <Card className="p-4 bg-muted/20" commentId="agenda-objective" commentLabel="Objective">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Objective</p>
           <p className="text-sm text-foreground/90 leading-relaxed">{a.objective}</p>
         </Card>
 
-        <Card className="p-0">
+        <Card className="p-0" commentId="agenda-topics" commentLabel="Agenda topics">
           <ol className="divide-y divide-border/60">
             {a.items.map((item) => <AgendaRow key={item.order} item={item} />)}
           </ol>
         </Card>
 
         {a.standalone_asks.length > 0 && (
-          <Card className="p-4">
+          <Card className="p-4" commentId="agenda-standalone-asks" commentLabel="Standalone asks">
             <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Standalone asks</p>
             <div className="flex flex-wrap gap-1.5">
               {a.standalone_asks.map((qid) => {
@@ -51,7 +52,7 @@ export function AgendaSection() {
         )}
 
         {a.materials_request.length > 0 && (
-          <Card className="p-4">
+          <Card className="p-4" commentId="agenda-materials-request" commentLabel="Materials request">
             <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Materials request</p>
             <ul className="space-y-2">
               {a.materials_request.map((m, i) => (
@@ -80,7 +81,7 @@ export function AgendaSection() {
           </Card>
         )}
 
-        <Card className="p-4 border-foreground/30 bg-foreground/5">
+        <Card className="p-4 border-foreground/30 bg-foreground/5" commentId="agenda-decision-rule" commentLabel="Decision rule">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-1">Decision rule</p>
           <p className="text-sm text-foreground leading-relaxed">{a.decision_rule}</p>
         </Card>

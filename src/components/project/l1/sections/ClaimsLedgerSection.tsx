@@ -48,8 +48,9 @@ export function ClaimsLedgerSection() {
       eyebrow="04"
       title="Claims Ledger"
       description="Every deck claim, once, with disposition, evidence, and citations."
+      disableComments
     >
-      <Card>
+      <Card commentId="claims-ledger" commentLabel="Claims Ledger">
         {/* Sticky tally bar inside the card */}
         <div className="sticky top-[44px] z-10 bg-card/95 backdrop-blur border-b border-border px-4 py-3 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
