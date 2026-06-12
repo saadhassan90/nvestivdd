@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 import type { RenderPayload, SectionKey } from "@/types/renderContract";
 import { RefsProvider } from "./primitives/RefsContext";
 import { StickySectionNav, type NavEntry } from "./primitives/StickySectionNav";
@@ -31,8 +32,12 @@ export function L1OnePager({ payload }: { payload: RenderPayload }) {
     <RefsProvider payload={payload}>
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
         <StickySectionNav entries={navEntries} />
-        <main className="px-4 sm:px-6 py-6 space-y-8 max-w-5xl w-full mx-auto">
-          {visible.map((e) => <div key={e.id}>{e.render()}</div>)}
+        <main className="px-4 sm:px-6 py-6 max-w-5xl w-full mx-auto divide-y divide-border">
+          {visible.map((e, idx) => (
+            <div key={e.id} className={cn(idx === 0 ? "pb-12" : "py-12", idx === visible.length - 1 && "pb-0")}>
+              {e.render()}
+            </div>
+          ))}
         </main>
       </div>
     </RefsProvider>
