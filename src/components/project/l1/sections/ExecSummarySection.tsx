@@ -12,15 +12,19 @@ export function ExecSummarySection() {
     <SectionShell id="l1-exec" eyebrow="02" title="Executive Summary" description="Narrative plus the strengths and risks an analyst would lead with." disableComments>
       <Card className="p-5 space-y-5" commentId="executive-summary" commentLabel="Executive Summary">
         <p className="text-sm text-foreground/85 leading-relaxed">{s.narrative}</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 auto-rows-fr">
-          <ColumnHeader title="Key strengths" tone="strong" />
-          <ColumnHeader title="Key risks" tone="critical" />
-          {Array.from({ length: rowCount }).map((_, i) => (
-            <Fragment key={i}>
-              <BulletCell bullet={s.key_strengths[i]} />
-              <BulletCell bullet={s.key_risks[i]} />
-            </Fragment>
-          ))}
+        <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+            <ColumnHeader title="Key strengths" tone="strong" />
+            <ColumnHeader title="Key risks" tone="critical" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 auto-rows-fr">
+            {Array.from({ length: rowCount }).map((_, i) => (
+              <Fragment key={i}>
+                <BulletCell bullet={s.key_strengths[i]} />
+                <BulletCell bullet={s.key_risks[i]} />
+              </Fragment>
+            ))}
+          </div>
         </div>
       </Card>
     </SectionShell>
@@ -29,7 +33,7 @@ export function ExecSummarySection() {
 
 function ColumnHeader({ title, tone }: { title: string; tone: "strong" | "critical" }) {
   const accent = tone === "strong" ? "text-score-strong" : "text-severity-critical";
-  return <p className={`text-[10px] uppercase tracking-wider font-semibold ${accent} row-auto`} style={{ gridRow: 1 }}>{title}</p>;
+  return <p className={`text-[10px] uppercase tracking-wider font-semibold ${accent}`}>{title}</p>;
 }
 
 function BulletCell({ bullet }: { bullet?: ExecBullet }) {
