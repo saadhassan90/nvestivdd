@@ -19,6 +19,7 @@ export function ModulesSection() {
       eyebrow="06"
       title="Modules"
       description="One level deeper on each of the five dimensions — collapsed by default."
+      disableComments
     >
       <div className="space-y-2">
         {ordered.map((m) => <ModuleCard key={m.key} m={m} />)}
@@ -42,7 +43,7 @@ function ModuleCard({ m }: { m: Module }) {
         : score >= 40 ? "text-severity-elevated" : "text-severity-critical";
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" commentId={`module-${m.key}`} commentLabel={MODULE_LABEL[m.key]}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

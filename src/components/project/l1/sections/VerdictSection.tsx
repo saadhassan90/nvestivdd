@@ -45,8 +45,8 @@ export function VerdictSection() {
   };
 
   return (
-    <SectionShell id="l1-verdict" eyebrow="01" title="Verdict" description="The one-minute answer to: is this deal worth an hour of my time?">
-      <Card className="p-5 space-y-5">
+    <SectionShell id="l1-verdict" eyebrow="01" title="Verdict" description="The one-minute answer to: is this deal worth an hour of my time?" disableComments>
+      <Card className="p-5 space-y-5" commentId="verdict-summary" commentLabel="Verdict">
         {/* North-star banner */}
         <div className="flex items-start gap-3 flex-wrap">
           <NorthStarBadge answer={v.north_star.answer} />

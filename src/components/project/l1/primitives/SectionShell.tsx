@@ -21,8 +21,9 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
     <section id={id} className={cn("scroll-mt-24", className)}>
       <header className="flex items-start justify-between gap-3 mb-3">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">{eyebrow}</p>
-          <h2 className="text-lg font-semibold text-foreground mt-0.5">{title}</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            <span className="text-muted-foreground font-medium">Section {eyebrow} —</span> {title}
+          </h2>
           {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
@@ -50,8 +51,35 @@ export function EmptyNotice({ children }: { children: ReactNode }) {
   );
 }
 
-export function Card({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
-  return <div id={id} className={cn("rounded-xl border border-border bg-card", className)}>{children}</div>;
+export function Card({
+  id,
+  children,
+  className,
+  commentId,
+  commentLabel,
+}: {
+  id?: string;
+  children: ReactNode;
+  className?: string;
+  /** Stable identity for the attached comment thread. Required to render comments. */
+  commentId?: string;
+  commentLabel?: string;
+}) {
+  const ctx = useSectionContext();
+  const showComments = !!ctx && !!commentId;
+  return (
+    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
+      {children}
+      {showComments && (
+        <CardCommentThread
+          projectId={ctx!.projectId}
+          sectionId={ctx!.sectionId}
+          cardId={commentId!}
+          cardLabel={commentLabel}
+        />
+      )}
+    </div>
+  );
 }
 
 export function Subcard({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
