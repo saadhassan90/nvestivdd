@@ -99,10 +99,10 @@ export function ClaimsLedgerSection() {
         {visible.length === 0 ? (
           <div className="p-5"><EmptyNotice>No claims match these filters.</EmptyNotice></div>
         ) : (
-          <div className="divide-y divide-border/60">
+          <div className="divide-y divide-border/60 pt-2">
             {grouped.map(({ cat, rows }) =>
               rows.length === 0 ? null : (
-                <div key={cat} className="px-4 py-3">
+                <div key={cat} className="px-4 py-4">
                   <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
                     {cat} claims <span className="tabular-nums">({rows.length})</span>
                   </p>
