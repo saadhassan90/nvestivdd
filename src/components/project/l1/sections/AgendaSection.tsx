@@ -19,7 +19,7 @@ export function AgendaSection() {
     >
       <div className="space-y-3">
         <Card className="p-4 bg-muted/20" commentId="agenda-objective" commentLabel="Objective">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Objective</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-1">Objective</p>
           <p className="text-sm text-foreground/90 leading-relaxed">{a.objective}</p>
         </Card>
 
@@ -31,7 +31,7 @@ export function AgendaSection() {
 
         {a.standalone_asks.length > 0 && (
           <Card className="p-4" commentId="agenda-standalone-asks" commentLabel="Standalone asks">
-            <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Standalone asks</p>
+            <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Standalone asks</p>
             <ul className="space-y-2">
               {a.standalone_asks.map((qid) => {
                 const q = questions.get(qid);
@@ -57,7 +57,7 @@ export function AgendaSection() {
 
         {a.materials_request.length > 0 && (
           <Card className="p-4" commentId="agenda-materials-request" commentLabel="Materials request">
-            <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Materials request</p>
+            <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Materials request</p>
             <ul className="space-y-2">
               {a.materials_request.map((m, i) => (
                 <Subcard key={i}>
@@ -110,7 +110,7 @@ function AgendaRow({ item }: { item: AgendaItem }) {
             </span>
           </div>
           <p className="text-xs text-foreground/85 leading-snug mb-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mr-1">What to validate</span>
+            <span className="text-[10px] uppercase tracking-wider text-foreground font-semibold mr-1">What to validate</span>
             {item.what_to_validate}
           </p>
           {item.question_refs.length > 0 && (

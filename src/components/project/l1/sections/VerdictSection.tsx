@@ -64,7 +64,7 @@ export function VerdictSection() {
 
         {/* Module chips */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Five modules</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Five modules</p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {v.modules.map((m) => {
               const open = openModule === m.key;
@@ -102,7 +102,7 @@ export function VerdictSection() {
 
         {/* Tally pills */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Claims tally</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">Claims tally</p>
           <div className="flex flex-wrap gap-2">
             {(["CONFIRMED", "CONTRADICTED", "UNVERIFIABLE"] as Disposition[]).map((d) => (
               <button
@@ -124,7 +124,7 @@ export function VerdictSection() {
 
         {/* What would change our mind */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">What would change our mind</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground mb-2">What would change our mind</p>
           <ul className="space-y-2">
             {v.change_our_mind.map((c, i) => (
               <li key={i} className={cn("rounded-md border-l-2 pl-3 py-1", CHANGE_TONE[c.direction])}>
