@@ -39,8 +39,7 @@ export function VerdictSection() {
   const v = payload.verdict;
   const [openModule, setOpenModule] = useState<string | null>(null);
 
-  const handleTallyClick = (d: Disposition) => {
-    setLedgerFilters({ disposition: d, category: "ALL" });
+  const handleTallyClick = () => {
     scrollTo(LEDGER_SECTION_ID);
   };
 
