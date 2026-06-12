@@ -32,7 +32,7 @@ export function L1OnePager({ payload }: { payload: RenderPayload }) {
     <RefsProvider payload={payload}>
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
         <StickySectionNav entries={navEntries} />
-        <main className="px-4 sm:px-6 py-6 max-w-5xl w-full mx-auto divide-y divide-border">
+        <main className="px-4 sm:px-6 py-6 max-w-5xl w-full mx-auto">
           {visible.map((e, idx) => (
             <div key={e.id} className={cn(idx === 0 ? "pb-12" : "py-12", idx === visible.length - 1 && "pb-0")}>
               {e.render()}
