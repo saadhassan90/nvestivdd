@@ -68,6 +68,7 @@ export function ChatSidebar() {
     text: string;
     isBinary: boolean;
     previewUrl?: string;
+    preview?: string;
     kind: "file" | "paste" | "image";
   }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -195,19 +196,10 @@ export function ChatSidebar() {
           type: "text/plain",
           text,
           isBinary: false,
+          preview,
           kind: "paste",
-          previewUrl: undefined,
-          // store preview line in name? keep separately via type trick
-        } as any,
+        },
       ]);
-      // Stash preview snippet on the object for the chip render
-      setAttachments((prev) => {
-        const last = prev[prev.length - 1];
-        if (last && last.kind === "paste") {
-          (last as any).preview = preview;
-        }
-        return [...prev];
-      });
     }
   };
 
@@ -339,7 +331,7 @@ export function ChatSidebar() {
                       );
                     }
                     if (a.kind === "paste") {
-                      const preview = (a as any).preview as string | undefined;
+                      const preview = a.preview;
                       return (
                         <div key={a.id} className="relative w-[200px] rounded-md border border-border bg-muted/60 px-2.5 py-1.5" title={a.name}>
                           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">
