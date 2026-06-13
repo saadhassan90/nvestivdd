@@ -1,6 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X, SquarePen, Menu, ChevronDown, Check, Plus, ArrowUp, Square, Paperclip, FileText } from "lucide-react";
+import { X, SquarePen, Menu, ChevronDown, Check, Plus, ArrowUp, Square, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
@@ -60,7 +60,16 @@ export function ChatSidebar() {
   const [input, setInput] = useState("");
   const [showModelMenu, setShowModelMenu] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [attachments, setAttachments] = useState<{ id: string; name: string; size: number; type: string; text: string; isBinary: boolean }[]>([]);
+  const [attachments, setAttachments] = useState<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    text: string;
+    isBinary: boolean;
+    previewUrl?: string;
+    kind: "file" | "paste" | "image";
+  }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -133,6 +142,7 @@ export function ChatSidebar() {
         if (textLike) {
           try { text = await f.text(); } catch { text = ""; }
         }
+        const isImg = f.type.startsWith("image/");
         return {
           id: crypto.randomUUID(),
           name: f.name,
@@ -140,11 +150,65 @@ export function ChatSidebar() {
           type: f.type,
           text,
           isBinary: !textLike,
+          previewUrl: isImg ? URL.createObjectURL(f) : undefined,
+          kind: (isImg ? "image" : "file") as "image" | "file",
         };
       })
     );
     setAttachments((prev) => [...prev, ...parsed]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const cd = e.clipboardData;
+    if (!cd) return;
+    // 1) Pasted images (screenshots, copied images)
+    const imageItems = Array.from(cd.items).filter((it) => it.kind === "file" && it.type.startsWith("image/"));
+    if (imageItems.length > 0) {
+      e.preventDefault();
+      const files = imageItems.map((it) => it.getAsFile()).filter((f): f is File => !!f);
+      const parsed = files.map((f) => ({
+        id: crypto.randomUUID(),
+        name: f.name || `pasted-image-${Date.now()}.png`,
+        size: f.size,
+        type: f.type,
+        text: "",
+        isBinary: true,
+        previewUrl: URL.createObjectURL(f),
+        kind: "image" as const,
+      }));
+      setAttachments((prev) => [...prev, ...parsed]);
+      return;
+    }
+    // 2) Long pasted text → convert to a text-body chip (Claude-style)
+    const text = cd.getData("text");
+    const isLong = text && (text.length > 600 || text.split("\n").length > 8);
+    if (isLong) {
+      e.preventDefault();
+      const preview = text.slice(0, 140).replace(/\s+/g, " ").trim();
+      setAttachments((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          name: `Pasted text · ${text.length.toLocaleString()} chars`,
+          size: text.length,
+          type: "text/plain",
+          text,
+          isBinary: false,
+          kind: "paste",
+          previewUrl: undefined,
+          // store preview line in name? keep separately via type trick
+        } as any,
+      ]);
+      // Stash preview snippet on the object for the chip render
+      setAttachments((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.kind === "paste") {
+          (last as any).preview = preview;
+        }
+        return [...prev];
+      });
+    }
   };
 
   const currentModel = MODELS.find((m) => m.id === selectedModel) || MODELS[0];
@@ -280,6 +344,7 @@ export function ChatSidebar() {
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               placeholder={projectScope ? "Ask about this deal..." : "Ask anything..."}
               rows={1}
               className="w-full resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
