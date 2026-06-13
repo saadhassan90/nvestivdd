@@ -1,9 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, MessagesSquare, Lock } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock, Upload, RotateCcw } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { ShareModal } from "@/components/project/ShareModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -22,6 +33,10 @@ interface ProjectTopBarProps {
   /** Opens the slide-in comments drawer. */
   onOpenComments?: () => void;
   commentsCount?: number;
+  /** Memo-only: triggers reset-to-template (with confirm). */
+  onReset?: () => void;
+  /** ODD-only: opens the re-import flow. */
+  onReimport?: () => void;
 }
 
 export function ProjectTopBar({
@@ -32,6 +47,8 @@ export function ProjectTopBar({
   onReportLevelChange,
   onOpenComments,
   commentsCount = 0,
+  onReset,
+  onReimport,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { variant } = useUiVariant();
@@ -99,6 +116,46 @@ export function ProjectTopBar({
           {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
           <div className="hidden lg:flex items-center gap-1.5">
             <NotificationsDropdown />
+            {onReimport && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onReimport}
+                    className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                  >
+                    <Upload className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Re-import ODD documents</TooltipContent>
+              </Tooltip>
+            )}
+            {onReset && (
+              <AlertDialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                      <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                        <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Reset memo to template</TooltipContent>
+                </Tooltip>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset memo to template?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will replace your current draft with a fresh skeleton seeded from the L1 report.
+                      This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={onReset}>Reset</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             {onOpenComments && !isMemoMode && (
               <Tooltip>
                 <TooltipTrigger asChild>
