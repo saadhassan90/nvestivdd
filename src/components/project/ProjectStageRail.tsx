@@ -46,7 +46,14 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
           const isActive = reportLevel === lvl;
-          const hasChildren = lvl === "L1" && !!bookmarks;
+          // Inline anchor list to render under this row, if any.
+          const inlineChildren =
+            lvl === "L1" && bookmarks
+              ? bookmarks
+              : (lvl === "ODD" || lvl === "L3") && isActive && sectionBookmarks
+                ? sectionBookmarks
+                : null;
+          const hasChildren = !!inlineChildren;
           // When a parent (L1/Triage) has visible children, the active highlight lives on the child row,
           // so we suppress the pill on the parent to avoid double-highlighting.
           const showActivePill = isActive && !hasChildren;
@@ -71,9 +78,9 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
               </Tooltip>
-              {lvl === "L1" && reportLevel === "L1" && bookmarks && (
+              {inlineChildren && (
                 <div className="pl-3 mt-0.5 mb-1 border-l border-border/60 ml-3">
-                  {bookmarks}
+                  {inlineChildren}
                 </div>
               )}
             </div>
@@ -81,14 +88,6 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
         })}
         </TabsList>
       </Tabs>
-      {sectionBookmarks && (
-        <div className="mt-2 flex flex-col gap-1.5">
-          <div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Bookmarks
-          </div>
-          <div className="px-1">{sectionBookmarks}</div>
-        </div>
-      )}
       {zoom && (
         <div className="mt-auto flex items-center justify-center gap-0.5 rounded-md border border-border bg-card px-1 py-1">
           <Tooltip>
