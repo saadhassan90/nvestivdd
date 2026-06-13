@@ -36,29 +36,35 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks }
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
           return (
-            <Tooltip key={lvl}>
-              <TooltipTrigger asChild>
-                <TabsTrigger
-                  value={lvl}
-                  disabled={!available}
-                  className={cn(
-                    "w-full justify-start gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-md text-muted-foreground transition-colors",
-                    "hover:bg-muted hover:text-foreground",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
-                    !available && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground",
-                  )}
-                >
-                  {!available && <Lock className="h-3 w-3" />}
-                  {display}
-                </TabsTrigger>
-              </TooltipTrigger>
-              <TooltipContent side="right">{label}</TooltipContent>
-            </Tooltip>
+            <div key={lvl} className="contents">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger
+                    value={lvl}
+                    disabled={!available}
+                    className={cn(
+                      "w-full justify-start gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-md text-muted-foreground transition-colors",
+                      "hover:bg-muted hover:text-foreground",
+                      "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
+                      !available && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground",
+                    )}
+                  >
+                    {!available && <Lock className="h-3 w-3" />}
+                    {display}
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="right">{label}</TooltipContent>
+              </Tooltip>
+              {lvl === "L1" && reportLevel === "L1" && bookmarks && (
+                <div className="pl-3 mt-0.5 mb-1 border-l border-border/60 ml-3">
+                  {bookmarks}
+                </div>
+              )}
+            </div>
           );
         })}
         </TabsList>
       </Tabs>
-      {bookmarks}
     </div>
   );
 }
