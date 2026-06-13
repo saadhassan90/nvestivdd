@@ -136,10 +136,7 @@ export default function IcMemoPage() {
             {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
             ) : (
-              <div
-                style={{ fontSize: `${zoom}em` }}
-                className="origin-top transition-[font-size] duration-150"
-              >
+              <div style={{ zoom } as React.CSSProperties}>
                 <IcMemoCanvas
                   contentJson={memo.content_json}
                   seedMarkdown={memo.content_markdown || seedMarkdown}
