@@ -24,7 +24,7 @@ export function StageDropdown({ projectId, current }: StageDropdownProps) {
   const navigate = useNavigate();
 
   const handleSelect = (stage: Stage) => {
-    if (stage === "L1") navigate(`/project/${projectId}?tab=overview`);
+    if (stage === "L1") navigate(`/project/${projectId}?tab=summary`);
     else if (stage === "L3") navigate(`/project/${projectId}/memo`);
   };
 
