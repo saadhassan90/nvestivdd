@@ -42,45 +42,45 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="hidden sm:grid sm:grid-cols-5 gap-2">
         {cards.map((card, i) => (
-          <BlurFade key={card.label} delay={i * 0.08}>
-            <MagicCard>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <BlurFade key={card.label} delay={i * 0.05}>
+            <MagicCard className="p-3">
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
                     {card.label}
                   </p>
-                  <span className="mt-2 block text-3xl font-bold text-foreground">
+                  <span className="mt-0.5 block text-xl font-bold text-foreground">
                     {(card as { suffix?: string }).suffix === "—" ? (
                       "—"
                     ) : (
                       <>
                         <NumberTicker value={card.value} />
                         {(card as { suffix?: string }).suffix === "%" && (
-                          <span className="text-lg ml-0.5">%</span>
+                          <span className="text-xs ml-0.5">%</span>
                         )}
                       </>
                     )}
                   </span>
                 </div>
-                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+                <card.icon className={`h-4 w-4 shrink-0 ${card.iconColor}`} />
               </div>
             </MagicCard>
           </BlurFade>
         ))}
       </div>
 
-      {/* Mobile: compact 2x2 */}
+      {/* Mobile: compact 5-col */}
       <BlurFade>
-        <div className="sm:hidden grid grid-cols-2 gap-2">
+        <div className="sm:hidden grid grid-cols-5 gap-1.5">
           {cards.map((card) => (
-            <div key={card.label} className="rounded-lg border border-border bg-card px-3 py-2.5">
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+            <div key={card.label} className="rounded-md border border-border bg-card px-2 py-1.5">
+              <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground leading-tight truncate">
                 {card.label}
               </p>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-lg font-bold text-foreground leading-none">
+              <div className="flex items-baseline gap-0.5 mt-0.5">
+                <span className="text-sm font-bold text-foreground leading-none">
                   {(card as { suffix?: string }).suffix === "—"
                     ? "—"
                     : `${card.value}${(card as { suffix?: string }).suffix ?? ""}`}
