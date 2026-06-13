@@ -104,7 +104,7 @@ export default function IcMemoPage() {
         mode="memo"
         reportLevel="L3"
         onReportLevelChange={(lvl) => {
-          if (lvl === "L1") navigate(`/project/${project.id}?tab=overview`);
+          if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
           else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
           else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
         }}
@@ -122,7 +122,7 @@ export default function IcMemoPage() {
         <ProjectStageRail
           reportLevel="L3"
           onReportLevelChange={(lvl) => {
-            if (lvl === "L1") navigate(`/project/${project.id}?tab=overview`);
+            if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
             else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
             else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
           }}

@@ -133,7 +133,7 @@ export function ProjectTopBar({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => navigate(`/project/${project.id}?tab=overview`)}
+                    onClick={() => navigate(`/project/${project.id}?tab=summary`)}
                     className="ml-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
