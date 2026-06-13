@@ -287,6 +287,7 @@ export default function ProjectDetail() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectStageRail
           reportLevel={isOddStage ? "ODD" : "L1"}
+          zoom={isOddStage ? oddZoom : undefined}
           bookmarks={
             !isOddStage && !isProcessing && project.status !== "error" ? (
               <L1SectionBookmarks
