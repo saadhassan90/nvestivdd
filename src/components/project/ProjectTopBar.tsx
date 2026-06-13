@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, MessagesSquare, Lock } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock, PanelLeftOpen } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { ShareModal } from "@/components/project/ShareModal";
+import { useChatContext } from "@/contexts/ChatContext";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -36,6 +37,15 @@ export function ProjectTopBar({
   const navigate = useNavigate();
   const { variant } = useUiVariant();
   const [shareOpen, setShareOpen] = useState(false);
+  const { isOpen: chatOpen, setIsOpen: setChatOpen } = useChatContext();
+
+  // Publish header height so the global chat drawer can sit below it.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--app-header-h", "48px");
+    return () => {
+      document.documentElement.style.setProperty("--app-header-h", "56px");
+    };
+  }, []);
 
   const statusColor = getStatusColor(project.status);
   const isMemoMode = mode === "memo";
@@ -62,7 +72,7 @@ export function ProjectTopBar({
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background">
         <div className="flex h-12 items-center justify-between px-3 sm:px-5">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm min-w-0">
