@@ -251,7 +251,7 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
                   onClick={() => !processing && navigate(`/project/${project.id}`)}
                 >
                   {/* Score */}
-                  <td className="px-4 py-3">
+                  <td className="px-2.5 py-2">
                     {processing ? (
                       <span className="text-xs font-medium text-muted-foreground">—</span>
                     ) : (
@@ -260,51 +260,51 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
                   </td>
 
                   {/* Fund Name */}
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-foreground text-sm">{project.fund_name}</p>
+                  <td className="px-2.5 py-2">
+                    <p className="font-medium text-foreground text-xs">{project.fund_name}</p>
                   </td>
 
                   {/* GP */}
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-foreground">
+                  <td className="px-2.5 py-2">
+                    <span className="text-xs text-foreground">
                       {project.gp_entity_name || "—"}
                     </span>
                   </td>
 
                   {/* Strategy */}
-                  <td className="px-4 py-3">
+                  <td className="px-2.5 py-2">
                     <StrategyPill strategy={project.asset_class} />
                   </td>
 
                   {/* Stage */}
-                  <td className="px-4 py-3">
+                  <td className="px-2.5 py-2">
                     <StagePill stage={stage} />
                   </td>
 
                   {/* Submitted */}
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-muted-foreground">
+                  <td className="px-2.5 py-2">
+                    <span className="text-xs text-muted-foreground">
                       {formatSubmittedDate(project.created_at)}
                     </span>
                   </td>
 
                   {/* Status */}
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${statusColor}`}>
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  <td className="px-2.5 py-2">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${statusColor}`}>
+                      <span className="h-1 w-1 rounded-full bg-current" />
                       {statusLabel}
                     </span>
                   </td>
 
                   {/* Verdict */}
-                  <td className="px-4 py-3">
-                    <span className={`text-sm font-medium ${verdictColor}`}>
+                  <td className="px-2.5 py-2">
+                    <span className={`text-xs font-medium ${verdictColor}`}>
                       {verdictLabel}
                     </span>
                   </td>
 
                   {/* Actions */}
-                  <td className="px-4 py-3">
+                  <td className="px-2.5 py-2">
                     <RowActionsMenu project={project} onRefresh={onRefresh} />
                   </td>
                 </tr>
