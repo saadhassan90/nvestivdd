@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, MessagesSquare, Lock, Upload, RotateCcw } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock, Upload, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { ShareModal } from "@/components/project/ShareModal";
 import {
@@ -42,6 +42,16 @@ interface ProjectTopBarProps {
   exportFilename?: string;
   /** Which scope the in-memory export override applies to. */
   exportCurrentScope?: "triage" | "idd" | "odd" | "memo" | "all";
+  /** When present, renders compact zoom controls (in/percent/out) to the left
+   *  of the icon set. Used by report pages (ODD, IC Memo). */
+  zoom?: {
+    value: number;
+    onIn: () => void;
+    onOut: () => void;
+    onReset: () => void;
+    canIn?: boolean;
+    canOut?: boolean;
+  };
 }
 
 export function ProjectTopBar({
@@ -57,6 +67,7 @@ export function ProjectTopBar({
   getExportMarkdown,
   exportFilename,
   exportCurrentScope,
+  zoom,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { variant } = useUiVariant();
@@ -123,6 +134,47 @@ export function ProjectTopBar({
 
           {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
           <div className="hidden lg:flex items-center gap-1.5">
+            {zoom && (
+              <div className="mr-1 flex items-center gap-0.5 rounded-md border border-border bg-card px-1 py-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={zoom.onOut}
+                      disabled={zoom.canOut === false}
+                      aria-label="Zoom out"
+                      className="inline-flex items-center justify-center rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                    >
+                      <ZoomOut className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Zoom out</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={zoom.onReset}
+                      className="min-w-[3rem] px-1 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {Math.round(zoom.value * 100)}%
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Reset zoom</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={zoom.onIn}
+                      disabled={zoom.canIn === false}
+                      aria-label="Zoom in"
+                      className="inline-flex items-center justify-center rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                    >
+                      <ZoomIn className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Zoom in</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
             <NotificationsDropdown />
             {onReimport && (
               <Tooltip>

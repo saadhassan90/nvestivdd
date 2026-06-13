@@ -36,6 +36,7 @@ import type { L1PageKey } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
+import { useReportZoom } from "@/hooks/use-report-zoom";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -86,6 +87,7 @@ export default function ProjectDetail() {
   const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
+  const oddZoom = useReportZoom();
 
   const isProcessing = project ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status) : false;
 
@@ -280,6 +282,18 @@ export default function ProjectDetail() {
             : undefined
         }
         exportCurrentScope={isOddStage ? "odd" : "triage"}
+        zoom={
+          isOddStage
+            ? {
+                value: oddZoom.zoom,
+                onIn: oddZoom.zoomIn,
+                onOut: oddZoom.zoomOut,
+                onReset: oddZoom.reset,
+                canIn: oddZoom.canIn,
+                canOut: oddZoom.canOut,
+              }
+            : undefined
+        }
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -310,7 +324,7 @@ export default function ProjectDetail() {
         />
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {isOddStage ? (
-            <OddWorkspace project={project} />
+            <OddWorkspace project={project} zoom={oddZoom.zoom} />
           ) : isProcessing ? (
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
               <ProcessingState startedAt={project.updated_at} projectId={project.id} />
