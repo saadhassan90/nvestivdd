@@ -46,7 +46,7 @@ function getSuggestedPrompts(lastAssistantMsg: ChatMessage | undefined, isScoped
 
 export function ChatSidebar() {
   const {
-    isOpen, setIsOpen, messages, isLoading, sendMessage,
+    messages, isLoading, sendMessage,
     startNewConversation, selectedModel, setSelectedModel, stopGeneration,
     projectScope, setProjectScope, loadConversations
   } = useChatContext();
@@ -106,8 +106,6 @@ export function ChatSidebar() {
     [lastAssistantMsg, projectScope]
   );
 
-  if (!isOpen) return null;
-
   return (
     <div data-chat-drawer className="relative flex flex-col h-full w-full bg-card border-r border-border">
       <ChatResizeHandle />
@@ -125,9 +123,6 @@ export function ChatSidebar() {
           <div className="flex items-center gap-1">
             <button onClick={() => {startNewConversation();setShowHistory(false);}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
               <SquarePen className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Close">
-              <X className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
         </div>
