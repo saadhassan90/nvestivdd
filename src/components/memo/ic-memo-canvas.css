@@ -55,23 +55,25 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] .ic-memo-inline-content {
-  font-size: 27px !important;       /* 36px -25% */
-  font-weight: 800 !important;      /* extrabold */
-  line-height: 1.1 !important;
-  letter-spacing: -0.025em !important;
-  margin-top: 24px;
-  margin-bottom: 12px;
+  /* Match ODD report title: text-xl / semibold / tracking-tight */
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.015em !important;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] .ic-memo-inline-content {
-  font-size: 22.5px !important;     /* 30px -25% */
+  /* Match ODD section heading: text-lg / semibold / border-b */
+  font-size: 18px !important;
   font-weight: 600 !important;
-  line-height: 1.2 !important;
-  letter-spacing: -0.025em !important;
-  margin-top: 30px;
-  margin-bottom: 12px;
+  line-height: 1.25 !important;
+  letter-spacing: -0.015em !important;
+  margin-top: 28px;
+  margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid hsl(var(--border));
 }
@@ -79,22 +81,22 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] .ic-memo-inline-content {
-  font-size: 18px !important;       /* 24px -25% */
+  font-size: 15px !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
-  letter-spacing: -0.025em !important;
-  margin-top: 24px;
-  margin-bottom: 9px;
+  letter-spacing: -0.015em !important;
+  margin-top: 20px;
+  margin-bottom: 8px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] .ic-memo-inline-content {
-  font-size: 15px !important;       /* 20px -25% */
+  font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1.4 !important;
-  letter-spacing: -0.025em !important;
-  margin-top: 18px;
+  letter-spacing: -0.015em !important;
+  margin-top: 16px;
   margin-bottom: 6px;
 }
 /* H5 = small uppercase label / eyebrow */

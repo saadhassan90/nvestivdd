@@ -11,6 +11,7 @@ import { OddCanvas } from "./OddCanvas";
 import { OddEmptyState } from "./OddEmptyState";
 import { OddImportModal } from "./OddImportModal";
 import { generateMockOddReport } from "@/lib/odd-mock-generator";
+import { ReportToolbar, nextZoomIn, nextZoomOut } from "@/components/project/ReportToolbar";
 
 interface OddWorkspaceProps {
   project: Tables<"projects">;
@@ -41,6 +42,7 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
   } = useOddReport(project.id, project.fund_name);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   // Listen for the global re-import trigger fired from the top bar.
   useEffect(() => {
@@ -149,6 +151,14 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <ReportToolbar
+          label="ODD Report"
+          fundName={project.fund_name}
+          zoom={zoom}
+          onZoomIn={() => setZoom((z) => nextZoomIn(z))}
+          onZoomOut={() => setZoom((z) => nextZoomOut(z))}
+          onZoomReset={() => setZoom(1)}
+        />
         {/* Section tabs (pills) */}
         {hasImport && (
           <div className="flex items-center border-b border-border bg-card/40 px-5 py-2">
@@ -177,16 +187,21 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
         )}
 
         {hasImport ? (
-          <OddCanvas
-            fundName={project.fund_name}
-            sections={sections}
-            onRetrySection={retrySection}
-            onSectionEdit={handleSectionEdit}
-            onRegisterScroll={(fn) => {
-              scrollFnRef.current = fn;
-            }}
-            onActiveSectionChange={setActiveKey}
-          />
+          <div
+            className="flex-1 min-h-0 flex flex-col overflow-hidden"
+            style={{ zoom } as React.CSSProperties}
+          >
+            <OddCanvas
+              fundName={project.fund_name}
+              sections={sections}
+              onRetrySection={retrySection}
+              onSectionEdit={handleSectionEdit}
+              onRegisterScroll={(fn) => {
+                scrollFnRef.current = fn;
+              }}
+              onActiveSectionChange={setActiveKey}
+            />
+          </div>
         ) : (
           <OddEmptyState onImportClick={() => setImportOpen(true)} />
         )}
