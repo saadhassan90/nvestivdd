@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { marked } from "marked";
 import { supabase } from "@/integrations/supabase/client";
 import { ODD_SECTIONS, assembleOddMarkdown, type OddSectionKey } from "@/lib/odd-template";
 
