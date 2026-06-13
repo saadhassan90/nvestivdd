@@ -368,22 +368,32 @@ export function ChatSidebar() {
                   className="hidden"
                   onChange={(e) => handleFiles(e.target.files)}
                 />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
-                      title="Add to chat"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" side="top" className="w-48">
-                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-                      <Paperclip className="h-4 w-4 mr-2" />
-                      Attach file
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-1.5">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                        title="Add to chat"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" side="top" className="w-48">
+                      <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip className="h-4 w-4 mr-2" />
+                        Attach file
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {projectScope && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      📎 <span className="truncate max-w-[120px]">{projectScope.name}</span>
+                      <button onClick={() => setProjectScope(null)} className="hover:text-destructive">
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </span>
+                  )}
+                </div>
                 <button
                 onClick={isLoading ? stopGeneration : handleSend}
                 disabled={!isLoading && !input.trim() && attachments.length === 0}
