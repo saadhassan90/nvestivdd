@@ -10,7 +10,7 @@ import { ModulesSection } from "./sections/ModulesSection";
 import { AgendaSection } from "./sections/AgendaSection";
 import { SourcesSection } from "./sections/SourcesSection";
 
-export type L1PageKey = "summary" | "analysis" | "agenda" | "judgement";
+export type L1PageKey = "summary" | "analysis" | "agenda";
 
 type Entry = { key: SectionKey; id: string; label: string; render: () => JSX.Element };
 
@@ -19,6 +19,7 @@ export const L1_PAGES: Array<{ key: L1PageKey; label: string; entries: Entry[] }
     key: "summary",
     label: "Executive Summary",
     entries: [
+      { key: "verdict", id: "l1-verdict", label: "Verdict", render: () => <VerdictSection /> },
       { key: "executive_summary", id: "l1-exec", label: "Executive Summary", render: () => <ExecSummarySection /> },
       { key: "factsheet", id: "l1-factsheet", label: "Factsheet", render: () => <FactsheetSection /> },
     ],
@@ -38,13 +39,6 @@ export const L1_PAGES: Array<{ key: L1PageKey; label: string; entries: Entry[] }
     label: "Meeting",
     entries: [
       { key: "agenda", id: "l1-agenda", label: "Meeting Agenda", render: () => <AgendaSection /> },
-    ],
-  },
-  {
-    key: "judgement",
-    label: "Judgement",
-    entries: [
-      { key: "verdict", id: "l1-verdict", label: "Verdict", render: () => <VerdictSection /> },
     ],
   },
 ];
