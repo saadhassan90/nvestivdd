@@ -53,10 +53,14 @@ export function IcMemoBookmarks({ markdown }: { markdown: string }) {
     );
   }
 
+  // Default to the first heading so there's always an active highlight, even
+  // before the user scrolls or the scroll-spy emits an index.
+  const effectiveActive = activeIndex ?? 0;
+
   return (
     <ul className="flex flex-col gap-0.5">
       {headings.map((h) => {
-        const isActive = activeIndex === h.index;
+        const isActive = effectiveActive === h.index;
         return (
           <li key={h.index}>
             <button

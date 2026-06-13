@@ -9,7 +9,9 @@ import { ODD_SECTIONS, type OddSectionKey } from "@/lib/odd-template";
  * page shell while the canvas lives further down the tree.
  */
 export function OddSectionBookmarks() {
-  const [active, setActive] = useState<OddSectionKey | null>(null);
+  // Default to the first section so there's always an active highlight on
+  // initial load, even before the user scrolls or the scroll-spy fires.
+  const [active, setActive] = useState<OddSectionKey | null>(ODD_SECTIONS[0]?.key ?? null);
 
   useEffect(() => {
     const handler = (e: Event) => {
