@@ -11,12 +11,15 @@ interface ProjectStageRailProps {
   reportLevel: Level;
   onReportLevelChange: (level: Level) => void;
   bookmarks?: ReactNode;
+  /** A separate "Bookmarks" group rendered below the stage tabs.
+   *  Used by BlockNote-backed stages (ODD, IC Memo) for heading anchors. */
+  sectionBookmarks?: ReactNode;
   /** When provided (BlockNote-backed stages: ODD, IC Memo), renders a horizontal
    *  zoom control pinned to the bottom of the rail. */
   zoom?: ReportZoomControls;
 }
 
-export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, zoom }: ProjectStageRailProps) {
+export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, sectionBookmarks, zoom }: ProjectStageRailProps) {
   const levels: Level[] = ["L1", "L2", "ODD", "L3"];
   const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
     L1: { label: "Triage Report", display: "Triage", available: true },
@@ -78,6 +81,14 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
         })}
         </TabsList>
       </Tabs>
+      {sectionBookmarks && (
+        <div className="mt-2 flex flex-col gap-1.5">
+          <div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            Bookmarks
+          </div>
+          <div className="px-1">{sectionBookmarks}</div>
+        </div>
+      )}
       {zoom && (
         <div className="mt-auto flex items-center justify-center gap-0.5 rounded-md border border-border bg-card px-1 py-1">
           <Tooltip>
