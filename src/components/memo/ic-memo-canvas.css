@@ -38,9 +38,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="paragraph"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"] .ic-memo-inline-content {
-  font-size: 15px !important;
+  font-size: 16px !important;       /* shadcn body */
   font-weight: 400 !important;
-  line-height: 1.7 !important;
+  line-height: 1.75 !important;     /* leading-7 */
   letter-spacing: 0 !important;
 }
 
@@ -55,45 +55,47 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] .ic-memo-inline-content {
-  font-size: 24px !important;
-  font-weight: 700 !important;
-  line-height: 1.3 !important;
-  letter-spacing: -0.021em !important;
+  font-size: 36px !important;       /* shadcn text-4xl */
+  font-weight: 800 !important;      /* extrabold */
+  line-height: 1.1 !important;
+  letter-spacing: -0.025em !important;
   margin-top: 32px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] .ic-memo-inline-content {
-  font-size: 19px !important;
+  font-size: 30px !important;       /* shadcn text-3xl */
   font-weight: 600 !important;
-  line-height: 1.35 !important;
-  letter-spacing: -0.015em !important;
-  margin-top: 28px;
-  margin-bottom: 6px;
+  line-height: 1.2 !important;
+  letter-spacing: -0.025em !important;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid hsl(var(--border));
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] .ic-memo-inline-content {
-  font-size: 16px !important;
+  font-size: 24px !important;       /* shadcn text-2xl */
   font-weight: 600 !important;
-  line-height: 1.4 !important;
-  letter-spacing: -0.01em !important;
-  margin-top: 20px;
-  margin-bottom: 4px;
+  line-height: 1.25 !important;
+  letter-spacing: -0.025em !important;
+  margin-top: 32px;
+  margin-bottom: 12px;
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] .ic-memo-inline-content {
-  font-size: 14px !important;
+  font-size: 20px !important;       /* shadcn text-xl */
   font-weight: 600 !important;
-  line-height: 1.45 !important;
-  letter-spacing: 0 !important;
-  margin-top: 16px;
-  margin-bottom: 3px;
+  line-height: 1.4 !important;
+  letter-spacing: -0.025em !important;
+  margin-top: 24px;
+  margin-bottom: 8px;
 }
 /* H5 = small uppercase label / eyebrow */
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"],
@@ -126,14 +128,14 @@
 .ic-memo-canvas .bn-block-content[data-content-type="quote"] blockquote,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="quote"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="quote"] blockquote {
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 400 !important;
-  line-height: 1.6 !important;
-  font-style: normal;
-  color: hsl(var(--muted-foreground));
-  border-left: 3px solid hsl(var(--border));
-  padding-left: 16px;
-  margin: 10px 0;
+  line-height: 1.75 !important;
+  font-style: italic;                /* shadcn blockquote */
+  color: hsl(var(--foreground));
+  border-left: 2px solid hsl(var(--border));
+  padding-left: 24px;
+  margin: 24px 0;
 }
 
 /* ---- inline code ---- */
