@@ -9,6 +9,7 @@ import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
 import { useReportZoom } from "@/hooks/use-report-zoom";
+import { ReportZoomRail } from "@/components/project/ReportZoomRail";
 import { useIcMemo } from "@/hooks/use-ic-memo";
 import { buildIcMemoSkeletonMarkdown } from "@/lib/ic-memo-template";
 import type { Tables } from "@/integrations/supabase/types";
@@ -114,14 +115,6 @@ export default function IcMemoPage() {
         getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
         exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
         exportCurrentScope="memo"
-        zoom={{
-          value: zoomCtl.zoom,
-          onIn: zoomCtl.zoomIn,
-          onOut: zoomCtl.zoomOut,
-          onReset: zoomCtl.reset,
-          canIn: zoomCtl.canIn,
-          canOut: zoomCtl.canOut,
-        }}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -135,18 +128,21 @@ export default function IcMemoPage() {
         />
         {/* Canvas column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
+          <main className="relative flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
             {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
             ) : (
-              <div style={{ zoom: zoomCtl.zoom } as React.CSSProperties}>
-                <IcMemoCanvas
-                  contentJson={memo.content_json}
-                  seedMarkdown={memo.content_markdown || seedMarkdown}
-                  onChange={handleCanvasChange}
-                  resetKey={resetKey}
-                />
-              </div>
+              <>
+                <div style={{ zoom: zoomCtl.zoom } as React.CSSProperties}>
+                  <IcMemoCanvas
+                    contentJson={memo.content_json}
+                    seedMarkdown={memo.content_markdown || seedMarkdown}
+                    onChange={handleCanvasChange}
+                    resetKey={resetKey}
+                  />
+                </div>
+                <ReportZoomRail zoom={zoomCtl} />
+              </>
             )}
           </main>
         </div>
