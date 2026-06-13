@@ -21,7 +21,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div
         className="flex-1 min-w-0 overflow-y-auto transition-[margin] duration-200 ease-out"
         style={{
-          marginRight: !isMobile && drawerActive ? chatWidth : 0,
+          marginLeft: !isMobile && drawerActive ? chatWidth : 0,
         }}
       >
         {children}
@@ -36,7 +36,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <div
-              className="fixed right-0 top-0 bottom-0 z-40 animate-slide-in-right"
+              className="fixed left-0 top-0 bottom-0 z-40 animate-slide-in-left"
               style={{ width: chatWidth }}
             >
               <ChatSidebar />

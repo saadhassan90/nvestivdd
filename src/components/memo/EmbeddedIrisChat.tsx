@@ -93,7 +93,7 @@ export function EmbeddedIrisChat({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-card border-l border-border">
+    <div className="flex flex-col h-full w-full bg-card border-r border-border">
       {/* Header — slimmed down: no history / new-chat buttons in memo mode */}
       <div className="border-b border-border bg-card shrink-0">
         <div className="flex items-center justify-between px-4 py-3">
