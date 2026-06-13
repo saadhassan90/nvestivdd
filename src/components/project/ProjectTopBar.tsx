@@ -100,6 +100,19 @@ export function ProjectTopBar({
 
           {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
           <div className="hidden lg:flex items-center gap-1.5">
+            {!chatOpen && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                  >
+                    <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Open Iris chat</TooltipContent>
+              </Tooltip>
+            )}
             <NotificationsDropdown />
             {onOpenComments && !isMemoMode && (
               <Tooltip>
@@ -148,6 +161,8 @@ export function ProjectTopBar({
           </div>
         </div>
       </header>
+      {/* Spacer to preserve flow now that header is fixed */}
+      <div className="h-12 shrink-0" aria-hidden />
 
       <ShareModal
         open={shareOpen}
