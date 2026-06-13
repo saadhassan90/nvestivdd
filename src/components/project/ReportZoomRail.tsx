@@ -9,7 +9,7 @@ import type { ReportZoomControls } from "@/hooks/use-report-zoom";
  */
 export function ReportZoomRail({ zoom }: { zoom: ReportZoomControls }) {
   return (
-    <div className="pointer-events-none absolute right-3 bottom-6 z-30 hidden lg:flex">
+    <div className="pointer-events-none fixed right-4 bottom-6 z-30 hidden lg:flex">
       <div className="pointer-events-auto flex flex-col items-center gap-0.5 rounded-md border border-border bg-card/95 px-1 py-1 shadow-sm backdrop-blur">
         <Tooltip>
           <TooltipTrigger asChild>
