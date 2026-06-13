@@ -37,6 +37,9 @@ interface ProjectTopBarProps {
   onReset?: () => void;
   /** ODD-only: opens the re-import flow. */
   onReimport?: () => void;
+  /** Returns the markdown to expose in the Share→Export tab. */
+  getExportMarkdown?: () => string | Promise<string>;
+  exportFilename?: string;
 }
 
 export function ProjectTopBar({
@@ -49,6 +52,8 @@ export function ProjectTopBar({
   commentsCount = 0,
   onReset,
   onReimport,
+  getExportMarkdown,
+  exportFilename,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { variant } = useUiVariant();
@@ -211,6 +216,8 @@ export function ProjectTopBar({
         onClose={() => setShareOpen(false)}
         fundName={project.fund_name}
         projectId={project.id}
+        getExportMarkdown={getExportMarkdown}
+        exportFilename={exportFilename}
       />
     </>
   );

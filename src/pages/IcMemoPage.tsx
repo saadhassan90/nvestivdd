@@ -106,6 +106,8 @@ export default function IcMemoPage() {
           else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
         }}
         onReset={resetToTemplate}
+        getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
+        exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -143,6 +145,8 @@ export default function IcMemoPage() {
         onClose={() => setShareOpen(false)}
         fundName={project.fund_name}
         projectId={project.id}
+        getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
+        exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
       />
     </div>
   );
