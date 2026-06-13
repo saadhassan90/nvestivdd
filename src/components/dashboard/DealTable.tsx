@@ -34,7 +34,7 @@ function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
   const isActive = sortBy === column;
   return (
     <th
-      className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
+      className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
       onClick={() => onSort?.(column)}
     >
       <span className="inline-flex items-center gap-1">
