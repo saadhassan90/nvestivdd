@@ -16,6 +16,47 @@ interface OddWorkspaceProps {
   project: Tables<"projects">;
 }
 
+function StatusIcon({ status }: { status: OddSectionStatusUi }) {
+  switch (status) {
+    case "generating":
+      return <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />;
+    case "verified":
+      return <CheckCircle2 className="h-3 w-3 text-score-strong" />;
+    case "flagged":
+    case "error":
+      return <AlertTriangle className="h-3 w-3 text-severity-critical" />;
+    case "unverified":
+    default:
+      return <Circle className="h-3 w-3 text-muted-foreground/60" />;
+  }
+}
+
+function RiskBadge({ rating }: { rating: "low" | "medium" | "high" }) {
+  const color =
+    rating === "low"
+      ? "text-score-strong"
+      : rating === "medium"
+        ? "text-score-review"
+        : "text-severity-critical";
+  const dot =
+    rating === "low"
+      ? "bg-score-strong"
+      : rating === "medium"
+        ? "bg-score-review"
+        : "bg-severity-critical";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-wider",
+        color,
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      Risk: {rating}
+    </span>
+  );
+}
+
 export function OddWorkspace({ project }: OddWorkspaceProps) {
   const { toast } = useToast();
   const {
