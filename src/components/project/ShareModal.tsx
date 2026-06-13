@@ -254,7 +254,71 @@ export function ShareModal({
             {sending ? "Sending..." : `Send to ${emails.length} recipient${emails.length !== 1 ? "s" : ""}`}
           </button>
         </div>
+        ) : (
+          <div className="p-4 space-y-3">
+            {!canExport ? (
+              <p className="text-xs text-muted-foreground py-6 text-center">
+                Nothing to export from this view.
+              </p>
+            ) : (
+              <>
+                <p className="text-[11px] text-muted-foreground">
+                  Download the current report in your preferred format.
+                </p>
+                <ExportRow
+                  icon={<FileCode className="h-4 w-4" />}
+                  title="Markdown (.md)"
+                  subtitle="Plain-text source — best for re-importing."
+                  busy={exporting === "md"}
+                  onClick={handleExportMd}
+                />
+                <ExportRow
+                  icon={<FileText className="h-4 w-4" />}
+                  title="PDF"
+                  subtitle="Opens the print dialog — choose 'Save as PDF'."
+                  busy={exporting === "pdf"}
+                  onClick={handleExportPdf}
+                />
+                <ExportRow
+                  icon={<FileType2 className="h-4 w-4" />}
+                  title="Word (.docx)"
+                  subtitle="Editable document for Word / Google Docs."
+                  busy={exporting === "docx"}
+                  onClick={handleExportDocx}
+                />
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function ExportRow({
+  icon,
+  title,
+  subtitle,
+  busy,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  busy: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={busy}
+      className="w-full flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 text-left hover:bg-muted transition-colors disabled:opacity-50"
+    >
+      <span className="shrink-0 text-muted-foreground">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : icon}</span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-xs font-medium text-foreground">{title}</span>
+        <span className="block text-[11px] text-muted-foreground truncate">{subtitle}</span>
+      </span>
+    </button>
   );
 }
