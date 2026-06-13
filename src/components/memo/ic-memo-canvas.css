@@ -38,9 +38,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="paragraph"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="paragraph"] .ic-memo-inline-content {
-  font-size: 15px !important;
+  font-size: 16px !important;       /* shadcn body */
   font-weight: 400 !important;
-  line-height: 1.7 !important;
+  line-height: 1.75 !important;     /* leading-7 */
   letter-spacing: 0 !important;
 }
 
@@ -128,14 +128,14 @@
 .ic-memo-canvas .bn-block-content[data-content-type="quote"] blockquote,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="quote"],
 .ic-memo-canvas .ic-memo-block-content[data-content-type="quote"] blockquote {
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 400 !important;
-  line-height: 1.6 !important;
-  font-style: normal;
-  color: hsl(var(--muted-foreground));
-  border-left: 3px solid hsl(var(--border));
-  padding-left: 16px;
-  margin: 10px 0;
+  line-height: 1.75 !important;
+  font-style: italic;                /* shadcn blockquote */
+  color: hsl(var(--foreground));
+  border-left: 2px solid hsl(var(--border));
+  padding-left: 24px;
+  margin: 24px 0;
 }
 
 /* ---- inline code ---- */
