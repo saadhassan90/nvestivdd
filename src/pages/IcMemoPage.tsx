@@ -4,7 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
-import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { IcMemoBookmarks } from "@/components/memo/IcMemoBookmarks";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -12,6 +11,7 @@ import { ShareModal } from "@/components/project/ShareModal";
 import { useReportZoom } from "@/hooks/use-report-zoom";
 import { useIcMemo } from "@/hooks/use-ic-memo";
 import { buildIcMemoSkeletonMarkdown } from "@/lib/ic-memo-template";
+import { useSetProjectRail } from "@/contexts/ProjectRailContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function IcMemoPage() {
@@ -91,6 +91,29 @@ export default function IcMemoPage() {
 
   const bookmarkMarkdown = memo?.content_markdown || seedMarkdown;
 
+  const handleRailLevelChange = useCallback(
+    (lvl: "L1" | "L2" | "L3" | "ODD") => {
+      if (!project) return;
+      if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
+      else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
+      else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
+    },
+    [navigate, project?.id],
+  );
+
+  // Register this page's rail config with the persistent shell.
+  useSetProjectRail(
+    project
+      ? {
+          reportLevel: "L3",
+          onReportLevelChange: handleRailLevelChange,
+          sectionBookmarks: <IcMemoBookmarks markdown={bookmarkMarkdown} />,
+          zoom: zoomCtl,
+        }
+      : null,
+    [project?.id, handleRailLevelChange, bookmarkMarkdown, zoomCtl],
+  );
+
   // Listen for bookmark scroll requests — find the nth heading inside the
   // BlockNote canvas and scroll it into view.
   useEffect(() => {
@@ -149,7 +172,7 @@ export default function IcMemoPage() {
 
   if (showInitialLoader || !project) {
     return (
-      <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <div className="flex flex-col h-full bg-background overflow-hidden">
         <ProjectTopBar project={null} isProcessing={false} mode="memo" reportLevel="L3" />
         <div className="flex-1 flex items-center justify-center">
           <NvestivLoader size={140} />
@@ -159,17 +182,13 @@ export default function IcMemoPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex flex-col h-full bg-background overflow-hidden">
       <ProjectTopBar
         project={project}
         isProcessing={false}
         mode="memo"
         reportLevel="L3"
-        onReportLevelChange={(lvl) => {
-          if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
-          else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
-          else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
-        }}
+        onReportLevelChange={handleRailLevelChange}
         onReset={resetToTemplate}
         getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
         exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
@@ -177,16 +196,6 @@ export default function IcMemoPage() {
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        <ProjectStageRail
-          reportLevel="L3"
-          zoom={zoomCtl}
-          sectionBookmarks={<IcMemoBookmarks markdown={bookmarkMarkdown} />}
-          onReportLevelChange={(lvl) => {
-            if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
-            else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
-            else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
-          }}
-        />
         {/* Canvas column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <main className="relative flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
