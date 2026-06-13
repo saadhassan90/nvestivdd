@@ -319,24 +319,53 @@ export function ChatSidebar() {
               )}
             <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
               {attachments.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {attachments.map((a) => (
-                    <span
-                      key={a.id}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/60 px-2 py-1 text-[11px] text-foreground max-w-[220px]"
-                      title={a.name}
-                    >
-                      <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{a.name}</span>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {attachments.map((a) => {
+                    const remove = (
                       <button
                         onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))}
-                        className="hover:text-destructive shrink-0"
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-foreground text-background flex items-center justify-center shadow hover:opacity-90"
                         title="Remove"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-2.5 w-2.5" />
                       </button>
-                    </span>
-                  ))}
+                    );
+                    if (a.kind === "image" && a.previewUrl) {
+                      return (
+                        <div key={a.id} className="relative h-14 w-14 rounded-md overflow-hidden border border-border bg-muted" title={a.name}>
+                          <img src={a.previewUrl} alt={a.name} className="h-full w-full object-cover" />
+                          {remove}
+                        </div>
+                      );
+                    }
+                    if (a.kind === "paste") {
+                      const preview = (a as any).preview as string | undefined;
+                      return (
+                        <div key={a.id} className="relative w-[200px] rounded-md border border-border bg-muted/60 px-2.5 py-1.5" title={a.name}>
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">
+                            <FileText className="h-3 w-3" />
+                            <span>Pasted</span>
+                            <span className="ml-auto normal-case tracking-normal">{a.size.toLocaleString()} chars</span>
+                          </div>
+                          <div className="text-[11px] text-foreground/80 line-clamp-2 leading-snug">
+                            {preview || a.text.slice(0, 140)}
+                          </div>
+                          {remove}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div
+                        key={a.id}
+                        className="relative inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/60 px-2 py-1 text-[11px] text-foreground max-w-[220px]"
+                        title={a.name}
+                      >
+                        <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{a.name}</span>
+                        {remove}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               <textarea
