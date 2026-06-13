@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { marked } from "marked";
 import { supabase } from "@/integrations/supabase/client";
 import { ODD_SECTIONS, assembleOddMarkdown, type OddSectionKey } from "@/lib/odd-template";
 
@@ -159,6 +158,7 @@ export function ShareModal({
     try {
       const md = await resolveMarkdown();
       if (!md) throw new Error("No content available for the selected report.");
+      const { marked } = await import("marked");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const w = window.open("", "_blank");
@@ -187,6 +187,7 @@ export function ShareModal({
     try {
       const md = await resolveMarkdown();
       if (!md) throw new Error("No content available for the selected report.");
+      const { marked } = await import("marked");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const mod: any = await import("html-docx-js/dist/html-docx");
