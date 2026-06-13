@@ -6,7 +6,6 @@ import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
-import { MemoToolbar } from "@/components/memo/MemoToolbar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
 import { useIcMemo } from "@/hooks/use-ic-memo";
@@ -54,7 +53,7 @@ export default function IcMemoPage() {
     return () => setProjectScope(null);
   }, [project?.id, project?.fund_name, setProjectScope]);
 
-  const { memo, loading: memoLoading, savingState, lastSavedAt, scheduleSave, resetToTemplate } =
+  const { memo, loading: memoLoading, scheduleSave, resetToTemplate } =
     useIcMemo({ project, redFlags, feeStructure, teamMembers });
 
   const seedMarkdown = project
@@ -106,6 +105,7 @@ export default function IcMemoPage() {
           else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
           else if (lvl === "L3") navigate(`/project/${project.id}/memo`);
         }}
+        onReset={resetToTemplate}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -119,13 +119,6 @@ export default function IcMemoPage() {
         />
         {/* Canvas column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-          <MemoToolbar
-            fundName={project.fund_name}
-            savingState={savingState}
-            lastSavedAt={lastSavedAt}
-            contentMarkdown={memo?.content_markdown || seedMarkdown}
-            onResetToTemplate={resetToTemplate}
-          />
           <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
             {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
