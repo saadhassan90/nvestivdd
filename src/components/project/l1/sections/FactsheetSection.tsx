@@ -16,22 +16,23 @@ const GROUP_ORDER: FactsheetGroup[] = ["identity", "scale", "economics", "govern
 
 export function FactsheetSection() {
   const { payload } = useRefs();
+  const groups = GROUP_ORDER
+    .map((g) => ({ g, fields: payload.factsheet.fields.filter((f) => f.group === g) }))
+    .filter((x) => x.fields.length > 0);
   return (
     <SectionShell id="l1-factsheet" eyebrow="03" title="Fund Factsheet" description="Every figure declares its provenance — verified, GP-stated, or not disclosed." disableComments>
-      <div className="space-y-3">
-        {GROUP_ORDER.map((g) => {
-          const fields = payload.factsheet.fields.filter((f) => f.group === g);
-          if (!fields.length) return null;
-          return (
-            <Card key={g} className="p-4" commentId={`factsheet-${g}`} commentLabel={GROUP_LABEL[g]}>
+      <Card className="p-5" commentId="factsheet" commentLabel="Fund Factsheet">
+        <div className="divide-y divide-border/60">
+          {groups.map(({ g, fields }, idx) => (
+            <div key={g} className={cn(idx === 0 ? "pb-4" : "py-4", idx === groups.length - 1 && "pb-0")}>
               <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">{GROUP_LABEL[g]}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
                 {fields.map((f) => <FieldRow key={f.key} f={f} />)}
               </div>
-            </Card>
-          );
-        })}
-      </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </SectionShell>
   );
 }
