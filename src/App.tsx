@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import IcMemoPage from "./pages/IcMemoPage";
 import CommentsPage from "./pages/CommentsPage";
+import ProjectChrome from "./pages/ProjectChrome";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +28,11 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/project/:id/memo" element={<IcMemoPage />} />
-              <Route path="/project/:id/comments" element={<CommentsPage />} />
-              <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/project/:id" element={<ProjectChrome />}>
+                <Route index element={<ProjectDetail />} />
+                <Route path="memo" element={<IcMemoPage />} />
+                <Route path="comments" element={<CommentsPage />} />
+              </Route>
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
