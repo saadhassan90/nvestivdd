@@ -234,6 +234,11 @@ export default function ProjectDetail() {
     return null;
   })();
 
+  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
+  const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
+    ? (activeTab as L1PageKey)
+    : "summary";
+
   return (
     <MeetingModeProvider dealId={project.id}>
     <CitationsProvider projectId={project.id} initialSources={researchSources}>
@@ -260,11 +265,6 @@ export default function ProjectDetail() {
         onOpenComments={() => setCommentsOpen(true)}
         commentsCount={commentsCount}
       />
-
-  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
-  const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
-    ? (activeTab as L1PageKey)
-    : "summary";
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectStageRail
