@@ -87,6 +87,7 @@ export default function ProjectDetail() {
   const initialTab = TAB_REDIRECTS[initialTabRaw] ?? initialTabRaw;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
+  const oddZoom = useReportZoom();
 
   const isProcessing = project ? ["processing", "pending", "uploading", "analyzing", "extracting"].includes(project.status) : false;
 
