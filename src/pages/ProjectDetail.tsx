@@ -34,7 +34,7 @@ import { OddWorkspace } from "@/components/odd/OddWorkspace";
 import { L1OnePager } from "@/components/project/l1/L1OnePager";
 import type { L1PageKey } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
-import { ProjectStageRail } from "@/components/project/ProjectStageRail";
+import { useSetProjectRail } from "@/contexts/ProjectRailContext";
 import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
 import { OddSectionBookmarks } from "@/components/odd/OddSectionBookmarks";
 import { useReportZoom } from "@/hooks/use-report-zoom";
