@@ -36,6 +36,7 @@ import type { L1PageKey } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
+import { OddSectionBookmarks } from "@/components/odd/OddSectionBookmarks";
 import { useReportZoom } from "@/hooks/use-report-zoom";
 
 import type { Tables } from "@/integrations/supabase/types";
@@ -296,6 +297,7 @@ export default function ProjectDetail() {
               />
             ) : undefined
           }
+          sectionBookmarks={isOddStage ? <OddSectionBookmarks /> : undefined}
           onReportLevelChange={(lvl) => {
             if (lvl === "L3") navigate(`/project/${project.id}/memo`);
             else if (lvl === "ODD") {
