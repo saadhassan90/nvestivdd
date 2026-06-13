@@ -81,7 +81,7 @@ export function ProjectTopBar({
     };
   }, []);
 
-  const statusColor = getStatusColor(project.status);
+  const statusColor = getStatusColor(project?.status ?? "pending");
   const isMemoMode = mode === "memo";
 
   const isAdia = variant === "adia";
@@ -121,8 +121,10 @@ export function ProjectTopBar({
               Funds
             </button>
             <span className="text-muted-foreground shrink-0">›</span>
-            <span className="font-medium text-foreground truncate">{project.fund_name}</span>
-            {isProcessing && (
+            <span className="font-medium text-foreground truncate">
+              {project?.fund_name ?? <span className="inline-block h-3 w-32 rounded bg-muted animate-pulse" />}
+            </span>
+            {project && isProcessing && (
               <span
                 className={`ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColor}`}
               >
