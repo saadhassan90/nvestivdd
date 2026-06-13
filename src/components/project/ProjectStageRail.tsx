@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { FileText, ClipboardList, Building2, ScrollText, Lock, ZoomIn, ZoomOut } from "lucide-react";
+import { Lock, ZoomIn, ZoomOut, ChevronRight, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
@@ -20,11 +20,11 @@ interface ProjectStageRailProps {
 
 export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, sectionBookmarks, zoom }: ProjectStageRailProps) {
   const levels: Level[] = ["L1", "L2", "ODD", "L3"];
-  const levelMeta: Record<Level, { label: string; display: string; available: boolean; icon: typeof FileText }> = {
-    L1: { label: "Triage Report", display: "Triage", available: true, icon: FileText },
-    L2: { label: "IDD (coming soon)", display: "IDD", available: false, icon: ClipboardList },
-    ODD: { label: "Operational Due Diligence", display: "ODD", available: true, icon: Building2 },
-    L3: { label: "IC Memo", display: "IC Memo", available: true, icon: ScrollText },
+  const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
+    L1: { label: "Triage Report", display: "Triage", available: true },
+    L2: { label: "IDD (coming soon)", display: "IDD", available: false },
+    ODD: { label: "Operational Due Diligence", display: "ODD", available: true },
+    L3: { label: "IC Memo", display: "IC Memo", available: true },
   };
 
   return (
@@ -34,7 +34,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
       </div>
       <nav aria-label="Report stage" className="flex flex-col gap-0.5">
         {levels.map((lvl) => {
-          const { label, display, available, icon: Icon } = levelMeta[lvl];
+          const { label, display, available } = levelMeta[lvl];
           const isActive = reportLevel === lvl;
           const inlineChildren =
             lvl === "L1" && bookmarks
@@ -43,7 +43,12 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
                 ? sectionBookmarks
                 : null;
           const hasChildren = !!inlineChildren;
+          // Parents with no children (L2/IDD) still highlight on active.
           const showActiveBg = isActive && !hasChildren;
+          const isOpen = hasChildren;
+          // Chevron replaces a per-stage icon. For unavailable stages, show the
+          // lock glyph instead so the disabled affordance is preserved.
+          const Leading = !available ? Lock : isOpen ? ChevronDown : ChevronRight;
           return (
             <div key={lvl}>
               <Tooltip>
@@ -61,9 +66,8 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
                       !available && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-sidebar-foreground/80",
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                    <Leading className="h-3.5 w-3.5 shrink-0 opacity-70" />
                     <span className="truncate">{display}</span>
-                    {!available && <Lock className="ml-auto h-3 w-3 opacity-60" />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
