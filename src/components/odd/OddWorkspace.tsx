@@ -11,11 +11,13 @@ import { OddCanvas } from "./OddCanvas";
 import { OddEmptyState } from "./OddEmptyState";
 import { OddImportModal } from "./OddImportModal";
 import { generateMockOddReport } from "@/lib/odd-mock-generator";
+import { ReportZoomRail } from "@/components/project/ReportZoomRail";
+import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
 interface OddWorkspaceProps {
   project: Tables<"projects">;
-  /** External zoom multiplier (controlled from the top app bar). */
-  zoom?: number;
+  /** Zoom controls rendered as a floating right-edge rail. */
+  zoomCtl?: ReportZoomControls;
 }
 
 function StatusIcon({ status }: { status: OddSectionStatusUi }) {
@@ -33,7 +35,8 @@ function StatusIcon({ status }: { status: OddSectionStatusUi }) {
   }
 }
 
-export function OddWorkspace({ project, zoom = 1 }: OddWorkspaceProps) {
+export function OddWorkspace({ project, zoomCtl }: OddWorkspaceProps) {
+  const zoom = zoomCtl?.zoom ?? 1;
   const { toast } = useToast();
   const {
     sections,
@@ -179,11 +182,12 @@ export function OddWorkspace({ project, zoom = 1 }: OddWorkspaceProps) {
         )}
 
         {hasImport ? (
-          <div
-            className="flex-1 min-h-0 flex flex-col overflow-hidden"
-            style={{ zoom } as React.CSSProperties}
-          >
-            <OddCanvas
+          <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div
+              className="flex-1 min-h-0 flex flex-col overflow-hidden"
+              style={{ zoom } as React.CSSProperties}
+            >
+              <OddCanvas
               fundName={project.fund_name}
               sections={sections}
               onRetrySection={retrySection}
@@ -192,7 +196,9 @@ export function OddWorkspace({ project, zoom = 1 }: OddWorkspaceProps) {
                 scrollFnRef.current = fn;
               }}
               onActiveSectionChange={setActiveKey}
-            />
+              />
+            </div>
+            {zoomCtl && <ReportZoomRail zoom={zoomCtl} />}
           </div>
         ) : (
           <OddEmptyState onImportClick={() => setImportOpen(true)} />
