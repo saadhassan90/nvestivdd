@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { RenderPayload, SectionKey } from "@/types/renderContract";
 import { RefsProvider } from "./primitives/RefsContext";
-import { StickySectionNav, type NavEntry } from "./primitives/StickySectionNav";
 import { VerdictSection } from "./sections/VerdictSection";
 import { ExecSummarySection } from "./sections/ExecSummarySection";
 import { FactsheetSection } from "./sections/FactsheetSection";
@@ -26,12 +25,10 @@ const ALL_ENTRIES: Array<{ key: SectionKey; id: string; label: string; render: (
 export function L1OnePager({ payload }: { payload: RenderPayload }) {
   const present = useMemo(() => new Set(payload.meta.sections_present), [payload]);
   const visible = ALL_ENTRIES.filter((e) => present.has(e.key));
-  const navEntries: NavEntry[] = visible.map(({ id, label }) => ({ id, label }));
 
   return (
     <RefsProvider payload={payload}>
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
-        <StickySectionNav entries={navEntries} />
         <main className="px-4 sm:px-6 py-6 max-w-5xl w-full mx-auto">
           {visible.map((e, idx) => (
             <div key={e.id} className={cn("pb-12", idx === visible.length - 1 && "pb-0")}>
