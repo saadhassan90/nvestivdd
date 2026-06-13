@@ -13,16 +13,16 @@ export function L1SectionBookmarks({ page, onPageChange }: Props) {
         const isActive = p.key === page;
         return (
           <li key={p.key}>
-            <button
-              type="button"
-              onClick={() => onPageChange(p.key)}
-              className={cn(
-                "w-full rounded-md px-2 py-1 text-xs transition-colors text-left",
-                isActive
-                  ? "bg-muted text-foreground font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-              )}
-            >
+          <button
+            type="button"
+            onClick={() => onPageChange(p.key)}
+            className={cn(
+              "w-full rounded-md px-2 py-1 text-xs transition-colors text-left border-l-2",
+              isActive
+                ? "bg-primary/10 text-foreground font-semibold border-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent",
+            )}
+          >
               {p.label}
             </button>
           </li>
