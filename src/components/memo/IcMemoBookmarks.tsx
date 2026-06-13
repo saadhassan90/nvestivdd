@@ -67,11 +67,11 @@ export function IcMemoBookmarks({ markdown }: { markdown: string }) {
                 )
               }
               className={cn(
-                "w-full rounded-md py-1 text-xs transition-colors text-left border-l-2 truncate",
+                "w-full rounded-md py-1 pr-2 text-xs text-left transition-colors truncate",
                 h.level === 1 ? "pl-2" : h.level === 2 ? "pl-4" : "pl-6",
                 isActive
-                  ? "bg-primary/10 text-foreground font-semibold border-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent",
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
               )}
               title={h.text}
             >
