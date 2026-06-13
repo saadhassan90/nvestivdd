@@ -111,6 +111,14 @@ export default function IcMemoPage() {
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Chat column — desktop only, now on the left */}
+        <div
+          className="hidden lg:block relative shrink-0 border-r border-border"
+          style={{ width: chatWidth }}
+        >
+          <ChatResizeHandle />
+          <EmbeddedIrisChat fundName={project.fund_name} memoId={memo?.id ?? null} />
+        </div>
         <ProjectStageRail
           reportLevel="L3"
           onReportLevelChange={(lvl) => {
@@ -140,15 +148,6 @@ export default function IcMemoPage() {
               />
             )}
           </main>
-        </div>
-
-        {/* Chat column — desktop only */}
-        <div
-          className="hidden lg:block relative shrink-0 border-l border-border"
-          style={{ width: chatWidth }}
-        >
-          <ChatResizeHandle />
-          <EmbeddedIrisChat fundName={project.fund_name} memoId={memo?.id ?? null} />
         </div>
       </div>
 

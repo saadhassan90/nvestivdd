@@ -130,6 +130,15 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
+      {/* Right rail — desktop only, now on the left */}
+      <div
+        className="hidden lg:block relative shrink-0 border-r border-border"
+        style={{ width: chatWidth }}
+      >
+        <ChatResizeHandle />
+        <EmbeddedIrisChat fundName={project.fund_name} memoId={null} oddProjectId={project.id} />
+      </div>
+
       <OddLeftRail
         sectionStatuses={sectionStatuses}
         activeKey={activeKey}
@@ -184,15 +193,6 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
           <Sparkles className="h-3.5 w-3.5" />
           Ask Iris
         </button>
-      </div>
-
-      {/* Right rail — desktop only */}
-      <div
-        className="hidden lg:block relative shrink-0 border-l border-border"
-        style={{ width: chatWidth }}
-      >
-        <ChatResizeHandle />
-        <EmbeddedIrisChat fundName={project.fund_name} memoId={null} oddProjectId={project.id} />
       </div>
 
       <OddImportModal
