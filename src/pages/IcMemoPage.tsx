@@ -6,6 +6,7 @@ import { useChatContext } from "@/contexts/ChatContext";
 import { ProjectTopBar } from "@/components/project/ProjectTopBar";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
+import { IcMemoBookmarks } from "@/components/memo/IcMemoBookmarks";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
 import { useReportZoom } from "@/hooks/use-report-zoom";
@@ -87,6 +88,24 @@ export default function IcMemoPage() {
 
   const showInitialLoader = useNvestivLoaderGate(loading || !project);
   const showMemoLoader = useNvestivLoaderGate(memoLoading || !memo);
+
+  const bookmarkMarkdown = memo?.content_markdown || seedMarkdown;
+
+  // Listen for bookmark scroll requests — find the nth heading inside the
+  // BlockNote canvas and scroll it into view.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const index = (e as CustomEvent).detail as number;
+      const root = document.querySelector(".ic-memo-canvas");
+      if (!root) return;
+      const heads = root.querySelectorAll("h1, h2, h3");
+      const el = heads[index] as HTMLElement | undefined;
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    window.addEventListener("ic-memo:scroll-to-heading", handler);
+    return () => window.removeEventListener("ic-memo:scroll-to-heading", handler);
+  }, []);
+
   if (showInitialLoader || !project) {
     return (
       <div className="flex flex-col h-screen bg-background overflow-hidden">
