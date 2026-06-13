@@ -223,13 +223,13 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
             <tr className="border-b border-border">
               <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</th>
-              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</th>
-              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</th>
               <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-              <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Verdict</th>
-              <th className="px-4 py-3 w-10"></th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Verdict</th>
+              <th className="px-2.5 py-2 w-10"></th>
             </tr>
           </thead>
           <tbody>
