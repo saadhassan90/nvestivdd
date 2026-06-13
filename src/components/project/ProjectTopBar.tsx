@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, MessagesSquare, Lock } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
-import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
@@ -35,7 +34,6 @@ export function ProjectTopBar({
   commentsCount = 0,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
-  const { isOpen, setIsOpen } = useChatContext();
   const { variant } = useUiVariant();
   const [shareOpen, setShareOpen] = useState(false);
 
