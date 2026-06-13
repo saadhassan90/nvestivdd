@@ -34,7 +34,7 @@ import { OddWorkspace } from "@/components/odd/OddWorkspace";
 import { L1OnePager } from "@/components/project/l1/L1OnePager";
 import type { L1PageKey } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
-import { ProjectStageRail } from "@/components/project/ProjectStageRail";
+import { useSetProjectRail } from "@/contexts/ProjectRailContext";
 import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
 import { OddSectionBookmarks } from "@/components/odd/OddSectionBookmarks";
 import { useReportZoom } from "@/hooks/use-report-zoom";
@@ -218,10 +218,55 @@ export default function ProjectDetail() {
     toast({ title: "Analysis dispatched" });
   };
 
+  // Shared stage-level navigation handler used by both TopBar and the
+  // persistent stage rail.
+  const handleStageLevelChange = useCallback(
+    (lvl: "L1" | "L2" | "L3" | "ODD") => {
+      if (!project) return;
+      if (lvl === "L3") {
+        navigate(`/project/${project.id}/memo`);
+      } else if (lvl === "ODD") {
+        const p = new URLSearchParams(searchParams);
+        p.set("stage", "odd");
+        p.delete("tab");
+        setSearchParams(p, { replace: true });
+      } else if (lvl === "L1") {
+        const p = new URLSearchParams(searchParams);
+        p.delete("stage");
+        if (!p.get("tab")) p.set("tab", "overview");
+        setSearchParams(p, { replace: true });
+      }
+    },
+    [navigate, project?.id, searchParams, setSearchParams],
+  );
+
+  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
+  const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
+    ? (activeTab as L1PageKey)
+    : "summary";
+
+  // Register rail config with the persistent shell so the side menu does not
+  // remount as the user navigates between Triage / ODD / IC Memo.
+  useSetProjectRail(
+    project
+      ? {
+          reportLevel: isOddStage ? "ODD" : "L1",
+          onReportLevelChange: handleStageLevelChange,
+          zoom: isOddStage ? oddZoom : undefined,
+          bookmarks:
+            !isOddStage && !isProcessing && project.status !== "error" ? (
+              <L1SectionBookmarks page={l1Page} onPageChange={(p) => setActiveTab(p)} />
+            ) : undefined,
+          sectionBookmarks: isOddStage ? <OddSectionBookmarks /> : undefined,
+        }
+      : null,
+    [project?.id, project?.status, isOddStage, isProcessing, l1Page, oddZoom, handleStageLevelChange],
+  );
+
   const showLoader = useNvestivLoaderGate(loading);
   if (showLoader || !project) {
     return (
-      <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <div className="flex flex-col h-full bg-background overflow-hidden">
         <ProjectTopBar project={null} isProcessing={false} />
         <div className="flex-1 flex items-center justify-center">
           {showLoader ? (
@@ -247,34 +292,15 @@ export default function ProjectDetail() {
     return null;
   })();
 
-  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
-  const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
-    ? (activeTab as L1PageKey)
-    : "summary";
-
   return (
     <MeetingModeProvider dealId={project.id}>
     <CitationsProvider projectId={project.id} initialSources={researchSources}>
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex flex-col h-full bg-background overflow-hidden">
       <ProjectTopBar
         project={project}
         isProcessing={isProcessing}
         reportLevel={isOddStage ? "ODD" : "L1"}
-        onReportLevelChange={(lvl) => {
-          if (lvl === "L3") navigate(`/project/${project.id}/memo`);
-          else if (lvl === "ODD") {
-            const p = new URLSearchParams(searchParams);
-            p.set("stage", "odd");
-            p.delete("tab");
-            setSearchParams(p, { replace: true });
-          } else if (lvl === "L1") {
-            const p = new URLSearchParams(searchParams);
-            p.delete("stage");
-            if (!p.get("tab")) p.set("tab", "overview");
-            setSearchParams(p, { replace: true });
-          }
-          // L1 is current; L2 is locked (no-op)
-        }}
+        onReportLevelChange={handleStageLevelChange}
         onOpenComments={() => setCommentsOpen(true)}
         commentsCount={commentsCount}
         onReimport={
@@ -286,33 +312,6 @@ export default function ProjectDetail() {
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        <ProjectStageRail
-          reportLevel={isOddStage ? "ODD" : "L1"}
-          zoom={isOddStage ? oddZoom : undefined}
-          bookmarks={
-            !isOddStage && !isProcessing && project.status !== "error" ? (
-              <L1SectionBookmarks
-                page={l1Page}
-                onPageChange={(p) => setActiveTab(p)}
-              />
-            ) : undefined
-          }
-          sectionBookmarks={isOddStage ? <OddSectionBookmarks /> : undefined}
-          onReportLevelChange={(lvl) => {
-            if (lvl === "L3") navigate(`/project/${project.id}/memo`);
-            else if (lvl === "ODD") {
-              const p = new URLSearchParams(searchParams);
-              p.set("stage", "odd");
-              p.delete("tab");
-              setSearchParams(p, { replace: true });
-            } else if (lvl === "L1") {
-              const p = new URLSearchParams(searchParams);
-              p.delete("stage");
-              if (!p.get("tab")) p.set("tab", "summary");
-              setSearchParams(p, { replace: true });
-            }
-          }}
-        />
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {isOddStage ? (
             <OddWorkspace project={project} zoomCtl={oddZoom} />
