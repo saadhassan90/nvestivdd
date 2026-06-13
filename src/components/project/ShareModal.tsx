@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2 } from "lucide-react";
+import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,7 @@ export function ShareModal({
   const [sending, setSending] = useState(false);
   const [exporting, setExporting] = useState<null | "md" | "pdf" | "docx">(null);
   const [scope, setScope] = useState<ExportScope>(currentScope ?? "triage");
+  const [format, setFormat] = useState<"md" | "pdf" | "docx">("md");
 
   const shareUrl = `${window.location.origin}/project/${projectId}`;
   const fundSlug = slug(fundName) || "report";
@@ -261,7 +262,7 @@ export function ShareModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
@@ -294,7 +295,7 @@ export function ShareModal({
         </div>
 
         {tab === "share" ? (
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 min-h-[420px]">
           {/* Copy link */}
           <div>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Report Link</label>
@@ -350,12 +351,12 @@ export function ShareModal({
           </button>
         </div>
         ) : (
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 min-h-[420px] flex flex-col">
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Report to export
               </label>
-              <div className="mt-1.5 space-y-1">
+              <div className="mt-1.5 grid grid-cols-2 gap-1.5">
                 {(Object.keys(SCOPE_LABELS) as ExportScope[]).map((s) => {
                   const disabled = s === "idd";
                   const selected = scope === s;
@@ -363,7 +364,7 @@ export function ShareModal({
                     <label
                       key={s}
                       className={cn(
-                        "flex items-start gap-2.5 rounded-md border px-3 py-2 cursor-pointer transition-colors",
+                        "flex items-center gap-2 rounded-md border px-2 py-1.5 cursor-pointer transition-colors",
                         selected
                           ? "border-foreground bg-muted/60"
                           : "border-border hover:bg-muted/40",
@@ -373,18 +374,13 @@ export function ShareModal({
                       <input
                         type="radio"
                         name="export-scope"
-                        className="mt-0.5 accent-foreground"
+                        className="accent-foreground h-3 w-3"
                         checked={selected}
                         disabled={disabled}
                         onChange={() => setScope(s)}
                       />
-                      <span className="flex-1 min-w-0">
-                        <span className="block text-xs font-medium text-foreground">
-                          {SCOPE_LABELS[s].label}
-                        </span>
-                        <span className="block text-[11px] text-muted-foreground">
-                          {SCOPE_LABELS[s].desc}
-                        </span>
+                      <span className="block text-xs font-medium text-foreground truncate">
+                        {SCOPE_LABELS[s].label}
                       </span>
                     </label>
                   );
@@ -392,31 +388,45 @@ export function ShareModal({
               </div>
             </div>
 
-            <div className="pt-1 space-y-2">
+            <div className="pt-1">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Format
               </label>
-              <ExportRow
+              <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+                <FormatTile
                   icon={<FileCode className="h-4 w-4" />}
-                  title="Markdown (.md)"
-                  subtitle="Plain-text source — best for re-importing."
-                  busy={exporting === "md"}
-                  onClick={handleExportMd}
+                  label="Markdown"
+                  selected={format === "md"}
+                  onClick={() => setFormat("md")}
                 />
-                <ExportRow
+                <FormatTile
                   icon={<FileText className="h-4 w-4" />}
-                  title="PDF"
-                  subtitle="Opens the print dialog — choose 'Save as PDF'."
-                  busy={exporting === "pdf"}
-                  onClick={handleExportPdf}
+                  label="PDF"
+                  selected={format === "pdf"}
+                  onClick={() => setFormat("pdf")}
                 />
-                <ExportRow
+                <FormatTile
                   icon={<FileType2 className="h-4 w-4" />}
-                  title="Word (.docx)"
-                  subtitle="Editable document for Word / Google Docs."
-                  busy={exporting === "docx"}
-                  onClick={handleExportDocx}
+                  label="Word"
+                  selected={format === "docx"}
+                  onClick={() => setFormat("docx")}
                 />
+              </div>
+            </div>
+
+            <div className="mt-auto pt-2">
+              <button
+                onClick={() => {
+                  if (format === "md") handleExportMd();
+                  else if (format === "pdf") handleExportPdf();
+                  else handleExportDocx();
+                }}
+                disabled={exporting !== null}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                {exporting ? "Preparing..." : "Download"}
+              </button>
             </div>
           </div>
         )}
@@ -425,30 +435,30 @@ export function ShareModal({
   );
 }
 
-function ExportRow({
+function FormatTile({
   icon,
-  title,
-  subtitle,
-  busy,
+  label,
+  selected,
   onClick,
 }: {
   icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  busy: boolean;
+  label: string;
+  selected: boolean;
   onClick: () => void;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      disabled={busy}
-      className="w-full flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 text-left hover:bg-muted transition-colors disabled:opacity-50"
+      className={cn(
+        "flex flex-col items-center justify-center gap-1 rounded-md border px-2 py-2.5 transition-colors",
+        selected
+          ? "border-foreground bg-muted/60 text-foreground"
+          : "border-border text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+      )}
     >
-      <span className="shrink-0 text-muted-foreground">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : icon}</span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-xs font-medium text-foreground">{title}</span>
-        <span className="block text-[11px] text-muted-foreground truncate">{subtitle}</span>
-      </span>
+      {icon}
+      <span className="text-[11px] font-medium">{label}</span>
     </button>
   );
 }
