@@ -158,6 +158,7 @@ export function ShareModal({
     try {
       const md = await resolveMarkdown();
       if (!md) throw new Error("No content available for the selected report.");
+      const { marked } = await import("marked");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const w = window.open("", "_blank");
@@ -186,6 +187,7 @@ export function ShareModal({
     try {
       const md = await resolveMarkdown();
       if (!md) throw new Error("No content available for the selected report.");
+      const { marked } = await import("marked");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const mod: any = await import("html-docx-js/dist/html-docx");
