@@ -3,15 +3,29 @@ import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2 } f
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { marked } from "marked";
+import { supabase } from "@/integrations/supabase/client";
+import { ODD_SECTIONS, assembleOddMarkdown, type OddSectionKey } from "@/lib/odd-template";
+
+type ExportScope = "triage" | "idd" | "odd" | "memo" | "all";
+
+const SCOPE_LABELS: Record<ExportScope, { label: string; desc: string; suffix: string }> = {
+  triage: { label: "Triage Report", desc: "L1 screening report.", suffix: "Triage" },
+  idd: { label: "IDD Report", desc: "Investment due diligence (coming soon).", suffix: "IDD" },
+  odd: { label: "ODD Report", desc: "Operational due diligence.", suffix: "ODD" },
+  memo: { label: "IC Memo", desc: "Investment committee memo.", suffix: "IC_Memo" },
+  all: { label: "Complete DD Package", desc: "All available reports concatenated.", suffix: "Full_DD" },
+};
 
 interface ShareModalProps {
   open: boolean;
   onClose: () => void;
   fundName: string;
   projectId: string;
-  /** Optional: returns the markdown for the currently visible page/report.
-   * When omitted, the Export tab is disabled. */
+  /** Optional override for the currently-visible page's markdown (used when the
+   * scope matches the active view and the editor has unsaved/in-memory state). */
   getExportMarkdown?: () => string | Promise<string>;
+  /** Which scope the in-memory override applies to. */
+  currentScope?: ExportScope;
   /** Base filename (no extension) for exports. Defaults to a slugified fund name. */
   exportFilename?: string;
 }
@@ -39,6 +53,7 @@ export function ShareModal({
   fundName,
   projectId,
   getExportMarkdown,
+  currentScope,
   exportFilename,
 }: ShareModalProps) {
   const { toast } = useToast();
@@ -48,15 +63,70 @@ export function ShareModal({
   const [emails, setEmails] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [exporting, setExporting] = useState<null | "md" | "pdf" | "docx">(null);
+  const [scope, setScope] = useState<ExportScope>(currentScope ?? "triage");
 
   const shareUrl = `${window.location.origin}/project/${projectId}`;
-  const baseName = exportFilename || slug(fundName) || "report";
-  const canExport = typeof getExportMarkdown === "function";
+  const fundSlug = slug(fundName) || "report";
+  const baseName =
+    exportFilename && scope === currentScope
+      ? exportFilename
+      : `${fundSlug}_${SCOPE_LABELS[scope].suffix}`;
 
-  const resolveMarkdown = async () => {
-    if (!getExportMarkdown) return "";
-    const m = await getExportMarkdown();
-    return m ?? "";
+  // --- scope-aware markdown fetchers ----------------------------------------
+  async function fetchTriage(): Promise<string> {
+    const { data } = await supabase
+      .from("projects")
+      .select("report_markdown,fund_name")
+      .eq("id", projectId)
+      .maybeSingle();
+    return (data?.report_markdown as string | null) || "";
+  }
+  async function fetchOdd(): Promise<string> {
+    const { data: report } = await supabase
+      .from("odd_reports")
+      .select("content_markdown")
+      .eq("project_id", projectId)
+      .maybeSingle();
+    if (report?.content_markdown) return report.content_markdown;
+    // Fallback: assemble from per-section results
+    const { data: rows } = await supabase
+      .from("odd_section_results")
+      .select("section_key,content_markdown")
+      .eq("project_id", projectId);
+    if (!rows?.length) return "";
+    const map: Partial<Record<OddSectionKey, string | null>> = {};
+    for (const r of rows) map[r.section_key as OddSectionKey] = r.content_markdown;
+    return assembleOddMarkdown({ fundName, sectionContent: map });
+  }
+  async function fetchMemo(): Promise<string> {
+    const { data } = await supabase
+      .from("ic_memos")
+      .select("content_markdown")
+      .eq("project_id", projectId)
+      .maybeSingle();
+    return data?.content_markdown || "";
+  }
+
+  const resolveMarkdown = async (s: ExportScope = scope): Promise<string> => {
+    // Prefer in-memory override when scopes line up (e.g. unsaved memo edits).
+    if (getExportMarkdown && currentScope && currentScope === s) {
+      return (await getExportMarkdown()) ?? "";
+    }
+    if (s === "triage") return fetchTriage();
+    if (s === "odd") return fetchOdd();
+    if (s === "memo") return fetchMemo();
+    if (s === "idd") return "";
+    // all = concatenate every available section
+    const [triage, odd, memo] = await Promise.all([
+      fetchTriage(),
+      fetchOdd(),
+      fetchMemo(),
+    ]);
+    const parts: string[] = [`# ${fundName} — Complete DD Package`, ""];
+    if (triage) parts.push("# Triage Report", "", triage, "");
+    if (odd) parts.push("# Operational Due Diligence", "", odd, "");
+    if (memo) parts.push("# IC Memo", "", memo, "");
+    return parts.join("\n");
   };
 
   const downloadBlob = (blob: Blob, filename: string) => {
@@ -74,10 +144,11 @@ export function ShareModal({
     setExporting("md");
     try {
       const md = await resolveMarkdown();
+      if (!md) throw new Error("No content available for the selected report.");
       downloadBlob(new Blob([md], { type: "text/markdown;charset=utf-8" }), `${baseName}.md`);
       toast({ title: "Markdown exported", description: `${baseName}.md downloaded.` });
     } catch (e) {
-      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+      toast({ title: "Export failed", description: (e as Error).message, variant: "destructive" });
     } finally {
       setExporting(null);
     }
@@ -87,6 +158,7 @@ export function ShareModal({
     setExporting("pdf");
     try {
       const md = await resolveMarkdown();
+      if (!md) throw new Error("No content available for the selected report.");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const w = window.open("", "_blank");
@@ -104,7 +176,7 @@ export function ShareModal({
         description: "Choose 'Save as PDF' as the destination.",
       });
     } catch (e) {
-      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+      toast({ title: "Export failed", description: (e as Error).message, variant: "destructive" });
     } finally {
       setExporting(null);
     }
@@ -114,6 +186,7 @@ export function ShareModal({
     setExporting("docx");
     try {
       const md = await resolveMarkdown();
+      if (!md) throw new Error("No content available for the selected report.");
       const html = await marked.parse(md);
       const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
       const mod: any = await import("html-docx-js/dist/html-docx");
@@ -123,7 +196,7 @@ export function ShareModal({
       downloadBlob(blob, `${baseName}.docx`);
       toast({ title: "DOCX exported", description: `${baseName}.docx downloaded.` });
     } catch (e) {
-      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+      toast({ title: "Export failed", description: (e as Error).message, variant: "destructive" });
     } finally {
       setExporting(null);
     }
