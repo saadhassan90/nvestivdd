@@ -114,7 +114,7 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
 function StrategyPill({ strategy }: { strategy: string | null }) {
   if (!strategy) return <span className="text-xs text-muted-foreground">—</span>;
   return (
-    <span className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+    <span className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
       {strategy}
     </span>
   );
