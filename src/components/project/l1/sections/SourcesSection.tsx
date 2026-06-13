@@ -9,7 +9,7 @@ export function SourcesSection() {
   return (
     <SectionShell
       id="l1-sources"
-      eyebrow="08"
+      eyebrow="04"
       title="Sources & Methodology"
       description="Every citation chip on the page anchors to a row here."
       actions={<MethodologyDialog methodology={payload.methodology} />}

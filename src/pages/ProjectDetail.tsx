@@ -32,6 +32,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useUiVariant } from "@/contexts/UiVariantContext";
 import { OddWorkspace } from "@/components/odd/OddWorkspace";
 import { L1OnePager } from "@/components/project/l1/L1OnePager";
+import type { L1PageKey } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
@@ -233,6 +234,11 @@ export default function ProjectDetail() {
     return null;
   })();
 
+  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
+  const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
+    ? (activeTab as L1PageKey)
+    : "summary";
+
   return (
     <MeetingModeProvider dealId={project.id}>
     <CitationsProvider projectId={project.id} initialSources={researchSources}>
@@ -263,7 +269,14 @@ export default function ProjectDetail() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectStageRail
           reportLevel={isOddStage ? "ODD" : "L1"}
-          bookmarks={!isOddStage && !isProcessing && project.status !== "error" ? <L1SectionBookmarks /> : undefined}
+          bookmarks={
+            !isOddStage && !isProcessing && project.status !== "error" ? (
+              <L1SectionBookmarks
+                page={l1Page}
+                onPageChange={(p) => setActiveTab(p)}
+              />
+            ) : undefined
+          }
           onReportLevelChange={(lvl) => {
             if (lvl === "L3") navigate(`/project/${project.id}/memo`);
             else if (lvl === "ODD") {
@@ -274,7 +287,7 @@ export default function ProjectDetail() {
             } else if (lvl === "L1") {
               const p = new URLSearchParams(searchParams);
               p.delete("stage");
-              if (!p.get("tab")) p.set("tab", "overview");
+              if (!p.get("tab")) p.set("tab", "summary");
               setSearchParams(p, { replace: true });
             }
           }}
@@ -299,9 +312,9 @@ export default function ProjectDetail() {
               </BlurFade>
             </main>
           ) : (
-            <SectionProvider projectId={project.id} sectionId="overview">
+            <SectionProvider projectId={project.id} sectionId={l1Page}>
               <div className="flex flex-1 min-h-0 overflow-hidden">
-                <L1OnePager payload={payloadFor(project.id, project.fund_name)} />
+                <L1OnePager payload={payloadFor(project.id, project.fund_name)} page={l1Page} />
               </div>
             </SectionProvider>
           )}
