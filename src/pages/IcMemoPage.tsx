@@ -87,10 +87,13 @@ export default function IcMemoPage() {
 
   const showInitialLoader = useNvestivLoaderGate(loading || !project);
   const showMemoLoader = useNvestivLoaderGate(memoLoading || !memo);
-  if (showInitialLoader) {
+  if (showInitialLoader || !project) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <NvestivLoader size={140} />
+      <div className="flex flex-col h-screen bg-background overflow-hidden">
+        <ProjectTopBar project={null} isProcessing={false} mode="memo" reportLevel="L3" />
+        <div className="flex-1 flex items-center justify-center">
+          <NvestivLoader size={140} />
+        </div>
       </div>
     );
   }
