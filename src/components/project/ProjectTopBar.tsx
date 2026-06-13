@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, MessagesSquare, Lock, PanelLeftOpen } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { ShareModal } from "@/components/project/ShareModal";
-import { useChatContext } from "@/contexts/ChatContext";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -37,7 +36,6 @@ export function ProjectTopBar({
   const navigate = useNavigate();
   const { variant } = useUiVariant();
   const [shareOpen, setShareOpen] = useState(false);
-  const { isOpen: chatOpen, setIsOpen: setChatOpen } = useChatContext();
 
   // Publish header height so the global chat drawer can sit below it.
   useEffect(() => {
@@ -100,19 +98,6 @@ export function ProjectTopBar({
 
           {/* Right actions — desktop only; mobile/tablet uses bottom bar */}
           <div className="hidden lg:flex items-center gap-1.5">
-            {!chatOpen && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setChatOpen(true)}
-                    className="p-1.5 rounded-md hover:bg-muted transition-colors"
-                  >
-                    <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">Open Iris chat</TooltipContent>
-              </Tooltip>
-            )}
             <NotificationsDropdown />
             {onOpenComments && !isMemoMode && (
               <Tooltip>

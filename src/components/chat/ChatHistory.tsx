@@ -31,7 +31,7 @@ export function ChatHistory({ onBack }: { onBack: () => void }) {
         <button onClick={onBack} className="p-1 rounded-md hover:bg-muted transition-colors">
           <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </button>
-        <span className="text-sm font-semibold text-foreground">Chat History</span>
+        <span className="text-sm font-semibold text-foreground">Back to Chat</span>
       </div>
 
       {conversations.length === 0 ? (

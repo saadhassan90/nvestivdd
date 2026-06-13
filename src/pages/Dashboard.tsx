@@ -1,6 +1,6 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useMemo, useEffect } from "react";
-import { Plus, PanelLeftOpen } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
@@ -14,8 +14,6 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { NewDealModal } from "@/components/dashboard/NewDealModal";
 import { FilterBar, type FilterState } from "@/components/dashboard/FilterBar";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { useChatContext } from "@/contexts/ChatContext";
-
 import { supabase } from "@/integrations/supabase/client";
 import { getScoreTier } from "@/lib/score-utils";
 import { getVerdict } from "@/lib/verdict-utils";
@@ -42,7 +40,6 @@ export default function Dashboard() {
     sortBy: "composite_score",
     sortDir: "desc",
   });
-  const { isOpen, setIsOpen } = useChatContext();
   const showLoader = useNvestivLoaderGate(loading);
 
   const fetchData = async () => {
@@ -209,16 +206,6 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-2">
               <NotificationsDropdown />
-              {!isOpen && (
-                <button
-                  onClick={() => setIsOpen(true)}
-                  className="p-2 rounded-md hover:bg-muted transition-colors"
-                  title="Open Iris chat"
-                >
-                  <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
-                </button>
-              )}
-              
             </div>
           </div>
         </header>

@@ -1,11 +1,10 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft, PanelLeftOpen } from "lucide-react";
+import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { useChatContext } from "@/contexts/ChatContext";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 
 interface ActivityItem {
@@ -52,7 +51,6 @@ export default function NotificationsPage() {
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { isOpen, setIsOpen } = useChatContext();
   const showLoader = useNvestivLoaderGate(loading);
 
   useEffect(() => {
@@ -127,15 +125,6 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationsDropdown />
-            {!isOpen && (
-              <button
-                onClick={() => setIsOpen(true)}
-                className="p-2 rounded-md hover:bg-muted transition-colors"
-                title="Open Iris chat"
-              >
-                <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
-              </button>
-            )}
           </div>
         </div>
       </header>
