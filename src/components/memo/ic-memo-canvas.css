@@ -45,6 +45,49 @@
 }
 
 /* ---- headings (H1–H5; BlockNote has no H6) ---- */
+/* Brute-force the actual heading tags too — BlockNote renders headings as
+   real <h1>..<h5> elements that pick up browser UA font-size (2em / 1.5em / …)
+   unless we reset them explicitly. */
+.ic-memo-canvas h1,
+.ic-memo-canvas h2,
+.ic-memo-canvas h3,
+.ic-memo-canvas h4,
+.ic-memo-canvas h5,
+.ic-memo-canvas h6 {
+  font-family: inherit;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.ic-memo-canvas h1 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+.ic-memo-canvas h2 {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+}
+.ic-memo-canvas h3 {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+}
+.ic-memo-canvas h4 {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+.ic-memo-canvas h5,
+.ic-memo-canvas h6 {
+  font-size: 9px !important;
+  font-weight: 650 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
 .ic-memo-canvas .bn-block-content[data-content-type="heading"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"],
@@ -54,7 +97,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"],
-.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] .ic-memo-inline-content {
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] .ic-memo-inline-content,
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="1"] h1,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="1"] h1 {
   /* Match ODD report title: text-xl / semibold / tracking-tight */
   font-size: 20px !important;
   font-weight: 600 !important;
@@ -66,7 +111,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"],
-.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] .ic-memo-inline-content {
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] .ic-memo-inline-content,
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="2"] h2,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="2"] h2 {
   /* Match ODD section heading: text-lg / semibold / border-b */
   font-size: 18px !important;
   font-weight: 600 !important;
@@ -78,7 +125,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"],
-.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] .ic-memo-inline-content {
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] .ic-memo-inline-content,
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] h3,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="3"] h3 {
   font-size: 15px !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
@@ -89,7 +138,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"],
-.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] .ic-memo-inline-content {
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] .ic-memo-inline-content,
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="4"] h4,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="4"] h4 {
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1.4 !important;
@@ -101,7 +152,9 @@
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] .bn-inline-content,
 .ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"],
-.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"] .ic-memo-inline-content {
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"] .ic-memo-inline-content,
+.ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="5"] h5,
+.ic-memo-canvas .ic-memo-block-content[data-content-type="heading"][data-level="5"] h5 {
   font-size: 9px !important;        /* 12px -25% */
   font-weight: 650 !important;
   line-height: 1.4 !important;
