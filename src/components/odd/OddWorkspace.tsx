@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertTriangle, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ODD_SECTIONS, type OddSectionKey } from "@/lib/odd-template";
 import { useOddReport } from "@/hooks/use-odd-report";
-import { OddLeftRail, type OddSectionStatusUi } from "./OddLeftRail";
+import { type OddSectionStatusUi } from "./OddLeftRail";
 import { OddCanvas } from "./OddCanvas";
 import { OddEmptyState } from "./OddEmptyState";
 import { OddImportModal } from "./OddImportModal";
@@ -13,6 +14,47 @@ import { generateMockOddReport } from "@/lib/odd-mock-generator";
 
 interface OddWorkspaceProps {
   project: Tables<"projects">;
+}
+
+function StatusIcon({ status }: { status: OddSectionStatusUi }) {
+  switch (status) {
+    case "generating":
+      return <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />;
+    case "verified":
+      return <CheckCircle2 className="h-3 w-3 text-score-strong" />;
+    case "flagged":
+    case "error":
+      return <AlertTriangle className="h-3 w-3 text-severity-critical" />;
+    case "unverified":
+    default:
+      return <Circle className="h-3 w-3 text-muted-foreground/60" />;
+  }
+}
+
+function RiskBadge({ rating }: { rating: "low" | "medium" | "high" }) {
+  const color =
+    rating === "low"
+      ? "text-score-strong"
+      : rating === "medium"
+        ? "text-score-review"
+        : "text-severity-critical";
+  const dot =
+    rating === "low"
+      ? "bg-score-strong"
+      : rating === "medium"
+        ? "bg-score-review"
+        : "bg-severity-critical";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-[10px] font-semibold uppercase tracking-wider",
+        color,
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      Risk: {rating}
+    </span>
+  );
 }
 
 export function OddWorkspace({ project }: OddWorkspaceProps) {
@@ -126,35 +168,49 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      <OddLeftRail
-        sectionStatuses={sectionStatuses}
-        activeKey={activeKey}
-        onSectionClick={handleSectionClick}
-        riskRating={allComplete ? riskRating : null}
-      />
-
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="flex items-center justify-between border-b border-border bg-card/40 px-5 py-2">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              ODD Workspace
-            </span>
+        <div className="flex items-center gap-3 border-b border-border bg-card/40 px-5 py-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+            ODD
+          </span>
+          {hasImport && (
+            <nav className="flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
+              {ODD_SECTIONS.map((s) => {
+                const status = sectionStatuses[s.key] ?? "unverified";
+                const isActive = activeKey === s.key;
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => handleSectionClick(s.key)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors border",
+                      isActive
+                        ? "bg-muted text-foreground border-border"
+                        : "bg-transparent text-muted-foreground border-transparent hover:bg-muted/60 hover:text-foreground",
+                    )}
+                  >
+                    <StatusIcon status={status} />
+                    <span>{s.title}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            {hasImport && allComplete && riskRating && (
+              <RiskBadge rating={riskRating} />
+            )}
             {hasImport && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                ADIA
-              </span>
+              <button
+                onClick={() => setImportOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <Upload className="h-3 w-3" />
+                Re-import
+              </button>
             )}
           </div>
-          {hasImport && (
-            <button
-              onClick={() => setImportOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <Upload className="h-3 w-3" />
-              Re-import
-            </button>
-          )}
         </div>
 
         {hasImport ? (
