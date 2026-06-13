@@ -74,8 +74,6 @@
   letter-spacing: -0.015em !important;
   margin-top: 28px;
   margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid hsl(var(--border));
 }
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"],
 .ic-memo-canvas .bn-block-content[data-content-type="heading"][data-level="3"] .bn-inline-content,
