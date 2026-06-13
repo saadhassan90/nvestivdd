@@ -1,7 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Lock, ZoomIn, ZoomOut } from "lucide-react";
+import { FileText, ClipboardList, Building2, ScrollText, Lock, ZoomIn, ZoomOut } from "lucide-react";
 import type { ReactNode } from "react";
 import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
@@ -21,32 +20,22 @@ interface ProjectStageRailProps {
 
 export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, sectionBookmarks, zoom }: ProjectStageRailProps) {
   const levels: Level[] = ["L1", "L2", "ODD", "L3"];
-  const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
-    L1: { label: "Triage Report", display: "Triage", available: true },
-    L2: { label: "IDD (coming soon)", display: "IDD", available: false },
-    ODD: { label: "Operational Due Diligence", display: "ODD", available: true },
-    L3: { label: "IC Memo", display: "IC Memo", available: true },
+  const levelMeta: Record<Level, { label: string; display: string; available: boolean; icon: typeof FileText }> = {
+    L1: { label: "Triage Report", display: "Triage", available: true, icon: FileText },
+    L2: { label: "IDD (coming soon)", display: "IDD", available: false, icon: ClipboardList },
+    ODD: { label: "Operational Due Diligence", display: "ODD", available: true, icon: Building2 },
+    L3: { label: "IC Memo", display: "IC Memo", available: true, icon: ScrollText },
   };
 
   return (
-    <div className="hidden lg:flex shrink-0 flex-col py-6 px-4 w-auto gap-3 border-r border-border/50 h-full">
-      <div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+    <div className="hidden lg:flex shrink-0 flex-col py-4 px-2 w-56 gap-2 border-r border-border/50 h-full">
+      <div className="px-2 py-1 text-[11px] font-medium text-muted-foreground/70">
         Report Stage
       </div>
-      <Tabs
-        value={reportLevel}
-        onValueChange={(v) => {
-          const next = v as Level;
-          if (levelMeta[next]?.available) onReportLevelChange(next);
-        }}
-        orientation="vertical"
-        aria-label="Report stage"
-      >
-        <TabsList className="flex h-auto flex-col items-stretch gap-1.5 bg-transparent p-0 w-full">
+      <nav aria-label="Report stage" className="flex flex-col gap-0.5">
         {levels.map((lvl) => {
-          const { label, display, available } = levelMeta[lvl];
+          const { label, display, available, icon: Icon } = levelMeta[lvl];
           const isActive = reportLevel === lvl;
-          // Inline anchor list to render under this row, if any.
           const inlineChildren =
             lvl === "L1" && bookmarks
               ? bookmarks
@@ -54,40 +43,40 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
                 ? sectionBookmarks
                 : null;
           const hasChildren = !!inlineChildren;
-          // When a parent (L1/Triage) has visible children, the active highlight lives on the child row,
-          // so we suppress the pill on the parent to avoid double-highlighting.
-          const showActivePill = isActive && !hasChildren;
+          const showActiveBg = isActive && !hasChildren;
           return (
-            <div key={lvl} className="contents">
+            <div key={lvl}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger
-                    value={lvl}
+                  <button
+                    type="button"
+                    onClick={() => available && onReportLevelChange(lvl)}
                     disabled={!available}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "w-full justify-start gap-1.5 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide rounded-md text-muted-foreground transition-colors",
-                      "hover:bg-muted hover:text-foreground",
-                      isActive && "text-foreground",
-                      showActivePill && "bg-muted",
-                      !available && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground",
+                      "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-left transition-colors",
+                      "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive && "text-sidebar-accent-foreground font-medium",
+                      showActiveBg && "bg-sidebar-accent",
+                      !available && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-sidebar-foreground/80",
                     )}
                   >
-                    {!available && <Lock className="h-3 w-3" />}
-                    {display}
-                  </TabsTrigger>
+                    <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                    <span className="truncate">{display}</span>
+                    {!available && <Lock className="ml-auto h-3 w-3 opacity-60" />}
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
               </Tooltip>
               {inlineChildren && (
-                <div className="pl-3 mt-0.5 mb-1 border-l border-border/60 ml-3">
+                <div className="mt-0.5 mb-1 ml-[15px] border-l border-sidebar-border/70 pl-2 py-0.5">
                   {inlineChildren}
                 </div>
               )}
             </div>
           );
         })}
-        </TabsList>
-      </Tabs>
+      </nav>
       {zoom && (
         <div className="mt-auto flex items-center justify-center gap-0.5 rounded-md border border-border bg-card px-1 py-1">
           <Tooltip>
