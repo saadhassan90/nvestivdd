@@ -56,6 +56,22 @@ export function OddWorkspace({ project, zoomCtl }: OddWorkspaceProps) {
   const [activeKey, setActiveKey] = useState<OddSectionKey | null>(null);
   const scrollFnRef = useRef<((key: OddSectionKey) => void) | null>(null);
 
+  // Broadcast the visible section so the sidebar bookmark group can highlight it.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("odd:active-section", { detail: activeKey }));
+  }, [activeKey]);
+
+  // Listen for click-to-scroll requests from the sidebar bookmarks.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const key = (e as CustomEvent).detail as OddSectionKey;
+      setActiveKey(key);
+      scrollFnRef.current?.(key);
+    };
+    window.addEventListener("odd:scroll-to-section", handler);
+    return () => window.removeEventListener("odd:scroll-to-section", handler);
+  }, []);
+
   // Derive left-rail status from runtime state
   const sectionStatuses = useMemo(() => {
     const map: Record<OddSectionKey, OddSectionStatusUi> = {} as any;
