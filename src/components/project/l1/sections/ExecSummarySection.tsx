@@ -9,7 +9,7 @@ export function ExecSummarySection() {
   const s = payload.executive_summary;
   const rowCount = Math.max(s.key_strengths.length, s.key_risks.length);
   return (
-    <SectionShell id="l1-exec" eyebrow="02" title="Executive Summary" description="Narrative plus the strengths and risks an analyst would lead with." disableComments>
+    <SectionShell id="l1-exec" eyebrow="01" title="Executive Summary" description="Narrative plus the strengths and risks an analyst would lead with." disableComments>
       <Card className="p-5 space-y-5" commentId="executive-summary" commentLabel="Executive Summary">
         <p className="text-sm text-foreground/85 leading-relaxed">{s.narrative}</p>
         <div className="space-y-2">

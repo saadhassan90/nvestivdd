@@ -234,7 +234,7 @@ export default function ProjectDetail() {
     return null;
   })();
 
-  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda"];
+  const L1_PAGE_KEYS: L1PageKey[] = ["summary", "analysis", "agenda", "judgement"];
   const l1Page: L1PageKey = (L1_PAGE_KEYS as string[]).includes(activeTab)
     ? (activeTab as L1PageKey)
     : "summary";

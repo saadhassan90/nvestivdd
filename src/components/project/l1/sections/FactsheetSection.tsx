@@ -17,7 +17,7 @@ const GROUP_ORDER: FactsheetGroup[] = ["identity", "scale", "economics", "govern
 export function FactsheetSection() {
   const { payload } = useRefs();
   return (
-    <SectionShell id="l1-factsheet" eyebrow="03" title="Fund Factsheet" description="Every figure declares its provenance — verified, GP-stated, or not disclosed." disableComments>
+    <SectionShell id="l1-factsheet" eyebrow="02" title="Fund Factsheet" description="Every figure declares its provenance — verified, GP-stated, or not disclosed." disableComments>
       <div className="space-y-3">
         {GROUP_ORDER.map((g) => {
           const fields = payload.factsheet.fields.filter((f) => f.group === g);
