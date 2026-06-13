@@ -274,6 +274,11 @@ export default function ProjectDetail() {
         }}
         onOpenComments={() => setCommentsOpen(true)}
         commentsCount={commentsCount}
+        onReimport={
+          isOddStage
+            ? () => window.dispatchEvent(new CustomEvent("odd:open-import"))
+            : undefined
+        }
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
