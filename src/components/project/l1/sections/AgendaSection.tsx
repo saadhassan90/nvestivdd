@@ -12,7 +12,7 @@ export function AgendaSection() {
   return (
     <SectionShell
       id="l1-agenda"
-      eyebrow="07"
+      eyebrow="01"
       title="Meeting Agenda"
       description={`${a.items.length} topics · ${totalMin} min total.`}
       disableComments

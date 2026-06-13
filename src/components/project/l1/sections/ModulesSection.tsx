@@ -16,7 +16,7 @@ export function ModulesSection() {
   return (
     <SectionShell
       id="l1-modules"
-      eyebrow="06"
+      eyebrow="03"
       title="Modules"
       description="One level deeper on each of the five dimensions — collapsed by default."
       disableComments

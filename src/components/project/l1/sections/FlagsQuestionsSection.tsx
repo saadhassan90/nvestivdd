@@ -15,7 +15,7 @@ export function FlagsQuestionsSection() {
   return (
     <SectionShell
       id="l1-flags"
-      eyebrow="05"
+      eyebrow="02"
       title="Flags & Questions"
       description="Each flag carries the clarifying question(s) inline. Question text appears here only."
       disableComments
