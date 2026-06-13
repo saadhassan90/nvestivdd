@@ -106,6 +106,47 @@ export default function IcMemoPage() {
     return () => window.removeEventListener("ic-memo:scroll-to-heading", handler);
   }, []);
 
+  // Scroll-spy: dispatch the index of the heading nearest the top of the
+  // scroll container so the bookmarks rail can highlight the active section.
+  useEffect(() => {
+    if (showMemoLoader) return;
+    const root = document.querySelector(".ic-memo-canvas");
+    const scroller = (root?.closest("main") ?? null) as HTMLElement | null;
+    if (!root || !scroller) return;
+
+    let raf = 0;
+    let lastIndex = -1;
+    const compute = () => {
+      raf = 0;
+      const heads = Array.from(root.querySelectorAll("h1, h2, h3")) as HTMLElement[];
+      if (heads.length === 0) return;
+      const scrollerTop = scroller.getBoundingClientRect().top;
+      const threshold = scrollerTop + 80; // a little below the top edge
+      let activeIdx = 0;
+      for (let i = 0; i < heads.length; i++) {
+        if (heads[i].getBoundingClientRect().top <= threshold) activeIdx = i;
+        else break;
+      }
+      if (activeIdx !== lastIndex) {
+        lastIndex = activeIdx;
+        window.dispatchEvent(
+          new CustomEvent("ic-memo:active-heading", { detail: activeIdx }),
+        );
+      }
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(compute);
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    // Initial computation (next frame to let layout settle).
+    raf = requestAnimationFrame(compute);
+    return () => {
+      scroller.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [showMemoLoader, bookmarkMarkdown]);
+
   if (showInitialLoader || !project) {
     return (
       <div className="flex flex-col h-screen bg-background overflow-hidden">
