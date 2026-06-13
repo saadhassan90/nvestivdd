@@ -136,17 +136,7 @@ export function ProjectTopBar({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Back to Triage report</TooltipContent>
               </Tooltip>
-            ) : (
-              !isOpen && (
-              <button
-                onClick={() => setIsOpen(true)}
-                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Ask Iris
-              </button>
-              )
-            )}
+            ) : null}
           </div>
         </div>
       </header>

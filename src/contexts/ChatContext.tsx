@@ -52,7 +52,17 @@ export function useOptionalChatContext() {
 }
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const raw = window.localStorage.getItem("chatIsOpen");
+    return raw === null ? true : raw === "true";
+  });
+  const setIsOpenPersist = useCallback((open: boolean) => {
+    setIsOpen(open);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("chatIsOpen", String(open));
+    }
+  }, []);
   const [chatWidth, setChatWidthState] = useState<number>(() => {
     if (typeof window === "undefined") return 480;
     const defaultW = Math.round(window.innerWidth * 0.3);
@@ -323,7 +333,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     <ChatContext.Provider
       value={{
         isOpen,
-        setIsOpen,
+        setIsOpen: setIsOpenPersist,
         chatWidth,
         setChatWidth,
         chatExpanded,
