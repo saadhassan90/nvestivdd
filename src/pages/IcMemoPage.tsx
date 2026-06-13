@@ -9,7 +9,6 @@ import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
 import { useReportZoom } from "@/hooks/use-report-zoom";
-import { ReportZoomRail } from "@/components/project/ReportZoomRail";
 import { useIcMemo } from "@/hooks/use-ic-memo";
 import { buildIcMemoSkeletonMarkdown } from "@/lib/ic-memo-template";
 import type { Tables } from "@/integrations/supabase/types";
@@ -120,6 +119,7 @@ export default function IcMemoPage() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectStageRail
           reportLevel="L3"
+          zoom={zoomCtl}
           onReportLevelChange={(lvl) => {
             if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
             else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
@@ -132,17 +132,14 @@ export default function IcMemoPage() {
             {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
             ) : (
-              <>
-                <div style={{ zoom: zoomCtl.zoom } as React.CSSProperties}>
-                  <IcMemoCanvas
-                    contentJson={memo.content_json}
-                    seedMarkdown={memo.content_markdown || seedMarkdown}
-                    onChange={handleCanvasChange}
-                    resetKey={resetKey}
-                  />
-                </div>
-                <ReportZoomRail zoom={zoomCtl} />
-              </>
+              <div style={{ zoom: zoomCtl.zoom } as React.CSSProperties}>
+                <IcMemoCanvas
+                  contentJson={memo.content_json}
+                  seedMarkdown={memo.content_markdown || seedMarkdown}
+                  onChange={handleCanvasChange}
+                  resetKey={resetKey}
+                />
+              </div>
             )}
           </main>
         </div>
