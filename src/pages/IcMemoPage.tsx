@@ -139,6 +139,7 @@ export default function IcMemoPage() {
         <ProjectStageRail
           reportLevel="L3"
           zoom={zoomCtl}
+          sectionBookmarks={<IcMemoBookmarks markdown={bookmarkMarkdown} />}
           onReportLevelChange={(lvl) => {
             if (lvl === "L1") navigate(`/project/${project.id}?tab=summary`);
             else if (lvl === "ODD") navigate(`/project/${project.id}?stage=odd`);
