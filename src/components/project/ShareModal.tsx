@@ -329,16 +329,52 @@ export function ShareModal({
         </div>
         ) : (
           <div className="p-4 space-y-3">
-            {!canExport ? (
-              <p className="text-xs text-muted-foreground py-6 text-center">
-                Nothing to export from this view.
-              </p>
-            ) : (
-              <>
-                <p className="text-[11px] text-muted-foreground">
-                  Download the current report in your preferred format.
-                </p>
-                <ExportRow
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Report to export
+              </label>
+              <div className="mt-1.5 space-y-1">
+                {(Object.keys(SCOPE_LABELS) as ExportScope[]).map((s) => {
+                  const disabled = s === "idd";
+                  const selected = scope === s;
+                  return (
+                    <label
+                      key={s}
+                      className={cn(
+                        "flex items-start gap-2.5 rounded-md border px-3 py-2 cursor-pointer transition-colors",
+                        selected
+                          ? "border-foreground bg-muted/60"
+                          : "border-border hover:bg-muted/40",
+                        disabled && "opacity-50 cursor-not-allowed",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="export-scope"
+                        className="mt-0.5 accent-foreground"
+                        checked={selected}
+                        disabled={disabled}
+                        onChange={() => setScope(s)}
+                      />
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-xs font-medium text-foreground">
+                          {SCOPE_LABELS[s].label}
+                        </span>
+                        <span className="block text-[11px] text-muted-foreground">
+                          {SCOPE_LABELS[s].desc}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-1 space-y-2">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Format
+              </label>
+              <ExportRow
                   icon={<FileCode className="h-4 w-4" />}
                   title="Markdown (.md)"
                   subtitle="Plain-text source — best for re-importing."
@@ -359,8 +395,7 @@ export function ShareModal({
                   busy={exporting === "docx"}
                   onClick={handleExportDocx}
                 />
-              </>
-            )}
+            </div>
           </div>
         )}
       </div>
