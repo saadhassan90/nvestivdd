@@ -279,6 +279,7 @@ export default function ProjectDetail() {
             ? () => window.dispatchEvent(new CustomEvent("odd:open-import"))
             : undefined
         }
+        exportCurrentScope={isOddStage ? "odd" : "triage"}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">

@@ -108,6 +108,7 @@ export default function IcMemoPage() {
         onReset={resetToTemplate}
         getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
         exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
+        exportCurrentScope="memo"
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -147,6 +148,7 @@ export default function IcMemoPage() {
         projectId={project.id}
         getExportMarkdown={() => memo?.content_markdown || seedMarkdown}
         exportFilename={`${project.fund_name.replace(/\s+/g, "_")}_IC_Memo`}
+        currentScope="memo"
       />
     </div>
   );

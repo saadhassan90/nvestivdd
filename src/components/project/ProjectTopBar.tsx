@@ -40,6 +40,8 @@ interface ProjectTopBarProps {
   /** Returns the markdown to expose in the Share→Export tab. */
   getExportMarkdown?: () => string | Promise<string>;
   exportFilename?: string;
+  /** Which scope the in-memory export override applies to. */
+  exportCurrentScope?: "triage" | "idd" | "odd" | "memo" | "all";
 }
 
 export function ProjectTopBar({
@@ -54,6 +56,7 @@ export function ProjectTopBar({
   onReimport,
   getExportMarkdown,
   exportFilename,
+  exportCurrentScope,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
   const { variant } = useUiVariant();
@@ -218,6 +221,7 @@ export function ProjectTopBar({
         projectId={project.id}
         getExportMarkdown={getExportMarkdown}
         exportFilename={exportFilename}
+        currentScope={exportCurrentScope}
       />
     </>
   );
