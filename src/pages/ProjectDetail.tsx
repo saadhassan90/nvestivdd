@@ -218,17 +218,17 @@ export default function ProjectDetail() {
   };
 
   const showLoader = useNvestivLoaderGate(loading);
-  if (showLoader) {
+  if (showLoader || !project) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <NvestivLoader size={140} />
-      </div>
-    );
-  }
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Project not found</p>
+      <div className="flex flex-col h-screen bg-background overflow-hidden">
+        <ProjectTopBar project={null} isProcessing={false} />
+        <div className="flex-1 flex items-center justify-center">
+          {showLoader ? (
+            <NvestivLoader size={140} />
+          ) : (
+            <p className="text-muted-foreground">Project not found</p>
+          )}
+        </div>
       </div>
     );
   }
