@@ -18,7 +18,8 @@ export function ChatResizeHandle() {
     const onMove = (ev: MouseEvent) => {
       const delta = ev.clientX - startX;
       const maxW = Math.round(window.innerWidth * 0.5);
-      const next = Math.min(Math.max(360, startWidth + delta), maxW);
+      const minW = Math.round(window.innerWidth * 0.2);
+      const next = Math.min(Math.max(minW, startWidth + delta), maxW);
       setChatWidth(next);
     };
     const onUp = () => {

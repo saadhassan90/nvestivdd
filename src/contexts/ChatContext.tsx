@@ -52,25 +52,19 @@ export function useOptionalChatContext() {
 }
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const raw = window.localStorage.getItem("chatIsOpen");
-    return raw === null ? true : raw === "true";
-  });
-  const setIsOpenPersist = useCallback((open: boolean) => {
-    setIsOpen(open);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("chatIsOpen", String(open));
-    }
-  }, []);
+  // Chat is always open — no close affordance. Kept in the context shape
+  // for backward compatibility with consumers that still read isOpen.
+  const isOpen = true;
+  const setIsOpen = useCallback((_open: boolean) => {}, []);
   const [chatWidth, setChatWidthState] = useState<number>(() => {
     if (typeof window === "undefined") return 480;
     const defaultW = Math.round(window.innerWidth * 0.3);
     const maxW = Math.round(window.innerWidth * 0.5);
+    const minW = Math.round(window.innerWidth * 0.2);
     const raw = window.localStorage.getItem("chatWidth");
     const n = raw ? parseInt(raw, 10) : NaN;
-    if (Number.isFinite(n) && n >= 360) return Math.min(n, maxW);
-    return Math.max(360, defaultW);
+    if (Number.isFinite(n)) return Math.min(Math.max(n, minW), maxW);
+    return Math.min(Math.max(defaultW, minW), maxW);
   });
   const setChatWidth = useCallback((w: number) => {
     setChatWidthState(w);
@@ -83,7 +77,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") return;
     const onResize = () => {
       const maxW = Math.round(window.innerWidth * 0.5);
-      const minW = Math.min(360, maxW);
+      const minW = Math.round(window.innerWidth * 0.2);
       setChatWidthState((prev) => Math.min(Math.max(prev, minW), maxW));
     };
     window.addEventListener("resize", onResize);
@@ -333,7 +327,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     <ChatContext.Provider
       value={{
         isOpen,
-        setIsOpen: setIsOpenPersist,
+        setIsOpen,
         chatWidth,
         setChatWidth,
         chatExpanded,
