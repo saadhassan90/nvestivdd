@@ -187,13 +187,34 @@ export function ShareModal({
     try {
       const md = await resolveMarkdown();
       if (!md) throw new Error("No content available for the selected report.");
-      const { marked } = await import("marked");
-      const html = await marked.parse(md);
-      const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
-      const mod: any = await import("html-docx-js/dist/html-docx");
-      const asBlob = mod.asBlob || mod.default?.asBlob;
-      if (!asBlob) throw new Error("DOCX exporter unavailable.");
-      const blob: Blob = asBlob(printable);
+      const { Document, Paragraph, TextRun, Packer, HeadingLevel } = await import("docx");
+      const lines = md.split("\n");
+      const children: any[] = [];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          children.push(new Paragraph({ text: "" }));
+          continue;
+        }
+        if (trimmed.startsWith("### ")) {
+          children.push(new Paragraph({ text: trimmed.slice(4), heading: HeadingLevel.HEADING_3 }));
+        } else if (trimmed.startsWith("## ")) {
+          children.push(new Paragraph({ text: trimmed.slice(3), heading: HeadingLevel.HEADING_2 }));
+        } else if (trimmed.startsWith("# ")) {
+          children.push(new Paragraph({ text: trimmed.slice(2), heading: HeadingLevel.HEADING_1 }));
+        } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          children.push(new Paragraph({ text: "• " + trimmed.slice(2), bullet: { level: 0 } }));
+        } else if (/^\d+\.\s/.test(trimmed)) {
+          const text = trimmed.replace(/^\d+\.\s/, "");
+          children.push(new Paragraph({ text, numbering: { level: 0, reference: "default-numbering" } }));
+        } else {
+          children.push(new Paragraph({ text: trimmed }));
+        }
+      }
+      const doc = new Document({
+        sections: [{ children }],
+      });
+      const blob = await Packer.toBlob(doc);
       downloadBlob(blob, `${baseName}.docx`);
       toast({ title: "DOCX exported", description: `${baseName}.docx downloaded.` });
     } catch (e) {
