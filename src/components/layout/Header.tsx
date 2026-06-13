@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Search, Sparkles, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { useChatContext } from "@/contexts/ChatContext";
 
 export function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const { isOpen, setIsOpen } = useChatContext();
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card">
@@ -35,17 +33,6 @@ export function Header() {
           >
             {mobileSearchOpen ? <X className="h-4 w-4 text-muted-foreground" /> : <Search className="h-4 w-4 text-muted-foreground" />}
           </button>
-
-          {/* Ask Iris – hidden when chat is open */}
-          {!isOpen && (
-            <button
-              onClick={() => setIsOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Ask Iris</span>
-            </button>
-          )}
         </div>
       </div>
 

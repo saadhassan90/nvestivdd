@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
-import { ArrowLeft, Share2, Sparkles, MessagesSquare, Lock } from "lucide-react";
+import { ArrowLeft, Share2, MessagesSquare, Lock } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
-import { useChatContext } from "@/contexts/ChatContext";
 import { ShareModal } from "@/components/project/ShareModal";
 import { getStatusColor } from "@/lib/verdict-utils";
 import { cn } from "@/lib/utils";
@@ -35,7 +34,6 @@ export function ProjectTopBar({
   commentsCount = 0,
 }: ProjectTopBarProps) {
   const navigate = useNavigate();
-  const { isOpen, setIsOpen } = useChatContext();
   const { variant } = useUiVariant();
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -136,17 +134,7 @@ export function ProjectTopBar({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Back to Triage report</TooltipContent>
               </Tooltip>
-            ) : (
-              !isOpen && (
-              <button
-                onClick={() => setIsOpen(true)}
-                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-all hover:opacity-90 active:scale-95"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Ask Iris
-              </button>
-              )
-            )}
+            ) : null}
           </div>
         </div>
       </header>
