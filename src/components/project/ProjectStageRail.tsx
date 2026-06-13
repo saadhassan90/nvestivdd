@@ -38,6 +38,11 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks }
         <TabsList className="flex h-auto flex-col items-stretch gap-1.5 bg-transparent p-0 w-full">
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
+          const isActive = reportLevel === lvl;
+          const hasChildren = lvl === "L1" && !!bookmarks;
+          // When a parent (L1/Triage) has visible children, the active highlight lives on the child row,
+          // so we suppress the pill on the parent to avoid double-highlighting.
+          const showActivePill = isActive && !hasChildren;
           return (
             <div key={lvl} className="contents">
               <Tooltip>
@@ -48,7 +53,8 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks }
                     className={cn(
                       "w-full justify-start gap-1.5 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide rounded-md text-muted-foreground transition-colors",
                       "hover:bg-muted hover:text-foreground",
-                      "data-[state=active]:bg-muted data-[state=active]:text-foreground",
+                      isActive && "text-foreground",
+                      showActivePill && "bg-muted",
                       !available && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground",
                     )}
                   >
