@@ -22,7 +22,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks }
   };
 
   return (
-    <div className="hidden lg:flex shrink-0 flex-col py-6 px-3 w-48 gap-4 border-r border-border/50">
+    <div className="hidden lg:flex shrink-0 flex-col py-6 px-2 w-auto gap-4 border-r border-border/50">
       <Tabs
         value={reportLevel}
         onValueChange={(v) => {
