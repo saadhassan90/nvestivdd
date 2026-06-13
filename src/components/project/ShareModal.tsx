@@ -1,22 +1,133 @@
 import { useState } from "react";
-import { Copy, Check, Send, X, Link2 } from "lucide-react";
+import { Copy, Check, Send, X, Link2, FileText, FileType2, FileCode, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { marked } from "marked";
 
 interface ShareModalProps {
   open: boolean;
   onClose: () => void;
   fundName: string;
   projectId: string;
+  /** Optional: returns the markdown for the currently visible page/report.
+   * When omitted, the Export tab is disabled. */
+  getExportMarkdown?: () => string | Promise<string>;
+  /** Base filename (no extension) for exports. Defaults to a slugified fund name. */
+  exportFilename?: string;
 }
 
-export function ShareModal({ open, onClose, fundName, projectId }: ShareModalProps) {
+function slug(s: string) {
+  return s.replace(/\s+/g, "_").replace(/[^A-Za-z0-9_-]/g, "");
+}
+
+function buildPrintableHtml(title: string, bodyHtml: string) {
+  return `<!doctype html><html><head><meta charset="utf-8"/><title>${title}</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;max-width:780px;margin:40px auto;padding:0 24px;line-height:1.55;}
+  h1{font-size:24px;margin-top:24px;}h2{font-size:18px;margin-top:20px;}h3{font-size:15px;margin-top:16px;}
+  p,li{font-size:13px;}table{border-collapse:collapse;width:100%;margin:12px 0;font-size:12px;}
+  th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;}th{background:#f5f5f5;}
+  code{background:#f3f3f3;padding:1px 4px;border-radius:3px;font-size:12px;}
+  pre{background:#f7f7f7;padding:10px;border-radius:6px;overflow:auto;font-size:12px;}
+  blockquote{border-left:3px solid #ccc;padding-left:10px;color:#555;margin:8px 0;}
+</style></head><body>${bodyHtml}</body></html>`;
+}
+
+export function ShareModal({
+  open,
+  onClose,
+  fundName,
+  projectId,
+  getExportMarkdown,
+  exportFilename,
+}: ShareModalProps) {
   const { toast } = useToast();
+  const [tab, setTab] = useState<"share" | "export">("share");
   const [copied, setCopied] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  const [exporting, setExporting] = useState<null | "md" | "pdf" | "docx">(null);
 
   const shareUrl = `${window.location.origin}/project/${projectId}`;
+  const baseName = exportFilename || slug(fundName) || "report";
+  const canExport = typeof getExportMarkdown === "function";
+
+  const resolveMarkdown = async () => {
+    if (!getExportMarkdown) return "";
+    const m = await getExportMarkdown();
+    return m ?? "";
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportMd = async () => {
+    setExporting("md");
+    try {
+      const md = await resolveMarkdown();
+      downloadBlob(new Blob([md], { type: "text/markdown;charset=utf-8" }), `${baseName}.md`);
+      toast({ title: "Markdown exported", description: `${baseName}.md downloaded.` });
+    } catch (e) {
+      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    setExporting("pdf");
+    try {
+      const md = await resolveMarkdown();
+      const html = await marked.parse(md);
+      const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
+      const w = window.open("", "_blank");
+      if (!w) throw new Error("Popup blocked — allow popups to export PDF.");
+      w.document.open();
+      w.document.write(printable);
+      w.document.close();
+      // Give the new window a tick to lay out, then trigger the print dialog.
+      setTimeout(() => {
+        w.focus();
+        w.print();
+      }, 400);
+      toast({
+        title: "Print dialog opened",
+        description: "Choose 'Save as PDF' as the destination.",
+      });
+    } catch (e) {
+      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportDocx = async () => {
+    setExporting("docx");
+    try {
+      const md = await resolveMarkdown();
+      const html = await marked.parse(md);
+      const printable = buildPrintableHtml(`${fundName} — Report`, html as string);
+      const mod: any = await import("html-docx-js/dist/html-docx");
+      const asBlob = mod.asBlob || mod.default?.asBlob;
+      if (!asBlob) throw new Error("DOCX exporter unavailable.");
+      const blob: Blob = asBlob(printable);
+      downloadBlob(blob, `${baseName}.docx`);
+      toast({ title: "DOCX exported", description: `${baseName}.docx downloaded.` });
+    } catch (e) {
+      toast({ title: "Export failed", description: String(e), variant: "destructive" });
+    } finally {
+      setExporting(null);
+    }
+  };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
@@ -59,7 +170,9 @@ export function ShareModal({ open, onClose, fundName, projectId }: ShareModalPro
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Share Report</h2>
+            <h2 className="text-sm font-semibold text-foreground">
+              {tab === "share" ? "Share Report" : "Export Report"}
+            </h2>
             <p className="text-xs text-muted-foreground mt-0.5">{fundName}</p>
           </div>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
@@ -67,6 +180,25 @@ export function ShareModal({ open, onClose, fundName, projectId }: ShareModalPro
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex items-center gap-1 px-4 pt-3 border-b border-border">
+          {(["share", "export"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-t-md border-b-2 -mb-px transition-colors",
+                tab === t
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t === "share" ? "Share" : "Export"}
+            </button>
+          ))}
+        </div>
+
+        {tab === "share" ? (
         <div className="p-4 space-y-4">
           {/* Copy link */}
           <div>
