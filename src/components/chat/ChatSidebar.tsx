@@ -109,7 +109,7 @@ export function ChatSidebar() {
   if (!isOpen) return null;
 
   return (
-    <div data-chat-drawer className="relative flex flex-col h-full w-full bg-card border-l border-border">
+    <div data-chat-drawer className="relative flex flex-col h-full w-full bg-card border-r border-border">
       <ChatResizeHandle />
       {/* Header */}
       <div className="border-b border-border bg-card shrink-0">
