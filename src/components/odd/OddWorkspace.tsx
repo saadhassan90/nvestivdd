@@ -1,11 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Sparkles, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useChatContext } from "@/contexts/ChatContext";
-import { EmbeddedIrisChat } from "@/components/memo/EmbeddedIrisChat";
-import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
 import { ODD_SECTIONS, type OddSectionKey } from "@/lib/odd-template";
 import { useOddReport } from "@/hooks/use-odd-report";
 import { OddLeftRail, type OddSectionStatusUi } from "./OddLeftRail";
@@ -20,7 +17,6 @@ interface OddWorkspaceProps {
 
 export function OddWorkspace({ project }: OddWorkspaceProps) {
   const { toast } = useToast();
-  const { setIsOpen: setChatOpen, chatWidth } = useChatContext();
   const {
     sections,
     hasImport,
@@ -130,15 +126,6 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {/* Right rail — desktop only, now on the left */}
-      <div
-        className="hidden lg:block relative shrink-0 border-r border-border"
-        style={{ width: chatWidth }}
-      >
-        <ChatResizeHandle />
-        <EmbeddedIrisChat fundName={project.fund_name} memoId={null} oddProjectId={project.id} />
-      </div>
-
       <OddLeftRail
         sectionStatuses={sectionStatuses}
         activeKey={activeKey}
@@ -184,15 +171,6 @@ export function OddWorkspace({ project }: OddWorkspaceProps) {
         ) : (
           <OddEmptyState onImportClick={() => setImportOpen(true)} />
         )}
-
-        {/* Mobile Ask Iris floating button */}
-        <button
-          onClick={() => setChatOpen(true)}
-          className="lg:hidden fixed bottom-20 right-4 z-30 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-2 text-xs font-medium text-background shadow-lg"
-        >
-          <Sparkles className="h-3.5 w-3.5" />
-          Ask Iris
-        </button>
       </div>
 
       <OddImportModal
