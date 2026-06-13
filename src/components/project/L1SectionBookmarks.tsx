@@ -1,4 +1,3 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -35,35 +34,26 @@ export function L1SectionBookmarks() {
   }, []);
 
   return (
-    <Accordion type="single" collapsible defaultValue="bookmarks" className="w-full">
-      <AccordionItem value="bookmarks" className="border-none">
-        <AccordionTrigger className="py-1.5 px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:no-underline hover:text-foreground">
-          Bookmarks
-        </AccordionTrigger>
-        <AccordionContent className="pb-1">
-          <ul className="flex flex-col gap-0.5">
-            {ENTRIES.map((e) => (
-              <li key={e.id}>
-                <a
-                  href={`#${e.id}`}
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    document.getElementById(e.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className={cn(
-                    "block rounded-md px-2 py-1 text-xs transition-colors",
-                    active === e.id
-                      ? "bg-muted text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                  )}
-                >
-                  {e.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <ul className="flex flex-col gap-0.5">
+      {ENTRIES.map((e) => (
+        <li key={e.id}>
+          <a
+            href={`#${e.id}`}
+            onClick={(ev) => {
+              ev.preventDefault();
+              document.getElementById(e.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className={cn(
+              "block rounded-md px-2 py-1 text-xs transition-colors",
+              active === e.id
+                ? "bg-muted text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+            )}
+          >
+            {e.label}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
