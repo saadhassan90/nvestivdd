@@ -45,21 +45,21 @@ export function ChatHistory({ onBack }: { onBack: () => void }) {
                 {items.map((conv: any) => (
                   <div
                     key={conv.id}
-                    className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors"
+                    className="flex items-center justify-between px-3 py-1.5 hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={() => { loadConversation(conv.id); onBack(); }}
                     onMouseEnter={() => setHoveredId(conv.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{conv.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{formatDistanceToNow(new Date(conv.created_at), { addSuffix: true })}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{conv.title}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(conv.created_at), { addSuffix: true })}</p>
                     </div>
                     {hoveredId === conv.id && (
                       <button
                         onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
-                        className="p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        className="p-0.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </button>
                     )}
                   </div>
