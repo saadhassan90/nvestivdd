@@ -2,15 +2,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
+import type { ReactNode } from "react";
 
 type Level = "L1" | "L2" | "L3" | "ODD";
 
 interface ProjectStageRailProps {
   reportLevel: Level;
   onReportLevelChange: (level: Level) => void;
+  bookmarks?: ReactNode;
 }
 
-export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectStageRailProps) {
+export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks }: ProjectStageRailProps) {
   const levels: Level[] = ["L1", "L2", "ODD", "L3"];
   const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
     L1: { label: "Triage Report", display: "Triage", available: true },
@@ -20,17 +22,17 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
   };
 
   return (
-    <Tabs
-      value={reportLevel}
-      onValueChange={(v) => {
-        const next = v as Level;
-        if (levelMeta[next]?.available) onReportLevelChange(next);
-      }}
-      orientation="vertical"
-      className="hidden lg:block shrink-0 py-6 px-3"
-      aria-label="Report stage"
-    >
-      <TabsList className="flex h-auto flex-col items-stretch gap-1 bg-transparent p-0 w-28">
+    <div className="hidden lg:flex shrink-0 flex-col py-6 px-3 w-48 gap-4 border-r border-border/50">
+      <Tabs
+        value={reportLevel}
+        onValueChange={(v) => {
+          const next = v as Level;
+          if (levelMeta[next]?.available) onReportLevelChange(next);
+        }}
+        orientation="vertical"
+        aria-label="Report stage"
+      >
+        <TabsList className="flex h-auto flex-col items-stretch gap-1 bg-transparent p-0 w-full">
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
           return (
@@ -54,7 +56,9 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange }: ProjectSt
             </Tooltip>
           );
         })}
-      </TabsList>
-    </Tabs>
+        </TabsList>
+      </Tabs>
+      {bookmarks}
+    </div>
   );
 }

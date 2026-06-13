@@ -34,6 +34,7 @@ import { OddWorkspace } from "@/components/odd/OddWorkspace";
 import { L1OnePager } from "@/components/project/l1/L1OnePager";
 import { payloadFor } from "@/mocks/renderPayloads";
 import { ProjectStageRail } from "@/components/project/ProjectStageRail";
+import { L1SectionBookmarks } from "@/components/project/L1SectionBookmarks";
 
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -262,6 +263,7 @@ export default function ProjectDetail() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ProjectStageRail
           reportLevel={isOddStage ? "ODD" : "L1"}
+          bookmarks={!isOddStage && !isProcessing && project.status !== "error" ? <L1SectionBookmarks /> : undefined}
           onReportLevelChange={(lvl) => {
             if (lvl === "L3") navigate(`/project/${project.id}/memo`);
             else if (lvl === "ODD") {
