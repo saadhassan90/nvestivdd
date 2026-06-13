@@ -36,7 +36,7 @@ export function ClaimsLedgerSection() {
   return (
     <SectionShell
       id={LEDGER_SECTION_ID}
-      eyebrow="04"
+      eyebrow="01"
       title="Claims Ledger"
       description="Every deck claim, once, with disposition, evidence, and citations."
       disableComments
