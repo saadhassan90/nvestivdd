@@ -22,7 +22,7 @@ import { useUiVariant } from "@/contexts/UiVariantContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProjectTopBarProps {
-  project: Tables<"projects">;
+  project: Tables<"projects"> | null;
   isProcessing: boolean;
   /** When set to "memo", the Ask Iris pill is replaced with a Stage dropdown
    *  + Back-to-Reports button. Defaults to undefined (= L1 tabs page). */
