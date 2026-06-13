@@ -1,6 +1,6 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, PanelLeftOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
@@ -198,7 +198,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b border-border bg-card">
+        <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card">
           <div className="flex h-14 items-center justify-between px-4 sm:px-6">
             <Link to="/dashboard" className="flex items-center shrink-0">
               <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
@@ -212,16 +212,17 @@ export default function Dashboard() {
               {!isOpen && (
                 <button
                   onClick={() => setIsOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+                  className="p-2 rounded-md hover:bg-muted transition-colors"
+                  title="Open Iris chat"
                 >
-                  <Sparkles className="h-4 w-4" />
-                  <span className="hidden sm:inline">Ask Iris</span>
+                  <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
                 </button>
               )}
               
             </div>
           </div>
         </header>
+        <div className="h-14 shrink-0" aria-hidden />
 
         {/* Main content */}
         <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 pb-20 lg:pb-6">

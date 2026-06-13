@@ -1,12 +1,11 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft } from "lucide-react";
+import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft, PanelLeftOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { useChatContext } from "@/contexts/ChatContext";
-import { Sparkles } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 
 interface ActivityItem {
@@ -118,7 +117,7 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-border bg-card">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card">
         <div className="flex h-14 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate("/dashboard")} className="p-1.5 rounded-md hover:bg-muted transition-colors">
@@ -131,15 +130,16 @@ export default function NotificationsPage() {
             {!isOpen && (
               <button
                 onClick={() => setIsOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+                className="p-2 rounded-md hover:bg-muted transition-colors"
+                title="Open Iris chat"
               >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">Ask Iris</span>
+                <PanelLeftOpen className="h-4 w-4 text-muted-foreground" />
               </button>
             )}
           </div>
         </div>
       </header>
+      <div className="h-14 shrink-0" aria-hidden />
 
       <main className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
         {showLoader ? (

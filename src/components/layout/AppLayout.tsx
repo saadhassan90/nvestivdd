@@ -36,8 +36,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <div
-              className="fixed left-0 top-0 bottom-0 z-40 animate-slide-in-left"
-              style={{ width: chatWidth }}
+              className="fixed left-0 bottom-0 z-30 animate-slide-in-left"
+              style={{ width: chatWidth, top: "var(--app-header-h, 56px)" }}
             >
               <ChatSidebar />
             </div>
