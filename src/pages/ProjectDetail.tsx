@@ -282,6 +282,18 @@ export default function ProjectDetail() {
             : undefined
         }
         exportCurrentScope={isOddStage ? "odd" : "triage"}
+        zoom={
+          isOddStage
+            ? {
+                value: oddZoom.zoom,
+                onIn: oddZoom.zoomIn,
+                onOut: oddZoom.zoomOut,
+                onReset: oddZoom.reset,
+                canIn: oddZoom.canIn,
+                canOut: oddZoom.canOut,
+              }
+            : undefined
+        }
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -312,7 +324,7 @@ export default function ProjectDetail() {
         />
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {isOddStage ? (
-            <OddWorkspace project={project} />
+            <OddWorkspace project={project} zoom={oddZoom.zoom} />
           ) : isProcessing ? (
             <main className="flex-1 overflow-y-auto p-4 sm:p-6">
               <ProcessingState startedAt={project.updated_at} projectId={project.id} />
