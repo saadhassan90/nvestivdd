@@ -8,6 +8,7 @@ import { ProjectStageRail } from "@/components/project/ProjectStageRail";
 import { IcMemoCanvas } from "@/components/memo/IcMemoCanvas";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ShareModal } from "@/components/project/ShareModal";
+import { ReportToolbar, nextZoomIn, nextZoomOut } from "@/components/project/ReportToolbar";
 import { useIcMemo } from "@/hooks/use-ic-memo";
 import { buildIcMemoSkeletonMarkdown } from "@/lib/ic-memo-template";
 import type { Tables } from "@/integrations/supabase/types";
@@ -23,6 +24,7 @@ export default function IcMemoPage() {
   const [feeStructure, setFeeStructure] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     if (!id) return;
@@ -122,16 +124,29 @@ export default function IcMemoPage() {
         />
         {/* Canvas column */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          <ReportToolbar
+            label="IC Memo"
+            fundName={project.fund_name}
+            zoom={zoom}
+            onZoomIn={() => setZoom((z) => nextZoomIn(z))}
+            onZoomOut={() => setZoom((z) => nextZoomOut(z))}
+            onZoomReset={() => setZoom(1)}
+          />
           <main className="flex-1 overflow-y-auto py-8 px-4 sm:px-8 bg-background">
             {showMemoLoader ? (
               <NvestivLoader fullscreen size={96} />
             ) : (
-              <IcMemoCanvas
-                contentJson={memo.content_json}
-                seedMarkdown={memo.content_markdown || seedMarkdown}
-                onChange={handleCanvasChange}
-                resetKey={resetKey}
-              />
+              <div
+                style={{ fontSize: `${zoom}em` }}
+                className="origin-top transition-[font-size] duration-150"
+              >
+                <IcMemoCanvas
+                  contentJson={memo.content_json}
+                  seedMarkdown={memo.content_markdown || seedMarkdown}
+                  onChange={handleCanvasChange}
+                  resetKey={resetKey}
+                />
+              </div>
             )}
           </main>
         </div>
