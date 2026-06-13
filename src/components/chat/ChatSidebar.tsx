@@ -1,6 +1,6 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X, SquarePen, Menu, ChevronDown, Check, Paperclip, ArrowUp, Square } from "lucide-react";
+import { X, SquarePen, Menu, ChevronDown, Check, Plus, ArrowUp, Square, Paperclip, FileText } from "lucide-react";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
 import { ChatMessageBubble } from "./ChatMessageBubble";
 import { ChatHistory } from "./ChatHistory";
@@ -9,6 +9,12 @@ import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
 import irisHelmet from "@/assets/iris-avatar-helmet.png";
 import { ChatResizeHandle } from "./ChatResizeHandle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const MODELS = [
 { id: "sonnet-4", label: "Sonnet 4", desc: "Default" },
@@ -54,6 +60,8 @@ export function ChatSidebar() {
   const [input, setInput] = useState("");
   const [showModelMenu, setShowModelMenu] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [attachments, setAttachments] = useState<{ id: string; name: string; size: number; type: string; text: string; isBinary: boolean }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -74,11 +82,25 @@ export function ChatSidebar() {
 
   const handleSend = async () => {
     const msg = input.trim();
-    if (!msg || isLoading) return;
+    if ((!msg && attachments.length === 0) || isLoading) return;
+    let payload = msg;
+    if (attachments.length > 0) {
+      const blocks = attachments
+        .map((a) => {
+          if (a.isBinary) {
+            return `--- Attached file: ${a.name} (${a.type || "binary"}, ${a.size} bytes) ---\n[Binary file — contents not inlined]`;
+          }
+          const truncated = a.text.length > 80_000 ? a.text.slice(0, 80_000) + "\n…[truncated]" : a.text;
+          return `--- Attached file: ${a.name} (${a.type || "text"}) ---\n${truncated}`;
+        })
+        .join("\n\n");
+      payload = msg ? `${msg}\n\n${blocks}` : blocks;
+    }
     setInput("");
+    setAttachments([]);
     setUserScrolled(false);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
-    await sendMessage(msg);
+    await sendMessage(payload);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -93,6 +115,36 @@ export function ChatSidebar() {
     const el = e.target;
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 144) + "px";
+  };
+
+  const isTextLike = (f: File) => {
+    if (f.type.startsWith("text/")) return true;
+    if (/(json|xml|javascript|typescript|csv|yaml|html|svg|sql|markdown)/i.test(f.type)) return true;
+    return /\.(txt|md|markdown|csv|tsv|json|yaml|yml|xml|html|htm|css|scss|js|jsx|ts|tsx|py|rb|go|rs|java|kt|swift|c|cc|cpp|h|hpp|sh|bash|zsh|sql|toml|ini|env|log|svg)$/i.test(f.name);
+  };
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const list = Array.from(files);
+    const parsed = await Promise.all(
+      list.map(async (f) => {
+        const textLike = isTextLike(f);
+        let text = "";
+        if (textLike) {
+          try { text = await f.text(); } catch { text = ""; }
+        }
+        return {
+          id: crypto.randomUUID(),
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          text,
+          isBinary: !textLike,
+        };
+      })
+    );
+    setAttachments((prev) => [...prev, ...parsed]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const currentModel = MODELS.find((m) => m.id === selectedModel) || MODELS[0];
@@ -202,6 +254,27 @@ export function ChatSidebar() {
                 </div>
               )}
             <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {attachments.map((a) => (
+                    <span
+                      key={a.id}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/60 px-2 py-1 text-[11px] text-foreground max-w-[220px]"
+                      title={a.name}
+                    >
+                      <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{a.name}</span>
+                      <button
+                        onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))}
+                        className="hover:text-destructive shrink-0"
+                        title="Remove"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
               <textarea
               ref={textareaRef}
               value={input}
@@ -213,18 +286,38 @@ export function ChatSidebar() {
               style={{ maxHeight: 144 }} />
             
               <div className="flex items-center justify-between mt-1.5">
-                <button className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground" title="Attach file">
-                  <Paperclip className="h-4 w-4" />
-                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handleFiles(e.target.files)}
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background hover:opacity-90 transition-opacity"
+                      title="Add to chat"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="top" className="w-48">
+                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                      <Paperclip className="h-4 w-4 mr-2" />
+                      Attach file
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <button
                 onClick={isLoading ? stopGeneration : handleSend}
-                disabled={!isLoading && !input.trim()}
+                disabled={!isLoading && !input.trim() && attachments.length === 0}
                 title={isLoading ? "Stop generating" : "Send"}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full transition-all",
                   isLoading
                     ? "bg-foreground text-background"
-                    : input.trim()
+                    : input.trim() || attachments.length > 0
                       ? "bg-foreground text-background"
                       : "bg-muted text-muted-foreground opacity-50"
                 )}>
