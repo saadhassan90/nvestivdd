@@ -128,7 +128,7 @@ function StagePill({ stage }: { stage: string }) {
   };
   const colorClass = colors[stage] || colors.L1;
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider ${colorClass}`}>
+    <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold tracking-wider ${colorClass}`}>
       {stage}
     </span>
   );
