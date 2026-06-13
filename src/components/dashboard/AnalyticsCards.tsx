@@ -45,7 +45,7 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
       <div className="hidden sm:grid sm:grid-cols-5 gap-2">
         {cards.map((card, i) => (
           <BlurFade key={card.label} delay={i * 0.05}>
-            <MagicCard>
+            <MagicCard className="p-3">
               <div className="flex items-center justify-between gap-2 px-1">
                 <div className="min-w-0">
                   <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
