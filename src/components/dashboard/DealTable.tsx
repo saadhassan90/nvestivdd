@@ -331,7 +331,7 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
           return (
             <div
               key={project.id}
-              className={`rounded-xl border border-border bg-card p-4 transition-colors ${
+              className={`rounded-lg border border-border bg-card p-3 transition-colors ${
                 processing ? "opacity-60" : "cursor-pointer active:bg-muted/50"
               }`}
               onClick={() => !processing && navigate(`/project/${project.id}`)}
@@ -339,25 +339,25 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-foreground text-[15px]">{project.fund_name}</p>
+                    <p className="font-semibold text-foreground text-sm">{project.fund_name}</p>
                     <StagePill stage={stage} />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {project.asset_class || project.strategy || "—"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {processing ? (
-                    <span className="inline-flex items-center justify-center h-10 w-12 rounded-lg border-2 border-border text-xs font-bold text-muted-foreground">
+                    <span className="inline-flex items-center justify-center h-8 w-10 rounded-lg border-2 border-border text-xs font-bold text-muted-foreground">
                       {project.status === "pending" ? "PREP" : "PEND"}
                     </span>
                   ) : (
-                    <ScoreBadge score={project.composite_score} size="md" />
+                    <ScoreBadge score={project.composite_score} size="sm" />
                   )}
                   <RowActionsMenu project={project} onRefresh={onRefresh} />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between mt-2">
                 <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                   {verdictLabel}
                 </span>
