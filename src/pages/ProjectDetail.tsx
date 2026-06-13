@@ -98,6 +98,16 @@ export default function ProjectDetail() {
     }
   }, [activeTab, searchParams, setSearchParams]);
 
+  // URL → state sync: when something else (e.g. citation chips) updates ?tab=,
+  // reflect that into local state so the page actually switches.
+  useEffect(() => {
+    const urlTab = searchParams.get("tab");
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(TAB_REDIRECTS[urlTab] ?? urlTab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   useEffect(() => {
     if (isProcessing && activeTab === "overview") setActiveTab("analysis_log");
   }, [isProcessing]); // eslint-disable-line react-hooks/exhaustive-deps
