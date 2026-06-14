@@ -5,6 +5,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import "@blocknote/core/fonts/inter.css";
 import "./ic-memo-canvas.css";
+import { animatedChartBlockSpec, postProcessChartBlocks } from "./blocks/AnimatedChartBlock";
 
 interface IcMemoCanvasProps {
   /** BlockNote document JSON. If empty, the editor falls back to seedMarkdown. */
@@ -19,7 +20,10 @@ interface IcMemoCanvasProps {
 
 export function IcMemoCanvas({ contentJson, seedMarkdown, onChange, resetKey }: IcMemoCanvasProps) {
   const schema = useMemo(
-    () => BlockNoteSchema.create({ blockSpecs: { ...defaultBlockSpecs } }),
+    () =>
+      BlockNoteSchema.create({
+        blockSpecs: { ...defaultBlockSpecs, animatedChart: animatedChartBlockSpec },
+      }),
     [],
   );
 
@@ -48,8 +52,9 @@ export function IcMemoCanvas({ contentJson, seedMarkdown, onChange, resetKey }: 
       const hasJson = Array.isArray(contentJson) && contentJson.length > 0;
       if (hasJson) return;
       const blocks = await editor.tryParseMarkdownToBlocks(seedMarkdown);
-      if (!cancelled && blocks.length > 0) {
-        editor.replaceBlocks(editor.document, blocks);
+      const processed = postProcessChartBlocks(blocks);
+      if (!cancelled && processed.length > 0) {
+        editor.replaceBlocks(editor.document, processed);
       }
     }
     seed();
