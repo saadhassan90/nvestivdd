@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Lock, ZoomIn, ZoomOut, ChevronRight, ChevronDown } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
 type Level = "L1" | "L2" | "L3" | "ODD";
@@ -27,6 +27,22 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
     L3: { label: "IC Memo", display: "IC Memo", available: true },
   };
 
+  // Local accordion state per stage. The currently-active stage is auto-
+  // expanded when it has children, but the user can independently toggle any
+  // stage open/closed without triggering navigation. Only clicking the stage
+  // label changes the page.
+  const [expanded, setExpanded] = useState<Record<Level, boolean>>({
+    L1: true,
+    L2: false,
+    ODD: true,
+    L3: true,
+  });
+
+  // Keep the active stage expanded automatically when the user navigates.
+  useEffect(() => {
+    setExpanded((prev) => (prev[reportLevel] ? prev : { ...prev, [reportLevel]: true }));
+  }, [reportLevel]);
+
   return (
     <div className="hidden lg:flex shrink-0 flex-col py-4 px-2 w-56 gap-2 border-r border-border/50 h-full">
       <div className="px-2 py-1 text-[11px] font-medium text-muted-foreground/70">
@@ -36,39 +52,68 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
         {levels.map((lvl) => {
           const { label, display, available } = levelMeta[lvl];
           const isActive = reportLevel === lvl;
-          const inlineChildren =
-            lvl === "L1" && bookmarks
+          // Children are only available for the active stage (the rail only
+          // knows about the current page's bookmarks). Inactive stages can
+          // still be clicked to navigate, but have no preview accordion.
+          const childrenAvailable =
+            (lvl === "L1" && !!bookmarks) ||
+            ((lvl === "ODD" || lvl === "L3") && isActive && !!sectionBookmarks);
+          const isOpen = childrenAvailable && expanded[lvl];
+          const inlineChildren = isOpen
+            ? lvl === "L1"
               ? bookmarks
-              : (lvl === "ODD" || lvl === "L3") && isActive && sectionBookmarks
-                ? sectionBookmarks
-                : null;
-          const hasChildren = !!inlineChildren;
-          // Parents with no children (L2/IDD) still highlight on active.
-          const showActiveBg = isActive && !hasChildren;
-          const isOpen = hasChildren;
-          // Chevron replaces a per-stage icon. For unavailable stages, show the
-          // lock glyph instead so the disabled affordance is preserved.
+              : sectionBookmarks
+            : null;
+          // Parents with no children visible still highlight on active.
+          const showActiveBg = isActive && !inlineChildren;
           const Leading = !available ? Lock : isOpen ? ChevronDown : ChevronRight;
+          const toggleExpanded = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (!childrenAvailable) return;
+            setExpanded((prev) => ({ ...prev, [lvl]: !prev[lvl] }));
+          };
           return (
             <div key={lvl}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => available && onReportLevelChange(lvl)}
-                    disabled={!available}
-                    aria-current={isActive ? "page" : undefined}
+                  <div
                     className={cn(
-                      "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-left transition-colors",
+                      "group flex w-full items-center rounded-md text-sm transition-colors",
                       "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       isActive && "text-sidebar-accent-foreground font-medium",
                       showActiveBg && "bg-sidebar-accent",
-                      !available && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-sidebar-foreground/80",
+                      !available && "opacity-50",
                     )}
+                    aria-current={isActive ? "page" : undefined}
                   >
-                    <Leading className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                    <span className="truncate">{display}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={toggleExpanded}
+                      disabled={!available || !childrenAvailable}
+                      aria-label={isOpen ? `Collapse ${display}` : `Expand ${display}`}
+                      aria-expanded={isOpen}
+                      tabIndex={childrenAvailable ? 0 : -1}
+                      className={cn(
+                        "flex items-center justify-center pl-2 pr-1 py-1.5 rounded-l-md",
+                        childrenAvailable && available
+                          ? "cursor-pointer hover:text-sidebar-accent-foreground"
+                          : "cursor-default",
+                      )}
+                    >
+                      <Leading className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => available && onReportLevelChange(lvl)}
+                      disabled={!available}
+                      className={cn(
+                        "flex-1 min-w-0 text-left pr-2 py-1.5 rounded-r-md truncate",
+                        !available && "cursor-not-allowed",
+                      )}
+                    >
+                      <span className="truncate">{display}</span>
+                    </button>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">{label}</TooltipContent>
               </Tooltip>
