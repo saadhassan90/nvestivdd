@@ -6,6 +6,10 @@ import "@blocknote/mantine/style.css";
 import "@blocknote/core/fonts/inter.css";
 import "@/components/memo/ic-memo-canvas.css";
 import "./odd-section-editor.css";
+import {
+  animatedChartBlockSpec,
+  postProcessChartBlocks,
+} from "@/components/memo/blocks/AnimatedChartBlock";
 
 interface OddSectionEditorProps {
   /** Markdown seed for this section's body (no H2 — header rendered outside). */
@@ -21,7 +25,10 @@ interface OddSectionEditorProps {
  */
 export function OddSectionEditor({ seedMarkdown, resetKey, onChange }: OddSectionEditorProps) {
   const schema = useMemo(
-    () => BlockNoteSchema.create({ blockSpecs: { ...defaultBlockSpecs } }),
+    () =>
+      BlockNoteSchema.create({
+        blockSpecs: { ...defaultBlockSpecs, animatedChart: animatedChartBlockSpec },
+      }),
     [],
   );
 
@@ -44,8 +51,9 @@ export function OddSectionEditor({ seedMarkdown, resetKey, onChange }: OddSectio
     async function seed() {
       if (!editor) return;
       const blocks = await editor.tryParseMarkdownToBlocks(seedMarkdown || "");
-      if (!cancelled && blocks.length > 0) {
-        editor.replaceBlocks(editor.document, blocks);
+      const processed = postProcessChartBlocks(blocks);
+      if (!cancelled && processed.length > 0) {
+        editor.replaceBlocks(editor.document, processed);
       }
     }
     seed();

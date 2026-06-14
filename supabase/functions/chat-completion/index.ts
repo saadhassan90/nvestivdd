@@ -33,6 +33,46 @@ const ODD_SECTION_TITLES: Record<string, string> = {
   sources_appendix: "Sources & Appendix",
 };
 
+// Shared additions appended to every system prompt.
+const CHART_FENCE_INSTRUCTIONS = `
+
+## RICH CANVAS BLOCKS — animated chart fences
+When writing markdown to the canvas (via edit_memo / edit_odd_section), you can embed an
+animated SVG chart by emitting a fenced code block with language \`chart\` whose body is JSON:
+
+\`\`\`chart
+{
+  "type": "bar",           // bar | line | area | pie | donut
+  "title": "...",          // optional
+  "subtitle": "...",       // optional
+  "xLabel": "Year",        // optional
+  "yLabel": "Net IRR (%)", // optional
+  "palette": "mono",       // mono | signal
+  "data": [
+    { "label": "2021", "value": 18.2 },
+    { "label": "2022", "value": 12.4 }
+  ]
+}
+\`\`\`
+
+For multi-series charts use multiple numeric keys per row, e.g.
+\`{ "label": "2021", "fund": 18.2, "benchmark": 11.0 }\`.
+
+If the user asks for a chart, graph, plot, visualization, "show me X", or any visual
+depiction of numeric data: insert a chart fence directly into the relevant section using
+the appropriate edit operation. NEVER paste the raw chart JSON or instructions into the
+chat — the chart belongs in the canvas.`;
+
+const CHAT_CLARIFY_INSTRUCTIONS = `
+
+## CLARIFICATION UI
+When the user's request is ambiguous, prefer asking via interactive UI tools instead of
+plain prose questions:
+- \`ask_quick_reply\` — for a single question with 2–5 discrete options (renders chips).
+- \`ask_form\`        — for multi-field clarifications (renders a real form).
+After calling one of these tools, do NOT generate additional prose — wait for the user's
+next message which will carry their answer. Use these sparingly; only when truly needed.`;
+
 // Map legacy model aliases (used by the client) to Gemini model IDs.
 // Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
@@ -73,7 +113,7 @@ If the user asks for a generic addition (e.g. "add a footer") that doesn't name 
     for (const s of oddContext.sections) {
       oddBase += `### ${s.title} (\`${s.key}\`)\n\n\`\`\`markdown\n${(s.content || "").slice(0, 1200)}\n\`\`\`\n\n`;
     }
-    return oddBase;
+    return oddBase + CHART_FENCE_INSTRUCTIONS + CHAT_CLARIFY_INSTRUCTIONS;
   }
 
   // FAST PATH: in IC Memo mode we want minimal prompt + single-purpose tool to keep TTFT low.
@@ -93,7 +133,7 @@ If the user asks for a generic addition (e.g. "add a footer") that doesn't name 
 
     // Keep memo context tight — 4k chars is enough to identify sections; full content is fetched fresh on every edit_memo call.
     memoBase += `\n\n## Current memo (markdown, truncated)\n\n\`\`\`markdown\n${memoContext.markdown.slice(0, 4000)}\n\`\`\``;
-    return memoBase;
+    return memoBase + CHART_FENCE_INSTRUCTIONS + CHAT_CLARIFY_INSTRUCTIONS;
   }
 
   let base = `You are Iris, an institutional-grade due diligence intelligence engine built into Nvestiv.
@@ -165,7 +205,7 @@ You have access to EVERY data point in the Nvestiv platform:
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
   }
 
-  return base;
+  return base + CHAT_CLARIFY_INSTRUCTIONS;
 }
 
 const tools = [
@@ -447,6 +487,56 @@ const tools = [
   },
 ];
 
+// Client-rendered clarification tools. These are deliberately exposed to ALL
+// modes (chat, memo, odd). The server returns an immediate stub so the model
+// stops, and the frontend renders the input as an interactive UI element.
+const CLARIFY_TOOLS = [
+  {
+    name: "ask_quick_reply",
+    description: "Ask the user a single clarifying question with 2–5 discrete answer chips. The chips are rendered as buttons in the chat; the user's tap becomes the next user message. Do not produce any other prose after calling this — wait for the user's answer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        question: { type: "string", description: "The question to display above the chips." },
+        options: {
+          type: "array",
+          items: { type: "string" },
+          description: "2–5 short answer options.",
+        },
+      },
+      required: ["question", "options"],
+    },
+  },
+  {
+    name: "ask_form",
+    description: "Ask the user a structured multi-field clarification by rendering a form (text / number / select / radio inputs). Use only when multiple inputs are genuinely needed. The user's submission becomes the next user message. Do not produce any other prose after calling this.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Optional form title / preamble." },
+        submitLabel: { type: "string", description: "Optional submit button label." },
+        fields: {
+          type: "array",
+          description: "Form fields. Keep to 2–5 inputs.",
+          items: {
+            type: "object",
+            properties: {
+              key: { type: "string" },
+              label: { type: "string" },
+              type: { type: "string", enum: ["text", "number", "select", "radio"] },
+              options: { type: "array", items: { type: "string" } },
+              placeholder: { type: "string" },
+              required: { type: "boolean" },
+            },
+            required: ["key", "label", "type"],
+          },
+        },
+      },
+      required: ["fields"],
+    },
+  },
+];
+
 function applyMemoEdit(
   currentMd: string,
   op: string,
@@ -531,6 +621,17 @@ async function executeTool(
 ): Promise<string> {
   try {
     switch (name) {
+      case "ask_quick_reply":
+      case "ask_form": {
+        // Client-rendered tools. Return immediately so the model can stop
+        // generating; the actual answer will arrive as the user's next turn.
+        return JSON.stringify({
+          success: true,
+          awaiting_user: true,
+          rendered: name,
+          summary: "Awaiting user response",
+        });
+      }
       case "edit_odd_section": {
         if (!ctx.oddProjectId) {
           return JSON.stringify({ error: "No ODD report is currently open. edit_odd_section can only be used in the ODD workspace." });
@@ -971,12 +1072,13 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
-    // In edit modes, expose ONLY the relevant edit tool to force fast tool selection.
-    const activeTools = oddContext
+    // In edit modes, expose the relevant edit tool + clarification tools.
+    const editTools = oddContext
       ? tools.filter((t) => t.name === "edit_odd_section")
       : memo_id
         ? tools.filter((t) => t.name === "edit_memo")
         : tools;
+    const activeTools = [...editTools, ...CLARIFY_TOOLS];
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -1142,6 +1244,15 @@ serve(async (req) => {
                       ? `${parsed.total_matches} matches`
                       : parsed?.success ? "done" : "done";
                   send("tool_complete", { name: fc.name, id: fc.id, resultSummary: summary });
+                  // For client-rendered clarification tools, also forward the
+                  // tool input so the UI can render the interactive control.
+                  if (fc.name === "ask_quick_reply" || fc.name === "ask_form") {
+                    send("interactive_request", {
+                      id: fc.id,
+                      name: fc.name,
+                      input: fc.args,
+                    });
+                  }
                   return {
                     type: "tool_result",
                     tool_use_id: fc.id,

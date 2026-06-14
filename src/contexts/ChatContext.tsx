@@ -11,6 +11,12 @@ export type ChatMessage = {
   isThinking?: boolean;
   thinkingDuration?: number;
   activeTools?: { name: string; id: string; status: "executing" | "complete"; resultSummary?: string }[];
+  interactive?: {
+    id: string;
+    kind: "chips" | "form";
+    input: any;
+    answered?: boolean;
+  } | null;
 };
 
 type ChatContextType = {
@@ -31,6 +37,7 @@ type ChatContextType = {
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   sendMessage: (content: string) => Promise<void>;
+  submitInteractive: (messageId: string, payload: { kind: "chips" | "form"; values: string | Record<string, string> }) => void;
   startNewConversation: () => void;
   loadConversation: (id: string) => Promise<void>;
   conversations: { id: string; title: string; created_at: string; project_id: string | null }[];
@@ -122,6 +129,32 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       prev.map((m) => (m.isStreaming || m.isThinking ? { ...m, isStreaming: false, isThinking: false } : m)),
     );
   }, []);
+
+  const sendMessageRef = useRef<((content: string) => Promise<void>) | null>(null);
+
+  const submitInteractive = useCallback(
+    (
+      messageId: string,
+      payload: { kind: "chips" | "form"; values: string | Record<string, string> },
+    ) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId && m.interactive
+            ? { ...m, interactive: { ...m.interactive, answered: true } }
+            : m,
+        ),
+      );
+      const text =
+        payload.kind === "chips"
+          ? String(payload.values)
+          : Object.entries(payload.values as Record<string, string>)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join("\n");
+      // Defer to next tick so the state update lands first.
+      setTimeout(() => sendMessageRef.current?.(text), 0);
+    },
+    [],
+  );
 
   const loadConversation = useCallback(async (id: string) => {
     const { data } = await supabase
@@ -294,6 +327,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         t.id === data.id ? { ...t, status: "complete", resultSummary: data.resultSummary } : t
                       );
                       break;
+                    case "interactive_request":
+                      updated.interactive = {
+                        id: data.id,
+                        kind: data.name === "ask_form" ? "form" : "chips",
+                        input: data.input,
+                        answered: false,
+                      };
+                      break;
                     case "message_complete":
                       updated.isStreaming = false;
                       break;
@@ -323,6 +364,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [isLoading, conversationId, messages, selectedModel, projectScope, memoContext, oddContext]
   );
 
+  // Expose latest sendMessage to the interactive submitter without creating
+  // a dependency cycle.
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -343,6 +390,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         selectedModel,
         setSelectedModel,
         sendMessage,
+        submitInteractive,
         startNewConversation,
         loadConversation,
         conversations,
