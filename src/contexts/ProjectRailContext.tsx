@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
-type Level = "L1" | "L2" | "L3" | "ODD";
+type Level = "L1" | "L2" | "DDQ" | "L3" | "ODD";
 
 export interface ProjectRailState {
   reportLevel: Level;
