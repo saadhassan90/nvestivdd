@@ -44,7 +44,10 @@ export function useSetProjectRail(state: ProjectRailState | null, deps: Readonly
   useEffect(() => {
     if (!set) return;
     set(memoState);
-    return () => set(null);
+    // No cleanup: leaving the state set across page transitions prevents the
+    // rail from flashing/unmounting while the next page registers its own
+    // config. `ProjectChrome` unmounts the rail naturally when the user
+    // navigates away from `/project/:id/*`.
   }, [set, memoState]);
 }
 
