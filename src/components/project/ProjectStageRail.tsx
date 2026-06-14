@@ -4,7 +4,7 @@ import { Lock, ZoomIn, ZoomOut, ChevronRight, ChevronDown } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import type { ReportZoomControls } from "@/hooks/use-report-zoom";
 
-type Level = "L1" | "L2" | "L3" | "ODD";
+type Level = "L1" | "L2" | "DDQ" | "ODD" | "L3";
 
 interface ProjectStageRailProps {
   reportLevel: Level;
@@ -19,12 +19,17 @@ interface ProjectStageRailProps {
 }
 
 export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, sectionBookmarks, zoom }: ProjectStageRailProps) {
-  const levels: Level[] = ["L1", "L2", "ODD", "L3"];
-  const levelMeta: Record<Level, { label: string; display: string; available: boolean }> = {
-    L1: { label: "Triage Report", display: "Triage", available: true },
-    L2: { label: "IDD (coming soon)", display: "IDD", available: false },
-    ODD: { label: "Operational Due Diligence", display: "ODD", available: true },
-    L3: { label: "IC Memo", display: "IC Memo", available: true },
+  // Stage nomenclature (v2):
+  //   L1 — Triage   · L2 — IDD   · L3 — DDQ   · L4 — ODD   · L5 — IC Memo
+  // Internal keys are kept stable to avoid breaking routes/handlers; the
+  // display labels carry the new numbering.
+  const levels: Level[] = ["L1", "L2", "DDQ", "ODD", "L3"];
+  const levelMeta: Record<Level, { label: string; display: string; code: string; available: boolean }> = {
+    L1:  { code: "L1", label: "L1 · Triage",  display: "Triage",  available: true },
+    L2:  { code: "L2", label: "L2 · IDD (coming soon)", display: "IDD", available: false },
+    DDQ: { code: "L3", label: "L3 · DDQ (coming soon)", display: "DDQ", available: false },
+    ODD: { code: "L4", label: "L4 · Operational Due Diligence", display: "ODD", available: true },
+    L3:  { code: "L5", label: "L5 · IC Memo", display: "IC Memo", available: true },
   };
 
   // Local accordion state per stage. The currently-active stage is auto-
@@ -34,6 +39,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
   const [expanded, setExpanded] = useState<Record<Level, boolean>>({
     L1: true,
     L2: false,
+    DDQ: false,
     ODD: true,
     L3: true,
   });
@@ -50,7 +56,7 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
       </div>
       <nav aria-label="Report stage" className="flex flex-col gap-0.5">
         {levels.map((lvl) => {
-          const { label, display, available } = levelMeta[lvl];
+          const { label, display, code, available } = levelMeta[lvl];
           const isActive = reportLevel === lvl;
           // Children are only available for the active stage (the rail only
           // knows about the current page's bookmarks). Inactive stages can
@@ -107,10 +113,13 @@ export function ProjectStageRail({ reportLevel, onReportLevelChange, bookmarks, 
                       onClick={() => available && onReportLevelChange(lvl)}
                       disabled={!available}
                       className={cn(
-                        "flex-1 min-w-0 text-left pr-2 py-1.5 rounded-r-md truncate",
+                        "flex-1 min-w-0 flex items-center gap-2 text-left pr-2 py-1.5 rounded-r-md truncate",
                         !available && "cursor-not-allowed",
                       )}
                     >
+                      <span className="shrink-0 text-[10px] font-mono tabular-nums text-muted-foreground/70">
+                        {code}
+                      </span>
                       <span className="truncate">{display}</span>
                     </button>
                   </div>
