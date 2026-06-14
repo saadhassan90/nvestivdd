@@ -238,6 +238,9 @@ const tooltipStyle = {
 } as const;
 
 /* ─── BlockNote block spec ─── */
+// createReactBlockSpec in BlockNote 0.48 returns a factory (options?) => BlockSpec.
+// We immediately invoke it so consumers can drop the spec straight into the
+// schema's `blockSpecs` map.
 export const animatedChartBlockSpec = createReactBlockSpec(
   {
     type: "animatedChart",
@@ -319,7 +322,7 @@ export const animatedChartBlockSpec = createReactBlockSpec(
       );
     },
     // Parse HTML pasted in (best-effort) — markdown seeding uses postProcessChartBlocks below.
-    parse: (el) => {
+    parse: (el: HTMLElement) => {
       if (el.tagName !== "PRE") return undefined;
       const code = el.querySelector("code");
       if (!code) return undefined;
@@ -328,7 +331,7 @@ export const animatedChartBlockSpec = createReactBlockSpec(
       return { json: (code.textContent || "{}").trim() };
     },
   },
-);
+)();
 
 function pretty(json: string): string {
   try {
