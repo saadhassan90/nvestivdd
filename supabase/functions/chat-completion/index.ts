@@ -621,6 +621,17 @@ async function executeTool(
 ): Promise<string> {
   try {
     switch (name) {
+      case "ask_quick_reply":
+      case "ask_form": {
+        // Client-rendered tools. Return immediately so the model can stop
+        // generating; the actual answer will arrive as the user's next turn.
+        return JSON.stringify({
+          success: true,
+          awaiting_user: true,
+          rendered: name,
+          summary: "Awaiting user response",
+        });
+      }
       case "edit_odd_section": {
         if (!ctx.oddProjectId) {
           return JSON.stringify({ error: "No ODD report is currently open. edit_odd_section can only be used in the ODD workspace." });
@@ -1061,12 +1072,13 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
-    // In edit modes, expose ONLY the relevant edit tool to force fast tool selection.
-    const activeTools = oddContext
+    // In edit modes, expose the relevant edit tool + clarification tools.
+    const editTools = oddContext
       ? tools.filter((t) => t.name === "edit_odd_section")
       : memo_id
         ? tools.filter((t) => t.name === "edit_memo")
         : tools;
+    const activeTools = [...editTools, ...CLARIFY_TOOLS];
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -1232,6 +1244,15 @@ serve(async (req) => {
                       ? `${parsed.total_matches} matches`
                       : parsed?.success ? "done" : "done";
                   send("tool_complete", { name: fc.name, id: fc.id, resultSummary: summary });
+                  // For client-rendered clarification tools, also forward the
+                  // tool input so the UI can render the interactive control.
+                  if (fc.name === "ask_quick_reply" || fc.name === "ask_form") {
+                    send("interactive_request", {
+                      id: fc.id,
+                      name: fc.name,
+                      input: fc.args,
+                    });
+                  }
                   return {
                     type: "tool_result",
                     tool_use_id: fc.id,
