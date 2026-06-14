@@ -487,6 +487,56 @@ const tools = [
   },
 ];
 
+// Client-rendered clarification tools. These are deliberately exposed to ALL
+// modes (chat, memo, odd). The server returns an immediate stub so the model
+// stops, and the frontend renders the input as an interactive UI element.
+const CLARIFY_TOOLS = [
+  {
+    name: "ask_quick_reply",
+    description: "Ask the user a single clarifying question with 2–5 discrete answer chips. The chips are rendered as buttons in the chat; the user's tap becomes the next user message. Do not produce any other prose after calling this — wait for the user's answer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        question: { type: "string", description: "The question to display above the chips." },
+        options: {
+          type: "array",
+          items: { type: "string" },
+          description: "2–5 short answer options.",
+        },
+      },
+      required: ["question", "options"],
+    },
+  },
+  {
+    name: "ask_form",
+    description: "Ask the user a structured multi-field clarification by rendering a form (text / number / select / radio inputs). Use only when multiple inputs are genuinely needed. The user's submission becomes the next user message. Do not produce any other prose after calling this.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Optional form title / preamble." },
+        submitLabel: { type: "string", description: "Optional submit button label." },
+        fields: {
+          type: "array",
+          description: "Form fields. Keep to 2–5 inputs.",
+          items: {
+            type: "object",
+            properties: {
+              key: { type: "string" },
+              label: { type: "string" },
+              type: { type: "string", enum: ["text", "number", "select", "radio"] },
+              options: { type: "array", items: { type: "string" } },
+              placeholder: { type: "string" },
+              required: { type: "boolean" },
+            },
+            required: ["key", "label", "type"],
+          },
+        },
+      },
+      required: ["fields"],
+    },
+  },
+];
+
 function applyMemoEdit(
   currentMd: string,
   op: string,
