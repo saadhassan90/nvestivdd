@@ -33,6 +33,46 @@ const ODD_SECTION_TITLES: Record<string, string> = {
   sources_appendix: "Sources & Appendix",
 };
 
+// Shared additions appended to every system prompt.
+const CHART_FENCE_INSTRUCTIONS = `
+
+## RICH CANVAS BLOCKS — animated chart fences
+When writing markdown to the canvas (via edit_memo / edit_odd_section), you can embed an
+animated SVG chart by emitting a fenced code block with language \`chart\` whose body is JSON:
+
+\`\`\`chart
+{
+  "type": "bar",           // bar | line | area | pie | donut
+  "title": "...",          // optional
+  "subtitle": "...",       // optional
+  "xLabel": "Year",        // optional
+  "yLabel": "Net IRR (%)", // optional
+  "palette": "mono",       // mono | signal
+  "data": [
+    { "label": "2021", "value": 18.2 },
+    { "label": "2022", "value": 12.4 }
+  ]
+}
+\`\`\`
+
+For multi-series charts use multiple numeric keys per row, e.g.
+\`{ "label": "2021", "fund": 18.2, "benchmark": 11.0 }\`.
+
+If the user asks for a chart, graph, plot, visualization, "show me X", or any visual
+depiction of numeric data: insert a chart fence directly into the relevant section using
+the appropriate edit operation. NEVER paste the raw chart JSON or instructions into the
+chat — the chart belongs in the canvas.`;
+
+const CHAT_CLARIFY_INSTRUCTIONS = `
+
+## CLARIFICATION UI
+When the user's request is ambiguous, prefer asking via interactive UI tools instead of
+plain prose questions:
+- \`ask_quick_reply\` — for a single question with 2–5 discrete options (renders chips).
+- \`ask_form\`        — for multi-field clarifications (renders a real form).
+After calling one of these tools, do NOT generate additional prose — wait for the user's
+next message which will carry their answer. Use these sparingly; only when truly needed.`;
+
 // Map legacy model aliases (used by the client) to Gemini model IDs.
 // Memo mode wants the fastest possible model; chat mode can take a slightly stronger one.
 const MODEL_MAP: Record<string, string> = {
@@ -73,7 +113,7 @@ If the user asks for a generic addition (e.g. "add a footer") that doesn't name 
     for (const s of oddContext.sections) {
       oddBase += `### ${s.title} (\`${s.key}\`)\n\n\`\`\`markdown\n${(s.content || "").slice(0, 1200)}\n\`\`\`\n\n`;
     }
-    return oddBase;
+    return oddBase + CHART_FENCE_INSTRUCTIONS + CHAT_CLARIFY_INSTRUCTIONS;
   }
 
   // FAST PATH: in IC Memo mode we want minimal prompt + single-purpose tool to keep TTFT low.
@@ -93,7 +133,7 @@ If the user asks for a generic addition (e.g. "add a footer") that doesn't name 
 
     // Keep memo context tight — 4k chars is enough to identify sections; full content is fetched fresh on every edit_memo call.
     memoBase += `\n\n## Current memo (markdown, truncated)\n\n\`\`\`markdown\n${memoContext.markdown.slice(0, 4000)}\n\`\`\``;
-    return memoBase;
+    return memoBase + CHART_FENCE_INSTRUCTIONS + CHAT_CLARIFY_INSTRUCTIONS;
   }
 
   let base = `You are Iris, an institutional-grade due diligence intelligence engine built into Nvestiv.
@@ -165,7 +205,7 @@ You have access to EVERY data point in the Nvestiv platform:
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
   }
 
-  return base;
+  return base + CHAT_CLARIFY_INSTRUCTIONS;
 }
 
 const tools = [
