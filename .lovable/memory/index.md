@@ -30,3 +30,4 @@ Tiered AI models: Claude Opus 4.6, Sonnet 4.5, gpt-4o-mini, text-embedding-3-sma
 - [Task Trigger Logic](mem://architecture/task-trigger-logic) — Database trigger queues, cron safety nets, and retry limits
 - [AI Model Selection](mem://tech/ai-model-selection) — Tiered model selection for research, assembly, extraction
 - [IC Memo Workspace](mem://features/ic-memo-workspace) — L3 page with BlockNote canvas + embedded Iris chat, top-bar stage dropdown
+- [Iris Canvas Tools](mem://features/iris-canvas-tools) — Animated chart fences + clarification chips/forms + rich chat rendering
