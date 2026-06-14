@@ -1,10 +1,22 @@
 import { NvestivPulse } from "@/components/ui/NvestivPulse";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronRight, Check, Loader2, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import type { ChatMessage } from "@/contexts/ChatContext";
+import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
+import { CodeBlock } from "./CodeBlock";
+import { InteractiveQuickReply } from "./InteractiveQuickReply";
+import { InteractiveForm, type FormField } from "./InteractiveForm";
+import { AnimatedChartRender } from "@/components/memo/blocks/AnimatedChartBlock";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const TOOL_LABELS: Record<string, string> = {
   query_deal_scores: "Querying deal scores",
@@ -33,6 +45,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   const [toolsOpen, setToolsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const { submitInteractive } = useChatContext();
 
   if (message.role === "user") {
     return (
@@ -45,6 +58,63 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   }
 
   const isComplete = !!message.content && !message.isStreaming && !message.isThinking;
+  // Markdown component overrides — proper shadcn tables, CodeBlock with copy,
+  // and inline animated chart fences.
+  const mdComponents = {
+    a: (props: any) => (
+      <a {...props} target="_blank" rel="noreferrer" className="underline text-foreground" />
+    ),
+    table: (props: any) => (
+      <div className="not-prose my-2 overflow-x-auto rounded-lg border border-border">
+        <Table>{props.children}</Table>
+      </div>
+    ),
+    thead: (props: any) => <TableHeader>{props.children}</TableHeader>,
+    tbody: (props: any) => <TableBody>{props.children}</TableBody>,
+    tr: (props: any) => <TableRow>{props.children}</TableRow>,
+    th: (props: any) => (
+      <TableHead className="h-8 px-2 text-[10px] uppercase tracking-wider">
+        {props.children}
+      </TableHead>
+    ),
+    td: (props: any) => <TableCell className="px-2 py-1.5 text-[12px]">{props.children}</TableCell>,
+    code: (props: any) => {
+      const { inline, className, children } = props;
+      const lang = /language-(\w+)/.exec(className || "")?.[1];
+      if (inline) {
+        return (
+          <code className="rounded bg-muted px-1 py-0.5 text-[11.5px] font-mono">
+            {children}
+          </code>
+        );
+      }
+      if (lang === "chart") {
+        const text = String(children).trim();
+        try {
+          const spec = JSON.parse(text);
+          return (
+            <AnimatedChartRender
+              spec={{
+                type: spec.type || "bar",
+                title: spec.title,
+                subtitle: spec.subtitle,
+                xLabel: spec.xLabel,
+                yLabel: spec.yLabel,
+                data: Array.isArray(spec.data) ? spec.data : [],
+                palette: spec.palette === "signal" ? "signal" : "mono",
+              }}
+              height={220}
+            />
+          );
+        } catch {
+          return <CodeBlock language="chart">{text}</CodeBlock>;
+        }
+      }
+      return <CodeBlock language={lang}>{children as ReactNode}</CodeBlock>;
+    },
+    pre: (props: any) => <>{props.children}</>,
+  } as const;
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message.content || "");
@@ -83,9 +153,34 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
         {/* Content (shown above steps so the assistant says what it's doing first) */}
         {message.content && (
-          <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-headings:font-semibold prose-h1:text-base prose-h2:text-sm prose-h3:text-sm prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:mt-3 prose-h2:mb-1.5 prose-h3:mt-2.5 prose-h3:mb-1 prose-p:text-[13px] prose-p:leading-snug prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:text-[13px] prose-li:my-0.5 prose-li:leading-snug prose-hr:my-3 prose-blockquote:my-2 prose-code:text-[12px] prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:my-2 prose-table:text-[12px] prose-table:my-2 prose-th:text-[10px] prose-th:uppercase prose-th:tracking-wider prose-th:text-muted-foreground prose-th:font-semibold prose-th:border-b prose-th:border-border prose-td:border-b prose-td:border-border prose-strong:text-foreground prose-a:text-foreground prose-a:underline prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+          <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-headings:font-semibold prose-h1:text-base prose-h2:text-sm prose-h3:text-sm prose-h1:mt-3 prose-h1:mb-1.5 prose-h2:mt-3 prose-h2:mb-1.5 prose-h3:mt-2.5 prose-h3:mb-1 prose-p:text-[13px] prose-p:leading-snug prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:text-[13px] prose-li:my-0.5 prose-li:leading-snug prose-hr:my-3 prose-blockquote:my-2 prose-strong:text-foreground prose-a:text-foreground prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents as any}>
+              {message.content}
+            </ReactMarkdown>
           </div>
+        )}
+
+        {/* Interactive clarification UI from ask_quick_reply / ask_form */}
+        {message.interactive && message.interactive.kind === "chips" && (
+          <InteractiveQuickReply
+            question={message.interactive.input?.question}
+            options={message.interactive.input?.options || []}
+            answered={message.interactive.answered}
+            onPick={(val) =>
+              submitInteractive(message.id, { kind: "chips", values: val })
+            }
+          />
+        )}
+        {message.interactive && message.interactive.kind === "form" && (
+          <InteractiveForm
+            title={message.interactive.input?.title}
+            submitLabel={message.interactive.input?.submitLabel}
+            fields={(message.interactive.input?.fields || []) as FormField[]}
+            answered={message.interactive.answered}
+            onSubmit={(values) =>
+              submitInteractive(message.id, { kind: "form", values })
+            }
+          />
         )}
 
         {/* Tool use indicators */}
