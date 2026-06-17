@@ -60,6 +60,13 @@ export default function IcMemoPage() {
   const { memo, loading: memoLoading, scheduleSave, resetToTemplate } =
     useIcMemo({ project, redFlags, feeStructure, teamMembers });
 
+  // Register active memo with chat so Iris exposes the edit_memo tool and
+  // every send carries memo_id to the edge function.
+  useEffect(() => {
+    setMemoContext(memo?.id ? { memoId: memo.id } : null);
+    return () => setMemoContext(null);
+  }, [memo?.id, setMemoContext]);
+
   const seedMarkdown = project
     ? buildIcMemoSkeletonMarkdown({ project, redFlags, feeStructure, teamMembers })
     : "";
