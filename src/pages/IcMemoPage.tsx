@@ -17,7 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function IcMemoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setProjectScope, setIsOpen: setChatOpen } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen, setMemoContext } = useChatContext();
   const [shareOpen, setShareOpen] = useState(false);
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
@@ -55,6 +55,14 @@ export default function IcMemoPage() {
     if (project) setProjectScope({ id: project.id, name: project.fund_name });
     return () => setProjectScope(null);
   }, [project?.id, project?.fund_name, setProjectScope]);
+
+  // Register active memo with chat so Iris exposes the edit_memo tool and
+  // every send carries memo_id to the edge function.
+  useEffect(() => {
+    if (!id) return;
+    setMemoContext({ memoId: id });
+    return () => setMemoContext(null);
+  }, [id, setMemoContext]);
 
   const { memo, loading: memoLoading, scheduleSave, resetToTemplate } =
     useIcMemo({ project, redFlags, feeStructure, teamMembers });
