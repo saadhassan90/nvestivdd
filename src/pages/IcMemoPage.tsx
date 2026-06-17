@@ -56,13 +56,6 @@ export default function IcMemoPage() {
     return () => setProjectScope(null);
   }, [project?.id, project?.fund_name, setProjectScope]);
 
-  // Register active memo with chat so Iris exposes the edit_memo tool and
-  // every send carries memo_id to the edge function.
-  useEffect(() => {
-    if (!id) return;
-    setMemoContext({ memoId: id });
-    return () => setMemoContext(null);
-  }, [id, setMemoContext]);
 
   const { memo, loading: memoLoading, scheduleSave, resetToTemplate } =
     useIcMemo({ project, redFlags, feeStructure, teamMembers });
