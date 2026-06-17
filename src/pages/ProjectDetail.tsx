@@ -47,7 +47,7 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
 
   const { toast } = useToast();
-  const { setProjectScope, setIsOpen: setChatOpen, chatExpanded, isOpen: chatIsOpen } = useChatContext();
+  const { setProjectScope, setIsOpen: setChatOpen, chatExpanded, isOpen: chatIsOpen, setOddContext } = useChatContext();
   const sidebarCollapsed = chatIsOpen && chatExpanded;
   const { variant } = useUiVariant();
 
@@ -206,6 +206,17 @@ export default function ProjectDetail() {
     if (project) setProjectScope({ id: project.id, name: project.fund_name });
     return () => { setProjectScope(null); };
   }, [project?.id, project?.fund_name, setProjectScope]);
+
+  // Register ODD context with the chat whenever this project is in the ODD
+  // stage so Iris exposes the edit_odd_section tool and edits the live canvas.
+  useEffect(() => {
+    if (project && isOddStage) {
+      setOddContext({ projectId: project.id });
+    } else {
+      setOddContext(null);
+    }
+    return () => setOddContext(null);
+  }, [project?.id, isOddStage, setOddContext]);
 
   const handleRerunAnalysis = async () => {
     if (!project) return;
