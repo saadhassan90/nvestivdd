@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ChevronDown, ChevronRight, CheckCircle2, Sparkles, RotateCcw, Plus, FileCheck2 } from "lucide-react";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
@@ -181,7 +181,8 @@ export default function RaiseDdq() {
       newQuestions: s.newQuestions.filter((n) => n.id !== q.id),
     }));
     setDrafts((d) => {
-      const { [q.id]: _omit, ...rest } = d;
+      const rest = { ...d };
+      delete rest[q.id];
       return rest;
     });
     toast({ title: "Response saved", description: "Question moved into your DDQ." });
