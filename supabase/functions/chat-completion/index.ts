@@ -519,6 +519,62 @@ const tools = [
   },
 ];
 
+// Page content tools: read + propose edits to GP page prose blocks.
+const PAGE_CONTENT_TOOLS = [
+  {
+    name: "list_page_blocks",
+    description: "List all editable prose blocks across GP pages, optionally filtered by page_key. Returns each block's page_key, raise_id, section_key, label, and current text. Use this when the user asks about content on a page other than the current one, or to discover what's editable.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string", description: "Optional page filter, e.g. 'gp.raise.overview'." },
+        raise_id: { type: "string", description: "Optional raise filter for raise-scoped pages." },
+      },
+    },
+  },
+  {
+    name: "read_page_block",
+    description: "Read the full current text of a single editable page block.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string" },
+        section_key: { type: "string" },
+        raise_id: { type: "string", description: "Required for raise-scoped pages." },
+      },
+      required: ["page_key", "section_key"],
+    },
+  },
+  {
+    name: "search_page_content",
+    description: "Substring search across the text of every editable page block. Use to answer 'where did we say X' or 'find the page that mentions Y'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        page_key: { type: "string", description: "Optional page filter." },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "propose_page_edit",
+    description: "Propose a new value for an editable page block. The proposal is shown to the user in a floating banner with Apply/Reject. You never write directly. Use ONLY page_key + section_key values from the manifest or list_page_blocks.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string" },
+        section_key: { type: "string" },
+        raise_id: { type: "string" },
+        proposed_text: { type: "string", description: "The full replacement text for the block." },
+        rationale: { type: "string", description: "One sentence explaining why this edit improves the page." },
+        label: { type: "string", description: "Optional human label for the block (mirrors what the page registered)." },
+      },
+      required: ["page_key", "section_key", "proposed_text", "rationale"],
+    },
+  },
+];
+
 // Client-rendered clarification tools. These are deliberately exposed to ALL
 // modes (chat, memo, odd). The server returns an immediate stub so the model
 // stops, and the frontend renders the input as an interactive UI element.
