@@ -205,8 +205,40 @@ You have access to EVERY data point in the Nvestiv platform:
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
   }
 
-  return base + CHAT_CLARIFY_INSTRUCTIONS;
+  return base + CHAT_CLARIFY_INSTRUCTIONS + PAGE_EDIT_INSTRUCTIONS;
 }
+
+const PAGE_EDIT_INSTRUCTIONS = `
+
+## PAGE CONTENT — READ + PROPOSE EDITS
+You have agentic access to the prose content of every GP page in this app
+(raises overview/interview/DDQ/dataroom/feedback/report-card/pipeline,
+global pipeline, contacts, settings, raise list). The user's CURRENT page
+and its editable blocks are injected at the bottom of this prompt under
+"CURRENT PAGE BLOCKS".
+
+Tools:
+- \`list_page_blocks({ page_key? })\` — discover blocks on any page.
+- \`read_page_block({ page_key, section_key, raise_id? })\` — full content of a block.
+- \`search_page_content({ query, page_key? })\` — substring search across all pages.
+- \`propose_page_edit({ page_key, section_key, raise_id?, proposed_text, rationale, label? })\`
+  — propose a new value for a block. The user reviews + applies; you never
+  write directly. Use the EXACT page_key and section_key from the manifest
+  or from list_page_blocks — never invent them.
+
+Rules:
+- When the user asks to change / rewrite / tighten / shorten / expand any
+  visible prose on the current page, call \`propose_page_edit\` immediately
+  with the active page_key + raise_id. Reply with one short sentence
+  saying you proposed the change.
+- When the user asks "what does this page say about X" or "where did we
+  mention Y", use \`search_page_content\` or read the manifest first.
+- Never propose edits to blocks that aren't in the manifest or returned by
+  list_page_blocks. If the user asks for something structural (new card,
+  new tab, new table column), explain that you can only change the text of
+  existing blocks.
+- Default scope is the user's current page. Only operate on other pages
+  when explicitly asked.`;
 
 const tools = [
   {
