@@ -19,18 +19,20 @@ export default function RaiseContext() {
   const pct = overallCompletion(raise);
   return (
     <div className="flex flex-col">
-      <div className="px-6 pt-6">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Raise · Vintage {raise.vintage}</p>
-        <div className="flex items-center gap-3 mt-0.5">
-          <h1 className="text-xl font-semibold text-foreground">{raise.name}</h1>
+      <div className="px-6 pt-4">
+        <div className="flex items-center gap-2">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Raise · Vintage {raise.vintage}</p>
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
             {raise.status}
           </span>
-          <span className="text-xs text-muted-foreground tabular-nums">{pct}% complete</span>
+          <span className="text-[11px] text-muted-foreground tabular-nums">{pct}%</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{raise.strategy} · Target {raise.targetSize}</p>
+        <div className="flex items-baseline gap-2 mt-0">
+          <h1 className="text-lg font-semibold text-foreground">{raise.name}</h1>
+          <span className="text-xs text-muted-foreground">{raise.strategy} · {raise.targetSize}</span>
+        </div>
       </div>
-      <nav className="px-6 mt-4 border-b border-border flex gap-1 overflow-x-auto">
+      <nav className="px-6 mt-2 border-b border-border flex gap-1 overflow-x-auto">
         {TABS.map((t) => (
           <NavLink
             key={t.to || "overview"}
