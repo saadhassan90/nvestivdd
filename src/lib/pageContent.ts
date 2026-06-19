@@ -53,7 +53,9 @@ function emit() {
 
 export function subscribePageContent(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 export function setActivePage(pageKey: string, raiseId: string | null) {
