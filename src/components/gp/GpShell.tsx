@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, NavLink } from "react-router-dom";
-import { MessageSquare, Briefcase, Network, Users, Settings as SettingsIcon, PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
-import { VariantSwitcher } from "@/components/layout/VariantSwitcher";
+import { MessageSquare, Briefcase, Network, Users, Settings as SettingsIcon, PanelLeftClose, PanelLeftOpen, Plus, Check, UserCog } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useUiVariant, type UiVariant } from "@/contexts/UiVariantContext";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
@@ -22,6 +23,12 @@ const PANEL_OPEN_KEY = "gp.chatPanelOpen";
 export function GpShell() {
   const { pathname } = useLocation();
   const { chatWidth, conversations, loadConversations, loadConversation, conversationId, startNewConversation } = useChatContext() as any;
+  const { variant, setVariant } = useUiVariant();
+  const variantOptions: { value: UiVariant; label: string }[] = [
+    { value: "adia", label: "LP — ADIA" },
+    { value: "general", label: "LP — General" },
+    { value: "gp", label: "GP" },
+  ];
   const [panelOpen, setPanelOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const v = window.localStorage.getItem(PANEL_OPEN_KEY);
@@ -75,7 +82,29 @@ export function GpShell() {
           </NavLink>
         ))}
         <div className="mt-auto flex flex-col items-center gap-1">
-          <VariantSwitcher />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                title="Switch UI variant"
+                aria-label="Switch UI variant"
+              >
+                <UserCog className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right" align="end" className="w-40">
+              {variantOptions.map((opt) => (
+                <DropdownMenuItem
+                  key={opt.value}
+                  onClick={() => setVariant(opt.value)}
+                  className="flex items-center justify-between"
+                >
+                  <span>{opt.label}</span>
+                  {variant === opt.value && <Check className="h-3.5 w-3.5" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </nav>
 
