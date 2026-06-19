@@ -1,107 +1,92 @@
-## Goal
 
-Upgrade Iris in two ways:
-1. **Chat rendering is genuinely rich** — proper shadcn tables, code blocks with syntax highlighting + copy, quick-reply chips, and full shadcn clarification forms (model picks per turn).
-2. **Iris directly mutates the canvas** — if you ask for a chart, an animated SVG chart block is inserted into BlockNote. No more "here's the data, you place it."
+# GP Manager Journey — Phased Build Plan
 
-Scope: both BlockNote canvases (`IcMemoCanvas` for IC Memo, `OddSectionEditor` for ODD).
+Building the full Manager Platform PRD on top of the existing LP app. One codebase, role-gated. The mode dropdown (LP-ADIA / LP-General / GP) is the role switch.
 
----
+## Foundation rules (apply to every stage)
 
-## 1. Custom BlockNote block: `animatedChart`
+- **Same app, role-gated.** No fork. `UiVariantContext.variant === "gp"` drives which routes render, which sidebar is shown, and where the user lands.
+- **Chat-as-spine, globally.** Rebuild the layout so Iris docks as a persistent left panel that *reflows* (not overlays) the body. `/chat` is the full-page expanded view of the same conversation. Toggling never resets state. Applied to both LP and GP modes.
+- **GP is passive toward LPs.** No outbound DM/email surfaces. Iris is the only thing that touches an LP.
+- **Privacy wall is real in the UI.** Feedback tab is empty until first L2 LP; L1 data never surfaces to GP screens.
+- **All mock data.** No new tables or edge functions in Phase 1–3. Seed JSON in `src/mocks/gp/`. Real backend work is a later phase.
+- **Design system.** Reuse the existing monochrome cool-gray palette + shadcn primitives. No new fonts, no PRD teal/amber/leak colors literally — map to existing semantic tokens (score-strong, gate, destructive, accent).
 
-New file `src/components/memo/blocks/AnimatedChartBlock.tsx` — registered via `createReactBlockSpec` and added to the schema in both `IcMemoCanvas.tsx` and `OddSectionEditor.tsx`.
+## Stage 1 — Mode switch + GP shell (smallest shippable)
 
-Props stored in the block:
-- `chartType`: `bar | line | area | pie | donut`
-- `title`, `subtitle`, `xLabel`, `yLabel` (strings)
-- `data`: JSON string — array of `{ label, value }` or `{ label, series: {a:n,b:n} }`
-- `palette`: `mono` (default, matches design system) | `signal`
+Goal: flipping the dropdown to GP replaces the entire chrome and lands on `/chat`.
 
-Rendered with **Recharts** (already a common shadcn pairing) inside an `<svg>` shell, plus a 700ms entry animation:
-- Bars/areas: animate height/width from 0 using Recharts' built-in `isAnimationActive` + `animationDuration`.
-- Lines: `stroke-dasharray` + `stroke-dashoffset` keyframe so the line "draws in".
-- Pie/donut: rotational sweep.
+- New `RoleGate` wrapper in `App.tsx`: when `variant === "gp"`, render GP routes; otherwise current LP routes.
+- New GP routes (all rendered, mostly placeholders):
+  - `/chat` (home), `/raises`, `/raises/:fundId` and 7 sub-tabs, `/pipeline`, `/contacts`, `/settings`
+- New `GpSidebar` (shadcn `Sidebar`, `collapsible="icon"`) — Chat · Raises · Pipeline · Contacts · Settings. Active-route highlighting via `NavLink`.
+- Switch behavior: changing variant to `gp` calls `navigate("/chat")` and replaces sidebar; switching back to LP returns to `/dashboard`.
+- LP routes hidden while in GP mode (and vice versa) — guarded redirects so deep-links resolve correctly.
 
-The block exposes a small inline toolbar (chart type switcher + edit JSON popover) so the user can tweak after insertion.
+## Stage 2 — Chat-as-spine layout (global rebuild)
 
-Roundtripping markdown: `toExternalHTML`/`parse` serializes the block as a fenced ` ```chart {json...} ``` ` so it survives `blocksToMarkdownLossy` and reseeds correctly on reload. The edge function reads/writes that same fence.
+Goal: Iris is a persistent left panel in both modes; `/chat` is the full-page view of the same conversation.
 
-## 2. New canvas-edit tool: `insert_chart`
+- Replace `AppLayout`'s right-side drawer behavior with a left-docked, reflow layout shell.
+- New `WorkspaceShell` component: `[ChatPanel (toggle, resizable)] [BodyView]`. Opening shrinks body; closing expands. No z-index overlay.
+- `/chat` route renders the same `ChatProvider` conversation expanded full-width with an empty body slot.
+- Keep current `ChatContext`, `ChatSidebar`, `ChatMessageBubble`, and tool registration intact — only the host layout changes.
+- Toggle persisted to `localStorage` per role.
 
-Add to `chat-completion/index.ts` alongside `edit_memo` / `edit_odd_section`:
+## Stage 3 — Raises workspace (the heart of the product)
 
-```
-insert_chart({ section_heading|section_key, position: "after"|"replace_section", chart: {type,title,subtitle,xLabel,yLabel,data,palette} })
-```
+Goal: a populated Raise context page with all 7 tabs working off mock data.
 
-Server inserts a chart fence into the markdown, saves, realtime push reseeds the editor. System prompt for memo + ODD modes gets:
+- `/raises` list: cards per raise with completion % bar, status pill, live signal counts. Seeded with 3 mock raises.
+- `/raises/:fundId` layout: tab strip + outlet. Default tab Overview.
+- Tabs (built in order, each shippable):
+  1. **Overview** — completion bar (4 components: Dataroom / IRIS Report / DDQ / Interview), key metrics, raise status.
+  2. **Dataroom** — upload/list/version UI (file rows; upload is mock).
+  3. **DDQ** — living Q&A list with provenance chips (ILPA / IRIS-generated / LP-direct), answered/unanswered/IRIS-suggested filters.
+  4. **IRIS Interview** — reuses existing chat surface, prompted with gap-fill questions.
+  5. **Report Card** — section-addressable analytical read, versioned, "compute once / re-synthesize" structure (reuses existing markdown/section primitives).
+  6. **Feedback** — L2+ gated; empty state by default; aggregate-default with per-LP drill (mock once an L2 LP exists in the seed).
+  7. **Pipeline (this raise)** — L2+ LP list, consent state column.
 
-> If the user asks for a chart, graph, plot, visualization, or "show me X" with numeric data, call `insert_chart` immediately. Never paste raw chart data into chat — always insert the block.
+## Stage 4 — Cross-raise surfaces + Contacts + Settings
 
-## 3. Chat clarification tools (model picks per turn)
+- `/pipeline` — aggregate L2+ LPs across all raises; status, consent, last activity. Filter by raise.
+- `/contacts` — GP-side CRM: LPs and placement agents. Reuses table primitives.
+- `/settings` — Connectors / Agents / Team. Billing parked.
 
-Two new client-rendered tools (no execution server-side — they stream as `tool_use` and the UI renders them as interactive cards in the assistant bubble):
+## Stage 5 — Claim / onboarding (later)
 
-- **`ask_quick_reply`**: `{ question: string, options: string[] }` → renders chips. Click sends the chip text as the next user message.
-- **`ask_form`**: `{ title, fields: [{key,label,type:"text"|"select"|"radio"|"number",options?,required?}], submitLabel? }` → renders a shadcn form (`Input` / `Select` / `RadioGroup` / `Label` / `Button`). Submit posts a single user turn with `JSON.stringify(values)` and a human-readable prefix.
+- `/claim/:fundId` pre-auth page seeded from Form D mock; "Create Raise" CTA → onboarding wizard (Pre-Data Room vs Full Data Room split).
+- Out of scope for Stage 1; spec captured for later.
 
-Both stream through the existing `activeTools` channel but carry their `input` payload to the bubble so it can render the interactive control. `ChatMessage` gains an optional `interactive?: { kind: "chips"|"form", payload, answered?: boolean }` field that the bubble renders inline (auto-hidden after answer to keep history clean).
+## Stage 6 — Backend (later)
 
-System prompt addition (chat mode):
+- Tables: `funds`, `raises`, `evaluations` (with `level` L1/L2), `ddq_items`, `report_sections`, `engagement_events`, `iris_questions`, `consents`.
+- Edge functions: section-job runner, synthesis pass, change-triggered incremental refresh.
+- Privacy-wall enforcement at the query layer (RLS-equivalent filtering by `evaluation.level`).
+- Not started until UI is validated.
 
-> Before answering ambiguous requests, prefer `ask_quick_reply` for 2–5 discrete choices and `ask_form` for multi-field inputs. Don't ask in prose.
+## Out of scope (matches PRD)
 
-## 4. Richer markdown rendering in the bubble
+- GP→LP messaging of any kind.
+- Pre-L2 attribution.
+- Cross-raise market intelligence.
+- Billing / Manager Services subscription.
 
-Replace the current `prose` blob in `ChatMessageBubble.tsx` with structured components passed to `ReactMarkdown`:
+## Technical notes
 
-- `table`/`thead`/`tbody`/`tr`/`th`/`td` → shadcn `Table` primitives (`@/components/ui/table`) with proper borders, hover, header tint.
-- `code` (fenced) → new `CodeBlock` component: language label, copy button, `react-syntax-highlighter` (Prism, `oneDark`/`oneLight` based on theme). Inline `code` stays as a styled `<code>`.
-- `pre` is rendered through `CodeBlock`.
-- `a` opens in new tab with `rel="noreferrer"`.
+- File additions concentrate in `src/pages/gp/`, `src/components/gp/`, `src/mocks/gp/`.
+- Routing: extend `App.tsx` with a `<Routes>` branch keyed off variant. No new router library.
+- Layout rebuild touches `AppLayout.tsx` and `ChatSidebar.tsx` host positioning only — message rendering untouched.
+- Mock data shapes mirror PRD §4 entities so the later backend swap is a wire-up, not a rewrite.
+- Reuse: existing `ChatProvider`, `BlockNote` canvas + chart tools, `MarkdownContent`, `CitationChip`, shadcn primitives.
 
-Animated SVG charts in chat: if a fenced ```chart block appears in the assistant content (rare — usually we'd use `insert_chart`), render it inline with the same `AnimatedChartBlock` component in read-only mode.
+## Suggested shipping order
 
-## 5. Memory + small wiring
+1. Stage 1 (shell + mode switch) — small, validates the swap.
+2. Stage 2 (chat spine) — biggest layout change; do it before more pages depend on it.
+3. Stage 3 tabs in PRD order — each tab is its own ship.
+4. Stage 4 cross-raise surfaces.
+5. Stages 5–6 once the UI is locked.
 
-- New memory file `mem://features/iris-canvas-tools` documenting `insert_chart` + clarification tools + animated chart block contract.
-- Update `mem://index.md` to reference it.
-- Update `mem://features/ic-memo-workspace` (and add an equivalent line in the ODD workspace memory) noting Iris now inserts chart blocks and renders clarification UIs.
-
----
-
-## Technical details
-
-**Files created**
-- `src/components/memo/blocks/AnimatedChartBlock.tsx` — Recharts + entry animation, used in both canvases.
-- `src/components/memo/blocks/chart-block-schema.ts` — `createReactBlockSpec` + markdown serializer.
-- `src/components/chat/CodeBlock.tsx` — language label + copy + Prism highlight.
-- `src/components/chat/InteractiveQuickReply.tsx` — chip group.
-- `src/components/chat/InteractiveForm.tsx` — shadcn form.
-- `.lovable/memory/features/iris-canvas-tools.md`.
-
-**Files edited**
-- `supabase/functions/chat-completion/index.ts`:
-  - register `insert_chart`, `ask_quick_reply`, `ask_form` tools;
-  - implement `insert_chart` (fence injector for both memo + ODD sections);
-  - `ask_quick_reply`/`ask_form` are no-op server-side: stream the `tool_use` block through to the client (mark them client-rendered, return a stub result so the model can continue);
-  - extend system prompts (memo, ODD, chat) with the new directives.
-- `src/contexts/ChatContext.tsx`:
-  - thread tool input through to the message (extend `activeTools` entry with `input`);
-  - add `interactive` resolution on a message; when user clicks a chip / submits form, call `sendMessage` and mark the originating message as `answered`.
-- `src/components/chat/ChatMessageBubble.tsx`:
-  - use the new `components` map for `ReactMarkdown` (Table, CodeBlock, a);
-  - render `InteractiveQuickReply` / `InteractiveForm` when `message.interactive` is set;
-  - inline `AnimatedChartBlock` for ```chart fences.
-- `src/components/memo/IcMemoCanvas.tsx` and `src/components/odd/OddSectionEditor.tsx`:
-  - schema gains `animatedChart` block spec;
-  - markdown parsing recognizes ```chart fences and emits the new block.
-- `bun add recharts react-syntax-highlighter @types/react-syntax-highlighter` (Recharts may already be present — will check first).
-
-**Behavior contract**
-- Anything numeric-comparative the user asks for → chart block inserted into the canvas the chat is scoped to, not pasted in chat.
-- Anything ambiguous → chips or form in chat, not a prose question.
-- All other answers continue to render as rich markdown (now with real tables + code blocks).
-
-**Not in scope this turn** (call out explicitly): export of chart blocks to PDF/print is best-effort (relies on SVG-in-print); editing chart data via the inline toolbar is JSON-textarea only (no spreadsheet UI).
+Tell me to start Stage 1 and I'll build it.
