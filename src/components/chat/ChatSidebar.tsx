@@ -413,6 +413,7 @@ export function ChatSidebar() {
               </div>
             
             </div>
+            </div>
           </div>
         </div>
       }
