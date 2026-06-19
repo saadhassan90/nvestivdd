@@ -185,9 +185,9 @@ type RaiseDraft = {
 };
 
 const listeners = new Set<() => void>();
-export function subscribeRaises(fn: () => void) {
+export function subscribeRaises(fn: () => void): () => void {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => { listeners.delete(fn); };
 }
 function emit() { listeners.forEach((f) => f()); }
 
