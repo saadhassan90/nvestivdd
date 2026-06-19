@@ -8,10 +8,7 @@ import { RAISES, overallCompletion, subscribeRaises } from "@/mocks/gp/raises";
 export default function RaisesList() {
   const [, force] = useState(0);
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const unsub = subscribeRaises(() => force((n) => n + 1));
-    return () => { unsub; };
-  }, []);
+  useEffect(() => subscribeRaises(() => force((n) => n + 1)), []);
 
   return (
     <>
