@@ -16,7 +16,6 @@ export default function RaiseContext() {
   const { fundId } = useParams();
   const raise = getRaise(fundId);
   if (!raise) return <Navigate to="/raises" replace />;
-  const pct = overallCompletion(raise);
   return (
     <div className="flex flex-col">
       <div className="px-6 pt-6 max-w-5xl mx-auto w-full">
