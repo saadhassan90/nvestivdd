@@ -47,7 +47,6 @@ export default function RaiseReportCard() {
         {/* Side tabs */}
         <div className="w-32 shrink-0 flex flex-col gap-0.5">
           {LEVELS.map((l) => {
-            const Icon = l.icon;
             const active = level === l.id;
             return (
               <button
@@ -60,7 +59,6 @@ export default function RaiseReportCard() {
                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span className="text-xs font-medium truncate">{l.label}</span>
               </button>
             );
