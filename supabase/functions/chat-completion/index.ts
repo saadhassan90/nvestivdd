@@ -705,10 +705,112 @@ function applyMemoEdit(
 async function executeTool(
   name: string,
   input: any,
-  ctx: { memoId?: string | null; oddProjectId?: string | null } = {},
+  ctx: {
+    memoId?: string | null;
+    oddProjectId?: string | null;
+    activePageKey?: string | null;
+    activeRaiseId?: string | null;
+    conversationId?: string | null;
+  } = {},
 ): Promise<string> {
   try {
     switch (name) {
+      case "list_page_blocks": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content, schema_type")
+          .limit(500);
+        if (input.page_key) q = q.eq("page_key", input.page_key);
+        if (input.raise_id) q = q.eq("raise_id", input.raise_id);
+        const { data, error } = await q;
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify({
+          blocks: (data || []).map((r: any) => ({
+            page_key: r.page_key,
+            raise_id: r.raise_id,
+            section_key: r.section_key,
+            label: r.label,
+            text: r.content?.text ?? "",
+          })),
+          note: "Blocks not listed here may still exist in code with default text; ask the user or use the current manifest.",
+        });
+      }
+      case "read_page_block": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content")
+          .eq("page_key", input.page_key)
+          .eq("section_key", input.section_key);
+        if (input.raise_id) q = q.eq("raise_id", input.raise_id);
+        const { data, error } = await q.limit(1);
+        if (error) return JSON.stringify({ error: error.message });
+        const row = data?.[0];
+        if (!row) return JSON.stringify({ found: false, note: "No DB override; in-code default is in use." });
+        return JSON.stringify({ found: true, ...row, text: row.content?.text ?? "" });
+      }
+      case "search_page_content": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content")
+          .limit(500);
+        if (input.page_key) q = q.eq("page_key", input.page_key);
+        const { data, error } = await q;
+        if (error) return JSON.stringify({ error: error.message });
+        const needle = String(input.query || "").toLowerCase();
+        const hits = (data || [])
+          .map((r: any) => ({
+            page_key: r.page_key,
+            raise_id: r.raise_id,
+            section_key: r.section_key,
+            label: r.label,
+            text: r.content?.text ?? "",
+          }))
+          .filter((b: any) => b.text.toLowerCase().includes(needle))
+          .slice(0, 25);
+        return JSON.stringify({ matches: hits.length, results: hits });
+      }
+      case "propose_page_edit": {
+        const pageKey = input.page_key || ctx.activePageKey;
+        const raiseId = input.raise_id ?? ctx.activeRaiseId ?? null;
+        if (!pageKey || !input.section_key || !input.proposed_text) {
+          return JSON.stringify({ error: "page_key, section_key, and proposed_text are required." });
+        }
+        // Snapshot current value from DB (if any).
+        let currentText: string | null = null;
+        {
+          let q = supabase
+            .from("page_content")
+            .select("content")
+            .eq("page_key", pageKey)
+            .eq("section_key", input.section_key);
+          if (raiseId) q = q.eq("raise_id", raiseId);
+          const { data } = await q.limit(1);
+          currentText = data?.[0]?.content?.text ?? null;
+        }
+        const { data: prop, error } = await supabase
+          .from("page_edit_proposals")
+          .insert({
+            page_key: pageKey,
+            raise_id: raiseId,
+            section_key: input.section_key,
+            label: input.label || null,
+            current_content: currentText !== null ? { text: currentText } : null,
+            proposed_content: { text: input.proposed_text },
+            rationale: input.rationale || null,
+            status: "pending",
+            conversation_id: ctx.conversationId || null,
+          })
+          .select("id")
+          .single();
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify({
+          success: true,
+          proposal_id: prop?.id,
+          page_key: pageKey,
+          section_key: input.section_key,
+          summary: "Proposal queued in the Iris suggestions banner — user will Apply or Reject.",
+        });
+      }
       case "ask_quick_reply":
       case "ask_form": {
         // Client-rendered tools. Return immediately so the model can stop
