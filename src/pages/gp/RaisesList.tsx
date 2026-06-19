@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
-
-const MOCK_RAISES = [
-  { id: "fund-001", name: "Meridian Credit Opportunities III", completion: 78, status: "Live", l2Lps: 4 },
-  { id: "fund-002", name: "Aspen Growth Equity II", completion: 42, status: "In setup", l2Lps: 0 },
-  { id: "fund-003", name: "Northwind Infra Yield", completion: 100, status: "Live", l2Lps: 9 },
-];
+import { RAISES, overallCompletion } from "@/mocks/gp/raises";
 
 export default function RaisesList() {
   return (
@@ -14,7 +9,9 @@ export default function RaisesList() {
       description="One record per raise. GPs may run several simultaneously."
     >
       <div className="grid gap-3">
-        {MOCK_RAISES.map((r) => (
+        {RAISES.map((r) => {
+          const pct = overallCompletion(r);
+          return (
           <Link
             key={r.id}
             to={`/raises/${r.id}`}
@@ -26,19 +23,21 @@ export default function RaisesList() {
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
                   {r.status}
                 </span>
+                <span className="text-[10px] text-muted-foreground">· {r.strategy} · {r.targetSize}</span>
               </div>
               <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full bg-foreground/70"
-                  style={{ width: `${r.completion}%` }}
+                  style={{ width: `${pct}%` }}
                 />
               </div>
               <p className="text-[11px] text-muted-foreground mt-1.5">
-                {r.completion}% complete · {r.l2Lps} L2 LP{r.l2Lps === 1 ? "" : "s"}
+                {pct}% complete · {r.lps.length} L2 LP{r.lps.length === 1 ? "" : "s"} · {r.ddq.length} DDQ items
               </p>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </GpPagePlaceholder>
   );
