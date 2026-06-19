@@ -298,7 +298,8 @@ export function ChatSidebar() {
                   ))}
                 </div>
               )}
-            <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
+            <div className="max-w-[50%] mx-auto w-full">
+              <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
                   {attachments.map((a) => {
@@ -411,6 +412,7 @@ export function ChatSidebar() {
                 </button>
               </div>
             
+            </div>
             </div>
           </div>
         </div>
