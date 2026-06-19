@@ -53,9 +53,6 @@ import {
   type FsFolder,
 } from "@/mocks/gp/dataroomFs";
 
-function formatSize(kb: number) {
-  return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
-}
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
