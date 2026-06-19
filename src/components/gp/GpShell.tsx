@@ -21,7 +21,7 @@ const PANEL_OPEN_KEY = "gp.chatPanelOpen";
 
 export function GpShell() {
   const { pathname } = useLocation();
-  const { chatWidth, conversations, loadConversations, loadConversation, deleteConversation, currentConversationId, startNewConversation } = useChatContext() as any;
+  const { chatWidth, conversations, loadConversations, loadConversation, conversationId, startNewConversation } = useChatContext() as any;
   const [panelOpen, setPanelOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const v = window.localStorage.getItem(PANEL_OPEN_KEY);
@@ -127,7 +127,7 @@ export function GpShell() {
                         onClick={() => loadConversation?.(conv.id)}
                         className={cn(
                           "group flex items-center justify-between gap-2 px-3 py-1.5 cursor-pointer transition-colors",
-                          currentConversationId === conv.id ? "bg-muted" : "hover:bg-muted/50"
+                          conversationId === conv.id ? "bg-muted" : "hover:bg-muted/50"
                         )}
                       >
                         <div className="min-w-0 flex-1">
