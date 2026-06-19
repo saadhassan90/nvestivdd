@@ -8,8 +8,9 @@ import {
 import { useUiVariant, type UiVariant } from "@/contexts/UiVariantContext";
 
 const OPTIONS: { value: UiVariant; label: string }[] = [
-  { value: "adia", label: "Adia" },
-  { value: "general", label: "General" },
+  { value: "adia", label: "LP — ADIA" },
+  { value: "general", label: "LP — General" },
+  { value: "gp", label: "GP" },
 ];
 
 export function VariantSwitcher() {

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type UiVariant = "adia" | "general";
+export type UiVariant = "adia" | "general" | "gp";
 
 const STORAGE_KEY = "nvestiv.ui-variant";
 const DEFAULT_VARIANT: UiVariant = "adia";
@@ -16,7 +16,7 @@ export function UiVariantProvider({ children }: { children: ReactNode }) {
   const [variant, setVariantState] = useState<UiVariant>(() => {
     if (typeof window === "undefined") return DEFAULT_VARIANT;
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "general" || stored === "adia" ? stored : DEFAULT_VARIANT;
+    return stored === "general" || stored === "adia" || stored === "gp" ? stored : DEFAULT_VARIANT;
   });
 
   useEffect(() => {
