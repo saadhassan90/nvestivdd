@@ -44,40 +44,47 @@ export default function RaiseReportCard() {
 
   return (
     <GpPagePlaceholder>
-      {/* Level switcher */}
-      <div className="flex gap-1 border-b border-border mb-5">
-        {LEVELS.map((l) => {
-          const Icon = l.icon;
-          const active = level === l.id;
-          return (
-            <button
-              key={l.id}
-              onClick={() => setLevel(l.id)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 text-sm border-b-2 -mb-px transition-colors",
-                active
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              <span>{l.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      <p className="text-xs text-muted-foreground -mt-3 mb-5">{LEVELS.find((l) => l.id === level)?.sub}</p>
+      <div className="flex gap-6 min-h-[60vh]">
+        {/* Side tabs */}
+        <div className="w-48 shrink-0 flex flex-col gap-1">
+          {LEVELS.map((l) => {
+            const Icon = l.icon;
+            const active = level === l.id;
+            return (
+              <button
+                key={l.id}
+                onClick={() => setLevel(l.id)}
+                className={cn(
+                  "flex flex-col items-start gap-0.5 px-3 py-2.5 text-left rounded-lg border transition-colors",
+                  active
+                    ? "border-foreground/20 bg-muted text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="text-sm font-medium">{l.label}</span>
+                </div>
+                <span className="text-[10px] leading-tight text-muted-foreground ml-5.5">{l.sub}</span>
+              </button>
+            );
+          })}
+        </div>
 
-      {level === "L1" && (
-        <L1PreDataroom
-          raise={raise}
-          composite={composite}
-          completeness={completeness}
-          verdict={verdict}
-        />
-      )}
-      {level === "L2" && <L2Idd report={raise.report} />}
-      {level === "L3" && <L3Odd />}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {level === "L1" && (
+            <L1PreDataroom
+              raise={raise}
+              composite={composite}
+              completeness={completeness}
+              verdict={verdict}
+            />
+          )}
+          {level === "L2" && <L2Idd report={raise.report} />}
+          {level === "L3" && <L3Odd />}
+        </div>
+      </div>
     </GpPagePlaceholder>
   );
 }
