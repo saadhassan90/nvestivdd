@@ -135,18 +135,21 @@ export default function Pipeline() {
             Every LP across every raise, plotted from first conversation to commitment.
           </p>
         </div>
-        <select
-          value={raiseFilter}
-          onChange={(e) => setRaiseFilter(e.target.value)}
-          className="h-8 rounded-md border border-border bg-background px-2 pr-8 text-xs text-foreground appearance-none"
-        >
-          <option value="all">All raises</option>
-          {RAISES.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={raiseFilter}
+            onChange={(e) => setRaiseFilter(e.target.value)}
+            className="h-8 rounded-md border border-border bg-background px-2 pr-8 text-xs text-foreground appearance-none"
+          >
+            <option value="all">All raises</option>
+            {RAISES.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        </div>
       </div>
 
       {/* Stage graph */}
