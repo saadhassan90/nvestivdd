@@ -70,7 +70,7 @@ export function GpShell() {
       {/* Docked chat panel — reflow, not overlay */}
       {showDockedChat && (
         <div
-          className="relative shrink-0 border-r border-border bg-card"
+          className="relative shrink-0 border-r border-border bg-card sticky top-0 h-screen self-start"
           style={{ width: chatWidth }}
         >
           <ChatSidebar />
