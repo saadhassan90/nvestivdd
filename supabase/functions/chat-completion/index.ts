@@ -1217,7 +1217,10 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model, project_id, conversation_id, memo_id, odd_project_id } = await req.json();
+    const { messages, model, project_id, conversation_id, memo_id, odd_project_id, page_context } = await req.json();
+    const activePageKey: string | null = page_context?.page_key || null;
+    const activeRaiseId: string | null = page_context?.raise_id || null;
+    const pageManifest = page_context?.manifest || null;
 
     // In edit modes, default to haiku for fast tool calls.
     const effectiveModel = model || (memo_id || odd_project_id ? "haiku-3.5" : "sonnet-4");
@@ -1259,7 +1262,21 @@ serve(async (req) => {
       };
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
+    let systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
+    if (!memoContext && !oddContext && pageManifest?.page_key) {
+      systemPrompt += `\n\n## CURRENT PAGE BLOCKS\nActive page_key: \`${pageManifest.page_key}\`${pageManifest.raise_id ? ` (raise_id: \`${pageManifest.raise_id}\`)` : ""}.\n\n`;
+      const blocks = Array.isArray(pageManifest.blocks) ? pageManifest.blocks : [];
+      if (blocks.length === 0) {
+        systemPrompt += `No editable prose blocks are registered on this page.`;
+      } else {
+        systemPrompt += blocks
+          .map(
+            (b: any) =>
+              `- \`${b.section_key}\` — ${b.label} (${b.schema}): ${JSON.stringify(b.preview || "")}`,
+          )
+          .join("\n");
+      }
+    }
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
     // In edit modes, expose the relevant edit tool + clarification tools.
@@ -1268,7 +1285,8 @@ serve(async (req) => {
       : memo_id
         ? tools.filter((t) => t.name === "edit_memo")
         : tools;
-    const activeTools = [...editTools, ...CLARIFY_TOOLS];
+    const pageTools = oddContext || memo_id ? [] : PAGE_CONTENT_TOOLS;
+    const activeTools = [...editTools, ...pageTools, ...CLARIFY_TOOLS];
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -1424,7 +1442,13 @@ serve(async (req) => {
               const toolResultBlocks = await Promise.all(
                 pendingFunctionCalls.map(async (fc) => {
                   send("tool_executing", { name: fc.name, id: fc.id });
-                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id, oddProjectId: odd_project_id });
+                  const result = await executeTool(fc.name, fc.args, {
+                    memoId: memo_id,
+                    oddProjectId: odd_project_id,
+                    activePageKey,
+                    activeRaiseId,
+                    conversationId: conversation_id,
+                  });
                   let parsed: any;
                   try { parsed = JSON.parse(result); } catch { parsed = { raw: result }; }
                   allToolCalls.push({ name: fc.name, input: fc.args, output: parsed });
