@@ -225,3 +225,11 @@ export function createRaise(draft: RaiseDraft): Raise {
   emit();
   return raise;
 }
+
+export function deleteRaise(id: string): void {
+  const idx = RAISES.findIndex((r) => r.id === id);
+  if (idx >= 0) {
+    RAISES.splice(idx, 1);
+    emit();
+  }
+}
