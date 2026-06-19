@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 
 type Level = "L1" | "L2" | "L3";
 
-const LEVELS: { id: Level; label: string; sub: string; icon: typeof Eye }[] = [
-  { id: "L1", label: "L1 — Pre-Dataroom", sub: "What every LP sees before NDA — mirror of the LP view", icon: Eye },
-  { id: "L2", label: "L2 — IDD", sub: "Investment due diligence — thesis, market, team, track, economics", icon: Layers },
-  { id: "L3", label: "L3 — ODD", sub: "Operational due diligence — firm, governance, controls, compliance", icon: ShieldCheck },
+const LEVELS: { id: Level; label: string; icon: typeof Eye }[] = [
+  { id: "L1", label: "L1 — Pre-Dataroom", icon: Eye },
+  { id: "L2", label: "L2 — IDD", icon: Layers },
+  { id: "L3", label: "L3 — ODD", icon: ShieldCheck },
 ];
 
 function scoreColor(s: number) {
@@ -46,7 +46,7 @@ export default function RaiseReportCard() {
     <GpPagePlaceholder>
       <div className="flex gap-6 min-h-[60vh]">
         {/* Side tabs */}
-        <div className="w-48 shrink-0 flex flex-col gap-1">
+        <div className="w-32 shrink-0 flex flex-col gap-0.5">
           {LEVELS.map((l) => {
             const Icon = l.icon;
             const active = level === l.id;
@@ -55,17 +55,14 @@ export default function RaiseReportCard() {
                 key={l.id}
                 onClick={() => setLevel(l.id)}
                 className={cn(
-                  "flex flex-col items-start gap-0.5 px-3 py-2.5 text-left rounded-lg border transition-colors",
+                  "flex items-center gap-2 px-2 py-1.5 text-left rounded-md border transition-colors",
                   active
                     ? "border-foreground/20 bg-muted text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <Icon className="h-3.5 w-3.5" />
-                  <span className="text-sm font-medium">{l.label}</span>
-                </div>
-                <span className="text-[10px] leading-tight text-muted-foreground ml-5.5">{l.sub}</span>
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="text-xs font-medium truncate">{l.label}</span>
               </button>
             );
           })}
