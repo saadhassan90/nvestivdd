@@ -9,10 +9,7 @@ export default function RaiseInterview() {
   if (!raise) return null;
   const gaps = raise.ddq.filter((d) => d.state === "unanswered" || d.state === "suggested").slice(0, 6);
   return (
-    <GpPagePlaceholder
-      title="IRIS Interview"
-      description="Gap-filling conversation. IRIS asks the questions your raise still needs answered. Use the Iris chat on the left to start any thread."
-    >
+    <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card p-5">
         <p className="text-sm font-medium text-foreground">Open gaps IRIS would ask next</p>
         <p className="text-xs text-muted-foreground mt-1">{gaps.length} prompts queued · pulled from unanswered DDQ + IRIS-suggested items</p>

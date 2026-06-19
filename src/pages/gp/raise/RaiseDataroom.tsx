@@ -199,10 +199,7 @@ export default function RaiseDataroom() {
   };
 
   return (
-    <GpPagePlaceholder
-      title="Dataroom"
-      description="Organise raise materials in nested folders. Upload, rename, and version files."
-    >
+    <GpPagePlaceholder>
       <div className="grid grid-cols-[220px_1fr] gap-6 min-h-[500px]">
         {/* Folder tree side pane */}
         <aside className="border-r border-border pr-2 py-1 overflow-y-auto max-h-[calc(100vh-220px)]">

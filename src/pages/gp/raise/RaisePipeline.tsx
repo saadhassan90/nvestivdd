@@ -15,7 +15,7 @@ export default function RaisePipeline() {
   if (!raise) return null;
   if (raise.lps.length === 0) {
     return (
-      <GpPagePlaceholder title="Pipeline" description="L2+ LPs for this raise.">
+      <GpPagePlaceholder>
         <div className="rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center text-sm text-muted-foreground">
           No L2 LPs yet on this raise.
         </div>
@@ -23,7 +23,7 @@ export default function RaisePipeline() {
     );
   }
   return (
-    <GpPagePlaceholder title="Pipeline" description="L2+ LPs for this raise. Consent states and engagement summary.">
+    <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="grid grid-cols-[1.5fr_120px_110px_90px_120px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
           <div>LP</div><div>Type</div><div>Consent</div><div>Questions</div><div>Last activity</div>

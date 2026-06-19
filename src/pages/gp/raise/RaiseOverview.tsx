@@ -20,7 +20,7 @@ export default function RaiseOverview() {
     { label: "L2 LPs engaged", value: raise.lps.length },
   ];
   return (
-    <GpPagePlaceholder title="Overview" description="Completion across the four components of a Raise.">
+    <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card p-5">
         <div className="flex items-baseline justify-between">
           <p className="text-sm font-medium text-foreground">Raise completion</p>
