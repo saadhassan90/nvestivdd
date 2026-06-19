@@ -157,148 +157,149 @@ export default function Pipeline() {
             {rows.length - droppedRows.length} active · {droppedRows.length} dropped
           </p>
         </div>
-        <div className="relative w-full">
-          <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full h-auto">
-            {/* Path */}
-            <path
-              d={pathD}
-              fill="none"
-              stroke="hsl(var(--border))"
-              strokeWidth={2}
-              strokeDasharray="4 6"
-            />
-            {/* Finish line marker */}
-            <line
-              x1={VB_W - PAD_X}
-              x2={VB_W - PAD_X}
-              y1={PATH_Y - 70}
-              y2={PATH_Y + 70}
-              stroke="hsl(var(--foreground))"
-              strokeWidth={1.5}
-            />
-            {/* Stage tick markers + labels */}
-            {STAGES.map((s, i) => {
-              const x = stageX(i);
-              const y = stageY(i);
-              return (
-                <g key={s.id}>
-                  <circle cx={x} cy={y} r={4} fill="hsl(var(--foreground))" />
-                  <text
-                    x={x}
-                    y={VB_H - 20}
-                    textAnchor="middle"
-                    className="fill-muted-foreground"
-                    fontSize={11}
-                  >
-                    {s.label}
-                  </text>
-                  <text
-                    x={x}
-                    y={VB_H - 6}
-                    textAnchor="middle"
-                    className="fill-foreground"
-                    fontSize={11}
-                    fontWeight={600}
-                  >
-                    {stageGroups.get(s.id)?.length ?? 0}
-                  </text>
-                </g>
-              );
-            })}
-            {/* Bubbles */}
-            {STAGES.map((s, i) => {
-              const lps = stageGroups.get(s.id) ?? [];
-              const cx = stageX(i);
-              const cy = stageY(i);
-              return lps.map((lp, idx) => {
-                const col = Math.floor(idx / MAX_PER_COL);
-                const rowIdx = idx % MAX_PER_COL;
-                const totalCols = Math.ceil(lps.length / MAX_PER_COL);
-                const colOffset = (col - (totalCols - 1) / 2) * STACK_DX;
-                const bx = cx + colOffset;
-                const by = cy - 40 - rowIdx * STACK_DY;
-                const isHover = hoverId === `${lp.raiseId}:${lp.id}`;
+        <div className="relative w-full overflow-x-auto">
+          <div className="min-w-[900px]">
+            <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full h-auto">
+              {/* Path */}
+              <path
+                d={pathD}
+                fill="none"
+                stroke="hsl(var(--border))"
+                strokeWidth={2}
+                strokeDasharray="4 6"
+              />
+              {/* Finish line marker */}
+              <line
+                x1={VB_W - PAD_X}
+                x2={VB_W - PAD_X}
+                y1={PATH_Y - 70}
+                y2={PATH_Y + 70}
+                stroke="hsl(var(--foreground))"
+                strokeWidth={1.5}
+              />
+              {/* Stage tick markers + labels */}
+              {STAGES.map((s, i) => {
+                const x = stageX(i);
+                const y = stageY(i);
                 return (
-                  <g
-                    key={`${lp.raiseId}-${lp.id}`}
-                    transform={`translate(${bx}, ${by})`}
-                    onMouseEnter={() => setHoverId(`${lp.raiseId}:${lp.id}`)}
-                    onMouseLeave={() => setHoverId(null)}
-                    className="cursor-pointer"
-                  >
-                    {rowIdx === 0 && (
-                      <line
-                        x1={0}
-                        y1={BUBBLE_R}
-                        x2={cx - bx}
-                        y2={cy - by}
-                        stroke="hsl(var(--border))"
-                        strokeWidth={1}
-                      />
-                    )}
-                    <circle
-                      r={BUBBLE_R}
-                      fill="hsl(var(--background))"
-                      stroke="hsl(var(--foreground))"
-                      strokeWidth={isHover ? 2 : 1.25}
-                    />
+                  <g key={s.id}>
+                    <circle cx={x} cy={y} r={4} fill="hsl(var(--foreground))" />
                     <text
+                      x={x}
+                      y={VB_H - 20}
                       textAnchor="middle"
-                      dy={4}
-                      fontSize={10}
-                      fontWeight={600}
-                      className="fill-foreground select-none"
+                      className="fill-muted-foreground"
+                      fontSize={11}
                     >
-                      {initials(lp.name)}
+                      {s.label}
                     </text>
-                    {isHover && (
-                      <g transform={`translate(0, ${-BUBBLE_R - 8})`}>
-                        <rect
-                          x={-90}
-                          y={-32}
-                          width={180}
-                          height={32}
-                          rx={4}
-                          fill="hsl(var(--popover))"
-                          stroke="hsl(var(--border))"
-                        />
-                        <text
-                          x={0}
-                          y={-19}
-                          textAnchor="middle"
-                          fontSize={10}
-                          fontWeight={600}
-                          className="fill-foreground"
-                        >
-                          {lp.name}
-                        </text>
-                        <text
-                          x={0}
-                          y={-6}
-                          textAnchor="middle"
-                          fontSize={9}
-                          className="fill-muted-foreground"
-                        >
-                          {lp.raiseName}
-                        </text>
-                      </g>
-                    )}
+                    <text
+                      x={x}
+                      y={VB_H - 6}
+                      textAnchor="middle"
+                      className="fill-foreground"
+                      fontSize={11}
+                      fontWeight={600}
+                    >
+                      {stageGroups.get(s.id)?.length ?? 0}
+                    </text>
                   </g>
                 );
-              });
-            })}
-            {/* Finish line label */}
-            <text
-              x={VB_W - PAD_X}
-              y={PATH_Y - 80}
-              textAnchor="middle"
-              fontSize={10}
-              className="fill-muted-foreground uppercase tracking-wider"
-            >
-              Finish
-            </text>
-          </svg>
-
+              })}
+              {/* Bubbles */}
+              {STAGES.map((s, i) => {
+                const lps = stageGroups.get(s.id) ?? [];
+                const cx = stageX(i);
+                const cy = stageY(i);
+                return lps.map((lp, idx) => {
+                  const col = Math.floor(idx / MAX_PER_COL);
+                  const rowIdx = idx % MAX_PER_COL;
+                  const totalCols = Math.ceil(lps.length / MAX_PER_COL);
+                  const colOffset = (col - (totalCols - 1) / 2) * STACK_DX;
+                  const bx = cx + colOffset;
+                  const by = cy - 40 - rowIdx * STACK_DY;
+                  const isHover = hoverId === `${lp.raiseId}:${lp.id}`;
+                  return (
+                    <g
+                      key={`${lp.raiseId}-${lp.id}`}
+                      transform={`translate(${bx}, ${by})`}
+                      onMouseEnter={() => setHoverId(`${lp.raiseId}:${lp.id}`)}
+                      onMouseLeave={() => setHoverId(null)}
+                      className="cursor-pointer"
+                    >
+                      {rowIdx === 0 && (
+                        <line
+                          x1={0}
+                          y1={BUBBLE_R}
+                          x2={cx - bx}
+                          y2={cy - by}
+                          stroke="hsl(var(--border))"
+                          strokeWidth={1}
+                        />
+                      )}
+                      <circle
+                        r={BUBBLE_R}
+                        fill="hsl(var(--background))"
+                        stroke="hsl(var(--foreground))"
+                        strokeWidth={isHover ? 2 : 1.25}
+                      />
+                      <text
+                        textAnchor="middle"
+                        dy={4}
+                        fontSize={10}
+                        fontWeight={600}
+                        className="fill-foreground select-none"
+                      >
+                        {initials(lp.name)}
+                      </text>
+                      {isHover && (
+                        <g transform={`translate(0, ${-BUBBLE_R - 8})`}>
+                          <rect
+                            x={-90}
+                            y={-32}
+                            width={180}
+                            height={32}
+                            rx={4}
+                            fill="hsl(var(--popover))"
+                            stroke="hsl(var(--border))"
+                          />
+                          <text
+                            x={0}
+                            y={-19}
+                            textAnchor="middle"
+                            fontSize={10}
+                            fontWeight={600}
+                            className="fill-foreground"
+                          >
+                            {lp.name}
+                          </text>
+                          <text
+                            x={0}
+                            y={-6}
+                            textAnchor="middle"
+                            fontSize={9}
+                            className="fill-muted-foreground"
+                          >
+                            {lp.raiseName}
+                          </text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                });
+              })}
+              {/* Finish line label */}
+              <text
+                x={VB_W - PAD_X}
+                y={PATH_Y - 80}
+                textAnchor="middle"
+                fontSize={10}
+                className="fill-muted-foreground uppercase tracking-wider"
+              >
+                Finish
+              </text>
+            </svg>
+          </div>
         </div>
       </div>
 
