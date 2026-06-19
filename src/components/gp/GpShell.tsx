@@ -7,7 +7,7 @@ import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useChatContext } from "@/contexts/ChatContext";
 import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
 import { formatDistanceToNow } from "date-fns";
-import logo from "@/assets/logo.svg";
+import logoAsset from "@/assets/nvestiv-logomark.svg.asset.json";
 import { cn } from "@/lib/utils";
 
 const RAIL_ITEMS = [
