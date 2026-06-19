@@ -4,6 +4,7 @@ import { Plus, MoreHorizontal } from "lucide-react";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { NewRaiseModal } from "@/components/gp/NewRaiseModal";
 import { RAISES, overallCompletion, subscribeRaises, deleteRaise } from "@/mocks/gp/raises";
+import { EditableText } from "@/components/iris/EditableText";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,8 +35,6 @@ export default function RaisesList() {
   return (
     <>
       <GpPagePlaceholder
-        title="Raises"
-        description="One record per raise. GPs may run several simultaneously."
         action={
           <button
             onClick={() => setOpen(true)}
@@ -45,6 +44,23 @@ export default function RaisesList() {
           </button>
         }
       >
+        <div className="mb-6">
+          <EditableText
+            as="h1"
+            className="text-2xl font-semibold text-foreground"
+            sectionKey="title"
+            label="Page title"
+            schema="text"
+            defaultValue="Raises"
+          />
+          <EditableText
+            as="p"
+            className="text-sm text-muted-foreground mt-1.5 max-w-2xl"
+            sectionKey="description"
+            label="Page description"
+            defaultValue="One record per raise. GPs may run several simultaneously."
+          />
+        </div>
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
