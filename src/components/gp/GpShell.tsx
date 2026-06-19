@@ -142,7 +142,7 @@ export function GpShell() {
                 </div>
               </aside>
               <div className="flex-1 min-w-0">
-                <ChatSidebar />
+                <ChatSidebar hideHeader />
               </div>
             </div>
           ) : (
