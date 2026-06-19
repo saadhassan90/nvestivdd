@@ -15,10 +15,7 @@ export default function RaiseReportCard() {
   if (!raise) return null;
   const composite = Math.round(raise.report.reduce((a, r) => a + r.score, 0) / Math.max(raise.report.length, 1));
   return (
-    <GpPagePlaceholder
-      title="Report Card"
-      description="IRIS analytical read. Section-addressable; re-synthesises incrementally on material change."
-    >
+    <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card p-5 mb-4">
         <div className="flex items-baseline justify-between">
           <p className="text-sm font-medium text-foreground">Composite</p>

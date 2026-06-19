@@ -9,10 +9,7 @@ export default function RaiseFeedback() {
   const sharedLps = raise.lps.filter((l) => l.consent === "shared");
   if (sharedLps.length === 0) {
     return (
-      <GpPagePlaceholder
-        title="Feedback"
-        description="LP engagement + IRIS question report. L2+ only. Empty until your first L2 LP."
-      >
+      <GpPagePlaceholder>
         <div className="rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center text-sm text-muted-foreground">
           No L2 LPs yet. Feedback activates once an LP signs the mNDA and you consent to share the dataroom.
         </div>
@@ -29,10 +26,7 @@ export default function RaiseFeedback() {
     { theme: "GP commit funding source", weight: 0.13 },
   ];
   return (
-    <GpPagePlaceholder
-      title="Feedback"
-      description="Aggregate LP signal across L2 engagements. Per-LP attribution available with consent."
-    >
+    <GpPagePlaceholder>
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground">L2 LPs engaged</p>

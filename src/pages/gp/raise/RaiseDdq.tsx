@@ -30,7 +30,7 @@ export default function RaiseDdq() {
     suggested: raise.ddq.filter((d) => d.state === "suggested").length,
   };
   return (
-    <GpPagePlaceholder title="DDQ" description="Living Q&A. ILPA standard + IRIS-generated + LP-direct items.">
+    <GpPagePlaceholder>
       <div className="flex gap-1 mb-4 flex-wrap">
         {STATES.map((s) => (
           <button

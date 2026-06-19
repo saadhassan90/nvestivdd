@@ -199,10 +199,7 @@ export default function RaiseDataroom() {
   };
 
   return (
-    <GpPagePlaceholder
-      title="Dataroom"
-      description="Organise raise materials in nested folders. Upload, rename, and version files."
-    >
+    <GpPagePlaceholder>
       <div className="grid grid-cols-[220px_1fr] gap-6 min-h-[500px]">
         {/* Folder tree side pane */}
         <aside className="border-r border-border pr-2 py-1 overflow-y-auto max-h-[calc(100vh-220px)]">
@@ -249,11 +246,25 @@ export default function RaiseDataroom() {
               ))}
             </nav>
             <div className="flex items-center gap-2 shrink-0">
-              <Button size="sm" variant="outline" className="gap-2" onClick={() => setNewFolderOpen(true)}>
-                <FolderPlus className="h-3.5 w-3.5" /> New folder
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                onClick={() => setNewFolderOpen(true)}
+                title="New folder"
+                aria-label="New folder"
+              >
+                <FolderPlus className="h-4 w-4" />
               </Button>
-              <Button size="sm" className="gap-2" onClick={handleUploadClick}>
-                <Upload className="h-3.5 w-3.5" /> Upload
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                onClick={handleUploadClick}
+                title="Upload files"
+                aria-label="Upload files"
+              >
+                <Upload className="h-4 w-4" />
               </Button>
               <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFilesPicked} />
             </div>
