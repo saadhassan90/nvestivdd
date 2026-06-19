@@ -1,12 +1,28 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
-import { RAISES, overallCompletion } from "@/mocks/gp/raises";
+import { NewRaiseModal } from "@/components/gp/NewRaiseModal";
+import { RAISES, overallCompletion, subscribeRaises } from "@/mocks/gp/raises";
 
 export default function RaisesList() {
+  const [, force] = useState(0);
+  const [open, setOpen] = useState(false);
+  useEffect(() => subscribeRaises(() => force((n) => n + 1)), []);
+
   return (
+    <>
     <GpPagePlaceholder
       title="Raises"
       description="One record per raise. GPs may run several simultaneously."
+      action={
+        <button
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-foreground text-background px-3.5 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors"
+        >
+          <Plus className="h-4 w-4" /> New Raise
+        </button>
+      }
     >
       <div className="grid gap-3">
         {RAISES.map((r) => {
@@ -40,5 +56,7 @@ export default function RaisesList() {
         })}
       </div>
     </GpPagePlaceholder>
+    <NewRaiseModal open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }

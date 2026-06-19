@@ -174,3 +174,54 @@ export function overallCompletion(r: Raise): number {
   const v = r.completion;
   return Math.round((v.dataroom + v.report + v.ddq + v.interview) / 4);
 }
+
+type RaiseDraft = {
+  name: string;
+  strategy?: string;
+  targetSize?: string;
+  vintage?: number;
+  files: { name: string; sizeKb: number; category: DataroomFile["category"] }[];
+  submitter: { name: string; company: string; email: string };
+};
+
+const listeners = new Set<() => void>();
+export function subscribeRaises(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => { listeners.delete(fn); };
+}
+function emit() { listeners.forEach((f) => f()); }
+
+export function createRaise(draft: RaiseDraft): Raise {
+  const id = `fund-${String(RAISES.length + 1).padStart(3, "0")}`;
+  const now = new Date().toISOString();
+  const dataroom: DataroomFile[] = draft.files.map((f, i) => ({
+    id: `nf${i + 1}`,
+    name: f.name,
+    category: f.category,
+    version: 1,
+    sizeKb: f.sizeKb,
+    uploadedAt: now,
+    uploadedBy: draft.submitter.name || "You",
+  }));
+  const raise: Raise = {
+    id,
+    name: draft.name,
+    vintage: draft.vintage ?? new Date().getFullYear(),
+    strategy: draft.strategy || "Strategy TBD",
+    targetSize: draft.targetSize || "TBD",
+    status: "In setup",
+    completion: {
+      dataroom: Math.min(100, draft.files.length * 12),
+      report: 0,
+      ddq: 0,
+      interview: 0,
+    },
+    dataroom,
+    ddq: [],
+    report: [],
+    lps: [],
+  };
+  RAISES.push(raise);
+  emit();
+  return raise;
+}
