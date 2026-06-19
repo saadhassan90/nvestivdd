@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Eye, Layers, ShieldCheck } from "lucide-react";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
-import { getRaise, overallCompletion, type ReportSection } from "@/mocks/gp/raises";
+import { getRaise, overallCompletion, type Raise, type ReportSection } from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
 
 type Level = "L1" | "L2" | "L3";
@@ -89,17 +89,16 @@ export default function RaiseReportCard() {
 }
 
 function L1PreDataroom({
-  raise,
+  raise: r,
   composite,
   completeness,
   verdict,
 }: {
-  raise: ReturnType<typeof getRaise> & object;
+  raise: Raise;
   composite: number;
   completeness: number;
   verdict: { label: string; tone: string };
 }) {
-  const r = raise!;
   const overall = overallCompletion(r);
   const stats = [
     { label: "Vintage", value: r.vintage },
