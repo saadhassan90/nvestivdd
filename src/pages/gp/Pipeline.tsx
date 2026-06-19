@@ -131,10 +131,21 @@ export default function Pipeline() {
     <div className="px-6 py-6 max-w-5xl mx-auto">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Pipeline</h1>
-          <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl">
-            Every LP across every raise, plotted from first conversation to commitment.
-          </p>
+          <EditableText
+            as="h1"
+            className="text-2xl font-semibold text-foreground"
+            sectionKey="title"
+            label="Page title"
+            schema="text"
+            defaultValue="Pipeline"
+          />
+          <EditableText
+            as="p"
+            className="text-sm text-muted-foreground mt-1.5 max-w-2xl"
+            sectionKey="description"
+            label="Page description"
+            defaultValue="Every LP across every raise, plotted from first conversation to commitment."
+          />
         </div>
         <div className="relative">
           <select
