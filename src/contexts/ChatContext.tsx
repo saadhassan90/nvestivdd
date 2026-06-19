@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { buildActiveManifest, getActivePage } from "@/lib/pageContent";
 
 export type ChatMessage = {
   id: string;
@@ -241,6 +242,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         const thinkingStart = Date.now();
         const controller = new AbortController();
         abortRef.current = controller;
+        const activePage = getActivePage();
+        const pageManifest = buildActiveManifest();
         const resp = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-completion`,
           {
@@ -256,6 +259,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
               conversation_id: convId,
               memo_id: memoContext?.memoId || null,
               odd_project_id: oddContext?.projectId || null,
+              page_context: {
+                page_key: activePage.pageKey,
+                raise_id: activePage.raiseId,
+                manifest: pageManifest,
+              },
             }),
             signal: controller.signal,
           }
