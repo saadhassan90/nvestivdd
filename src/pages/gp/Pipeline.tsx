@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { RAISES, type ConsentState, type L2Lp } from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
+import { EditableText } from "@/components/iris/EditableText";
 
 const STAGES = [
   { id: "sourced", label: "Sourced" },
