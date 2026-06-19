@@ -19,7 +19,7 @@ export default function RaiseContext() {
   const pct = overallCompletion(raise);
   return (
     <div className="flex flex-col">
-      <div className="px-6 pt-4">
+      <div className="px-6 pt-6 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Raise · Vintage {raise.vintage}</p>
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
@@ -32,7 +32,7 @@ export default function RaiseContext() {
           <span className="text-xs text-muted-foreground">{raise.strategy} · {raise.targetSize}</span>
         </div>
       </div>
-      <nav className="px-6 mt-2 border-b border-border flex gap-1 overflow-x-auto">
+      <nav className="px-6 mt-3 border-b border-border flex gap-1 overflow-x-auto max-w-5xl mx-auto w-full">
         {TABS.map((t) => (
           <NavLink
             key={t.to || "overview"}
