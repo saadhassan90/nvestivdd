@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Eye, Layers, ShieldCheck } from "lucide-react";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise, overallCompletion, type Raise, type ReportSection } from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
 
 type Level = "L1" | "L2" | "L3";
 
-const LEVELS: { id: Level; label: string; icon: typeof Eye }[] = [
-  { id: "L1", label: "L1 — Pre-Dataroom", icon: Eye },
-  { id: "L2", label: "L2 — IDD", icon: Layers },
-  { id: "L3", label: "L3 — ODD", icon: ShieldCheck },
+const LEVELS: { id: Level; label: string }[] = [
+  { id: "L1", label: "L1- Triage" },
+  { id: "L2", label: "L2 — IDD" },
+  { id: "L3", label: "L3 — ODD" },
 ];
 
 function scoreColor(s: number) {
