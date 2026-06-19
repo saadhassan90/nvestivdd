@@ -196,8 +196,38 @@ export default function RaiseOverview() {
   ];
   return (
     <GpPagePlaceholder>
+      <div className="rounded-lg border border-border bg-card p-5">
+        <div className="flex items-baseline justify-between">
+          <p className="text-sm font-medium text-foreground">Raise completion</p>
+          <p className="text-2xl font-semibold text-foreground tabular-nums">{overall}%</p>
+        </div>
+        <div className="mt-2 h-2 w-full rounded-full bg-muted overflow-hidden">
+          <div className="h-full bg-foreground" style={{ width: `${overall}%` }} />
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          {components.map((c) => (
+            <div key={c.name}>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{c.name}</span>
+                <span className="tabular-nums">{c.pct}%</span>
+              </div>
+              <div className="mt-1 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div className="h-full bg-foreground/60" style={{ width: `${c.pct}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-lg border border-border bg-card p-4">
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.label}</p>
+            <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{s.value}</p>
+          </div>
+        ))}
+      </div>
       {specifics && (
-        <div className="mb-4 rounded-lg border border-border bg-card">
+        <div className="mt-4 rounded-lg border border-border bg-card">
           <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -235,36 +265,6 @@ export default function RaiseOverview() {
           </div>
         </div>
       )}
-      <div className="rounded-lg border border-border bg-card p-5">
-        <div className="flex items-baseline justify-between">
-          <p className="text-sm font-medium text-foreground">Raise completion</p>
-          <p className="text-2xl font-semibold text-foreground tabular-nums">{overall}%</p>
-        </div>
-        <div className="mt-2 h-2 w-full rounded-full bg-muted overflow-hidden">
-          <div className="h-full bg-foreground" style={{ width: `${overall}%` }} />
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          {components.map((c) => (
-            <div key={c.name}>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{c.name}</span>
-                <span className="tabular-nums">{c.pct}%</span>
-              </div>
-              <div className="mt-1 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-foreground/60" style={{ width: `${c.pct}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-lg border border-border bg-card p-4">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.label}</p>
-            <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{s.value}</p>
-          </div>
-        ))}
-      </div>
     </GpPagePlaceholder>
   );
 }
