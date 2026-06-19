@@ -53,7 +53,7 @@ export function GpShell() {
       {/* Icon nav rail — always visible */}
       <nav className="w-14 shrink-0 border-r border-border bg-card flex flex-col items-center py-3 gap-1 sticky top-0 h-screen z-40">
         <Link to="/chat" className="mb-1 flex h-8 w-8 items-center justify-center" title="Nvestiv">
-          <img src={logo} alt="Nvestiv" className="h-6 w-6 object-contain" />
+          <img src={logoAsset.url} alt="Nvestiv" className="h-6 w-auto object-contain" />
         </Link>
         {!isChatPage && (
           <button
