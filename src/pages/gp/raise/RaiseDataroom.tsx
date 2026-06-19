@@ -53,9 +53,6 @@ import {
   type FsFolder,
 } from "@/mocks/gp/dataroomFs";
 
-function formatSize(kb: number) {
-  return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
-}
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
@@ -272,8 +269,8 @@ export default function RaiseDataroom() {
 
           {/* Listing */}
           <div>
-            <div className="grid grid-cols-[1fr_100px_120px_140px_40px] text-[11px] uppercase tracking-wider text-muted-foreground px-2 py-2 border-b border-border">
-              <div>Name</div><div>Size</div><div>Modified by</div><div>Modified</div><div />
+            <div className="grid grid-cols-[1fr_140px_40px] text-[11px] uppercase tracking-wider text-muted-foreground px-2 py-2 border-b border-border">
+              <div>Name</div><div>Modified</div><div />
             </div>
             {folders.length === 0 && files.length === 0 && (
               <div className="px-4 py-16 text-center text-sm text-muted-foreground border-b border-border">
@@ -283,7 +280,7 @@ export default function RaiseDataroom() {
             {folders.map((f) => (
               <div
                 key={f.id}
-                className="grid grid-cols-[1fr_100px_120px_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm cursor-pointer rounded-sm"
+                className="grid grid-cols-[1fr_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm cursor-pointer rounded-sm"
                 onDoubleClick={() => openFolder(f.id)}
                 onClick={() => openFolder(f.id)}
               >
@@ -291,8 +288,6 @@ export default function RaiseDataroom() {
                   <Folder className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="truncate text-foreground font-medium">{f.name}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">—</div>
-                <div className="text-xs text-muted-foreground truncate">{f.createdBy}</div>
                 <div className="text-xs text-muted-foreground">{f.createdAt ? formatDate(f.createdAt) : "—"}</div>
                 <div onClick={(e) => e.stopPropagation()} className="flex justify-end">
                   <NodeMenu
@@ -305,7 +300,7 @@ export default function RaiseDataroom() {
             {files.map((f) => (
               <div
                 key={f.id}
-                className="grid grid-cols-[1fr_100px_120px_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm"
+                className="grid grid-cols-[1fr_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -314,8 +309,6 @@ export default function RaiseDataroom() {
                     v{f.version}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground tabular-nums">{formatSize(f.sizeKb)}</div>
-                <div className="text-xs text-muted-foreground truncate">{f.uploadedBy}</div>
                 <div className="text-xs text-muted-foreground">{formatDate(f.uploadedAt)}</div>
                 <div className="flex justify-end">
                   <NodeMenu
