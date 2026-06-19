@@ -137,7 +137,6 @@ export default function RaiseDataroom() {
   // Ensure tree initialised
   getFs(raiseId);
 
-  const rootFolder = useMemo(() => getChildren(raiseId, "root"), [raiseId]);
   const rootNode = { kind: "folder" as const, id: "root", name: "Data Room", parentId: null, createdAt: "", createdBy: "" };
   const { folders, files } = getChildren(raiseId, currentId);
   const path = getPath(raiseId, currentId);
