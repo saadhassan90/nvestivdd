@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useParams, Navigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { getRaise, overallCompletion } from "@/mocks/gp/raises";
+import { getRaise } from "@/mocks/gp/raises";
 
 const TABS = [
   { to: "", label: "Overview", end: true },
