@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
 import { RAISES, type ConsentState, type L2Lp } from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
 
@@ -17,15 +18,6 @@ type Row = L2Lp & {
   raiseId: string;
   raiseName: string;
   stage: StageId | "dropped";
-  commitment: string;
-};
-
-const COMMIT_BY_TYPE: Record<L2Lp["type"], number> = {
-  SWF: 150,
-  Pension: 75,
-  Insurance: 60,
-  Endowment: 40,
-  "Family Office": 20,
 };
 
 function deriveStage(lp: L2Lp): StageId | "dropped" {
@@ -36,12 +28,6 @@ function deriveStage(lp: L2Lp): StageId | "dropped" {
   if (lp.questions <= 10) return "ic";
   if (lp.questions <= 20) return "commit";
   return "closed";
-}
-
-function deriveCommitment(lp: L2Lp): string {
-  const base = COMMIT_BY_TYPE[lp.type];
-  const jitter = ((lp.id.charCodeAt(lp.id.length - 1) % 7) - 3) * 5;
-  return `$${Math.max(10, base + jitter)}M`;
 }
 
 function initials(name: string): string {
@@ -95,7 +81,6 @@ export default function Pipeline() {
           raiseId: r.id,
           raiseName: r.name,
           stage: deriveStage(lp),
-          commitment: deriveCommitment(lp),
         });
       }
     }
@@ -286,7 +271,7 @@ export default function Pipeline() {
                           fontSize={9}
                           className="fill-muted-foreground"
                         >
-                          {lp.raiseName} · {lp.commitment}
+                          {lp.raiseName}
                         </text>
                       </g>
                     )}
@@ -329,19 +314,19 @@ export default function Pipeline() {
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_110px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
+        <div className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_44px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
           <div>LP</div>
           <div>Raise</div>
           <div>Type</div>
           <div>Stage</div>
-          <div>Commitment</div>
           <div>Consent</div>
           <div>Last activity</div>
+          <div className="text-center" />
         </div>
         {rows.map((lp) => (
           <div
             key={`${lp.raiseId}-${lp.id}`}
-            className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_110px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm"
+            className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_44px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm"
           >
             <div className="flex items-center gap-2 min-w-0">
               <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-[10px] font-semibold text-foreground">
@@ -352,7 +337,6 @@ export default function Pipeline() {
             <div className="text-xs text-muted-foreground truncate">{lp.raiseName}</div>
             <div className="text-xs text-muted-foreground">{lp.type}</div>
             <div className="text-xs text-foreground">{STAGE_LABEL[lp.stage]}</div>
-            <div className="text-xs text-foreground tabular-nums">{lp.commitment}</div>
             <div>
               <span
                 className={cn(
@@ -364,6 +348,11 @@ export default function Pipeline() {
               </span>
             </div>
             <div className="text-xs text-muted-foreground">{lp.lastActivity}</div>
+            <div className="flex justify-center">
+              <button className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ))}
         {rows.length === 0 && (
