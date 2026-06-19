@@ -45,9 +45,18 @@ export function GpShell() {
     <div className="min-h-screen flex w-full bg-background">
       {/* Icon nav rail — always visible */}
       <nav className="w-14 shrink-0 border-r border-border bg-card flex flex-col items-center py-3 gap-1 sticky top-0 h-screen z-40">
-        <Link to="/chat" className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-foreground">
-          <span className="text-[10px] font-bold text-background">N</span>
+        <Link to="/chat" className="mb-1 flex h-8 w-8 items-center justify-center" title="Nvestiv">
+          <img src={logo} alt="Nvestiv" className="h-6 w-6 object-contain" />
         </Link>
+        {!isChatPage && (
+          <button
+            onClick={() => setPanelOpen((o) => !o)}
+            className="mb-1 flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            title={panelOpen ? "Hide chat" : "Show chat"}
+          >
+            {panelOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+          </button>
+        )}
         {RAIL_ITEMS.map((it) => (
           <NavLink
             key={it.to}
@@ -65,6 +74,9 @@ export function GpShell() {
             <it.icon className="h-4 w-4" />
           </NavLink>
         ))}
+        <div className="mt-auto flex flex-col items-center gap-1">
+          <VariantSwitcher />
+        </div>
       </nav>
 
       {/* Docked chat panel — reflow, not overlay */}
@@ -80,32 +92,10 @@ export function GpShell() {
 
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 border-b border-border bg-card">
-          <div className="flex h-14 items-center gap-3 px-4">
-            {!isChatPage && (
-              <button
-                onClick={() => setPanelOpen((o) => !o)}
-                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
-                title={panelOpen ? "Hide chat" : "Show chat"}
-              >
-                {panelOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-              </button>
-            )}
-            <Link to="/chat" className="flex items-center shrink-0">
-              <img src={logo} alt="Nvestiv" className="h-5 sm:h-6" />
-            </Link>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
-              Manager
-            </span>
-            <div className="ml-auto">
-              <VariantSwitcher />
-            </div>
-          </div>
-        </header>
         <main className="flex-1 overflow-y-auto">
           {isChatPage ? (
             // Full-page chat: history panel + conversation
-            <div className="h-[calc(100vh-3.5rem)] flex">
+            <div className="h-screen flex">
               <aside className="w-64 lg:w-72 shrink-0 border-r border-border bg-card flex flex-col">
                 <div className="flex items-center justify-between px-3 py-2 border-b border-border">
                   <span className="text-xs font-semibold text-foreground">History</span>
