@@ -44,12 +44,6 @@ export default function RaiseReportCard() {
 
   return (
     <GpPagePlaceholder>
-      {/* Mirror banner */}
-      <div className="flex items-center gap-2 mb-3 text-xs text-muted-foreground">
-        <Eye className="h-3.5 w-3.5" />
-        <span>Mirror of the LP-facing report. Switch tiers to see what each LP audience reads.</span>
-      </div>
-
       {/* Level switcher */}
       <div className="flex gap-1 border-b border-border mb-5">
         {LEVELS.map((l) => {
