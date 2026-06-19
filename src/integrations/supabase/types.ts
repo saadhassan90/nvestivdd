@@ -1097,6 +1097,87 @@ export type Database = {
         }
         Relationships: []
       }
+      page_content: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          label: string | null
+          page_key: string
+          raise_id: string | null
+          schema_type: string
+          section_key: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          label?: string | null
+          page_key: string
+          raise_id?: string | null
+          schema_type?: string
+          section_key: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          label?: string | null
+          page_key?: string
+          raise_id?: string | null
+          schema_type?: string
+          section_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      page_edit_proposals: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          current_content: Json | null
+          id: string
+          label: string | null
+          page_key: string
+          proposed_content: Json
+          raise_id: string | null
+          rationale: string | null
+          section_key: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          current_content?: Json | null
+          id?: string
+          label?: string | null
+          page_key: string
+          proposed_content: Json
+          raise_id?: string | null
+          rationale?: string | null
+          section_key: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          current_content?: Json | null
+          id?: string
+          label?: string | null
+          page_key?: string
+          proposed_content?: Json
+          raise_id?: string | null
+          rationale?: string | null
+          section_key?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       performance_metrics: {
         Row: {
           alpha: string | null

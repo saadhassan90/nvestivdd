@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise } from "@/mocks/gp/raises";
 import { MessageSquare } from "lucide-react";
+import { EditableText } from "@/components/iris/EditableText";
 
 export default function RaiseInterview() {
   const { fundId } = useParams();
@@ -11,8 +12,21 @@ export default function RaiseInterview() {
   return (
     <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card p-5">
-        <p className="text-sm font-medium text-foreground">Open gaps IRIS would ask next</p>
-        <p className="text-xs text-muted-foreground mt-1">{gaps.length} prompts queued · pulled from unanswered DDQ + IRIS-suggested items</p>
+        <EditableText
+          as="p"
+          className="text-sm font-medium text-foreground"
+          sectionKey="header.title"
+          label="Interview header"
+          schema="text"
+          defaultValue="Open gaps IRIS would ask next"
+        />
+        <EditableText
+          as="p"
+          className="text-xs text-muted-foreground mt-1"
+          sectionKey="header.subtitle"
+          label="Interview subtitle"
+          defaultValue={`${gaps.length} prompts queued · pulled from unanswered DDQ + IRIS-suggested items`}
+        />
         <ul className="mt-4 space-y-2">
           {gaps.map((g) => (
             <li key={g.id} className="flex items-start gap-3 rounded-md border border-border bg-background/50 px-3 py-2.5">

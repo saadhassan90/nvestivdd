@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise } from "@/mocks/gp/raises";
+import { EditableText } from "@/components/iris/EditableText";
 
 export default function RaiseFeedback() {
   const { fundId } = useParams();
@@ -42,8 +43,21 @@ export default function RaiseFeedback() {
         </div>
       </div>
       <div className="rounded-lg border border-border bg-card p-5">
-        <p className="text-sm font-medium text-foreground">Top question themes</p>
-        <p className="text-xs text-muted-foreground mt-1">Aggregated across all L2 LPs. Identifying details suppressed.</p>
+        <EditableText
+          as="p"
+          className="text-sm font-medium text-foreground"
+          sectionKey="themes.title"
+          label="Themes card title"
+          schema="text"
+          defaultValue="Top question themes"
+        />
+        <EditableText
+          as="p"
+          className="text-xs text-muted-foreground mt-1"
+          sectionKey="themes.subtitle"
+          label="Themes card subtitle"
+          defaultValue="Aggregated across all L2 LPs. Identifying details suppressed."
+        />
         <div className="mt-4 space-y-3">
           {themes.map((t) => (
             <div key={t.theme}>

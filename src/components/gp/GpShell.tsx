@@ -9,6 +9,8 @@ import { ChatResizeHandle } from "@/components/chat/ChatResizeHandle";
 import { formatDistanceToNow } from "date-fns";
 import logoAsset from "@/assets/nvestiv-logomark.svg.asset.json";
 import { cn } from "@/lib/utils";
+import { PageContextSync } from "@/components/iris/PageContextSync";
+import { IrisProposalsBanner } from "@/components/iris/IrisProposalsBanner";
 
 const RAIL_ITEMS = [
   { to: "/chat", label: "Chat", icon: MessageSquare },
@@ -50,6 +52,8 @@ export function GpShell() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
+      <PageContextSync />
+      <IrisProposalsBanner />
       {/* Icon nav rail — always visible */}
       <nav className="w-14 shrink-0 border-r border-border bg-card flex flex-col items-center py-3 gap-1 sticky top-0 h-screen z-40">
         <Link to="/chat" className="mb-1 flex h-8 w-8 items-center justify-center" title="Nvestiv">

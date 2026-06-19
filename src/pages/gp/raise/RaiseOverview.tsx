@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise, overallCompletion } from "@/mocks/gp/raises";
+import { EditableText } from "@/components/iris/EditableText";
 
 type FundSpecifics = {
   oneLiner: string;
@@ -235,7 +236,13 @@ export default function RaiseOverview() {
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Snapshot</span>
               </div>
               <h2 className="mt-1 text-base font-semibold text-foreground truncate">{raise.name}</h2>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{specifics.oneLiner}</p>
+              <EditableText
+                as="p"
+                className="mt-1 text-xs text-muted-foreground leading-relaxed"
+                sectionKey="fund.one_liner"
+                label="Fund one-liner"
+                defaultValue={specifics.oneLiner}
+              />
             </div>
             <div className="shrink-0 text-right">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Status</p>

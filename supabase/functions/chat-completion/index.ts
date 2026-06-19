@@ -205,8 +205,40 @@ You have access to EVERY data point in the Nvestiv platform:
     base += `\n\nGlobal mode — user may ask about any deal. Use cross-deal tools for comparisons.`;
   }
 
-  return base + CHAT_CLARIFY_INSTRUCTIONS;
+  return base + CHAT_CLARIFY_INSTRUCTIONS + PAGE_EDIT_INSTRUCTIONS;
 }
+
+const PAGE_EDIT_INSTRUCTIONS = `
+
+## PAGE CONTENT — READ + PROPOSE EDITS
+You have agentic access to the prose content of every GP page in this app
+(raises overview/interview/DDQ/dataroom/feedback/report-card/pipeline,
+global pipeline, contacts, settings, raise list). The user's CURRENT page
+and its editable blocks are injected at the bottom of this prompt under
+"CURRENT PAGE BLOCKS".
+
+Tools:
+- \`list_page_blocks({ page_key? })\` — discover blocks on any page.
+- \`read_page_block({ page_key, section_key, raise_id? })\` — full content of a block.
+- \`search_page_content({ query, page_key? })\` — substring search across all pages.
+- \`propose_page_edit({ page_key, section_key, raise_id?, proposed_text, rationale, label? })\`
+  — propose a new value for a block. The user reviews + applies; you never
+  write directly. Use the EXACT page_key and section_key from the manifest
+  or from list_page_blocks — never invent them.
+
+Rules:
+- When the user asks to change / rewrite / tighten / shorten / expand any
+  visible prose on the current page, call \`propose_page_edit\` immediately
+  with the active page_key + raise_id. Reply with one short sentence
+  saying you proposed the change.
+- When the user asks "what does this page say about X" or "where did we
+  mention Y", use \`search_page_content\` or read the manifest first.
+- Never propose edits to blocks that aren't in the manifest or returned by
+  list_page_blocks. If the user asks for something structural (new card,
+  new tab, new table column), explain that you can only change the text of
+  existing blocks.
+- Default scope is the user's current page. Only operate on other pages
+  when explicitly asked.`;
 
 const tools = [
   {
@@ -487,6 +519,62 @@ const tools = [
   },
 ];
 
+// Page content tools: read + propose edits to GP page prose blocks.
+const PAGE_CONTENT_TOOLS = [
+  {
+    name: "list_page_blocks",
+    description: "List all editable prose blocks across GP pages, optionally filtered by page_key. Returns each block's page_key, raise_id, section_key, label, and current text. Use this when the user asks about content on a page other than the current one, or to discover what's editable.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string", description: "Optional page filter, e.g. 'gp.raise.overview'." },
+        raise_id: { type: "string", description: "Optional raise filter for raise-scoped pages." },
+      },
+    },
+  },
+  {
+    name: "read_page_block",
+    description: "Read the full current text of a single editable page block.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string" },
+        section_key: { type: "string" },
+        raise_id: { type: "string", description: "Required for raise-scoped pages." },
+      },
+      required: ["page_key", "section_key"],
+    },
+  },
+  {
+    name: "search_page_content",
+    description: "Substring search across the text of every editable page block. Use to answer 'where did we say X' or 'find the page that mentions Y'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        page_key: { type: "string", description: "Optional page filter." },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "propose_page_edit",
+    description: "Propose a new value for an editable page block. The proposal is shown to the user in a floating banner with Apply/Reject. You never write directly. Use ONLY page_key + section_key values from the manifest or list_page_blocks.",
+    input_schema: {
+      type: "object",
+      properties: {
+        page_key: { type: "string" },
+        section_key: { type: "string" },
+        raise_id: { type: "string" },
+        proposed_text: { type: "string", description: "The full replacement text for the block." },
+        rationale: { type: "string", description: "One sentence explaining why this edit improves the page." },
+        label: { type: "string", description: "Optional human label for the block (mirrors what the page registered)." },
+      },
+      required: ["page_key", "section_key", "proposed_text", "rationale"],
+    },
+  },
+];
+
 // Client-rendered clarification tools. These are deliberately exposed to ALL
 // modes (chat, memo, odd). The server returns an immediate stub so the model
 // stops, and the frontend renders the input as an interactive UI element.
@@ -617,10 +705,112 @@ function applyMemoEdit(
 async function executeTool(
   name: string,
   input: any,
-  ctx: { memoId?: string | null; oddProjectId?: string | null } = {},
+  ctx: {
+    memoId?: string | null;
+    oddProjectId?: string | null;
+    activePageKey?: string | null;
+    activeRaiseId?: string | null;
+    conversationId?: string | null;
+  } = {},
 ): Promise<string> {
   try {
     switch (name) {
+      case "list_page_blocks": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content, schema_type")
+          .limit(500);
+        if (input.page_key) q = q.eq("page_key", input.page_key);
+        if (input.raise_id) q = q.eq("raise_id", input.raise_id);
+        const { data, error } = await q;
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify({
+          blocks: (data || []).map((r: any) => ({
+            page_key: r.page_key,
+            raise_id: r.raise_id,
+            section_key: r.section_key,
+            label: r.label,
+            text: r.content?.text ?? "",
+          })),
+          note: "Blocks not listed here may still exist in code with default text; ask the user or use the current manifest.",
+        });
+      }
+      case "read_page_block": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content")
+          .eq("page_key", input.page_key)
+          .eq("section_key", input.section_key);
+        if (input.raise_id) q = q.eq("raise_id", input.raise_id);
+        const { data, error } = await q.limit(1);
+        if (error) return JSON.stringify({ error: error.message });
+        const row = data?.[0];
+        if (!row) return JSON.stringify({ found: false, note: "No DB override; in-code default is in use." });
+        return JSON.stringify({ found: true, ...row, text: row.content?.text ?? "" });
+      }
+      case "search_page_content": {
+        let q = supabase
+          .from("page_content")
+          .select("page_key, raise_id, section_key, label, content")
+          .limit(500);
+        if (input.page_key) q = q.eq("page_key", input.page_key);
+        const { data, error } = await q;
+        if (error) return JSON.stringify({ error: error.message });
+        const needle = String(input.query || "").toLowerCase();
+        const hits = (data || [])
+          .map((r: any) => ({
+            page_key: r.page_key,
+            raise_id: r.raise_id,
+            section_key: r.section_key,
+            label: r.label,
+            text: r.content?.text ?? "",
+          }))
+          .filter((b: any) => b.text.toLowerCase().includes(needle))
+          .slice(0, 25);
+        return JSON.stringify({ matches: hits.length, results: hits });
+      }
+      case "propose_page_edit": {
+        const pageKey = input.page_key || ctx.activePageKey;
+        const raiseId = input.raise_id ?? ctx.activeRaiseId ?? null;
+        if (!pageKey || !input.section_key || !input.proposed_text) {
+          return JSON.stringify({ error: "page_key, section_key, and proposed_text are required." });
+        }
+        // Snapshot current value from DB (if any).
+        let currentText: string | null = null;
+        {
+          let q = supabase
+            .from("page_content")
+            .select("content")
+            .eq("page_key", pageKey)
+            .eq("section_key", input.section_key);
+          if (raiseId) q = q.eq("raise_id", raiseId);
+          const { data } = await q.limit(1);
+          currentText = data?.[0]?.content?.text ?? null;
+        }
+        const { data: prop, error } = await supabase
+          .from("page_edit_proposals")
+          .insert({
+            page_key: pageKey,
+            raise_id: raiseId,
+            section_key: input.section_key,
+            label: input.label || null,
+            current_content: currentText !== null ? { text: currentText } : null,
+            proposed_content: { text: input.proposed_text },
+            rationale: input.rationale || null,
+            status: "pending",
+            conversation_id: ctx.conversationId || null,
+          })
+          .select("id")
+          .single();
+        if (error) return JSON.stringify({ error: error.message });
+        return JSON.stringify({
+          success: true,
+          proposal_id: prop?.id,
+          page_key: pageKey,
+          section_key: input.section_key,
+          summary: "Proposal queued in the Iris suggestions banner — user will Apply or Reject.",
+        });
+      }
       case "ask_quick_reply":
       case "ask_form": {
         // Client-rendered tools. Return immediately so the model can stop
@@ -1027,7 +1217,10 @@ serve(async (req) => {
       });
     }
 
-    const { messages, model, project_id, conversation_id, memo_id, odd_project_id } = await req.json();
+    const { messages, model, project_id, conversation_id, memo_id, odd_project_id, page_context } = await req.json();
+    const activePageKey: string | null = page_context?.page_key || null;
+    const activeRaiseId: string | null = page_context?.raise_id || null;
+    const pageManifest = page_context?.manifest || null;
 
     // In edit modes, default to haiku for fast tool calls.
     const effectiveModel = model || (memo_id || odd_project_id ? "haiku-3.5" : "sonnet-4");
@@ -1069,7 +1262,21 @@ serve(async (req) => {
       };
     }
 
-    const systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
+    let systemPrompt = buildSystemPrompt(projectContext, memoContext, oddContext);
+    if (!memoContext && !oddContext && pageManifest?.page_key) {
+      systemPrompt += `\n\n## CURRENT PAGE BLOCKS\nActive page_key: \`${pageManifest.page_key}\`${pageManifest.raise_id ? ` (raise_id: \`${pageManifest.raise_id}\`)` : ""}.\n\n`;
+      const blocks = Array.isArray(pageManifest.blocks) ? pageManifest.blocks : [];
+      if (blocks.length === 0) {
+        systemPrompt += `No editable prose blocks are registered on this page.`;
+      } else {
+        systemPrompt += blocks
+          .map(
+            (b: any) =>
+              `- \`${b.section_key}\` — ${b.label} (${b.schema}): ${JSON.stringify(b.preview || "")}`,
+          )
+          .join("\n");
+      }
+    }
     const modelId = MODEL_MAP[effectiveModel] || "claude-sonnet-4-5-20250929";
 
     // In edit modes, expose the relevant edit tool + clarification tools.
@@ -1078,7 +1285,8 @@ serve(async (req) => {
       : memo_id
         ? tools.filter((t) => t.name === "edit_memo")
         : tools;
-    const activeTools = [...editTools, ...CLARIFY_TOOLS];
+    const pageTools = oddContext || memo_id ? [] : PAGE_CONTENT_TOOLS;
+    const activeTools = [...editTools, ...pageTools, ...CLARIFY_TOOLS];
     const anthropicTools = toAnthropicTools(activeTools);
 
     const baseMessages = toAnthropicMessages(messages);
@@ -1234,7 +1442,13 @@ serve(async (req) => {
               const toolResultBlocks = await Promise.all(
                 pendingFunctionCalls.map(async (fc) => {
                   send("tool_executing", { name: fc.name, id: fc.id });
-                  const result = await executeTool(fc.name, fc.args, { memoId: memo_id, oddProjectId: odd_project_id });
+                  const result = await executeTool(fc.name, fc.args, {
+                    memoId: memo_id,
+                    oddProjectId: odd_project_id,
+                    activePageKey,
+                    activeRaiseId,
+                    conversationId: conversation_id,
+                  });
                   let parsed: any;
                   try { parsed = JSON.parse(result); } catch { parsed = { raw: result }; }
                   allToolCalls.push({ name: fc.name, input: fc.args, output: parsed });
