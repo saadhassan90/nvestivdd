@@ -300,7 +300,7 @@ export default function RaiseDataroom() {
             {files.map((f) => (
               <div
                 key={f.id}
-                className="grid grid-cols-[1fr_100px_120px_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm"
+                className="grid grid-cols-[1fr_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -309,8 +309,6 @@ export default function RaiseDataroom() {
                     v{f.version}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground tabular-nums">{formatSize(f.sizeKb)}</div>
-                <div className="text-xs text-muted-foreground truncate">{f.uploadedBy}</div>
                 <div className="text-xs text-muted-foreground">{formatDate(f.uploadedAt)}</div>
                 <div className="flex justify-end">
                   <NodeMenu
