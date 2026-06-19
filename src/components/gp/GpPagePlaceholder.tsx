@@ -2,15 +2,21 @@ interface Props {
   title: string;
   description?: string;
   children?: React.ReactNode;
+  action?: React.ReactNode;
 }
 
-export function GpPagePlaceholder({ title, description, children }: Props) {
+export function GpPagePlaceholder({ title, description, children, action }: Props) {
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
-      {description && (
-        <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl">{description}</p>
-      )}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
+          {description && (
+            <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl">{description}</p>
+          )}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
       <div className="mt-8">
         {children ?? (
           <div className="rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center text-sm text-muted-foreground">
