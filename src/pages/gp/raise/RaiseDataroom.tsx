@@ -197,7 +197,7 @@ export default function RaiseDataroom() {
 
   return (
     <GpPagePlaceholder>
-      <div className="grid grid-cols-[220px_1fr] gap-6 min-h-[500px]">
+      <div className="grid grid-cols-[170px_1fr] gap-5 min-h-[500px]">
         {/* Folder tree side pane */}
         <aside className="border-r border-border pr-2 py-1 overflow-y-auto max-h-[calc(100vh-220px)]">
           <div className="flex items-center justify-between px-1.5 py-1 mb-1">
