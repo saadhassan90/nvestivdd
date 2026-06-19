@@ -280,7 +280,7 @@ export default function RaiseDataroom() {
             {folders.map((f) => (
               <div
                 key={f.id}
-                className="grid grid-cols-[1fr_100px_120px_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm cursor-pointer rounded-sm"
+                className="grid grid-cols-[1fr_140px_40px] items-center px-2 py-2.5 border-b border-border/60 hover:bg-muted/40 text-sm cursor-pointer rounded-sm"
                 onDoubleClick={() => openFolder(f.id)}
                 onClick={() => openFolder(f.id)}
               >
@@ -288,8 +288,6 @@ export default function RaiseDataroom() {
                   <Folder className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="truncate text-foreground font-medium">{f.name}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">—</div>
-                <div className="text-xs text-muted-foreground truncate">{f.createdBy}</div>
                 <div className="text-xs text-muted-foreground">{f.createdAt ? formatDate(f.createdAt) : "—"}</div>
                 <div onClick={(e) => e.stopPropagation()} className="flex justify-end">
                   <NodeMenu
