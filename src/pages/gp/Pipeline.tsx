@@ -11,16 +11,17 @@ const STAGES = [
   { id: "ic", label: "IC Review" },
   { id: "commit", label: "Commitment" },
   { id: "closed", label: "Closed" },
+  { id: "dropped", label: "Dropped" },
 ] as const;
 type StageId = (typeof STAGES)[number]["id"];
 
 type Row = L2Lp & {
   raiseId: string;
   raiseName: string;
-  stage: StageId | "dropped";
+  stage: StageId;
 };
 
-function deriveStage(lp: L2Lp): StageId | "dropped" {
+function deriveStage(lp: L2Lp): StageId {
   if (lp.consent === "withdrawn") return "dropped";
   if (lp.consent === "pending") return "nda";
   if (lp.questions === 0) return "dataroom";
@@ -45,7 +46,7 @@ const CONSENT_STYLES: Record<ConsentState, string> = {
   withdrawn: "border-destructive/40 text-destructive",
 };
 
-const STAGE_LABEL: Record<StageId | "dropped", string> = {
+const STAGE_LABEL: Record<StageId, string> = {
   sourced: "Sourced",
   nda: "NDA",
   dataroom: "Data Room",
@@ -58,11 +59,13 @@ const STAGE_LABEL: Record<StageId | "dropped", string> = {
 
 // SVG layout constants
 const VB_W = 1000;
-const VB_H = 280;
+const VB_H = 300;
 const PAD_X = 70;
 const PATH_Y = 170;
-const BUBBLE_R = 16;
-const STACK_DY = 36;
+const BUBBLE_R = 14;
+const STACK_DY = 32;
+const STACK_DX = 32;
+const MAX_PER_COL = 3;
 
 function stageX(i: number): number {
   return PAD_X + (i * (VB_W - PAD_X * 2)) / (STAGES.length - 1);
@@ -97,8 +100,7 @@ export default function Pipeline() {
     const map = new Map<StageId, Row[]>();
     STAGES.forEach((s) => map.set(s.id, []));
     for (const r of rows) {
-      if (r.stage === "dropped") continue;
-      map.get(r.stage as StageId)?.push(r);
+      map.get(r.stage)?.push(r);
     }
     return map;
   }, [rows]);
@@ -209,25 +211,31 @@ export default function Pipeline() {
               const cx = stageX(i);
               const cy = stageY(i);
               return lps.map((lp, idx) => {
-                const offset = (idx - (lps.length - 1) / 2) * STACK_DY;
-                const by = cy - 36 + offset; // sit above the path point
+                const col = Math.floor(idx / MAX_PER_COL);
+                const rowIdx = idx % MAX_PER_COL;
+                const totalCols = Math.ceil(lps.length / MAX_PER_COL);
+                const colOffset = (col - (totalCols - 1) / 2) * STACK_DX;
+                const bx = cx + colOffset;
+                const by = cy - 40 - rowIdx * STACK_DY;
                 const isHover = hoverId === `${lp.raiseId}:${lp.id}`;
                 return (
                   <g
                     key={`${lp.raiseId}-${lp.id}`}
-                    transform={`translate(${cx}, ${by})`}
+                    transform={`translate(${bx}, ${by})`}
                     onMouseEnter={() => setHoverId(`${lp.raiseId}:${lp.id}`)}
                     onMouseLeave={() => setHoverId(null)}
                     className="cursor-pointer"
                   >
-                    <line
-                      x1={0}
-                      y1={BUBBLE_R}
-                      x2={0}
-                      y2={cy - by}
-                      stroke="hsl(var(--border))"
-                      strokeWidth={1}
-                    />
+                    {rowIdx === 0 && (
+                      <line
+                        x1={0}
+                        y1={BUBBLE_R}
+                        x2={cx - bx}
+                        y2={cy - by}
+                        stroke="hsl(var(--border))"
+                        strokeWidth={1}
+                      />
+                    )}
                     <circle
                       r={BUBBLE_R}
                       fill="hsl(var(--background))"
@@ -291,24 +299,6 @@ export default function Pipeline() {
             </text>
           </svg>
 
-          {droppedRows.length > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Dropped
-              </span>
-              {droppedRows.map((lp) => (
-                <span
-                  key={`${lp.raiseId}-${lp.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-2 py-0.5 text-[11px] text-destructive"
-                >
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-destructive/40 text-[8px] font-semibold">
-                    {initials(lp.name)}
-                  </span>
-                  {lp.name}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
