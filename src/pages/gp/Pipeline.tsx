@@ -138,7 +138,7 @@ export default function Pipeline() {
         <select
           value={raiseFilter}
           onChange={(e) => setRaiseFilter(e.target.value)}
-          className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+          className="h-8 rounded-md border border-border bg-background px-2 pr-8 text-xs text-foreground appearance-none"
         >
           <option value="all">All raises</option>
           {RAISES.map((r) => (
