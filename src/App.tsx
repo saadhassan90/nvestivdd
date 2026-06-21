@@ -29,6 +29,8 @@ import RaisePipeline from "./pages/gp/raise/RaisePipeline";
 import Pipeline from "./pages/gp/Pipeline";
 import Contacts from "./pages/gp/Contacts";
 import GpSettings from "./pages/gp/GpSettings";
+import Ndas from "./pages/gp/Ndas";
+import NdaSignPage from "./pages/nda/NdaSignPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,7 @@ function RoleRoutes() {
   if (variant === "gp") {
     return (
       <Routes>
+        <Route path="/nda/:ndaId" element={<NdaSignPage />} />
         <Route element={<GpShell />}>
           <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/chat" element={<GpChat />} />
@@ -51,6 +54,7 @@ function RoleRoutes() {
             <Route path="pipeline" element={<RaisePipeline />} />
           </Route>
           <Route path="/pipeline" element={<Pipeline />} />
+          <Route path="/ndas" element={<Ndas />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/settings" element={<GpSettings />} />
           <Route path="*" element={<Navigate to="/chat" replace />} />

@@ -1,4 +1,4 @@
-import { MessageSquare, Briefcase, Network, Users, Settings as SettingsIcon } from "lucide-react";
+import { MessageSquare, Briefcase, Network, Users, Settings as SettingsIcon, FileSignature } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -16,6 +16,7 @@ const ITEMS = [
   { title: "Chat", url: "/chat", icon: MessageSquare },
   { title: "Raises", url: "/raises", icon: Briefcase },
   { title: "Pipeline", url: "/pipeline", icon: Network },
+  { title: "NDAs", url: "/ndas", icon: FileSignature },
   { title: "Contacts", url: "/contacts", icon: Users },
   { title: "Settings", url: "/settings", icon: SettingsIcon },
 ];
