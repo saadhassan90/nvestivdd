@@ -3,7 +3,14 @@ import { useParams } from "react-router-dom";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
-import { getRaise, dropLpFromPipeline, subscribeRaises, RAISES } from "@/mocks/gp/raises";
+import {
+  getRaise,
+  dropLpFromPipeline,
+  setLpStage,
+  subscribeRaises,
+  RAISES,
+  type PipelineStage,
+} from "@/mocks/gp/raises";
 import {
   getNdaByLp,
   seedNdasFromRaises,
@@ -15,6 +22,7 @@ import { NdaStatusPill } from "@/components/gp/NdaStatusPill";
 import { SendNdaModal } from "@/components/gp/SendNdaModal";
 import { NdaDetailDrawer } from "@/components/gp/NdaDetailDrawer";
 import { LpRowMenu } from "@/components/gp/LpRowMenu";
+import { PipelineStagePill } from "@/components/gp/PipelineStagePill";
 
 seedNdasFromRaises(RAISES);
 
@@ -45,16 +53,32 @@ export default function RaisePipeline() {
   return (
     <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1.5fr_110px_140px_70px_110px_90px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
-          <div>LP</div><div>Type</div><div>NDA</div><div>Qs</div><div>Last activity</div><div className="text-right">Actions</div>
+        <div className="grid grid-cols-[1.4fr_100px_180px_130px_60px_100px_90px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
+          <div>LP</div><div>Type</div><div>Stage</div><div>NDA</div><div>Qs</div><div>Last activity</div><div className="text-right">Actions</div>
         </div>
         {raise.lps.map((lp) => {
           const nda = getNdaByLp(raise.id, lp.id);
           const status: NdaStatus = nda?.status ?? "not_sent";
+          const stage: PipelineStage = lp.stage
+            ?? (lp.consent === "withdrawn"
+              ? "declined"
+              : status === "signed" || status === "countersigned"
+                ? "dataroom_sent"
+                : status === "sent" || status === "viewed"
+                  ? "nda_sent"
+                  : status === "requested"
+                    ? "requested_dataroom"
+                    : "sent");
           return (
-            <div key={lp.id} className="grid grid-cols-[1.5fr_110px_140px_70px_110px_90px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm">
+            <div key={lp.id} className="grid grid-cols-[1.4fr_100px_180px_130px_60px_100px_90px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm">
               <div className="text-foreground font-medium truncate">{lp.name}</div>
               <div className="text-xs text-muted-foreground">{lp.type}</div>
+              <div>
+                <PipelineStagePill
+                  stage={stage}
+                  onChange={(next) => setLpStage(raise.id, lp.id, next)}
+                />
+              </div>
               <div>
                 <NdaStatusPill status={status} onClick={nda ? () => setOpenNda(nda) : undefined} />
               </div>
