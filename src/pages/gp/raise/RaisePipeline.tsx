@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Send, MoreHorizontal } from "lucide-react";
+import { Send } from "lucide-react";
+import { toast } from "sonner";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
-import { getRaise } from "@/mocks/gp/raises";
-import { RAISES } from "@/mocks/gp/raises";
+import { getRaise, dropLpFromPipeline, subscribeRaises, RAISES } from "@/mocks/gp/raises";
 import {
   getNdaByLp,
   seedNdasFromRaises,
@@ -14,6 +14,7 @@ import {
 import { NdaStatusPill } from "@/components/gp/NdaStatusPill";
 import { SendNdaModal } from "@/components/gp/SendNdaModal";
 import { NdaDetailDrawer } from "@/components/gp/NdaDetailDrawer";
+import { LpRowMenu } from "@/components/gp/LpRowMenu";
 
 seedNdasFromRaises(RAISES);
 
@@ -21,7 +22,11 @@ export default function RaisePipeline() {
   const { fundId } = useParams();
   const raise = getRaise(fundId);
   const [, force] = useState(0);
-  useEffect(() => subscribeNdas(() => force((v) => v + 1)), []);
+  useEffect(() => {
+    const u1 = subscribeNdas(() => force((v) => v + 1));
+    const u2 = subscribeRaises(() => force((v) => v + 1));
+    return () => { u1(); u2(); };
+  }, []);
 
   const [sendFor, setSendFor] = useState<{ id: string; name: string } | null>(null);
   const [openNda, setOpenNda] = useState<NdaRecord | null>(null);
@@ -46,7 +51,6 @@ export default function RaisePipeline() {
         {raise.lps.map((lp) => {
           const nda = getNdaByLp(raise.id, lp.id);
           const status: NdaStatus = nda?.status ?? "not_sent";
-          const canSend = !nda || ["not_sent", "expired", "declined", "revoked"].includes(status);
           return (
             <div key={lp.id} className="grid grid-cols-[1.5fr_110px_140px_70px_110px_90px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm">
               <div className="text-foreground font-medium truncate">{lp.name}</div>
@@ -56,23 +60,27 @@ export default function RaisePipeline() {
               </div>
               <div className="text-xs text-muted-foreground tabular-nums">{lp.questions}</div>
               <div className="text-xs text-muted-foreground">{lp.lastActivity}</div>
-              <div className="flex justify-end gap-1">
-                {canSend ? (
+              <div className="flex justify-end items-center gap-1">
+                {!nda && (
                   <button
                     onClick={() => setSendFor({ id: lp.id, name: lp.name })}
                     className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] hover:bg-muted"
                   >
                     <Send className="h-3 w-3" /> Send
                   </button>
-                ) : (
-                  <button
-                    onClick={() => nda && setOpenNda(nda)}
-                    className="inline-flex items-center justify-center h-6 w-6 rounded-md border border-border hover:bg-muted text-muted-foreground"
-                    title="View NDA"
-                  >
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                  </button>
                 )}
+                <LpRowMenu
+                  raiseId={raise.id}
+                  raiseName={raise.name}
+                  lpId={lp.id}
+                  lpName={lp.name}
+                  onViewNda={(n) => setOpenNda(n)}
+                  onSendNda={() => setSendFor({ id: lp.id, name: lp.name })}
+                  onDropFromPipeline={() => {
+                    dropLpFromPipeline(raise.id, lp.id);
+                    toast.error(`${lp.name} dropped from pipeline`);
+                  }}
+                />
               </div>
             </div>
           );
