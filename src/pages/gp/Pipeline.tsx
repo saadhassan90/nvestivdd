@@ -1,42 +1,50 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { RAISES, type ConsentState, type L2Lp, dropLpFromPipeline, subscribeRaises } from "@/mocks/gp/raises";
+import {
+  RAISES,
+  type ConsentState,
+  type L2Lp,
+  type PipelineStage,
+  PIPELINE_STAGES,
+  PIPELINE_STAGE_LABEL,
+  dropLpFromPipeline,
+  setLpStage,
+  subscribeRaises,
+} from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
 import { EditableText } from "@/components/iris/EditableText";
 import { LpRowMenu } from "@/components/gp/LpRowMenu";
 import { NdaDetailDrawer } from "@/components/gp/NdaDetailDrawer";
 import { SendNdaModal } from "@/components/gp/SendNdaModal";
-import { seedNdasFromRaises, subscribeNdas, type NdaRecord } from "@/mocks/gp/ndas";
+import { getNdaByLp, seedNdasFromRaises, subscribeNdas, type NdaRecord } from "@/mocks/gp/ndas";
+import { PipelineStagePill } from "@/components/gp/PipelineStagePill";
 
 seedNdasFromRaises(RAISES);
 
-const STAGES = [
-  { id: "sourced", label: "Sourced" },
-  { id: "nda", label: "NDA" },
-  { id: "dataroom", label: "Data Room" },
-  { id: "ddq", label: "DDQ" },
-  { id: "ic", label: "IC Review" },
-  { id: "commit", label: "Commitment" },
-  { id: "closed", label: "Closed" },
-  { id: "dropped", label: "Dropped" },
-] as const;
-type StageId = (typeof STAGES)[number]["id"];
+const STAGES = PIPELINE_STAGES;
+type StageId = PipelineStage;
 
-type Row = L2Lp & {
+type Row = Omit<L2Lp, "stage"> & {
   raiseId: string;
   raiseName: string;
   stage: StageId;
 };
 
-function deriveStage(lp: L2Lp): StageId {
-  if (lp.consent === "withdrawn") return "dropped";
-  if (lp.consent === "pending") return "nda";
-  if (lp.questions === 0) return "dataroom";
-  if (lp.questions <= 5) return "ddq";
-  if (lp.questions <= 10) return "ic";
-  if (lp.questions <= 20) return "commit";
-  return "closed";
+function deriveStage(raiseId: string, lp: L2Lp): StageId {
+  if (lp.stage) return lp.stage;
+  if (lp.consent === "withdrawn") return "declined";
+  const nda = getNdaByLp(raiseId, lp.id);
+  if (nda) {
+    if (nda.status === "signed" || nda.status === "countersigned") {
+      if (lp.questions >= 15) return "ic_ready";
+      if (lp.questions >= 6) return "opened";
+      return "dataroom_sent";
+    }
+    if (nda.status === "sent" || nda.status === "viewed") return "nda_sent";
+    if (nda.status === "requested") return "requested_dataroom";
+  }
+  return "sent";
 }
 
 function initials(name: string): string {
@@ -54,16 +62,7 @@ const CONSENT_STYLES: Record<ConsentState, string> = {
   withdrawn: "border-destructive/40 text-destructive",
 };
 
-const STAGE_LABEL: Record<StageId, string> = {
-  sourced: "Sourced",
-  nda: "NDA",
-  dataroom: "Data Room",
-  ddq: "DDQ",
-  ic: "IC Review",
-  commit: "Commitment",
-  closed: "Closed",
-  dropped: "Dropped",
-};
+const STAGE_LABEL = PIPELINE_STAGE_LABEL;
 
 // SVG layout constants
 const VB_W = 1000;
@@ -99,12 +98,14 @@ export default function Pipeline() {
           ...lp,
           raiseId: r.id,
           raiseName: r.name,
-          stage: deriveStage(lp),
+          stage: deriveStage(r.id, lp),
         });
       }
     }
     return out;
-  }, []);
+    // re-derive when raises or ndas change via force()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [RAISES.length]);
 
   const rows = useMemo(
     () => (raiseFilter === "all" ? allRows : allRows.filter((r) => r.raiseId === raiseFilter)),
@@ -121,7 +122,7 @@ export default function Pipeline() {
     return map;
   }, [rows]);
 
-  const droppedRows = rows.filter((r) => r.stage === "dropped");
+  const droppedRows = rows.filter((r) => r.stage === "declined");
 
   // Build the path: a gentle wave so it doesn't feel like a ruler
   const pathD = useMemo(() => {
@@ -357,7 +358,12 @@ export default function Pipeline() {
             </div>
             <div className="text-xs text-muted-foreground truncate">{lp.raiseName}</div>
             <div className="text-xs text-muted-foreground">{lp.type}</div>
-            <div className="text-xs text-foreground">{STAGE_LABEL[lp.stage]}</div>
+            <div>
+              <PipelineStagePill
+                stage={lp.stage}
+                onChange={(next) => setLpStage(lp.raiseId, lp.id, next)}
+              />
+            </div>
             <div>
               <span
                 className={cn(
