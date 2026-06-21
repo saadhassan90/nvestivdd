@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { useOptionalChatContext } from "@/contexts/ChatContext";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LpRail } from "@/components/layout/LpRail";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const chat = useOptionalChatContext();
@@ -14,6 +15,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
+      {/* Persistent LP icon rail (desktop only — mobile uses MobileBottomNav) */}
+      {!isMobile && <LpRail />}
+
       {/* Main content */}
       <div
         className="flex-1 min-w-0 overflow-y-auto transition-[margin] duration-200 ease-out"
@@ -33,8 +37,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <div
-              className="fixed left-0 bottom-0 z-30 animate-slide-in-left"
-              style={{ width: chatWidth, top: "var(--app-header-h, 56px)" }}
+              className="fixed bottom-0 z-30 animate-slide-in-left"
+              style={{ width: chatWidth, top: 0, left: 56 }}
             >
               <ChatSidebar />
             </div>
