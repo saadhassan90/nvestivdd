@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { NavLink, Outlet, useParams, Navigate } from "react-router-dom";
+import { Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getRaise } from "@/mocks/gp/raises";
+import { ShareRaiseModal } from "@/components/gp/ShareRaiseModal";
 
 const TABS = [
   { to: "", label: "Overview", end: true },
@@ -16,12 +19,24 @@ export default function RaiseContext() {
   const { fundId } = useParams();
   const raise = getRaise(fundId);
   if (!raise) return <Navigate to="/raises" replace />;
+  const [shareOpen, setShareOpen] = useState(false);
   return (
     <div className="flex flex-col">
       <div className="px-6 pt-6 max-w-5xl mx-auto w-full">
-        <div className="flex items-baseline gap-2">
-          <h1 className="text-lg font-semibold text-foreground">{raise.name}</h1>
-          <span className="text-xs text-muted-foreground">{raise.strategy} · {raise.targetSize}</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <h1 className="text-lg font-semibold text-foreground truncate">{raise.name}</h1>
+            <span className="text-xs text-muted-foreground truncate">{raise.strategy} · {raise.targetSize}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            aria-label="Share raise"
+            title="Share raise"
+            className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
       <nav className="px-6 mt-3 border-b border-border flex gap-1 overflow-x-auto max-w-5xl mx-auto w-full">
@@ -46,6 +61,12 @@ export default function RaiseContext() {
       <div>
         <Outlet />
       </div>
+      <ShareRaiseModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        raiseName={raise.name}
+        raiseId={raise.id}
+      />
     </div>
   );
 }
