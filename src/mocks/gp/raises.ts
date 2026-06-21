@@ -271,5 +271,15 @@ export function dropLpFromPipeline(raiseId: string, lpId: string): void {
   const lp = r.lps.find((l) => l.id === lpId);
   if (!lp) return;
   lp.consent = "withdrawn";
+  lp.stage = "declined";
+  emit();
+}
+
+export function setLpStage(raiseId: string, lpId: string, stage: PipelineStage): void {
+  const r = RAISES.find((x) => x.id === raiseId);
+  if (!r) return;
+  const lp = r.lps.find((l) => l.id === lpId);
+  if (!lp) return;
+  lp.stage = stage;
   emit();
 }
