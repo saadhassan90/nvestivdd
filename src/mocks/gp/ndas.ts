@@ -49,37 +49,47 @@ export interface NdaRecord {
   auditTrail: NdaAuditEvent[];
 }
 
-const DEFAULT_BODY = `# Mutual Non-Disclosure Agreement
+import NVESTIV_MUTUAL_NDA_MD from "@/assets/legal/nvestiv-mutual-nda.md?raw";
 
-**Effective Date:** {{date}}
+const DEFAULT_BODY = NVESTIV_MUTUAL_NDA_MD;
 
-This Mutual Non-Disclosure Agreement (the "Agreement") is entered into between the Disclosing Party ("Fund") and the Receiving Party ("Recipient"). The full executed copy of this Agreement will be made available to both parties upon countersignature.
-
-## 1. Confidential Information
-The Recipient acknowledges that, in connection with evaluating a potential investment in the Fund, it may receive confidential, proprietary, or non-public information including, without limitation, fund documents, performance data, investment strategy, pipeline, and limited-partner information ("Confidential Information").
-
-## 2. Obligations
-The Recipient agrees to:
-(a) hold all Confidential Information in strict confidence;
-(b) not disclose Confidential Information to any third party without prior written consent;
-(c) use Confidential Information solely to evaluate the prospective investment;
-(d) protect Confidential Information using at least the same degree of care it uses for its own confidential information.
-
-## 3. Exclusions
-Confidential Information does not include information that (i) is or becomes public other than through a breach of this Agreement, (ii) was known to the Recipient prior to disclosure, (iii) is rightfully received from a third party without restriction, or (iv) is independently developed without use of the Confidential Information.
-
-## 4. Term
-The Recipient's obligations under this Agreement shall survive for a period of two (2) years from the Effective Date.
-
-## 5. No License
-No license or other right under any intellectual property is granted by this Agreement.
-
-## 6. Governing Law
-This Agreement is governed by the laws of the State of Delaware, without regard to its conflict-of-laws principles.
-
-## 7. Electronic Signature
-The parties agree that this Agreement may be executed and delivered electronically and that an electronic signature has the same legal effect as a handwritten signature.
-`;
+export function renderNdaBody(bodyMd: string, nda: Pick<NdaRecord, "raiseName" | "lpName" | "signerName" | "signerTitle" | "createdAt" | "signedAt">): string {
+  const fmt = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "____________________";
+  const blank = (v?: string) => v && v.trim().length > 0 ? v : "____________________";
+  const map: Record<string, string> = {
+    date: fmt(nda.createdAt),
+    EFFECTIVE_DATE: fmt(nda.createdAt),
+    GP_COMPANY_NAME: nda.raiseName ? `Nvestiv GP — ${nda.raiseName}` : "Nvestiv GP",
+    GP_ENTITY_TYPE_AND_JURISDICTION: "a Delaware limited partnership",
+    GP_REGISTERED_ADDRESS: "1 Market Street, San Francisco, CA 94105, USA",
+    GP_SIGNATORY_NAME: "Authorized GP Signatory",
+    GP_SIGNATORY_TITLE: "Managing Partner",
+    GP_SIGNATORY_EMAIL: "gp@nvestiv.example",
+    GP_SIGNATURE: "/s/ GP",
+    GP_EXECUTION_DATE: fmt(nda.createdAt),
+    GP_AUTHORITY_CONFIRMED: "☑",
+    GP_TIMESTAMP_UTC: nda.createdAt ?? "",
+    GP_IP_ADDRESS: "—",
+    LP_COMPANY_NAME: blank(nda.lpName),
+    LP_ENTITY_TYPE_AND_JURISDICTION: "____________________",
+    LP_REGISTERED_ADDRESS: "____________________",
+    LP_SIGNATORY_NAME: blank(nda.signerName),
+    LP_SIGNATORY_TITLE: blank(nda.signerTitle),
+    LP_SIGNATORY_EMAIL: "____________________",
+    LP_SIGNATURE: nda.signedAt ? "/s/ " + (nda.signerName ?? "LP") : "____________________",
+    LP_EXECUTION_DATE: fmt(nda.signedAt),
+    LP_AUTHORITY_CONFIRMED: nda.signedAt ? "☑" : "☐",
+    LP_TIMESTAMP_UTC: nda.signedAt ?? "",
+    LP_IP_ADDRESS: "—",
+    DOCUMENT_ID: "—",
+    AUDIT_HASH: "—",
+    SCHEDULE_A_PURPOSE_DESCRIPTION: `Evaluation of a potential investment in ${nda.raiseName}.`,
+    SCHEDULE_B_DESIGNATED_JURISDICTION: "Delaware, USA",
+    SCHEDULE_B_ARBITRAL_INSTITUTION: "ICC (default)",
+    SCHEDULE_C_CATEGORIES: "Fund PPM, LPA, track record, financial projections, pipeline, and related diligence materials.",
+  };
+  return bodyMd.replace(/\{\{(\w+)\}\}/g, (_, k) => map[k] ?? `\`{{${k}}}\``);
+}
 
 export const NDA_TEMPLATES: NdaTemplate[] = [
   {

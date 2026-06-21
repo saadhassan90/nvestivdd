@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import type { NdaRecord } from "@/mocks/gp/ndas";
-import { getTemplate, NDA_STATUS_META } from "@/mocks/gp/ndas";
+import { getTemplate, NDA_STATUS_META, renderNdaBody } from "@/mocks/gp/ndas";
 
 function fmt(ts?: string) {
   if (!ts) return "—";
@@ -41,16 +41,25 @@ export function generateNdaPdf(nda: NdaRecord): jsPDF {
   doc.setTextColor(0);
 
   // Body
-  const body = (tpl?.bodyMd ?? "").replace(/{{date}}/g, fmt(nda.createdAt));
+  const body = tpl ? renderNdaBody(tpl.bodyMd, nda) : "";
   for (const block of body.split(/\n\n+/)) {
-    if (block.startsWith("# ")) {
-      writeWrapped(block.replace(/^#\s+/, ""), 14, true);
+    const trimmed = block.trim();
+    if (!trimmed || trimmed === "---") { y += 6; continue; }
+    if (trimmed.startsWith("# ")) {
+      writeWrapped(trimmed.replace(/^#\s+/, ""), 14, true);
       y += 4;
-    } else if (block.startsWith("## ")) {
+    } else if (trimmed.startsWith("## ")) {
       y += 6;
-      writeWrapped(block.replace(/^##\s+/, ""), 11, true);
+      writeWrapped(trimmed.replace(/^##\s+/, ""), 11, true);
+    } else if (trimmed.startsWith("### ")) {
+      y += 4;
+      writeWrapped(trimmed.replace(/^###\s+/, ""), 10, true);
     } else {
-      writeWrapped(block.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\n/g, " "), 10);
+      const clean = trimmed
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/\n/g, " ");
+      writeWrapped(clean, 10);
       y += 4;
     }
   }

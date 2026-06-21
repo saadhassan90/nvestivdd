@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle2, Download, ShieldCheck } from "lucide-react";
-import { getNda, getTemplate, markViewed, signNda, subscribeNdas } from "@/mocks/gp/ndas";
+import { getNda, getTemplate, markViewed, signNda, subscribeNdas, renderNdaBody } from "@/mocks/gp/ndas";
 import { SignaturePad } from "@/components/gp/SignaturePad";
 import { downloadNdaPdf } from "@/lib/nda-pdf";
+import { MarkdownContent } from "@/components/project/MarkdownContent";
 
 export default function NdaSignPage() {
   const { ndaId } = useParams();
@@ -20,7 +21,10 @@ export default function NdaSignPage() {
   const [agree, setAgree] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
 
-  const body = useMemo(() => (tpl?.bodyMd ?? "").replace(/{{date}}/g, new Date().toLocaleDateString()), [tpl]);
+  const body = useMemo(
+    () => (tpl && nda ? renderNdaBody(tpl.bodyMd, { ...nda, signerName: nda.signerName || name, signerTitle: nda.signerTitle || title }) : ""),
+    [tpl, nda, name, title],
+  );
 
   if (!nda || !tpl) {
     return (
@@ -74,8 +78,17 @@ export default function NdaSignPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-6 space-y-4">
-        <div className="rounded-lg border border-border bg-card p-6 max-h-[55vh] overflow-y-auto">
-          <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-foreground">{body}</pre>
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-8 py-5 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mutual NDA</p>
+              <h2 className="text-base font-semibold text-foreground mt-0.5">{tpl.name}</h2>
+            </div>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">v{tpl.version}</span>
+          </div>
+          <div className="px-8 py-6 max-h-[60vh] overflow-y-auto">
+            <MarkdownContent content={body} />
+          </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-5 space-y-4">
