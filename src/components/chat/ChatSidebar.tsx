@@ -405,7 +405,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                 </div>
                 <button
                 onClick={isLoading ? stopGeneration : handleSend}
-                type="submit"
+                type="button"
                 disabled={!isLoading && !input.trim() && attachments.length === 0}
                 title={isLoading ? "Stop generating" : "Send"}
                 className={cn(
