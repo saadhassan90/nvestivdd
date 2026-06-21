@@ -417,11 +417,11 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                 )}>
                 
                   {isLoading ? <Square className="h-3 w-3 fill-current" /> : <ArrowUp className="h-4 w-4" />}
-                </button>
-              </div>
-            
-            </div>
-            </div>
+                 </button>
+               </div>
+             
+             </div>
+             </form>
           </div>
         </div>
       }
