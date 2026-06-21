@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useUiVariant, type UiVariant } from "@/contexts/UiVariantContext";
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/nvestiv-logomark.svg.asset.json";
+import { useLpRailActions } from "@/contexts/LpRailActionsContext";
 
 const RAIL_ITEMS = [
   { to: "/dashboard", label: "Funds", icon: LayoutDashboard, match: (p: string) => p === "/dashboard" || p.startsWith("/project/") },
@@ -18,6 +19,7 @@ const VARIANT_OPTIONS: { value: UiVariant; label: string }[] = [
 
 export function LpRail() {
   const { variant, setVariant } = useUiVariant();
+  const railActions = useLpRailActions();
   return (
     <nav className="w-14 shrink-0 border-r border-border bg-card flex flex-col items-center py-3 gap-1 sticky top-0 h-screen z-40">
       <Link to="/dashboard" className="mb-1 flex h-8 w-8 items-center justify-center" title="Nvestiv">
@@ -40,6 +42,12 @@ export function LpRail() {
           <it.icon className="h-4 w-4" />
         </NavLink>
       ))}
+      {railActions?.actions && (
+        <>
+          <div className="my-2 h-px w-8 bg-border" />
+          <div className="flex flex-col items-center gap-1">{railActions.actions}</div>
+        </>
+      )}
       <div className="mt-auto flex flex-col items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

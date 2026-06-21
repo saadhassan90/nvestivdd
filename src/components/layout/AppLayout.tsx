@@ -3,6 +3,7 @@ import { useOptionalChatContext } from "@/contexts/ChatContext";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LpRail } from "@/components/layout/LpRail";
+import { LpRailActionsProvider } from "@/contexts/LpRailActionsContext";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const chat = useOptionalChatContext();
@@ -14,6 +15,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const drawerActive = isOpen;
 
   return (
+    <LpRailActionsProvider>
     <div className="flex h-screen w-full overflow-hidden">
       {/* Persistent LP icon rail (desktop only — mobile uses MobileBottomNav) */}
       {!isMobile && <LpRail />}
@@ -46,5 +48,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </>
       )}
     </div>
+    </LpRailActionsProvider>
   );
 }
