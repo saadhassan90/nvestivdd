@@ -403,7 +403,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                     </span>
                   )}
                 </div>
-                <button type="button"
+                <button
                 onClick={isLoading ? stopGeneration : handleSend}
                 type="button"
                 disabled={!isLoading && !input.trim() && attachments.length === 0}
