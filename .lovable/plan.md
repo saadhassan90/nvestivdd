@@ -1,57 +1,144 @@
 
-# Agentic Iris across all GP pages
+## Goal
+Build an NDA e-signing system that (1) tracks NDA state for every LP in every raise's pipeline, (2) gates data-room access on a signed NDA, and (3) gives GPs a dedicated NDA management page in the sidebar where they can view, download, and export signed and pending NDAs.
 
-Goal: Iris (the embedded chat) can read content from any GP page and propose edits the user reviews before applying. Storage is in Lovable Cloud. Structure of pages stays the same; only the content inside named blocks is editable.
+This is a frontend / mock-data build (consistent with the existing GP raises, which live in `src/mocks/gp/raises.ts`). No backend changes — signatures are simulated and PDFs generated client-side.
 
-## What ships
+---
 
-1. **Generic editable-content layer**
-   - New table `page_content` keyed by `(page_key, section_key)` holding `content jsonb` and `updated_at`.
-   - New table `page_edit_proposals` holding pending proposals: `page_key, section_key, current, proposed, rationale, status (pending|applied|rejected), conversation_id`.
-   - Both tables: open public policies (per project memory) + GRANTs.
-   - Realtime enabled on both, so pages refresh when content changes and chat shows new proposals as they arrive.
+## 1. NDA states (the workflow)
 
-2. **Client content runtime**
-   - `PageContentProvider` (mounted in `GpShell`) loads all blocks for the current route, exposes `useBlock(section_key, defaultValue)` for pages and `usePendingProposals()` for the proposal banner.
-   - Pages adopt `useBlock` for the prose/headline/description fields that are reasonable to edit (overview cards, interview prompts, DDQ intros, dataroom descriptions, feedback notes, report-card narrative, pipeline notes, contacts notes, settings copy). Layout / tables / charts stay structural and are not registered as blocks.
-   - Each registered block calls `registerBlock({ page_key, section_key, label, schema: "markdown" | "text" | "json" })` once on mount so the agent can discover what exists on the page without reading source code.
+Every pipeline LP gets an `ndaStatus` instead of today's single `ndaSignedAt`. States, in funnel order:
 
-3. **Proposal UI (propose + confirm)**
-   - Floating "Iris suggestions" banner anchored to the page (not the chat). Each pending proposal shows: section label, side-by-side diff (current vs proposed), rationale, Apply / Reject buttons. Applying writes to `page_content`; rejecting marks the row rejected.
-   - In the chat bubble, when the agent calls `propose_page_edit`, the assistant message renders a compact card linking to the proposal in the banner.
+| State | Meaning | Trigger |
+|---|---|---|
+| `not_required` | NDA gating off for this LP / raise | GP toggle |
+| `not_sent` | LP exists in pipeline, no NDA action taken | default |
+| `requested` | LP requested access; NDA owed to them | LP-initiated (or GP marks) |
+| `sent` | NDA dispatched, awaiting signature | GP clicks "Send NDA" |
+| `viewed` | LP opened the NDA link | sign page load |
+| `signed` | LP completed e-sign | sign submit |
+| `countersigned` | GP signed back (fully executed) | GP action |
+| `expired` | Sent link past expiry without signature | time-based |
+| `declined` | LP declined to sign | LP action |
+| `revoked` | GP revoked access | GP action |
 
-4. **Edge function tools**
-   - Extend `chat-completion` with four tools the model can call:
-     - `list_page_blocks({ page_key? })` — returns registered blocks + current content for the active page (or any page).
-     - `read_page_block({ page_key, section_key })` — full content of one block.
-     - `search_page_content({ query, page_key? })` — substring search across blocks so Iris can answer "where did we say X".
-     - `propose_page_edit({ page_key, section_key, proposed, rationale })` — inserts a row in `page_edit_proposals`; returns the proposal id.
-   - Active `page_key` is sent from the client in the request body (derived from the current route) so Iris defaults to "this page" when the user doesn't name one.
-   - System prompt updated: Iris is told she can edit page content only via `propose_page_edit`, never invent section keys, and must read before proposing.
+Data room access is unlocked only at `signed` or `countersigned`. Share modal's existing "Require NDA acceptance" toggle wires into this.
 
-5. **Discovery for the agent**
-   - On every chat request we also send a compact `page_blocks_manifest` for the active page (keys + labels + short preview) so the model has zero-shot awareness without an extra tool call.
+## 2. Pipeline UI changes
 
-## Out of scope (explicit)
+`src/pages/gp/raise/RaisePipeline.tsx` — replace the current `Consent` column with an `NDA` column that renders a status pill (color-coded by state) and a row-level action menu:
 
-- Structural edits (adding/removing tabs, cards, rows, columns).
-- Editing tabular/computed data (scores, pipeline rows, contact rows).
-- Auto-apply. Every change goes through Apply/Reject.
-- Versioning beyond `updated_at` (no full history table in v1).
+- Send NDA / Resend
+- View NDA
+- Download PDF (signed copy)
+- Mark as countersigned
+- Revoke access
 
-## Technical notes
+Per-row "Send NDA" opens a small `SendNdaModal` (template picker, expiry, optional note). Status pill is clickable to open the NDA detail drawer (see §5).
 
-- Page keys follow the route: `gp.raises.list`, `gp.raise.overview`, `gp.raise.interview`, `gp.raise.ddq`, `gp.raise.dataroom`, `gp.raise.pipeline`, `gp.raise.feedback`, `gp.raise.report-card`, `gp.pipeline`, `gp.contacts`, `gp.settings`, `gp.chat`. Raise-scoped pages also include the `raise_id` in the row so different raises have independent content.
-- Section keys are short and stable, declared in code (e.g. `overview.summary`, `interview.intro`, `ddq.preamble`).
-- Default content for each block stays in code; `useBlock` returns the DB value if present, otherwise the code default. This means existing pages keep working before any edit is made.
-- Realtime channel `page_content:{page_key}` for content updates and `page_edit_proposals:{page_key}` for proposals.
-- Edge function authorization continues to use the publishable key; no per-user auth changes.
-- Diff rendering uses a small inline word-diff (no new heavy dep).
+## 3. NDA template
 
-## Rollout order
+`src/mocks/gp/ndas.ts` (new) seeds one default template ("Nvestiv Standard Mutual NDA v1") with placeholder body. Schema:
 
-1. Migration: `page_content`, `page_edit_proposals`, grants, realtime.
-2. `PageContentProvider`, `useBlock`, manifest registry, proposal banner.
-3. Edge function tools + system prompt + manifest injection.
-4. Adopt `useBlock` on the GP pages above (one PR-sized pass, prose blocks only).
-5. Manual test: ask Iris to summarize the current page, then ask her to rewrite the overview summary; confirm proposal appears, Apply writes through, refresh shows new content.
+```ts
+type NdaTemplate = { id; name; version; bodyMd; createdAt; isDefault };
+```
+
+GP can later upload additional templates; for now one default is enough. The actual NDA copy will be provided later — placeholder lorem is fine until then.
+
+## 4. NDA records
+
+Single source of truth: `src/mocks/gp/ndas.ts` exports an `NDAS` array of records:
+
+```ts
+type NdaRecord = {
+  id;
+  raiseId;
+  lpId;           // links back to L2Lp in raises.ts
+  lpName;
+  lpEmail;
+  templateId;
+  templateVersion;
+  status: NdaStatus;
+  sentAt?; viewedAt?; signedAt?; countersignedAt?; expiresAt?;
+  signerName?; signerTitle?;
+  signatureDataUrl?;   // base64 PNG from canvas
+  ipAddress?;          // mocked
+  auditTrail: { ts; actor; event; meta? }[];
+};
+```
+
+Helpers: `createNda`, `sendNda`, `markViewed`, `signNda`, `countersign`, `revoke`, `getNdasByRaise`, `getNdaByLp`, plus a `subscribeNdas` listener so the pipeline and NDA page re-render.
+
+## 5. NDA detail drawer
+
+Click any NDA pill → side drawer showing: status timeline, signer details, audit trail, embedded document preview, and buttons: Download PDF, Resend, Revoke, Countersign.
+
+## 6. Sign flow (LP side)
+
+New route `/nda/:ndaId` (public-ish, no auth in this mock):
+
+1. Loads NDA + template, marks `viewed`.
+2. Renders the NDA body (markdown) scrollable.
+3. Required fields: full name, title, "I agree" checkbox.
+4. Signature pad (HTML canvas) — captured as data URL.
+5. Submit → status `signed`, timestamps recorded, audit trail appended, success screen with download link.
+
+Component: `src/pages/nda/NdaSignPage.tsx`. Lightweight signature pad implemented inline (no extra dep) — mouse/touch on canvas → toDataURL.
+
+## 7. NDA management page (sidebar)
+
+Add a new sidebar entry in `src/components/gp/GpSidebar.tsx`:
+
+```
+Chat · Raises · Pipeline · NDAs · Contacts · Settings
+```
+
+Icon: `FileSignature` from lucide-react. Route: `/ndas`.
+
+`src/pages/gp/Ndas.tsx` (new) — table view of every NDA across all raises:
+
+Columns: LP · Raise · Template · Status pill · Sent · Signed · Expires · Actions
+Filters: status (multi), raise (select), date range, search (LP name/email)
+Bulk actions: export selected as ZIP (mocked toast), resend pending
+
+Row actions:
+- View — opens NDA detail drawer (same component as §5)
+- Download PDF — generates and downloads via `jsPDF` (already a common dep) or a tiny `pdf-lib`-style helper. If no PDF lib is installed, add `jspdf` via `bun add`. PDF includes NDA body, signer block, signature image, audit trail.
+- Export CSV — top-of-page button exports the filtered list (LP, raise, status, dates, signer).
+
+Summary tiles at top: Total NDAs · Signed · Pending · Expired.
+
+## 8. Share-modal integration
+
+In `src/components/gp/ShareRaiseModal.tsx`, when "Require NDA acceptance" is on and an email is added, on Send we also call `createNda(...)` for each recipient (if a matching LP exists, link it; otherwise create a pending pipeline entry) and the toast becomes "Share link + NDA sent to N recipients".
+
+## 9. Data migration of existing mock
+
+`L2Lp.ndaSignedAt` is replaced by `ndaStatus` + `ndaId`. All existing mocked LPs that had a `ndaSignedAt` date become `status: "countersigned"` with that timestamp, and a corresponding `NdaRecord` is seeded. Pipeline page reads from the new fields.
+
+## 10. Files touched
+
+```text
+NEW  src/mocks/gp/ndas.ts                 (templates + records store)
+NEW  src/components/gp/NdaStatusPill.tsx
+NEW  src/components/gp/SendNdaModal.tsx
+NEW  src/components/gp/NdaDetailDrawer.tsx
+NEW  src/components/gp/SignaturePad.tsx
+NEW  src/pages/nda/NdaSignPage.tsx        (route /nda/:ndaId)
+NEW  src/pages/gp/Ndas.tsx                (route /ndas)
+NEW  src/lib/nda-pdf.ts                   (PDF generator)
+EDIT src/mocks/gp/raises.ts               (L2Lp: ndaStatus + ndaId; seed records)
+EDIT src/components/gp/GpSidebar.tsx      (add "NDAs" entry)
+EDIT src/App.tsx                          (add /ndas and /nda/:ndaId routes)
+EDIT src/pages/gp/raise/RaisePipeline.tsx (NDA column, actions, drawer)
+EDIT src/components/gp/ShareRaiseModal.tsx(wire NDA creation on send)
+ADD  jspdf dependency
+```
+
+## Out of scope (for this build)
+- Real auth on the LP sign page (open link by id, mock only)
+- Server-side audit log / IP capture (mocked)
+- Multi-party / sequential signing (single-party LP, optional GP countersign)
+- Template editor UI (single default template; upload later)
