@@ -299,7 +299,14 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                   ))}
                 </div>
               )}
-            <div className={(hideHeader ? "max-w-[50%]" : "max-w-[100%]") + " mx-auto w-full"}>
+          <form
+            className={(hideHeader ? "max-w-[50%]" : "max-w-[100%]") + " mx-auto w-full"}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!isLoading) handleSend();
+            }}
+          >
               <div className="rounded-2xl border border-border bg-card shadow-lg p-3">
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
