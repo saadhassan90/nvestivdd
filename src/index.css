@@ -275,3 +275,15 @@
   padding: 0.5rem 1rem;
   text-align: left;
 }
+
+/* IRIS interview — pulse the chat sidebar to draw attention */
+@keyframes iris-attention-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  20%      { box-shadow: 0 0 0 6px hsl(var(--primary) / 0.45); }
+  60%      { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+}
+.iris-attention-pulse {
+  animation: iris-attention-pulse 1.4s ease-out 2;
+  position: relative;
+  z-index: 50;
+}
