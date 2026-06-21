@@ -1,8 +1,15 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, MoreHorizontal } from "lucide-react";
-import { RAISES, type ConsentState, type L2Lp } from "@/mocks/gp/raises";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
+import { RAISES, type ConsentState, type L2Lp, dropLpFromPipeline, subscribeRaises } from "@/mocks/gp/raises";
 import { cn } from "@/lib/utils";
 import { EditableText } from "@/components/iris/EditableText";
+import { LpRowMenu } from "@/components/gp/LpRowMenu";
+import { NdaDetailDrawer } from "@/components/gp/NdaDetailDrawer";
+import { SendNdaModal } from "@/components/gp/SendNdaModal";
+import { seedNdasFromRaises, subscribeNdas, type NdaRecord } from "@/mocks/gp/ndas";
+
+seedNdasFromRaises(RAISES);
 
 const STAGES = [
   { id: "sourced", label: "Sourced" },
@@ -75,6 +82,14 @@ function stageX(i: number): number {
 export default function Pipeline() {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [raiseFilter, setRaiseFilter] = useState<string>("all");
+  const [, force] = useState(0);
+  const [openNda, setOpenNda] = useState<NdaRecord | null>(null);
+  const [sendFor, setSendFor] = useState<{ raiseId: string; raiseName: string; lpId: string; lpName: string } | null>(null);
+  useEffect(() => {
+    const u1 = subscribeNdas(() => force((v) => v + 1));
+    const u2 = subscribeRaises(() => force((v) => v + 1));
+    return () => { u1(); u2(); };
+  }, []);
 
   const allRows: Row[] = useMemo(() => {
     const out: Row[] = [];
@@ -355,9 +370,20 @@ export default function Pipeline() {
             </div>
             <div className="text-xs text-muted-foreground">{lp.lastActivity}</div>
             <div className="flex justify-center">
-              <button className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
+              <LpRowMenu
+                raiseId={lp.raiseId}
+                raiseName={lp.raiseName}
+                lpId={lp.id}
+                lpName={lp.name}
+                onViewNda={(n) => setOpenNda(n)}
+                onSendNda={() =>
+                  setSendFor({ raiseId: lp.raiseId, raiseName: lp.raiseName, lpId: lp.id, lpName: lp.name })
+                }
+                onDropFromPipeline={() => {
+                  dropLpFromPipeline(lp.raiseId, lp.id);
+                  toast.error(`${lp.name} dropped from pipeline`);
+                }}
+              />
             </div>
           </div>
         ))}
@@ -365,6 +391,18 @@ export default function Pipeline() {
           <div className="px-6 py-12 text-center text-sm text-muted-foreground">No LPs yet.</div>
         )}
       </div>
+
+      <NdaDetailDrawer nda={openNda} onClose={() => setOpenNda(null)} />
+      {sendFor && (
+        <SendNdaModal
+          open
+          onClose={() => setSendFor(null)}
+          raiseId={sendFor.raiseId}
+          raiseName={sendFor.raiseName}
+          lpId={sendFor.lpId}
+          lpName={sendFor.lpName}
+        />
+      )}
     </div>
   );
 }

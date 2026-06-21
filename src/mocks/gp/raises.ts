@@ -233,3 +233,12 @@ export function deleteRaise(id: string): void {
     emit();
   }
 }
+
+export function dropLpFromPipeline(raiseId: string, lpId: string): void {
+  const r = RAISES.find((x) => x.id === raiseId);
+  if (!r) return;
+  const lp = r.lps.find((l) => l.id === lpId);
+  if (!lp) return;
+  lp.consent = "withdrawn";
+  emit();
+}
