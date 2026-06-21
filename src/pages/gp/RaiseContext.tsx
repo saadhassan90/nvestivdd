@@ -5,14 +5,24 @@ import { cn } from "@/lib/utils";
 import { getRaise } from "@/mocks/gp/raises";
 import { ShareRaiseModal } from "@/components/gp/ShareRaiseModal";
 
-const TABS = [
-  { to: "", label: "Overview", end: true },
-  { to: "dataroom", label: "Dataroom" },
-  { to: "ddq", label: "DDQ" },
-  { to: "interview", label: "IRIS Interview" },
-  { to: "report-card", label: "Report Card" },
-  { to: "feedback", label: "Feedback" },
-  { to: "pipeline", label: "Pipeline" },
+const TAB_GROUPS: { label: string; tabs: { to: string; label: string; end?: boolean }[] }[] = [
+  {
+    label: "Setup",
+    tabs: [
+      { to: "", label: "Overview", end: true },
+      { to: "dataroom", label: "Dataroom" },
+      { to: "ddq", label: "DDQ" },
+      { to: "interview", label: "IRIS Interview" },
+    ],
+  },
+  {
+    label: "Feedback",
+    tabs: [
+      { to: "report-card", label: "Report Card" },
+      { to: "feedback", label: "Feedback" },
+      { to: "pipeline", label: "Pipeline" },
+    ],
+  },
 ];
 
 export default function RaiseContext() {
@@ -39,23 +49,33 @@ export default function RaiseContext() {
           </button>
         </div>
       </div>
-      <nav className="px-6 mt-3 border-b border-border flex gap-1 overflow-x-auto max-w-5xl mx-auto w-full">
-        {TABS.map((t) => (
-          <NavLink
-            key={t.to || "overview"}
-            to={t.to}
-            end={t.end}
-            className={({ isActive }) =>
-              cn(
-                "px-3 py-2 text-sm border-b-2 -mb-px transition-colors whitespace-nowrap",
-                isActive
-                  ? "border-foreground text-foreground font-medium"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )
-            }
-          >
-            {t.label}
-          </NavLink>
+      <nav className="px-6 mt-3 border-b border-border flex items-stretch gap-5 overflow-x-auto max-w-5xl mx-auto w-full">
+        {TAB_GROUPS.map((group, gi) => (
+          <div key={group.label} className="flex items-stretch gap-1">
+            {gi > 0 && (
+              <div aria-hidden className="mr-3 self-stretch w-px bg-border" />
+            )}
+            <span className="self-center text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70 pr-1 select-none">
+              {group.label}
+            </span>
+            {group.tabs.map((t) => (
+              <NavLink
+                key={t.to || "overview"}
+                to={t.to}
+                end={t.end}
+                className={({ isActive }) =>
+                  cn(
+                    "px-3 py-2 text-sm border-b-2 -mb-px transition-colors whitespace-nowrap",
+                    isActive
+                      ? "border-foreground text-foreground font-medium"
+                      : "border-transparent text-muted-foreground hover:text-foreground",
+                  )
+                }
+              >
+                {t.label}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
       <div>
