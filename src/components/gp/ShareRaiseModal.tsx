@@ -10,11 +10,11 @@ interface Props {
   raiseId: string;
 }
 
-const SHAREABLE = [
+const SHAREABLE: ReadonlyArray<{ key: string; label: string; desc: string; required?: boolean }> = [
   { key: "overview", label: "Overview", desc: "Fund summary, strategy, target size.", required: true },
   { key: "dataroom", label: "Data Room", desc: "Documents, financials, legal materials." },
   { key: "ddq", label: "DDQ", desc: "Due diligence questionnaire responses." },
-] as const;
+];
 
 const PERMISSIONS = [
   { key: "view", label: "View only" },
