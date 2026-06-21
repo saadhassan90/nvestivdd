@@ -221,7 +221,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
         <div className="border-b border-border bg-card shrink-0">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
-              <button onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
+              <button type="button" onClick={() => {setShowHistory(!showHistory);if (!showHistory) loadConversations();}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="History">
                 <Menu className="h-4 w-4 text-muted-foreground" />
               </button>
               <img src={irisHelmet} alt="Iris" className="h-6 w-6 rounded-full object-cover" />
@@ -229,7 +229,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
             </div>
 
             <div className="flex items-center gap-1">
-              <button onClick={() => {startNewConversation();setShowHistory(false);}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
+              <button type="button" onClick={() => {startNewConversation();setShowHistory(false);}} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="New conversation">
                 <SquarePen className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
@@ -285,7 +285,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
               {suggestedPrompts.length > 0 && !isLoading && (
                 <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
                   {suggestedPrompts.map((prompt) => (
-                    <button
+                    <button type="button"
                       key={prompt}
                       onClick={() => {
                         setInput(prompt);
@@ -312,7 +312,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                 <div className="flex flex-wrap gap-2 mb-2">
                   {attachments.map((a) => {
                     const remove = (
-                      <button
+                      <button type="button"
                         onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))}
                         className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
                         title="Remove"
@@ -380,7 +380,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                 <div className="flex items-center gap-1.5">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button
+                      <button type="button"
                         className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
                         title="Add to chat"
                       >
@@ -397,13 +397,13 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                   {projectScope && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       📎 <span className="truncate max-w-[120px]">{projectScope.name}</span>
-                      <button onClick={() => setProjectScope(null)} className="hover:text-destructive">
+                      <button type="button" onClick={() => setProjectScope(null)} className="hover:text-destructive">
                         <X className="h-2.5 w-2.5" />
                       </button>
                     </span>
                   )}
                 </div>
-                <button
+                <button type="button"
                 onClick={isLoading ? stopGeneration : handleSend}
                 type="button"
                 disabled={!isLoading && !input.trim() && attachments.length === 0}
