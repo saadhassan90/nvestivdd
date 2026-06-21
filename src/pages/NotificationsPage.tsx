@@ -1,11 +1,10 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart, ArrowLeft } from "lucide-react";
+import { Bell, CheckCircle2, AlertTriangle, Clock, FileBarChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BlurFade } from "@/components/magicui/BlurFade";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 
 interface ActivityItem {
   id: string;
@@ -114,23 +113,8 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Top bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/dashboard")} className="p-1.5 rounded-md hover:bg-muted transition-colors">
-              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <h1 className="text-sm font-semibold text-foreground">Activity Log</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <NotificationsDropdown />
-          </div>
-        </div>
-      </header>
-      <div className="h-14 shrink-0" aria-hidden />
-
       <main className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
+        <h1 className="text-2xl font-bold text-foreground mb-4">Activity Log</h1>
         {showLoader ? (
           <NvestivLoader fullscreen size={96} />
         ) : items.length === 0 ? (

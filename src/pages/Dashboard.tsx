@@ -1,12 +1,7 @@
 import { NvestivLoader, useNvestivLoaderGate } from "@/components/ui/NvestivLoader";
 import { useState, useMemo, useEffect } from "react";
 import { Plus } from "lucide-react";
-import { Link } from "react-router-dom";
-import logo from "@/assets/logo.svg";
-import { NotificationsDropdown } from "@/components/notifications/NotificationsDropdown";
 import { CommandSearch } from "@/components/search/CommandSearch";
-import { VariantSwitcher } from "@/components/layout/VariantSwitcher";
-
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsCards } from "@/components/dashboard/AnalyticsCards";
 import { DealTable } from "@/components/dashboard/DealTable";
@@ -193,39 +188,24 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-
-        {/* Top bar */}
-        <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card">
-          <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-            <Link to="/dashboard" className="flex items-center shrink-0">
-              <img src={logo} alt="Nvestiv" className="h-5 sm:h-7" />
-            </Link>
-            <VariantSwitcher />
-
-            <CommandSearch />
-
-            <div className="flex items-center gap-2">
-              <NotificationsDropdown />
-            </div>
-          </div>
-        </header>
-        <div className="h-14 shrink-0" aria-hidden />
-
         {/* Main content */}
         <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 pb-20 lg:pb-6">
           <BlurFade>
-            <div className="mb-4 flex items-start justify-between">
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Deals</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">Sorted by score, highest first</p>
               </div>
-              <button
+              <div className="flex items-center gap-2">
+                <CommandSearch />
+                <button
                 onClick={() => setModalOpen(true)}
                 className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
               >
                 <Plus className="h-4 w-4" />
                 Submit new fund
-              </button>
+                </button>
+              </div>
             </div>
           </BlurFade>
 
