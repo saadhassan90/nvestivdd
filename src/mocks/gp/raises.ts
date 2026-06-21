@@ -3,6 +3,36 @@ export type DdqProvenance = "ILPA" | "IRIS" | "LP-direct";
 export type DdqState = "answered" | "unanswered" | "suggested";
 export type ConsentState = "pending" | "shared" | "withdrawn";
 
+export type PipelineStage =
+  | "sent"
+  | "requested_dataroom"
+  | "nda_sent"
+  | "nda_signed"
+  | "dataroom_sent"
+  | "opened"
+  | "ic_ready"
+  | "declined"
+  | "ready_to_invest"
+  | "current_investor";
+
+export const PIPELINE_STAGES: { id: PipelineStage; label: string }[] = [
+  { id: "sent", label: "Sent" },
+  { id: "requested_dataroom", label: "Requested Dataroom" },
+  { id: "nda_sent", label: "NDA Sent" },
+  { id: "nda_signed", label: "NDA Signed" },
+  { id: "dataroom_sent", label: "Dataroom Sent" },
+  { id: "opened", label: "Opened" },
+  { id: "ic_ready", label: "IC Ready" },
+  { id: "declined", label: "Declined Investment" },
+  { id: "ready_to_invest", label: "Ready to Invest" },
+  { id: "current_investor", label: "Current Investor" },
+];
+
+export const PIPELINE_STAGE_LABEL: Record<PipelineStage, string> = PIPELINE_STAGES.reduce(
+  (acc, s) => ({ ...acc, [s.id]: s.label }),
+  {} as Record<PipelineStage, string>,
+);
+
 export interface DataroomFile {
   id: string;
   name: string;
@@ -39,6 +69,7 @@ export interface L2Lp {
   lastActivity: string;
   questions: number;
   ndaSignedAt: string;
+  stage?: PipelineStage;
 }
 
 export interface Raise {
