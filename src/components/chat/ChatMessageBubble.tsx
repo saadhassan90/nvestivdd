@@ -9,6 +9,7 @@ import { CodeBlock } from "./CodeBlock";
 import { InteractiveQuickReply } from "./InteractiveQuickReply";
 import { InteractiveForm, type FormField } from "./InteractiveForm";
 import { AnimatedChartRender } from "@/components/memo/blocks/AnimatedChartBlock";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Table,
   TableBody,
@@ -49,11 +50,11 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-muted-foreground/15 px-4 py-2.5 text-sm text-foreground">
+      <Message from="user">
+        <MessageContent className="group-[.is-user]:bg-foreground group-[.is-user]:text-background group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:px-4 group-[.is-user]:py-2.5 max-w-[85%]">
           {message.content}
-        </div>
-      </div>
+        </MessageContent>
+      </Message>
     );
   }
 
@@ -125,8 +126,8 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
 
   // Assistant message
   return (
-    <div className="flex">
-      <div className="flex-1 min-w-0 space-y-2">
+    <Message from="assistant" className="max-w-full">
+      <MessageContent className="space-y-2 bg-transparent p-0">
         {/* Thinking block */}
         {(message.isThinking || message.thinkingContent) && (
           <div className="rounded-lg border border-border bg-muted/30 overflow-hidden">
@@ -284,7 +285,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
             </button>
           </div>
         )}
-      </div>
-    </div>
+      </MessageContent>
+    </Message>
   );
 }
