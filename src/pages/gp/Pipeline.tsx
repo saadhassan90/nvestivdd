@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { Sankey, Tooltip as RTooltip, ResponsiveContainer, Layer, Rectangle } from "recharts";
 import {
   RAISES,
   type ConsentState,
@@ -64,19 +65,22 @@ const CONSENT_STYLES: Record<ConsentState, string> = {
 
 const STAGE_LABEL = PIPELINE_STAGE_LABEL;
 
-// SVG layout constants
-const VB_W = 1000;
-const VB_H = 300;
-const PAD_X = 70;
-const PATH_Y = 170;
-const BUBBLE_R = 14;
-const STACK_DY = 32;
-const STACK_DX = 32;
-const MAX_PER_COL = 3;
-
-function stageX(i: number): number {
-  return PAD_X + (i * (VB_W - PAD_X * 2)) / (STAGES.length - 1);
-}
+// Main flow order (declined branches off near the end)
+const MAIN_FLOW: StageId[] = [
+  "sent",
+  "requested_dataroom",
+  "nda_sent",
+  "nda_signed",
+  "dataroom_sent",
+  "opened",
+  "ic_ready",
+  "ready_to_invest",
+  "current_investor",
+];
+const STAGE_INDEX: Record<StageId, number> = MAIN_FLOW.reduce(
+  (acc, s, i) => ({ ...acc, [s]: i }),
+  { declined: -1 } as Record<StageId, number>,
+);
 
 export default function Pipeline() {
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -124,24 +128,42 @@ export default function Pipeline() {
 
   const droppedRows = rows.filter((r) => r.stage === "declined");
 
-  // Build the path: a gentle wave so it doesn't feel like a ruler
-  const pathD = useMemo(() => {
-    const x0 = PAD_X;
-    const xN = VB_W - PAD_X;
-    return `M ${x0} ${PATH_Y} C ${x0 + 180} ${PATH_Y - 50}, ${xN - 180} ${PATH_Y + 50}, ${xN} ${PATH_Y}`;
-  }, []);
+  // Build Sankey data — cumulative funnel: link[i→i+1] = LPs that reached at least stage i+1.
+  // "declined" branches off from ic_ready.
+  const sankey = useMemo(() => {
+    const nodes = MAIN_FLOW.map((id) => ({
+      name: PIPELINE_STAGE_LABEL[id],
+      stageId: id,
+    }));
+    const declinedIdx = nodes.length;
+    nodes.push({ name: PIPELINE_STAGE_LABEL.declined, stageId: "declined" as StageId });
 
-  // y position on the path at stage index (approximate to match curve)
-  function stageY(i: number): number {
-    const t = i / (STAGES.length - 1);
-    // approximate cubic bezier y for the wave above
-    const y0 = PATH_Y,
-      y1 = PATH_Y - 50,
-      y2 = PATH_Y + 50,
-      y3 = PATH_Y;
-    const mt = 1 - t;
-    return mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
-  }
+    // furthest main-stage reached per LP
+    const reachedCounts = new Array(MAIN_FLOW.length).fill(0);
+    let declinedCount = 0;
+    for (const r of rows) {
+      if (r.stage === "declined") {
+        declinedCount += 1;
+        // assume they reached at least ic_ready before declining
+        const upTo = STAGE_INDEX.ic_ready;
+        for (let i = 0; i <= upTo; i++) reachedCounts[i] += 1;
+      } else {
+        const idx = STAGE_INDEX[r.stage];
+        if (idx >= 0) for (let i = 0; i <= idx; i++) reachedCounts[i] += 1;
+      }
+    }
+
+    const links: { source: number; target: number; value: number }[] = [];
+    for (let i = 0; i < MAIN_FLOW.length - 1; i++) {
+      // value flowing from i → i+1 = number reaching i+1
+      const v = reachedCounts[i + 1];
+      if (v > 0) links.push({ source: i, target: i + 1, value: v });
+    }
+    if (declinedCount > 0) {
+      links.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
+    }
+    return { nodes, links };
+  }, [rows]);
 
   return (
     <div className="px-6 py-6 max-w-5xl mx-auto">
@@ -188,150 +210,35 @@ export default function Pipeline() {
             {rows.length - droppedRows.length} active · {droppedRows.length} dropped
           </p>
         </div>
-        <div className="relative w-full overflow-x-auto">
-          <div className="min-w-[900px]">
-            <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full h-auto">
-              {/* Path */}
-              <path
-                d={pathD}
-                fill="none"
-                stroke="hsl(var(--border))"
-                strokeWidth={2}
-                strokeDasharray="4 6"
-              />
-              {/* Finish line marker */}
-              <line
-                x1={VB_W - PAD_X}
-                x2={VB_W - PAD_X}
-                y1={PATH_Y - 70}
-                y2={PATH_Y + 70}
-                stroke="hsl(var(--foreground))"
-                strokeWidth={1.5}
-              />
-              {/* Stage tick markers + labels */}
-              {STAGES.map((s, i) => {
-                const x = stageX(i);
-                const y = stageY(i);
-                return (
-                  <g key={s.id}>
-                    <circle cx={x} cy={y} r={4} fill="hsl(var(--foreground))" />
-                    <text
-                      x={x}
-                      y={VB_H - 20}
-                      textAnchor="middle"
-                      className="fill-muted-foreground"
-                      fontSize={11}
-                    >
-                      {s.label}
-                    </text>
-                    <text
-                      x={x}
-                      y={VB_H - 6}
-                      textAnchor="middle"
-                      className="fill-foreground"
-                      fontSize={11}
-                      fontWeight={600}
-                    >
-                      {stageGroups.get(s.id)?.length ?? 0}
-                    </text>
-                  </g>
-                );
-              })}
-              {/* Bubbles */}
-              {STAGES.map((s, i) => {
-                const lps = stageGroups.get(s.id) ?? [];
-                const cx = stageX(i);
-                const cy = stageY(i);
-                return lps.map((lp, idx) => {
-                  const col = Math.floor(idx / MAX_PER_COL);
-                  const rowIdx = idx % MAX_PER_COL;
-                  const totalCols = Math.ceil(lps.length / MAX_PER_COL);
-                  const colOffset = (col - (totalCols - 1) / 2) * STACK_DX;
-                  const bx = cx + colOffset;
-                  const by = cy - 40 - rowIdx * STACK_DY;
-                  const isHover = hoverId === `${lp.raiseId}:${lp.id}`;
-                  return (
-                    <g
-                      key={`${lp.raiseId}-${lp.id}`}
-                      transform={`translate(${bx}, ${by})`}
-                      onMouseEnter={() => setHoverId(`${lp.raiseId}:${lp.id}`)}
-                      onMouseLeave={() => setHoverId(null)}
-                      className="cursor-pointer"
-                    >
-                      {rowIdx === 0 && (
-                        <line
-                          x1={0}
-                          y1={BUBBLE_R}
-                          x2={cx - bx}
-                          y2={cy - by}
-                          stroke="hsl(var(--border))"
-                          strokeWidth={1}
-                        />
-                      )}
-                      <circle
-                        r={BUBBLE_R}
-                        fill="hsl(var(--background))"
-                        stroke="hsl(var(--foreground))"
-                        strokeWidth={isHover ? 2 : 1.25}
-                      />
-                      <text
-                        textAnchor="middle"
-                        dy={4}
-                        fontSize={10}
-                        fontWeight={600}
-                        className="fill-foreground select-none"
-                      >
-                        {initials(lp.name)}
-                      </text>
-                      {isHover && (
-                        <g transform={`translate(0, ${-BUBBLE_R - 8})`}>
-                          <rect
-                            x={-90}
-                            y={-32}
-                            width={180}
-                            height={32}
-                            rx={4}
-                            fill="hsl(var(--popover))"
-                            stroke="hsl(var(--border))"
-                          />
-                          <text
-                            x={0}
-                            y={-19}
-                            textAnchor="middle"
-                            fontSize={10}
-                            fontWeight={600}
-                            className="fill-foreground"
-                          >
-                            {lp.name}
-                          </text>
-                          <text
-                            x={0}
-                            y={-6}
-                            textAnchor="middle"
-                            fontSize={9}
-                            className="fill-muted-foreground"
-                          >
-                            {lp.raiseName}
-                          </text>
-                        </g>
-                      )}
-                    </g>
-                  );
-                });
-              })}
-              {/* Finish line label */}
-              <text
-                x={VB_W - PAD_X}
-                y={PATH_Y - 80}
-                textAnchor="middle"
-                fontSize={10}
-                className="fill-muted-foreground uppercase tracking-wider"
-              >
-                Finish
-              </text>
-            </svg>
+        {sankey.links.length === 0 ? (
+          <div className="h-[280px] flex items-center justify-center text-xs text-muted-foreground">
+            No LP flow yet.
           </div>
-        </div>
+        ) : (
+          <div className="w-full" style={{ height: 320 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <Sankey
+                data={sankey}
+                nodePadding={18}
+                nodeWidth={12}
+                linkCurvature={0.5}
+                iterations={64}
+                margin={{ top: 8, right: 140, bottom: 8, left: 8 }}
+                node={<SankeyNode />}
+                link={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.08, fill: "hsl(var(--foreground))", fillOpacity: 0.12 }}
+              >
+                <RTooltip
+                  contentStyle={{
+                    fontSize: 11,
+                    borderRadius: 8,
+                    border: "1px solid hsl(var(--border))",
+                    background: "hsl(var(--popover))",
+                  }}
+                />
+              </Sankey>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* Table */}
