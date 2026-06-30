@@ -4,8 +4,8 @@ import { NDA_STATUS_META, type NdaStatus } from "@/mocks/gp/ndas";
 const TONE_CLS: Record<string, string> = {
   muted: "border-border text-muted-foreground bg-muted/30",
   info: "border-foreground/30 text-foreground bg-muted/40",
-  warn: "border-amber-500/40 text-amber-600 bg-amber-500/10",
-  good: "border-emerald-500/40 text-emerald-600 bg-emerald-500/10",
+  warn: "border-border text-foreground bg-muted",
+  good: "border-foreground/30 text-foreground bg-muted",
   bad: "border-destructive/40 text-destructive bg-destructive/10",
 };
 

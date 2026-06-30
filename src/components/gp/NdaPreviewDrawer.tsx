@@ -127,7 +127,7 @@ export function NdaPreviewDrawer({ open, onClose, raiseName, signed, onSigned }:
               <div className="flex items-baseline justify-between">
                 <h3 className="text-sm font-semibold text-foreground">Sign as LP</h3>
                 {signed && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-foreground">
                     <CheckCircle2 className="h-3 w-3" /> Signed
                   </span>
                 )}
