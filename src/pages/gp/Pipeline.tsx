@@ -373,7 +373,7 @@ export default function Pipeline() {
             <div>
               <span
                 className={cn(
-                  "text-[10px] uppercase tracking-wider border rounded px-1.5 py-0.5",
+                  "text-[10px] border rounded px-1.5 py-0.5",
                   CONSENT_STYLES[lp.consent],
                 )}
               >

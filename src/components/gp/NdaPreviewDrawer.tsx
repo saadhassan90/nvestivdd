@@ -113,7 +113,7 @@ export function NdaPreviewDrawer({ open, onClose, raiseName, signed, onSigned }:
                   <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mutual NDA</p>
                   <h3 className="text-sm font-semibold text-foreground mt-0.5">{tpl.name}</h3>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">v{tpl.version}</span>
+                <span className="text-[11px] text-muted-foreground">v{tpl.version}</span>
               </div>
               <div className="px-6 py-5 max-h-[42vh] overflow-y-auto">
                 <MarkdownContent content={body} />
@@ -134,7 +134,7 @@ export function NdaPreviewDrawer({ open, onClose, raiseName, signed, onSigned }:
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Full legal name</label>
+                  <label className="text-[11px] text-muted-foreground">Full legal name</label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -144,7 +144,7 @@ export function NdaPreviewDrawer({ open, onClose, raiseName, signed, onSigned }:
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Title / capacity</label>
+                  <label className="text-[11px] text-muted-foreground">Title / capacity</label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -156,7 +156,7 @@ export function NdaPreviewDrawer({ open, onClose, raiseName, signed, onSigned }:
               </div>
 
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Signature</label>
+                <label className="text-[11px] text-muted-foreground">Signature</label>
                 <button
                   type="button"
                   onClick={() => { setDraft(signature); setPadOpen(true); }}

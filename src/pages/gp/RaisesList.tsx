@@ -86,7 +86,7 @@ export default function RaisesList() {
                   >
                     <td className="px-4 py-3 font-medium text-foreground">{r.name}</td>
                     <td className="px-4 py-3">
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                      <span className="text-[10px] text-muted-foreground border border-border rounded px-1.5 py-0.5">
                         {r.status}
                       </span>
                     </td>

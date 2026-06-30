@@ -52,7 +52,7 @@ export function NdaDetailDrawer({ nda, onClose }: Props) {
 
           {nda.signerName && (
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Signer</div>
+              <div className="text-[11px] text-muted-foreground mb-1">Signer</div>
               <div className="text-xs text-foreground font-medium">{nda.signerName}</div>
               {nda.signerTitle && <div className="text-[11px] text-muted-foreground">{nda.signerTitle}</div>}
               {nda.signatureDataUrl && (
@@ -62,7 +62,7 @@ export function NdaDetailDrawer({ nda, onClose }: Props) {
           )}
 
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Audit trail</div>
+            <div className="text-[11px] text-muted-foreground mb-1.5">Audit trail</div>
             <div className="space-y-1">
               {nda.auditTrail.map((e, i) => (
                 <div key={i} className="flex items-start gap-2 text-[11px]">
@@ -75,7 +75,7 @@ export function NdaDetailDrawer({ nda, onClose }: Props) {
           </div>
 
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Sign link</div>
+            <div className="text-[11px] text-muted-foreground mb-1.5">Sign link</div>
             <div className="rounded border border-border bg-muted/40 px-2 py-1.5 text-[11px] font-mono truncate">
               {window.location.origin}/nda/{nda.id}
             </div>
@@ -122,7 +122,7 @@ export function NdaDetailDrawer({ nda, onClose }: Props) {
 function Grid({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 py-1 border-b border-border last:border-0">
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-[11px] text-muted-foreground">{label}</span>
       <span className="text-xs text-foreground tabular-nums">{value}</span>
     </div>
   );

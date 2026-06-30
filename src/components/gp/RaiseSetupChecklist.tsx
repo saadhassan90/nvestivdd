@@ -87,7 +87,7 @@ export function RaiseSetupChecklist({ raise }: Props) {
           <div className="text-right">
             <p className="text-2xl font-semibold text-foreground tabular-nums">{pct}%</p>
             <span className={cn(
-              "mt-1 inline-block text-[10px] uppercase tracking-wider rounded-full border px-2 py-0.5",
+              "mt-1 inline-block text-[10px] rounded-full border px-2 py-0.5",
               isLive ? "border-foreground text-foreground bg-foreground/5" : "border-border text-muted-foreground",
             )}>
               {isLive ? "Ready" : "In setup"}

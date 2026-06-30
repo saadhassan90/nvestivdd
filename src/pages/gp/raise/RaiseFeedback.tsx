@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise } from "@/mocks/gp/raises";
 import { EditableText } from "@/components/iris/EditableText";
+import { KpiRow, KpiCell } from "@/components/ui/kpi";
 
 export default function RaiseFeedback() {
   const { fundId } = useParams();
@@ -28,20 +29,11 @@ export default function RaiseFeedback() {
   ];
   return (
     <GpPagePlaceholder>
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">L2 LPs engaged</p>
-          <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{sharedLps.length}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Questions asked</p>
-          <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{totalQs}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Avg / LP</p>
-          <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{Math.round(totalQs / sharedLps.length)}</p>
-        </div>
-      </div>
+      <KpiRow className="mb-4 lg:grid-cols-3">
+        <KpiCell label="L2 LPs engaged" value={sharedLps.length} />
+        <KpiCell label="Questions asked" value={totalQs} />
+        <KpiCell label="Avg / LP" value={Math.round(totalQs / sharedLps.length)} />
+      </KpiRow>
       <div className="rounded-lg border border-border bg-card p-5">
         <EditableText
           as="p"

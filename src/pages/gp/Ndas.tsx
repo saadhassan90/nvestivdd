@@ -7,6 +7,7 @@ import { NDAS, subscribeNdas, type NdaRecord, type NdaStatus, seedNdasFromRaises
 import { RAISES } from "@/mocks/gp/raises";
 import { downloadNdaPdf } from "@/lib/nda-pdf";
 import { cn } from "@/lib/utils";
+import { KpiRow, KpiCell } from "@/components/ui/kpi";
 
 seedNdasFromRaises(RAISES);
 
@@ -82,12 +83,12 @@ export default function Ndas() {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mb-4">
-        <Tile label="Total" value={stats.t} />
-        <Tile label="Signed / executed" value={stats.signed} tone="good" />
-        <Tile label="Pending" value={stats.pending} tone="info" />
-        <Tile label="Expired" value={stats.expired} tone="warn" />
-      </div>
+      <KpiRow className="mb-4 lg:grid-cols-4">
+        <KpiCell label="Total" value={stats.t} />
+        <KpiCell label="Signed / executed" value={stats.signed} />
+        <KpiCell label="Pending" value={stats.pending} />
+        <KpiCell label="Expired" value={stats.expired} />
+      </KpiRow>
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <div className="relative">
@@ -131,8 +132,8 @@ export default function Ndas() {
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <div className="grid grid-cols-[1.5fr_1.5fr_110px_110px_110px_110px_60px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
-            <div>LP</div><div>Raise</div><div>Status</div><div>Sent</div><div>Signed</div><div>Expires</div><div></div>
+          <div className="grid grid-cols-[1.5fr_1.5fr_110px_110px_110px_110px_60px] text-[11px] text-muted-foreground px-4 py-2 border-b border-border">
+            <div>lp</div><div>raise</div><div>status</div><div>sent</div><div>signed</div><div>expires</div><div></div>
           </div>
           {rows.map((n) => (
             <div

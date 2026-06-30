@@ -60,7 +60,7 @@ export function SendNdaModal({ open, onClose, raiseId, raiseName, lpId, lpName, 
         </div>
         <div className="p-4 space-y-4">
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Recipient email</label>
+            <label className="text-[11px] font-medium text-muted-foreground">Recipient email</label>
             <input
               type="email"
               value={email}
@@ -69,7 +69,7 @@ export function SendNdaModal({ open, onClose, raiseId, raiseName, lpId, lpName, 
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Template</label>
+            <label className="text-[11px] font-medium text-muted-foreground">Template</label>
             <div className="mt-1.5 space-y-1">
               {NDA_TEMPLATES.map((t) => (
                 <button
@@ -89,7 +89,7 @@ export function SendNdaModal({ open, onClose, raiseId, raiseName, lpId, lpName, 
             </div>
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Link expires in</label>
+            <label className="text-[11px] font-medium text-muted-foreground">Link expires in</label>
             <div className="mt-1.5 grid grid-cols-3 gap-1.5">
               {EXPIRY.map((p) => (
                 <button
@@ -109,7 +109,7 @@ export function SendNdaModal({ open, onClose, raiseId, raiseName, lpId, lpName, 
             </div>
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Personal note (optional)</label>
+            <label className="text-[11px] font-medium text-muted-foreground">Personal note (optional)</label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}

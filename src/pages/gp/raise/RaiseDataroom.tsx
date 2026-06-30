@@ -305,7 +305,7 @@ export default function RaiseDataroom() {
                 <div className="flex items-center gap-2 min-w-0">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="truncate text-foreground">{f.name}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1 py-0.5 shrink-0">
+                  <span className="text-[10px] text-muted-foreground border border-border rounded px-1 py-0.5 shrink-0">
                     v{f.version}
                   </span>
                 </div>
