@@ -1,67 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 25% 12%;
+    /* Efferd-style: warm off-white surface, pure-white cards, hairline borders */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
 
-    --card: 220 20% 100%;
-    --card-foreground: 220 25% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
 
-    --popover: 220 20% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
 
-    --primary: 220 15% 10%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 100%;
-    --secondary-foreground: 220 15% 10%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 220 16% 93%;
-    --muted-foreground: 220 12% 46%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 220 16% 93%;
-    --accent-foreground: 220 25% 12%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 16% 88%;
-    --input: 220 16% 88%;
-    --ring: 220 15% 10%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 0 0% 9%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Score tier colors */
-    --score-strong: 160 84% 39%;
-    --score-advance: 168 76% 42%;
-    --score-review: 38 92% 50%;
-    --score-decline: 0 84% 60%;
+    --score-strong: 158 64% 40%;
+    --score-advance: 158 50% 45%;
+    --score-review: 38 80% 50%;
+    --score-decline: 0 72% 51%;
 
     /* Severity colors */
-    --severity-critical: 0 84% 60%;
-    --severity-elevated: 38 92% 50%;
-    --severity-monitor: 217 91% 60%;
+    --severity-critical: 0 72% 51%;
+    --severity-elevated: 38 80% 50%;
+    --severity-monitor: 217 80% 55%;
 
     /* Trend colors */
-    --trend-positive: 160 84% 39%;
-    --trend-negative: 0 84% 60%;
+    --trend-positive: 158 64% 40%;
+    --trend-negative: 0 72% 51%;
 
     /* Nvestiv brand teal (logo) */
     --nvestiv-teal: 199 53% 36%;
 
-    --sidebar-background: 220 20% 100%;
-    --sidebar-foreground: 220 12% 46%;
-    --sidebar-primary: 220 15% 10%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 45%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 93%;
-    --sidebar-accent-foreground: 220 25% 12%;
-    --sidebar-border: 220 16% 88%;
-    --sidebar-ring: 220 15% 10%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 0 0% 9%;
   }
 }
 
@@ -72,7 +71,8 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist Variable', 'Geist', 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
   }
 
   /* PRD §7.1 — Meeting Mode: +15% font scaling and a few visibility hides */
