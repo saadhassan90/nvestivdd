@@ -44,7 +44,7 @@ export function MethodologyModal() {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <Info className="h-3 w-3" />
           How is this computed?
@@ -61,7 +61,7 @@ export function MethodologyModal() {
         <div className="space-y-5 text-sm">
           {/* Recommendation ladder */}
           <section>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground mb-2">
               1. Recommendation ladder (top-down precedence)
             </h3>
             <ol className="space-y-1.5 text-xs">
@@ -90,7 +90,7 @@ export function MethodologyModal() {
 
           {/* Composite weights */}
           <section>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground mb-2">
               2. Composite weights (5 scored dimensions, sum = 100)
             </h3>
             <table className="w-full text-xs">
@@ -113,7 +113,7 @@ export function MethodologyModal() {
 
           {/* Tiers */}
           <section>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground mb-2">
               3. Six composite tiers
             </h3>
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -130,7 +130,7 @@ export function MethodologyModal() {
 
           {/* Hard floors */}
           <section>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground mb-2">
               4. Ten hard floors (any one forces Decline)
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">

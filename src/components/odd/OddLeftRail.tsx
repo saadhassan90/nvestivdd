@@ -58,7 +58,7 @@ function RiskRatingBlock({ rating }: { rating: RiskRating }) {
   if (!rating) {
     return (
       <div className="rounded-md border border-border bg-muted/30 p-3">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+        <div className="text-[10px] font-bold text-muted-foreground mb-1">
           Risk Rating
         </div>
         <div className="text-2xl font-bold text-muted-foreground">—</div>
@@ -80,7 +80,7 @@ function RiskRatingBlock({ rating }: { rating: RiskRating }) {
   const label = rating[0].toUpperCase() + rating.slice(1);
   return (
     <div className="rounded-md border border-border bg-card p-3">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+      <div className="text-[10px] font-bold text-muted-foreground mb-1">
         Risk Rating
       </div>
       <div className={cn("flex items-center gap-2 text-lg font-bold", color)}>
@@ -100,7 +100,7 @@ export function OddLeftRail({
   return (
     <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-border bg-card/40">
       <div className="px-4 py-3 border-b border-border">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="text-[10px] font-bold text-muted-foreground">
           ODD Sections
         </div>
       </div>

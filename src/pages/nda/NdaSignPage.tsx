@@ -84,7 +84,7 @@ export default function NdaSignPage() {
               <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mutual NDA</p>
               <h2 className="text-base font-semibold text-foreground mt-0.5">{tpl.name}</h2>
             </div>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">v{tpl.version}</span>
+            <span className="text-[10px] text-muted-foreground">v{tpl.version}</span>
           </div>
           <div className="px-8 py-6 max-h-[60vh] overflow-y-auto">
             <MarkdownContent content={body} />
@@ -96,17 +96,17 @@ export default function NdaSignPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Full legal name</label>
+              <label className="text-[10px] text-muted-foreground">Full legal name</label>
               <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm focus:outline-none focus:border-foreground" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Title</label>
+              <label className="text-[10px] text-muted-foreground">Title</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm focus:outline-none focus:border-foreground" />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Signature</label>
+            <label className="text-[10px] text-muted-foreground">Signature</label>
             <div className="mt-1">
               <SignaturePad onChange={setSignature} />
             </div>

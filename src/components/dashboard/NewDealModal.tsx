@@ -142,7 +142,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         <div className="mt-5 sm:mt-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">1</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</span>
+            <span className="text-xs font-semibold text-muted-foreground">Upload Documents</span>
           </div>
           <div
             className="rounded-xl border-2 border-dashed border-border p-5 sm:p-6 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
@@ -163,7 +163,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
             />
           </div>
           <div className="mt-3 space-y-1.5">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recommended documents</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Recommended documents</p>
             {RECOMMENDED_DOCS.map((doc) => (
               <div key={doc} className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
@@ -192,7 +192,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         <div className="mt-5 sm:mt-6 pt-3 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submitted By</span>
+            <span className="text-xs font-semibold text-muted-foreground">Submitted By</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

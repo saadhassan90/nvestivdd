@@ -50,7 +50,7 @@ export function FundFactSheet({ project, fees = [] }: FundFactSheetProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3">
           {rows.map((r) => (
             <div key={r.label} className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
+              <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">
                 {r.label}
               </p>
               <p className="text-xs font-medium text-foreground leading-snug break-words">

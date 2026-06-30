@@ -59,7 +59,7 @@ export function MarkdownSectionCards({ content, baseDelay = 0.05, cardIdPrefix =
               <div className="p-5 sm:p-6">
                 {card.title && (
                   <div className="mb-4 pb-3 border-b border-border">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">
                       Section {i + 1}
                     </p>
                     <h3 className="text-sm font-bold text-foreground tracking-tight">

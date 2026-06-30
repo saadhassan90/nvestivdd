@@ -146,7 +146,7 @@ export function OverviewTab({
             {/* Composite + tier */}
             <div className="flex flex-col items-start gap-2 md:border-r md:border-border/60 md:pr-6">
               <div className="flex items-center justify-between w-full gap-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Composite Score</p>
+                <p className="text-[10px] text-muted-foreground">Composite Score</p>
                 <MethodologyModal />
               </div>
               <div className="flex items-baseline gap-1">
@@ -160,7 +160,7 @@ export function OverviewTab({
 
             {/* Recommendation */}
             <div className="flex flex-col items-start gap-2 md:border-r md:border-border/60 md:pr-6">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Recommendation</p>
+              <p className="text-[10px] text-muted-foreground">Recommendation</p>
               <RecommendationBadge recommendation={rec} className="text-sm px-3 py-1" />
               {hardFloorTriggered && (
                 <p className="text-[10px] text-severity-critical font-medium">Forced by hard floor</p>
@@ -169,7 +169,7 @@ export function OverviewTab({
 
             {/* Confidence */}
             <div className="flex flex-col items-start gap-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Confidence</p>
+              <p className="text-[10px] text-muted-foreground">Confidence</p>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-bold tabular-nums text-foreground">
                   {completenessPct != null ? `${completenessPct}` : "—"}
@@ -274,7 +274,7 @@ export function OverviewTab({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
             {fundSnapshotGroups.map((g) => (
               <div key={g.key}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-1 mb-2">
+                <p className="text-[10px] font-semibold text-muted-foreground border-b border-border/60 pb-1 mb-2">
                   {g.label}
                 </p>
                 <FieldValueGrid rows={g.rows} columns={1} />
@@ -315,7 +315,7 @@ function deriveConfidenceTier(pct: number | null | undefined): "High" | "Medium"
 function ConfidencePill({ tier }: { tier: "High" | "Medium" | "Low" | "Very Low" | null }) {
   if (!tier) {
     return (
-      <span className="inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+      <span className="inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
         Confidence —
       </span>
     );
@@ -327,7 +327,7 @@ function ConfidencePill({ tier }: { tier: "High" | "Medium" | "Low" | "Very Low"
     "Very Low": "border-severity-critical/40 text-severity-critical bg-severity-critical/10",
   } as const;
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", styles[tier])}>
+    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", styles[tier])}>
       {tier}
     </span>
   );
@@ -356,7 +356,7 @@ function SummaryColumn({
     tone === "good" ? "text-score-strong" : tone === "bad" ? "text-severity-critical" : "text-score-review";
   return (
     <div className="rounded-md border border-border/50 bg-card p-3">
-      <div className={cn("flex items-center gap-1.5 mb-2 text-[11px] font-semibold uppercase tracking-wider", toneClass)}>
+      <div className={cn("flex items-center gap-1.5 mb-2 text-[11px] font-semibold", toneClass)}>
         {icon}
         <span>{title}</span>
       </div>
@@ -433,7 +433,7 @@ function ScoresSummaryTable({ rows, projectId }: { rows: DimensionRow[]; project
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-border/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr className="border-b border-border/60 text-[10px] text-muted-foreground">
             <th className="text-left font-semibold py-2">Dimension</th>
             <th className="text-right font-semibold py-2 w-20">Weight</th>
             <th className="text-right font-semibold py-2 w-20">Score</th>
@@ -460,13 +460,13 @@ function ScoresSummaryTable({ rows, projectId }: { rows: DimensionRow[]; project
               <td className="py-2 text-right tabular-nums font-semibold text-foreground">
                 {r.score10 != null ? r.score10.toFixed(1) : "─"}
               </td>
-              <td className={cn("py-2 text-right font-semibold uppercase tracking-wider text-[10px]", tierClass(r.tier))}>
+              <td className={cn("py-2 text-right font-semibold text-[10px]", tierClass(r.tier))}>
                 {SCORE_TIER_LABELS[r.tier]}
               </td>
             </tr>
           ))}
           <tr className="border-t-2 border-border bg-muted/20">
-            <td className="py-2 text-[10px] uppercase tracking-wider text-muted-foreground" colSpan={4}>
+            <td className="py-2 text-[10px] text-muted-foreground" colSpan={4}>
               Regulatory & Operational Hygiene emits Pass / Conditional / Fail — see Reg & Ops tab.
             </td>
           </tr>

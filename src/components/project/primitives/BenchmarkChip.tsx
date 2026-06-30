@@ -31,7 +31,7 @@ export function BenchmarkChip({ score10, label, text, className }: BenchmarkChip
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold",
         TONE[resolved],
         className,
       )}

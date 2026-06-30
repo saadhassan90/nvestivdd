@@ -48,7 +48,7 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
             <MagicCard className="p-3">
               <div className="flex items-center justify-between gap-2 px-1">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
+                  <p className="text-[10px] font-medium text-muted-foreground truncate">
                     {card.label}
                   </p>
                   <span className="mt-0.5 block text-xl font-bold text-foreground">
@@ -76,7 +76,7 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
         <div className="sm:hidden grid grid-cols-5 gap-1.5">
           {cards.map((card) => (
             <div key={card.label} className="rounded-md border border-border bg-card px-2 py-1.5">
-              <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground leading-tight truncate">
+              <p className="text-[9px] font-medium text-muted-foreground leading-tight truncate">
                 {card.label}
               </p>
               <div className="flex items-baseline gap-0.5 mt-0.5">

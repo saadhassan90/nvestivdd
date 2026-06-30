@@ -15,7 +15,7 @@ export function MethodologyDialog({ methodology }: { methodology: Methodology })
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground border border-border rounded-md px-2 py-1"
+          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground border border-border rounded-md px-2 py-1"
         >
           <Info className="h-3 w-3" /> Methodology
         </button>
@@ -29,12 +29,12 @@ export function MethodologyDialog({ methodology }: { methodology: Methodology })
         </DialogHeader>
         <div className="space-y-3 text-xs">
           <div className="rounded-md border border-border bg-muted/30 px-3 py-2 flex items-center justify-between">
-            <span className="text-muted-foreground uppercase tracking-wider text-[10px] font-semibold">Completeness</span>
+            <span className="text-muted-foreground text-[10px] font-semibold">Completeness</span>
             <span className="text-lg font-bold tabular-nums">{methodology.completeness_pct}%</span>
           </div>
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              <tr className="text-[10px] text-muted-foreground">
                 <th className="text-left font-semibold py-1.5">Topic</th>
                 <th className="text-right font-semibold py-1.5">Venues</th>
                 <th className="text-right font-semibold py-1.5">Hits</th>

@@ -51,7 +51,7 @@ function ModuleCard({ m }: { m: Module }) {
       >
         <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform shrink-0", open && "rotate-180")} />
         <span className="text-sm font-semibold text-foreground">{MODULE_LABEL[m.key]}</span>
-        <span className={cn("text-[11px] font-semibold uppercase tracking-wider", tone)}>{m.verdict_chip}</span>
+        <span className={cn("text-[11px] font-semibold", tone)}>{m.verdict_chip}</span>
         <div className="flex-1" />
         {score != null && (
           <span className={cn("text-lg font-bold tabular-nums shrink-0", tone)}>{score}<span className="text-[10px] text-muted-foreground">/100</span></span>
@@ -63,7 +63,7 @@ function ModuleCard({ m }: { m: Module }) {
         <div className="border-t border-border/60 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {m.kpis.map((k, i) => (
             <div key={i} className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-nvestiv-teal truncate">{k.label}</p>
+              <p className="text-[10px] text-nvestiv-teal truncate">{k.label}</p>
               <p className="text-sm font-semibold text-foreground tabular-nums">
                 {k.value}{k.unit ? <span className="text-[10px] text-muted-foreground ml-0.5">{k.unit}</span> : null}
               </p>
@@ -86,7 +86,7 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.facts.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Facts</p>
+              <p className="text-[10px] font-semibold text-nvestiv-teal mb-2">Facts</p>
               <ul className="space-y-2">
                 {m.facts.map((f, i) => (
                   <Subcard key={i}>
@@ -103,7 +103,7 @@ function ModuleCard({ m }: { m: Module }) {
 
           {m.flag_refs.length > 0 && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Related flags</p>
+              <p className="text-[10px] font-semibold text-nvestiv-teal mb-2">Related flags</p>
               <div className="space-y-2">
                 {m.flag_refs.map((fid) => {
                   const f = payload.flags.items.find((x) => x.id === fid);
@@ -123,7 +123,7 @@ function ModuleCard({ m }: { m: Module }) {
                       <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <FlagSeverityBadge s={f.severity} />
-                          <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal">{f.category}</span>
+                          <span className="text-[10px] text-nvestiv-teal">{f.category}</span>
                           <span className="font-mono text-[10px] text-muted-foreground">{f.id}</span>
                         </div>
                       </div>
@@ -135,7 +135,7 @@ function ModuleCard({ m }: { m: Module }) {
 
                       {linked.length > 0 && (
                         <div className="mt-2.5 space-y-2">
-                          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal">
+                          <p className="text-[10px] font-semibold text-nvestiv-teal">
                             Questions to ask <span className="tabular-nums">({linked.length})</span>
                           </p>
                           {linked.map((q) => (
@@ -146,7 +146,7 @@ function ModuleCard({ m }: { m: Module }) {
                               </div>
                               {q.why && (
                                 <p className="text-[11px] text-muted-foreground italic leading-snug">
-                                  <span className="not-italic uppercase tracking-wider text-[9px] font-semibold mr-1">Why</span>
+                                  <span className="not-italic text-[9px] font-semibold mr-1">Why</span>
                                   {q.why}
                                 </p>
                               )}

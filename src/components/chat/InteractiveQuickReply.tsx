@@ -34,7 +34,7 @@ export function InteractiveQuickReply({
         ))}
       </div>
       {answered && (
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-2">
+        <div className="text-[10px] text-muted-foreground mt-2">
           answered
         </div>
       )}

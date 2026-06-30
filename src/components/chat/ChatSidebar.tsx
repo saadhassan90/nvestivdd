@@ -332,7 +332,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
                       const preview = a.preview;
                       return (
                         <div key={a.id} className="group relative w-[200px] rounded-md border border-border bg-muted/60 px-2.5 py-1.5" title={a.name}>
-                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium mb-0.5">
                             <FileText className="h-3 w-3" />
                             <span>Pasted</span>
                             <span className="ml-auto normal-case tracking-normal">{a.size.toLocaleString()} chars</span>

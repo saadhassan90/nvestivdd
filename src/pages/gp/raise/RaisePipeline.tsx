@@ -53,7 +53,7 @@ export default function RaisePipeline() {
   return (
     <GpPagePlaceholder>
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1.4fr_100px_180px_130px_60px_100px_90px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
+        <div className="grid grid-cols-[1.4fr_100px_180px_130px_60px_100px_90px] text-[11px] text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
           <div>LP</div><div>Type</div><div>Stage</div><div>NDA</div><div>Qs</div><div>Last activity</div><div className="text-right">Actions</div>
         </div>
         {raise.lps.map((lp) => {

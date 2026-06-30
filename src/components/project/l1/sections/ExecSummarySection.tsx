@@ -33,14 +33,14 @@ export function ExecSummarySection() {
 
 function ColumnHeader({ title, tone }: { title: string; tone: "strong" | "critical" }) {
   const accent = tone === "strong" ? "text-score-strong" : "text-severity-critical";
-  return <p className={`text-[10px] uppercase tracking-wider font-semibold ${accent}`}>{title}</p>;
+  return <p className={`text-[10px] font-semibold ${accent}`}>{title}</p>;
 }
 
 function BulletCell({ bullet }: { bullet?: ExecBullet }) {
   if (!bullet) return <div />;
   return (
     <Subcard className="h-full flex flex-col">
-      <p className="text-[10px] uppercase tracking-wider text-nvestiv-teal font-semibold mb-1">{bullet.category}</p>
+      <p className="text-[10px] text-nvestiv-teal font-semibold mb-1">{bullet.category}</p>
       <p className="text-xs text-foreground/85 leading-relaxed mb-1.5 flex-1">{bullet.detail}</p>
       <CitationChipRow ids={bullet.citation_ids} />
     </Subcard>

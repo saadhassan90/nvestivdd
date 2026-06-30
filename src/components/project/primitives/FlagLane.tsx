@@ -26,7 +26,7 @@ export function FlagLane({ title, tone, flags, emptyMessage = "All clear — no 
     <div>
       <div className="flex items-center gap-2 mb-2">
         <span className={cn("h-2 w-2 rounded-full", style.dot)} />
-        <span className={cn("text-[11px] font-bold uppercase tracking-wider", style.text)}>
+        <span className={cn("text-[11px] font-bold", style.text)}>
           {title} ({flags.length})
         </span>
       </div>

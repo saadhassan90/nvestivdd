@@ -163,7 +163,7 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
                             <div className="flex items-start gap-1.5">
                               <p className="text-xs italic text-foreground flex-1">{s.title}</p>
                               {s.is_primary && (
-                                <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-score-strong border border-score-strong/30 rounded px-1 py-[1px] shrink-0">
+                                <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-score-strong border border-score-strong/30 rounded px-1 py-[1px] shrink-0">
                                   <Star className="h-2 w-2" /> Primary
                                 </span>
                               )}
@@ -187,7 +187,7 @@ export function SourceFilesTab({ researchSources }: SourceFilesTabProps) {
                             </div>
                             {linkedSections.length > 0 && projectId && (
                               <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Cited in:</span>
+                                <span className="text-[9px] text-muted-foreground">Cited in:</span>
                                 {linkedSections.map((sec, idx) => {
                                   const link = resolveSectionLink(sec);
                                   if (!link) {

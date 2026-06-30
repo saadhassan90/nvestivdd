@@ -101,7 +101,7 @@ export function ModuleFlagBlock({
 
         {unattributed.length > 0 && (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3">
-            <div className="flex items-center gap-1.5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-1.5 mb-2 text-[10px] font-semibold text-muted-foreground">
               <HelpCircle className="h-3 w-3" />
               Unattributed observations
               <span className="font-mono tabular-nums">({unattributed.length})</span>
@@ -142,14 +142,14 @@ function FlagCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2 mb-1 flex-wrap">
             <p className="text-sm font-semibold text-foreground leading-snug">{flag.title}</p>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold shrink-0">
+            <span className="text-[10px] text-muted-foreground font-semibold shrink-0">
               {flag.severity}
             </span>
           </div>
 
           {(flag.issue || flag.description) && (
             <div className="mt-1.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+              <p className="text-[10px] text-muted-foreground font-semibold mb-0.5">
                 Why it was raised
               </p>
               <p className="text-xs text-foreground/85 leading-relaxed">
@@ -160,7 +160,7 @@ function FlagCard({
 
           {flag.implication && (
             <div className="mt-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+              <p className="text-[10px] text-muted-foreground font-semibold mb-0.5">
                 Implication
               </p>
               <p className="text-xs text-foreground/85 leading-relaxed">{flag.implication}</p>
@@ -170,7 +170,7 @@ function FlagCard({
           {/* Linked questions */}
           {linked.length > 0 && (
             <div className="mt-3 space-y-2 border-t border-border/40 pt-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold inline-flex items-center gap-1">
+              <p className="text-[10px] text-muted-foreground font-semibold inline-flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
                 Questions tied to this flag ({linked.length})
               </p>
@@ -212,7 +212,7 @@ function QuestionRow({
         {q.priority && (
           <span
             className={cn(
-              "text-[9px] font-bold uppercase tracking-wider shrink-0 rounded-full px-1.5 py-0.5",
+              "text-[9px] font-bold shrink-0 rounded-full px-1.5 py-0.5",
               q.priority === "critical"
                 ? "bg-severity-critical/15 text-severity-critical"
                 : q.priority === "high"
@@ -226,7 +226,7 @@ function QuestionRow({
       </div>
       {q.rationale && (
         <div className="text-[11px] leading-relaxed text-foreground/75 mb-1.5">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mr-1">
+          <span className="text-[10px] text-muted-foreground font-semibold mr-1">
             Rationale
           </span>
           {q.rationale}
@@ -274,7 +274,7 @@ function AnswerBlock({
     tone === "good" ? "text-score-strong" : "text-severity-critical";
   return (
     <div className={cn("rounded border px-2 py-1.5", toneClass)}>
-      <p className={cn("text-[10px] uppercase tracking-wider font-bold mb-0.5", labelClass)}>
+      <p className={cn("text-[10px] font-bold mb-0.5", labelClass)}>
         {label}
       </p>
       <p className="text-[11px] text-foreground/85 leading-snug">

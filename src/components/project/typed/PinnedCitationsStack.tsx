@@ -20,7 +20,7 @@ export function PinnedCitationsStack() {
       )}
       aria-label="Pinned citations"
     >
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 rounded-md border border-border self-end inline-flex items-center gap-1">
+      <div className="text-[10px] text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 rounded-md border border-border self-end inline-flex items-center gap-1">
         <Pin className="h-3 w-3" />
         Pinned ({pinned.length})
       </div>
@@ -30,7 +30,7 @@ export function PinnedCitationsStack() {
           className="rounded-lg border border-border bg-card shadow-lg overflow-hidden"
         >
           <div className="flex items-start gap-2 px-3 py-2 border-b border-border bg-muted/30">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+            <span className="text-[10px] text-muted-foreground font-mono">
               {s.citation_id || s.source_type || "src"}
             </span>
             <button

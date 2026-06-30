@@ -251,7 +251,7 @@ export function MarketRealityTab({
                     )}
                   </div>
                   {t.factor_type && (
-                    <span className="ml-auto shrink-0 inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                    <span className="ml-auto shrink-0 inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground font-semibold">
                       {t.factor_type.replace(/_/g, " ")}
                     </span>
                   )}
@@ -319,7 +319,7 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
         <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>
@@ -399,7 +399,7 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-border/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr className="border-b border-border/60 text-[10px] text-muted-foreground">
             <th className="text-left font-semibold py-2 pr-3">GP Claim</th>
             <th className="text-left font-semibold py-2 pr-3 w-[28%]">Benchmark / Market Read</th>
             <th className="text-right font-semibold py-2 w-32">Deviation</th>
@@ -427,7 +427,7 @@ function ClaimVsMarketTable({ rows }: { rows: ClaimRow[] }) {
               <td className="py-2.5 text-right">
                 <span
                   className={cn(
-                    "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                    "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
                     DEVIATION_STYLE[r.deviation],
                   )}
                 >
@@ -468,7 +468,7 @@ function SubScoresPanel({
             <span className="text-right tabular-nums text-foreground font-medium">
               {score != null ? score.toFixed(1) : "─"}
             </span>
-            <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="text-right text-[10px] text-muted-foreground">
               {SCORE_TIER_LABELS[tier]}
             </span>
           </div>

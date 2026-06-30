@@ -18,7 +18,7 @@ export function NorthStarBadge({ answer, className }: { answer: NorthStarAnswer;
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider",
+        "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold",
         NORTH_STAR_CLASS[answer],
         className,
       )}
@@ -32,7 +32,7 @@ export function TierBadge({ tier, className }: { tier: VerdictTier; className?: 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground",
+        "inline-flex items-center rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export const DISPOSITION_CLASS: Record<Disposition, string> = {
 
 export function DispositionBadge({ d }: { d: Disposition }) {
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider", DISPOSITION_CLASS[d])}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold", DISPOSITION_CLASS[d])}>
       {d}
     </span>
   );
@@ -62,7 +62,7 @@ export const SEVERITY_CLASS: Record<FlagSeverity, string> = {
 
 export function FlagSeverityBadge({ s }: { s: FlagSeverity }) {
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider", SEVERITY_CLASS[s])}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold", SEVERITY_CLASS[s])}>
       {s}
     </span>
   );
@@ -92,7 +92,7 @@ export const TIER_LABEL_SHORT: Record<SourceTier, string> = {
 
 export function SourceTierBadge({ tier }: { tier: SourceTier }) {
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider", TIER_BADGE_CLASS[tier])}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold", TIER_BADGE_CLASS[tier])}>
       {TIER_LABEL_SHORT[tier]}
     </span>
   );

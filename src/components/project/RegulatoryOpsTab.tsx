@@ -119,7 +119,7 @@ export function RegulatoryOpsTab({
               </div>
               <div className="flex items-center gap-2 mt-2.5">
                 <TierPill tier={tier} />
-                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {moduleScore?.confidence || "Confidence not parsed"}
                 </span>
               </div>
@@ -159,7 +159,7 @@ export function RegulatoryOpsTab({
                 <div key={gate.key} className={`rounded-lg border p-3 ${tone}`}>
                   <p className="text-xs font-semibold text-foreground">{gate.label}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{gate.description}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mt-2">
+                  <p className="text-[10px] font-bold mt-2">
                     {data?.status?.replace(/_/g, " ") || "Pending verification"}
                   </p>
                   {data?.confidence && (
@@ -181,25 +181,25 @@ export function RegulatoryOpsTab({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="rounded-lg border border-border bg-card px-3.5 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Regulatory Status</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">Regulatory Status</p>
               <div className="mt-1.5">
                 <ValueOrEmpty value={project.regulatory_status} />
               </div>
             </div>
             <div className="rounded-lg border border-border bg-card px-3.5 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Domicile</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">Domicile</p>
               <div className="mt-1.5">
                 <ValueOrEmpty value={project.domicile} />
               </div>
             </div>
             <div className="rounded-lg border border-border bg-card px-3.5 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP Entity</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">GP Entity</p>
               <div className="mt-1.5">
                 <ValueOrEmpty value={project.gp_entity_name} />
               </div>
             </div>
             <div className="rounded-lg border border-border bg-card px-3.5 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Inception</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">Inception</p>
               <div className="mt-1.5">
                 <ValueOrEmpty value={project.fund_inception_date} />
               </div>
@@ -237,7 +237,7 @@ export function RegulatoryOpsTab({
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-foreground">{req.label}</span>
                           {req.importance === "critical" && (
-                            <span className="text-[9px] uppercase tracking-wider text-severity-elevated">required</span>
+                            <span className="text-[9px] text-severity-elevated">required</span>
                           )}
                         </div>
                       </td>
@@ -292,7 +292,7 @@ export function RegulatoryOpsTab({
                 <div key={sq.id} className={`rounded-md border p-2.5 ${tone}`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-foreground truncate">{sq.category_label || sq.category}</p>
-                    <span className="text-[10px] font-bold uppercase tracking-wider shrink-0">
+                    <span className="text-[10px] font-bold shrink-0">
                       {sq.status?.replace(/_/g, " ") || "—"}
                     </span>
                   </div>
@@ -316,7 +316,7 @@ export function RegulatoryOpsTab({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
             {SUB_SCORES.map((s) => (
               <div key={s.key} className="rounded-md border border-border bg-card px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                <p className="text-[10px] font-semibold text-muted-foreground">{s.label}</p>
                 <div className="flex items-baseline gap-1 mt-1">
                   <EmptyChip />
                 </div>
@@ -345,7 +345,7 @@ export function RegulatoryOpsTab({
                   className="rounded-md border border-border bg-card px-3 py-2 flex items-start gap-2.5"
                 >
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider shrink-0 mt-0.5 ${
+                    className={`text-[10px] font-bold shrink-0 mt-0.5 ${
                       rf.severity === "critical"
                         ? "text-severity-critical"
                         : rf.severity === "elevated"
@@ -382,7 +382,7 @@ export function RegulatoryOpsTab({
               <li key={q.id} className="rounded-md border border-border bg-card px-3 py-2">
                 <div className="flex items-start gap-2">
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider shrink-0 mt-0.5 ${
+                    className={`text-[10px] font-bold shrink-0 mt-0.5 ${
                       q.priority === "critical"
                         ? "text-severity-critical"
                         : q.priority === "high"

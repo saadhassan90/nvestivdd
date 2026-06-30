@@ -73,7 +73,7 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
     tbody: (props: any) => <TableBody>{props.children}</TableBody>,
     tr: (props: any) => <TableRow>{props.children}</TableRow>,
     th: (props: any) => (
-      <TableHead className="h-8 px-2 text-[10px] uppercase tracking-wider">
+      <TableHead className="h-8 px-2 text-[10px]">
         {props.children}
       </TableHead>
     ),

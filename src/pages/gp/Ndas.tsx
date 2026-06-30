@@ -173,7 +173,7 @@ function Tile({ label, value, tone }: { label: string; value: number; tone?: "go
   const cls = tone === "good" ? "text-emerald-600" : tone === "warn" ? "text-amber-600" : tone === "info" ? "text-foreground" : "text-foreground";
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2.5">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-[10px] text-muted-foreground">{label}</div>
       <div className={cn("text-xl font-semibold tabular-nums mt-0.5", cls)}>{value}</div>
     </div>
   );

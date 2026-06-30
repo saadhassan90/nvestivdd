@@ -73,7 +73,7 @@ export function IrisProposalsBanner() {
             <span className="text-xs font-semibold text-foreground">
               Iris suggestions
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground tabular-nums">
+            <span className="text-[10px] text-muted-foreground tabular-nums">
               {visible.length} pending
             </span>
           </div>
@@ -118,7 +118,7 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
 
   return (
     <div className="px-3 py-2.5">
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground">
         {proposal.label || proposal.section_key}
       </p>
       {proposal.rationale && (
@@ -126,11 +126,11 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
       )}
       <div className="mt-2 grid grid-cols-1 gap-1.5">
         <div className="rounded border border-destructive/30 bg-destructive/5 px-2 py-1.5">
-          <p className="text-[9px] uppercase tracking-wider text-destructive/70 mb-0.5">Current</p>
+          <p className="text-[9px] text-destructive/70 mb-0.5">Current</p>
           <p className="text-[11px] text-foreground/80 line-clamp-3">{currentText || "— (empty)"}</p>
         </div>
         <div className="rounded border border-foreground/30 bg-muted/40 px-2 py-1.5">
-          <p className="text-[9px] uppercase tracking-wider text-foreground/70 mb-0.5">Proposed</p>
+          <p className="text-[9px] text-foreground/70 mb-0.5">Proposed</p>
           <p className="text-[11px] text-foreground line-clamp-5 whitespace-pre-wrap">{proposedText}</p>
         </div>
       </div>

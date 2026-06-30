@@ -249,7 +249,7 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
         <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>
@@ -259,7 +259,7 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
 function ThesisBlock({ label, body, empty }: { label: string; body: string | null; empty: string }) {
   return (
     <div className="rounded-md border border-border/50 bg-card p-3 min-h-[88px]">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+      <p className="text-[10px] text-muted-foreground font-semibold mb-1.5">
         {label}
       </p>
       {body ? (
@@ -282,7 +282,7 @@ function ValidationStatus({ status }: { status: string }) {
           ? "text-severity-critical border-severity-critical/30"
           : "text-muted-foreground border-border";
   return (
-    <span className={cn("ml-auto shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider font-semibold", cls)}>
+    <span className={cn("ml-auto shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold", cls)}>
       {status.replace(/_/g, " ")}
     </span>
   );
@@ -314,7 +314,7 @@ function SubScoresPanel({
             <span className="text-right tabular-nums text-foreground font-medium">
               {score != null ? score.toFixed(1) : "─"}
             </span>
-            <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="text-right text-[10px] text-muted-foreground">
               {SCORE_TIER_LABELS[tier]}
             </span>
           </div>
