@@ -36,15 +36,21 @@ function deriveStage(raiseId: string, lp: L2Lp): StageId {
   if (lp.stage) return lp.stage;
   if (lp.consent === "withdrawn") return "declined";
   const nda = getNdaByLp(raiseId, lp.id);
+  // Spread LPs across the funnel based on activity (questions) and consent.
+  // Higher activity = further along.
   if (nda) {
     if (nda.status === "signed" || nda.status === "countersigned") {
-      if (lp.questions >= 15) return "ic_ready";
-      if (lp.questions >= 6) return "opened";
-      return "dataroom_sent";
+      if (lp.questions >= 25) return "ready_to_invest";
+      if (lp.questions >= 18) return "ic_ready";
+      if (lp.questions >= 10) return "opened";
+      if (lp.questions >= 4) return "dataroom_sent";
+      return "nda_signed";
     }
     if (nda.status === "sent" || nda.status === "viewed") return "nda_sent";
     if (nda.status === "requested") return "requested_dataroom";
   }
+  // Fallback distribution for LPs with no NDA yet — spread between sent/requested.
+  if (lp.consent === "pending") return "requested_dataroom";
   return "sent";
 }
 
