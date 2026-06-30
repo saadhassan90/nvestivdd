@@ -272,7 +272,7 @@ export default function Pipeline() {
                 nodeWidth={10}
                 linkCurvature={0.5}
                 iterations={64}
-                margin={{ top: 12, right: 24, bottom: 56, left: 24 }}
+                margin={{ top: 12, right: 80, bottom: 56, left: 24 }}
                 node={<SankeyNode />}
                 link={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.08, fill: "hsl(var(--foreground))", fillOpacity: 0.12 }}
               >
