@@ -1,4 +1,3 @@
-import { NvestivPulse } from "@/components/ui/NvestivPulse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X, SquarePen, Menu, ChevronDown, Check, Plus, ArrowUp, Square, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { useChatContext, type ChatMessage } from "@/contexts/ChatContext";
@@ -9,6 +8,7 @@ import { DotPattern } from "@/components/magicui/DotPattern";
 import { cn } from "@/lib/utils";
 import irisHelmet from "@/assets/iris-avatar-helmet.png";
 import { ChatResizeHandle } from "./ChatResizeHandle";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -274,7 +274,11 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
             {isLoading && (() => {
               const last = messages[messages.length - 1];
               const showPulse = !last || last.role === "user" || (last.role === "assistant" && !last.content);
-              return showPulse ? <div className="mt-5"><NvestivPulse /></div> : null;
+              return showPulse ? (
+                <div className="mt-5">
+                  <Shimmer className="text-sm">Thinking…</Shimmer>
+                </div>
+              ) : null;
             })()}
             <div ref={messagesEndRef} />
           </div>
