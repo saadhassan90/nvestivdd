@@ -76,12 +76,12 @@ export default function RaiseInterview() {
     not_started: { label: "Not started", tone: "bg-muted text-muted-foreground", icon: Clock },
     in_progress: {
       label: "We still need to talk",
-      tone: "bg-amber-500/15 text-amber-600 dark:text-amber-300",
+      tone: "bg-muted text-foreground border border-border",
       icon: MessageSquare,
     },
     complete: {
       label: "Interview complete",
-      tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
+      tone: "bg-muted text-foreground border border-border",
       icon: CheckCircle2,
     },
   };
