@@ -83,10 +83,10 @@ const STAGE_INDEX: Record<StageId, number> = MAIN_FLOW.reduce(
 );
 
 function SankeyNode(props: any) {
-  const { x, y, width, height, index, payload, containerWidth } = props;
-  const isOut = x + width + 6 > containerWidth - 6;
+  const { x, y, width, height, index, payload } = props;
   const label = payload?.name ?? "";
   const value = payload?.value ?? 0;
+  const isDeclined = payload?.stageId === "declined";
   return (
     <Layer key={`node-${index}`}>
       <Rectangle
@@ -94,14 +94,14 @@ function SankeyNode(props: any) {
         y={y}
         width={width}
         height={height}
-        fill="hsl(var(--foreground))"
-        fillOpacity={0.85}
+        fill={isDeclined ? "hsl(var(--destructive))" : "hsl(var(--foreground))"}
+        fillOpacity={isDeclined ? 0.55 : 0.8}
       />
+      {/* Label sits BELOW the node, centered on the bar */}
       <text
-        x={isOut ? x - 8 : x + width + 8}
-        y={y + height / 2}
-        textAnchor={isOut ? "end" : "start"}
-        dominantBaseline="middle"
+        x={x + width / 2}
+        y={y + height + 16}
+        textAnchor="middle"
         fontSize={11}
         className="fill-foreground"
         fontWeight={500}
@@ -109,10 +109,9 @@ function SankeyNode(props: any) {
         {label}
       </text>
       <text
-        x={isOut ? x - 8 : x + width + 8}
-        y={y + height / 2 + 13}
-        textAnchor={isOut ? "end" : "start"}
-        dominantBaseline="middle"
+        x={x + width / 2}
+        y={y + height + 30}
+        textAnchor="middle"
         fontSize={10}
         className="fill-muted-foreground"
       >
