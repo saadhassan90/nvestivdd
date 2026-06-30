@@ -206,10 +206,12 @@ export function GpShell() {
                   )}
                 </div>
               </aside>
-              <div className="relative flex-1 min-w-0">
-                <ChatSidebar hideHeader />
-                <div className="pointer-events-none absolute inset-0 z-20" style={{ mixBlendMode: 'multiply' }}>
-                  <SolarFlareBackground opacity={0.12} />
+              <div className="relative flex-1 min-w-0 bg-background">
+                <div className="pointer-events-none absolute inset-0 z-0">
+                  <SolarFlareBackground opacity={0.55} />
+                </div>
+                <div className="relative z-10 h-full">
+                  <ChatSidebar hideHeader transparent />
                 </div>
               </div>
             </div>

@@ -50,7 +50,7 @@ function getSuggestedPrompts(lastAssistantMsg: ChatMessage | undefined, isScoped
 }
 
 
-export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
+export function ChatSidebar({ hideHeader = false, transparent = false }: { hideHeader?: boolean; transparent?: boolean }) {
   const {
     messages, isLoading, sendMessage,
     startNewConversation, selectedModel, setSelectedModel, stopGeneration,
@@ -215,7 +215,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
   );
 
   return (
-    <div data-chat-drawer className="relative flex flex-col h-full w-full bg-card border-r border-border">
+    <div data-chat-drawer className={cn("relative flex flex-col h-full w-full border-r", transparent ? "bg-transparent border-transparent" : "bg-card border-border")}>
       <ChatResizeHandle />
       {!hideHeader && (
         <div className="border-b border-border bg-card shrink-0">
@@ -246,11 +246,11 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
           <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="relative flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-3 bg-muted">
+          className={cn("relative flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-3", transparent ? "bg-transparent" : "bg-muted")}>
           
-            <DotPattern
+            {!transparent && <DotPattern
             className="fill-muted-foreground/10"
-            style={{ mask: "radial-gradient(ellipse at center, black 20%, transparent 70%)", WebkitMask: "radial-gradient(ellipse at center, black 20%, transparent 70%)" } as React.CSSProperties} />
+            style={{ mask: "radial-gradient(ellipse at center, black 20%, transparent 70%)", WebkitMask: "radial-gradient(ellipse at center, black 20%, transparent 70%)" } as React.CSSProperties} />}
           
             {messages.length === 0 ?
           <ChatEmptyState
@@ -284,7 +284,7 @@ export function ChatSidebar({ hideHeader = false }: { hideHeader?: boolean }) {
           </div>
 
           {/* Input dock (in-flow so messages can't slide underneath) */}
-            <div className="shrink-0 p-3 bg-muted border-t border-transparent">
+            <div className={cn("shrink-0 p-3 border-t border-transparent", transparent ? "bg-transparent" : "bg-muted")}>
               {/* Suggested follow-up prompts */}
               {suggestedPrompts.length > 0 && !isLoading && (
                 <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-1">
