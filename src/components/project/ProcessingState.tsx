@@ -242,7 +242,7 @@ export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) 
 
       {/* Execution log */}
       <BlurFade delay={0.16}>
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
           <button onClick={() => setExecutionExpanded((e) => !e)} className="flex w-full items-center justify-between px-4 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-2">
               <Terminal className="h-3.5 w-3.5 text-muted-foreground" />

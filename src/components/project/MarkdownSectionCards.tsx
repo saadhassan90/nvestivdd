@@ -30,7 +30,7 @@ export function MarkdownSectionCards({ content, baseDelay = 0.05, cardIdPrefix =
     const domId = ctx ? cardDomId(ctx.sectionId, cardId) : undefined;
     return (
       <BlurFade delay={baseDelay}>
-        <section id={domId} className="rounded-xl border border-border bg-card overflow-hidden">
+        <section id={domId} className="rounded-lg border border-border bg-card overflow-hidden">
           <div className="p-5 sm:p-6">
             <MarkdownContent content={cards[0].content} />
           </div>
@@ -55,7 +55,7 @@ export function MarkdownSectionCards({ content, baseDelay = 0.05, cardIdPrefix =
         const domId = ctx ? cardDomId(ctx.sectionId, cardId) : undefined;
         return (
           <BlurFade key={i} delay={baseDelay + i * 0.03}>
-            <section id={domId} className="rounded-xl border border-border bg-card overflow-hidden">
+            <section id={domId} className="rounded-lg border border-border bg-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 {card.title && (
                   <div className="mb-4 pb-3 border-b border-border">

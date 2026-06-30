@@ -142,7 +142,7 @@ export function L1SnapshotPage({
             )}
 
             {/* 3-col verdict */}
-            <div className="mx-7 mt-6 grid grid-cols-1 md:grid-cols-[1.15fr_1fr_1fr] overflow-hidden rounded-xl border border-border">
+            <div className="mx-7 mt-6 grid grid-cols-1 md:grid-cols-[1.15fr_1fr_1fr] overflow-hidden rounded-lg border border-border">
               <VCell label="Composite Score" trailing={<MethodologyModal />}>
                 <BigNum value={verdict.composite} denom="/100" />
                 <TierPill tier={verdict.tier} />
@@ -457,7 +457,7 @@ function Tile({
           ? "text-severity-critical"
           : "text-foreground";
   return (
-    <div className="rounded-xl border border-border px-4 py-3.5">
+    <div className="rounded-lg border border-border px-4 py-3.5">
       <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-muted-foreground">
         {label}
       </p>
@@ -482,7 +482,7 @@ function SignalCol({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/70 bg-background/40 p-4",
+        "rounded-lg border border-border/70 bg-background/40 p-4",
         full && "md:col-span-2",
       )}
     >
@@ -553,11 +553,11 @@ function ModuleAccordion({
   const verdictLine = moduleVerdictLine(row.score);
 
   return (
-    <div className="mb-2 rounded-xl border border-border/70 bg-background/40 last:mb-0">
+    <div className="mb-2 rounded-lg border border-border/70 bg-background/40 last:mb-0">
       <button
         type="button"
         onClick={onToggle}
-        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-xl px-4 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
+        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-lg px-4 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
       >
         <ChevronDown
           className={cn(

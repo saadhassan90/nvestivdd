@@ -32,7 +32,7 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
       </header>
       {children}
       {!disableComments && ctx && (
-        <div className="mt-3 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="mt-3 rounded-lg border border-border bg-card overflow-hidden">
           <CardCommentThread
             projectId={ctx.projectId}
             sectionId={ctx.sectionId}
@@ -71,7 +71,7 @@ export function Card({
   const showComments = !!ctx && !!commentId;
   if (!showComments) {
     return (
-      <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
+      <div id={id} className={cn("rounded-lg border border-border bg-card overflow-hidden", className)}>
         {children}
       </div>
     );
@@ -82,7 +82,7 @@ export function Card({
   const innerCls = tokens.filter((t) => /^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
   const outerCls = tokens.filter((t) => !/^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
   return (
-    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", outerCls)}>
+    <div id={id} className={cn("rounded-lg border border-border bg-card overflow-hidden", outerCls)}>
       <div className={innerCls || undefined}>{children}</div>
       <CardCommentThread
         projectId={ctx!.projectId}

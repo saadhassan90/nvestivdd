@@ -10,7 +10,7 @@ interface EmptyStateProps {
 export function EmptyState({ onNewDeal }: EmptyStateProps) {
   return (
     <BlurFade>
-      <div className="relative flex flex-col items-center justify-center rounded-xl border border-border bg-card py-20 px-8">
+      <div className="relative flex flex-col items-center justify-center rounded-lg border border-border bg-card py-20 px-8">
         <DotPattern className="opacity-30" />
         <div className="relative z-10 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">

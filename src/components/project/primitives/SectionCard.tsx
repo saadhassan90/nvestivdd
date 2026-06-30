@@ -52,7 +52,7 @@ export function SectionCard({
     <section
       id={domId}
       className={cn(
-        "rounded-xl border border-border bg-card overflow-hidden",
+        "rounded-lg border border-border bg-card overflow-hidden",
         className,
       )}
     >

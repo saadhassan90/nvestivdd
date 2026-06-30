@@ -145,7 +145,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
             <span className="text-xs font-semibold text-muted-foreground">Upload Documents</span>
           </div>
           <div
-            className="rounded-xl border-2 border-dashed border-border p-5 sm:p-6 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
+            className="rounded-lg border-2 border-dashed border-border p-5 sm:p-6 text-center transition-colors hover:border-muted-foreground/40 cursor-pointer"
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => document.getElementById('file-input')?.click()}

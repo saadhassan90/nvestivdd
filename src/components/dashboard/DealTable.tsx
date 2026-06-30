@@ -189,7 +189,7 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
+      <div className="rounded-lg border border-border bg-card p-8 text-center">
         <p className="text-sm text-muted-foreground">No deals match your filters.</p>
       </div>
     );
