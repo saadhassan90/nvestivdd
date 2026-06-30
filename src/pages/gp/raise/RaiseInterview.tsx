@@ -166,7 +166,7 @@ export default function RaiseInterview() {
         </div>
 
         <div className="mt-6 rounded-md border border-dashed border-border bg-background/40 p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             Tip
           </p>
           <p className="text-sm text-foreground mt-1">

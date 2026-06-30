@@ -106,7 +106,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
         <div className="p-4 space-y-4 overflow-y-auto">
           {/* Recipients */}
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
               <Mail className="h-3 w-3" /> Recipients
             </label>
             <div className="mt-1.5 rounded-lg border border-border bg-muted/50 p-2 min-h-[44px]">
@@ -143,7 +143,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
 
           {/* What to share */}
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            <label className="text-[11px] font-medium text-muted-foreground">
               What to share
             </label>
             <div className="mt-1.5 space-y-1.5">
@@ -171,7 +171,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
                       <div className="text-xs font-medium text-foreground flex items-center gap-1.5">
                         {s.label}
                         {s.required && (
-                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground">
                             required
                           </span>
                         )}
@@ -187,7 +187,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
           {/* Permissions + expiry */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-[11px] font-medium text-muted-foreground">
                 Access
               </label>
               <div className="mt-1.5 grid grid-cols-1 gap-1">
@@ -209,7 +209,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" /> Link expires
               </label>
               <div className="mt-1.5 grid grid-cols-1 gap-1">
@@ -250,7 +250,7 @@ export function ShareRaiseModal({ open, onClose, raiseName, raiseId }: Props) {
 
           {/* Message */}
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
               <MessageSquare className="h-3 w-3" /> Personal note (optional)
             </label>
             <textarea
