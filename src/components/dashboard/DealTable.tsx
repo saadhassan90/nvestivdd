@@ -34,7 +34,7 @@ function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
   const isActive = sortBy === column;
   return (
     <th
-      className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
+      className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
       onClick={() => onSort?.(column)}
     >
       <span className="inline-flex items-center gap-1">
@@ -114,21 +114,15 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
 function StrategyPill({ strategy }: { strategy: string | null }) {
   if (!strategy) return <span className="text-xs text-muted-foreground">—</span>;
   return (
-    <span className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
+    <span className="inline-flex items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground">
       {strategy}
     </span>
   );
 }
 
 function StagePill({ stage }: { stage: string }) {
-  const colors: Record<string, string> = {
-    L1: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    L2: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    L3: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  };
-  const colorClass = colors[stage] || colors.L1;
   return (
-    <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold tracking-wider ${colorClass}`}>
+    <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium text-foreground">
       {stage}
     </span>
   );
@@ -217,18 +211,18 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
   return (
     <BlurFade delay={0.15}>
       {/* Desktop table */}
-      <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden">
+      <div className="hidden md:block rounded-lg border border-border bg-card overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">GP</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Strategy</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Stage</th>
-              <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Status</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Verdict</th>
+              <SortableHeader label="score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="fund name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">gp</th>
+              <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">strategy</th>
+              <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">stage</th>
+              <SortableHeader label="submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">status</th>
+              <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">verdict</th>
               <th className="px-2.5 py-2 w-10"></th>
             </tr>
           </thead>
