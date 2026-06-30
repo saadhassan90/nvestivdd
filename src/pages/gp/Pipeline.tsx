@@ -83,10 +83,10 @@ const STAGE_INDEX: Record<StageId, number> = MAIN_FLOW.reduce(
 );
 
 function SankeyNode(props: any) {
-  const { x, y, width, height, index, payload, containerWidth } = props;
-  const isOut = x + width + 6 > containerWidth - 6;
+  const { x, y, width, height, index, payload } = props;
   const label = payload?.name ?? "";
   const value = payload?.value ?? 0;
+  const isDeclined = payload?.stageId === "declined";
   return (
     <Layer key={`node-${index}`}>
       <Rectangle
@@ -94,14 +94,14 @@ function SankeyNode(props: any) {
         y={y}
         width={width}
         height={height}
-        fill="hsl(var(--foreground))"
-        fillOpacity={0.85}
+        fill={isDeclined ? "hsl(var(--destructive))" : "hsl(var(--foreground))"}
+        fillOpacity={isDeclined ? 0.55 : 0.8}
       />
+      {/* Label sits BELOW the node, centered on the bar */}
       <text
-        x={isOut ? x - 8 : x + width + 8}
-        y={y + height / 2}
-        textAnchor={isOut ? "end" : "start"}
-        dominantBaseline="middle"
+        x={x + width / 2}
+        y={y + height + 16}
+        textAnchor="middle"
         fontSize={11}
         className="fill-foreground"
         fontWeight={500}
@@ -109,10 +109,9 @@ function SankeyNode(props: any) {
         {label}
       </text>
       <text
-        x={isOut ? x - 8 : x + width + 8}
-        y={y + height / 2 + 13}
-        textAnchor={isOut ? "end" : "start"}
-        dominantBaseline="middle"
+        x={x + width / 2}
+        y={y + height + 30}
+        textAnchor="middle"
         fontSize={10}
         className="fill-muted-foreground"
       >
@@ -193,16 +192,26 @@ export default function Pipeline() {
       }
     }
 
-    const links: { source: number; target: number; value: number }[] = [];
+    const rawLinks: { source: number; target: number; value: number }[] = [];
     for (let i = 0; i < MAIN_FLOW.length - 1; i++) {
-      // value flowing from i → i+1 = number reaching i+1
       const v = reachedCounts[i + 1];
-      if (v > 0) links.push({ source: i, target: i + 1, value: v });
+      if (v > 0) rawLinks.push({ source: i, target: i + 1, value: v });
     }
     if (declinedCount > 0) {
-      links.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
+      rawLinks.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
     }
-    return { nodes, links };
+    // Drop nodes that participate in no links (e.g. 0-LP terminal stages).
+    const used = new Set<number>();
+    rawLinks.forEach((l) => { used.add(l.source); used.add(l.target); });
+    const keepIdx: number[] = nodes.map((_, i) => i).filter((i) => used.has(i));
+    const remap = new Map<number, number>(keepIdx.map((orig, i) => [orig, i]));
+    const finalNodes = keepIdx.map((i) => nodes[i]);
+    const finalLinks = rawLinks.map((l) => ({
+      source: remap.get(l.source)!,
+      target: remap.get(l.target)!,
+      value: l.value,
+    }));
+    return { nodes: finalNodes, links: finalLinks };
   }, [rows]);
 
   return (
@@ -255,15 +264,15 @@ export default function Pipeline() {
             No LP flow yet.
           </div>
         ) : (
-          <div className="w-full" style={{ height: 320 }}>
+          <div className="w-full" style={{ height: 360 }}>
             <ResponsiveContainer width="100%" height="100%">
               <Sankey
                 data={sankey}
-                nodePadding={18}
-                nodeWidth={12}
+                nodePadding={22}
+                nodeWidth={10}
                 linkCurvature={0.5}
                 iterations={64}
-                margin={{ top: 8, right: 140, bottom: 8, left: 8 }}
+                margin={{ top: 12, right: 80, bottom: 56, left: 24 }}
                 node={<SankeyNode />}
                 link={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.08, fill: "hsl(var(--foreground))", fillOpacity: 0.12 }}
               >
