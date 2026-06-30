@@ -89,7 +89,7 @@ export function EsgValidationCard({
       actions={
         <div className="flex items-center gap-2">
           <div className="flex items-baseline gap-0.5 tabular-nums">
-            <span className="text-2xl font-bold text-foreground">
+            <span className="text-2xl font-semibold text-foreground">
               {esgScore != null ? esgScore.toFixed(1) : "─"}
             </span>
             <span className="text-xs text-muted-foreground">/4.0</span>
@@ -97,7 +97,7 @@ export function EsgValidationCard({
           {band && (
             <span
               className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold",
+                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold",
                 band.cls,
               )}
             >
@@ -130,7 +130,7 @@ export function EsgValidationCard({
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
+                      "shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold",
                       VALIDATION_STYLE[c.validation],
                     )}
                   >
@@ -161,7 +161,7 @@ export function EsgValidationCard({
                   </p>
                   <span
                     className={cn(
-                      "mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
+                      "mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold",
                       PROCESS_STATUS_STYLE[status],
                     )}
                   >

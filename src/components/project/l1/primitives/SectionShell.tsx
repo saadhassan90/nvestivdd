@@ -23,7 +23,7 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
       {/* Section index ribbon — anchors the eye on the left edge */}
       <header className="flex items-start justify-between gap-3 mb-4 pb-3 border-b-2 border-foreground/80">
         <div className="min-w-0">
-          <h2 className="text-xl font-bold text-nvestiv-teal leading-tight">
+          <h2 className="text-xl font-semibold text-nvestiv-teal leading-tight">
             Section {Number.isFinite(sectionNum) ? sectionNum : eyebrow} - {title}
           </h2>
           {description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{description}</p>}
@@ -32,7 +32,7 @@ export function SectionShell({ id, eyebrow, title, description, actions, childre
       </header>
       {children}
       {!disableComments && ctx && (
-        <div className="mt-3 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="mt-3 rounded-lg border border-border bg-card overflow-hidden">
           <CardCommentThread
             projectId={ctx.projectId}
             sectionId={ctx.sectionId}
@@ -71,7 +71,7 @@ export function Card({
   const showComments = !!ctx && !!commentId;
   if (!showComments) {
     return (
-      <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", className)}>
+      <div id={id} className={cn("rounded-lg border border-border bg-card overflow-hidden", className)}>
         {children}
       </div>
     );
@@ -82,7 +82,7 @@ export function Card({
   const innerCls = tokens.filter((t) => /^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
   const outerCls = tokens.filter((t) => !/^(p|px|py|pt|pb|pl|pr|space)-/.test(t)).join(" ");
   return (
-    <div id={id} className={cn("rounded-xl border border-border bg-card overflow-hidden", outerCls)}>
+    <div id={id} className={cn("rounded-lg border border-border bg-card overflow-hidden", outerCls)}>
       <div className={innerCls || undefined}>{children}</div>
       <CardCommentThread
         projectId={ctx!.projectId}

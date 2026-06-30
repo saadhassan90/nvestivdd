@@ -31,7 +31,7 @@ export function KpiTile({ label, value, subValue, tone = "default", icon, classN
         {empty ? (
           <EmptyChip />
         ) : (
-          <p className={cn("text-xl font-bold tabular-nums leading-tight", TONE_CLASSES[tone])}>{value}</p>
+          <p className={cn("text-xl font-semibold tabular-nums leading-tight", TONE_CLASSES[tone])}>{value}</p>
         )}
         {subValue && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{subValue}</p>}
       </div>

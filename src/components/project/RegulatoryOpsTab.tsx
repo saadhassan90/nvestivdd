@@ -114,7 +114,7 @@ export function RegulatoryOpsTab({
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold tabular-nums text-foreground">{score ?? "—"}</span>
+                <span className="text-5xl font-semibold tabular-nums text-foreground">{score ?? "—"}</span>
                 <span className="text-base text-muted-foreground">/10</span>
               </div>
               <div className="flex items-center gap-2 mt-2.5">
@@ -159,7 +159,7 @@ export function RegulatoryOpsTab({
                 <div key={gate.key} className={`rounded-lg border p-3 ${tone}`}>
                   <p className="text-xs font-semibold text-foreground">{gate.label}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{gate.description}</p>
-                  <p className="text-[10px] font-bold mt-2">
+                  <p className="text-[10px] font-semibold mt-2">
                     {data?.status?.replace(/_/g, " ") || "Pending verification"}
                   </p>
                   {data?.confidence && (
@@ -292,7 +292,7 @@ export function RegulatoryOpsTab({
                 <div key={sq.id} className={`rounded-md border p-2.5 ${tone}`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-foreground truncate">{sq.category_label || sq.category}</p>
-                    <span className="text-[10px] font-bold shrink-0">
+                    <span className="text-[10px] font-semibold shrink-0">
                       {sq.status?.replace(/_/g, " ") || "—"}
                     </span>
                   </div>
@@ -345,7 +345,7 @@ export function RegulatoryOpsTab({
                   className="rounded-md border border-border bg-card px-3 py-2 flex items-start gap-2.5"
                 >
                   <span
-                    className={`text-[10px] font-bold shrink-0 mt-0.5 ${
+                    className={`text-[10px] font-semibold shrink-0 mt-0.5 ${
                       rf.severity === "critical"
                         ? "text-severity-critical"
                         : rf.severity === "elevated"
@@ -382,7 +382,7 @@ export function RegulatoryOpsTab({
               <li key={q.id} className="rounded-md border border-border bg-card px-3 py-2">
                 <div className="flex items-start gap-2">
                   <span
-                    className={`text-[10px] font-bold shrink-0 mt-0.5 ${
+                    className={`text-[10px] font-semibold shrink-0 mt-0.5 ${
                       q.priority === "critical"
                         ? "text-severity-critical"
                         : q.priority === "high"

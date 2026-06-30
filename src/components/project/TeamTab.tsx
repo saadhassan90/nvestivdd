@@ -93,7 +93,7 @@ export function TeamTab({
         >
           {gpEntityName && (
             <div className="rounded-lg border border-border p-3 max-w-md">
-              <p className="text-xs font-bold text-foreground">{gpEntityName}</p>
+              <p className="text-xs font-semibold text-foreground">{gpEntityName}</p>
               <FieldValueGrid
                 className="mt-2"
                 columns={2}
@@ -118,7 +118,7 @@ export function TeamTab({
           actions={
             keyPersons > 0 ? (
               <span className="text-[10px] text-muted-foreground">
-                <span className="font-bold text-foreground">{keyPersons}</span> key-person designate{keyPersons !== 1 ? "s" : ""}
+                <span className="font-semibold text-foreground">{keyPersons}</span> key-person designate{keyPersons !== 1 ? "s" : ""}
               </span>
             ) : null
           }
@@ -209,10 +209,10 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-baseline gap-0.5 tabular-nums">
-        <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
+        <span className="text-2xl font-semibold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>
@@ -231,12 +231,12 @@ function TeamGrid({ members }: { members: Tables<"team_members">[] }) {
         return (
           <div key={m.id} className="rounded-lg border border-border p-3 relative">
             {m.is_key_person && (
-              <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-foreground text-background px-1.5 py-0.5 text-[9px] font-bold">
+              <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-foreground text-background px-1.5 py-0.5 text-[9px] font-semibold">
                 Key
               </span>
             )}
             <div className="flex items-start gap-2.5 pr-12">
-              <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
+              <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-[11px] font-semibold text-muted-foreground shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">

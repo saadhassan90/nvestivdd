@@ -131,7 +131,7 @@ export function L1SnapshotPage({
               subtitle="Composite score · Recommendation · Confidence"
             />
             {strategyTag && (
-              <p className="px-7 pl-[68px] pt-4 text-[11px] font-bold uppercase tracking-[0.13em] text-[hsl(var(--nvestiv-teal))]">
+              <p className="px-7 pl-[68px] pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[hsl(var(--nvestiv-teal))]">
                 {strategyTag}
               </p>
             )}
@@ -142,7 +142,7 @@ export function L1SnapshotPage({
             )}
 
             {/* 3-col verdict */}
-            <div className="mx-7 mt-6 grid grid-cols-1 md:grid-cols-[1.15fr_1fr_1fr] overflow-hidden rounded-xl border border-border">
+            <div className="mx-7 mt-6 grid grid-cols-1 md:grid-cols-[1.15fr_1fr_1fr] overflow-hidden rounded-lg border border-border">
               <VCell label="Composite Score" trailing={<MethodologyModal />}>
                 <BigNum value={verdict.composite} denom="/100" />
                 <TierPill tier={verdict.tier} />
@@ -236,7 +236,7 @@ export function L1SnapshotPage({
                         <span>
                           <span
                             className={cn(
-                              "block text-[10px] font-bold uppercase tracking-[0.06em] text-muted-foreground",
+                              "block text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground",
                             )}
                           >
                             {w.severity}
@@ -256,7 +256,7 @@ export function L1SnapshotPage({
                   <ol className="flex flex-col gap-2.5">
                     {doNext.slice(0, 3).map((t, i) => (
                       <li key={i} className="flex items-start gap-3 text-[13.5px] leading-snug">
-                        <span className="flex h-[23px] w-[23px] shrink-0 items-center justify-center rounded-full bg-[hsl(var(--nvestiv-teal))] text-[11.5px] font-bold text-white">
+                        <span className="flex h-[23px] w-[23px] shrink-0 items-center justify-center rounded-full bg-[hsl(var(--nvestiv-teal))] text-[11.5px] font-semibold text-white">
                           {i + 1}
                         </span>
                         <span className="pt-0.5">{t}</span>
@@ -341,7 +341,7 @@ function CardHead({
         {icon}
       </span>
       <div>
-        <h2 className="text-[17px] font-bold tracking-tight text-foreground">{title}</h2>
+        <h2 className="text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
         {subtitle && <p className="mt-0.5 text-[12.5px] text-muted-foreground">{subtitle}</p>}
       </div>
     </div>
@@ -361,7 +361,7 @@ function VCell({
 }) {
   return (
     <div className={cn("px-6 py-5", borderLeft && "md:border-l border-border")}>
-      <div className="mb-3 flex items-center justify-between gap-2 text-[10.5px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="mb-3 flex items-center justify-between gap-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         <span>{label}</span>
         {trailing}
       </div>
@@ -412,7 +412,7 @@ function TierPill({ tier }: { tier: Verdict["tier"] }) {
   return (
     <span
       className={cn(
-        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold",
+        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-semibold",
         map[tier],
       )}
     >
@@ -430,7 +430,7 @@ function ConfPill({ tier }: { tier: Verdict["confidence_tier"] }) {
   return (
     <span
       className={cn(
-        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold",
+        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-semibold",
         map[tier],
       )}
     >
@@ -457,8 +457,8 @@ function Tile({
           ? "text-severity-critical"
           : "text-foreground";
   return (
-    <div className="rounded-xl border border-border px-4 py-3.5">
-      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-muted-foreground">
+    <div className="rounded-lg border border-border px-4 py-3.5">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-muted-foreground">
         {label}
       </p>
       <p className={cn("text-[21px] font-extrabold tabular-nums tracking-tight", cls)}>
@@ -482,11 +482,11 @@ function SignalCol({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/70 bg-background/40 p-4",
+        "rounded-lg border border-border/70 bg-background/40 p-4",
         full && "md:col-span-2",
       )}
     >
-      <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         <span className={cn("h-[2px] w-[18px] rounded-full", accent)} />
         {label}
       </div>
@@ -518,7 +518,7 @@ function RatingChip({ rating }: { rating: Rating }) {
   return (
     <span
       className={cn(
-        "inline-flex w-[92px] items-center justify-center rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide",
+        "inline-flex w-[92px] items-center justify-center rounded-full px-2.5 py-1 text-[10.5px] font-semibold tracking-wide",
         map[rating],
       )}
     >
@@ -553,11 +553,11 @@ function ModuleAccordion({
   const verdictLine = moduleVerdictLine(row.score);
 
   return (
-    <div className="mb-2 rounded-xl border border-border/70 bg-background/40 last:mb-0">
+    <div className="mb-2 rounded-lg border border-border/70 bg-background/40 last:mb-0">
       <button
         type="button"
         onClick={onToggle}
-        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-xl px-4 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
+        className="grid w-full grid-cols-[20px_180px_1fr_auto] items-center gap-4 rounded-lg px-4 py-3.5 text-left transition-colors hover:bg-muted/40 md:gap-4"
       >
         <ChevronDown
           className={cn(
@@ -565,7 +565,7 @@ function ModuleAccordion({
             open && "rotate-180",
           )}
         />
-        <span className="text-[14px] font-bold text-foreground">{row.name}</span>
+        <span className="text-[14px] font-semibold text-foreground">{row.name}</span>
         <span className="hidden flex-col gap-0.5 md:flex">
           <span className="text-[13px] leading-snug text-foreground">
             {row.read || verdictLine}
@@ -679,7 +679,7 @@ function DetailBody({ row }: { row: ModuleRow }) {
                 impClass[impTone],
               )}
             >
-              <span className="text-[9.5px] font-bold uppercase tracking-[0.1em] opacity-70">
+              <span className="text-[9.5px] font-semibold uppercase tracking-[0.1em] opacity-70">
                 Implication
               </span>
               <span className="text-[13px] font-medium leading-snug">{implication}</span>
@@ -704,10 +704,10 @@ function DetailBody({ row }: { row: ModuleRow }) {
 function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }) {
   return (
     <div className="mt-5 border-t border-border/60 pt-4">
-      <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-foreground">
+      <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">
         <AlertTriangle className="h-3.5 w-3.5 text-severity-elevated" />
         Flags in this module
-        <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-muted px-1.5 text-[10px] font-bold text-muted-foreground">
+        <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-muted px-1.5 text-[10px] font-semibold text-muted-foreground">
           {items.length}
         </span>
       </div>
@@ -724,7 +724,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
             <li key={f.id} className={cn("border-l-2 pl-3", sevAccent)}>
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-[13px] font-semibold text-foreground leading-snug">{f.title}</p>
-                <span className="text-[10px] font-bold text-muted-foreground shrink-0">
+                <span className="text-[10px] font-semibold text-muted-foreground shrink-0">
                   {f.severity}
                 </span>
               </div>
@@ -763,7 +763,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                         )}
                         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
-                            <p className="text-[9.5px] font-bold text-score-strong mb-0.5">
+                            <p className="text-[9.5px] font-semibold text-score-strong mb-0.5">
                               Good answer
                             </p>
                             <p className="text-[11.5px] leading-snug text-foreground/85">
@@ -771,7 +771,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                             </p>
                           </div>
                           <div className="rounded border border-severity-critical/30 bg-severity-critical/5 px-2 py-1.5">
-                            <p className="text-[9.5px] font-bold text-severity-critical mb-0.5">
+                            <p className="text-[9.5px] font-semibold text-severity-critical mb-0.5">
                               Bad answer
                             </p>
                             <p className="text-[11.5px] leading-snug text-foreground/85">
@@ -808,7 +808,7 @@ function EvidenceGroup({
     <div className="mt-0 [&+&]:mt-[18px]">
       <div
         className={cn(
-          "mb-2.5 flex items-center gap-2 text-[12.5px] font-bold tracking-tight",
+          "mb-2.5 flex items-center gap-2 text-[12.5px] font-semibold tracking-tight",
           headCls,
         )}
       >
@@ -818,7 +818,7 @@ function EvidenceGroup({
           <AlertTriangle className="h-[15px] w-[15px]" strokeWidth={2.5} />
         )}
         <span>{label}</span>
-        <span className="inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-bold text-muted-foreground">
+        <span className="inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
           {count}
         </span>
       </div>
@@ -898,7 +898,7 @@ function InitialQuestionsList({
             key={q.id}
             className="grid grid-cols-[28px_84px_1fr] items-start gap-3 border-b border-border/60 py-3.5 last:border-b-0"
           >
-            <span className="mt-[2px] text-[12px] font-bold tabular-nums text-muted-foreground">
+            <span className="mt-[2px] text-[12px] font-semibold tabular-nums text-muted-foreground">
               {String(i + 1).padStart(2, "0")}
             </span>
             <PriorityChip priority={q.priority} />
@@ -942,7 +942,7 @@ function PriorityChip({ priority }: { priority: string }) {
   return (
     <span
       className={cn(
-        "inline-flex w-[84px] items-center justify-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.06em]",
+        "inline-flex w-[84px] items-center justify-center rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.06em]",
         cls,
       )}
     >

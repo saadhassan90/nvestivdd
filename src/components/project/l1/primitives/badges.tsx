@@ -18,7 +18,7 @@ export function NorthStarBadge({ answer, className }: { answer: NorthStarAnswer;
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold",
+        "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold",
         NORTH_STAR_CLASS[answer],
         className,
       )}
@@ -49,7 +49,7 @@ export const DISPOSITION_CLASS: Record<Disposition, string> = {
 
 export function DispositionBadge({ d }: { d: Disposition }) {
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold", DISPOSITION_CLASS[d])}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold", DISPOSITION_CLASS[d])}>
       {d}
     </span>
   );
@@ -62,7 +62,7 @@ export const SEVERITY_CLASS: Record<FlagSeverity, string> = {
 
 export function FlagSeverityBadge({ s }: { s: FlagSeverity }) {
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold", SEVERITY_CLASS[s])}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold", SEVERITY_CLASS[s])}>
       {s}
     </span>
   );

@@ -30,7 +30,7 @@ export function MethodologyDialog({ methodology }: { methodology: Methodology })
         <div className="space-y-3 text-xs">
           <div className="rounded-md border border-border bg-muted/30 px-3 py-2 flex items-center justify-between">
             <span className="text-muted-foreground text-[10px] font-semibold">Completeness</span>
-            <span className="text-lg font-bold tabular-nums">{methodology.completeness_pct}%</span>
+            <span className="text-lg font-semibold tabular-nums">{methodology.completeness_pct}%</span>
           </div>
           <table className="w-full text-xs">
             <thead>

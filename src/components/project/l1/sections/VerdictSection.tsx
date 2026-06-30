@@ -55,7 +55,7 @@ export function VerdictSection() {
         {/* Composite */}
         <div className="flex items-center gap-4 flex-wrap border-y border-border/60 py-3">
           <div className="flex items-baseline gap-1 tabular-nums">
-            <span className="text-3xl font-bold text-foreground">{v.composite_score}</span>
+            <span className="text-3xl font-semibold text-foreground">{v.composite_score}</span>
             <span className="text-xs text-muted-foreground">/ 100 composite</span>
           </div>
           <TierBadge tier={v.tier} />
@@ -82,7 +82,7 @@ export function VerdictSection() {
                     <span className="text-[10px] font-semibold text-nvestiv-teal">{m.label}</span>
                     <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
                   </div>
-                  <div className="text-xl font-bold tabular-nums leading-none mt-1">{m.score}</div>
+                  <div className="text-xl font-semibold tabular-nums leading-none mt-1">{m.score}</div>
                   <p className="text-[10px] text-foreground/70 mt-1 leading-snug line-clamp-2">{m.verdict_label}</p>
                 </button>
               );
@@ -113,7 +113,7 @@ export function VerdictSection() {
                   TALLY_TONE[d],
                 )}
               >
-                <span className="tabular-nums font-bold">{v.claims_tally[d.toLowerCase() as keyof typeof v.claims_tally]}</span>
+                <span className="tabular-nums font-semibold">{v.claims_tally[d.toLowerCase() as keyof typeof v.claims_tally]}</span>
                 <span className="lowercase">{TALLY_LABEL[d]}</span>
               </button>
             ))}
@@ -128,7 +128,7 @@ export function VerdictSection() {
             {v.change_our_mind.map((c, i) => (
               <li key={i} className={cn("rounded-md border-l-2 pl-3 py-1", CHANGE_TONE[c.direction])}>
                 <div className="flex items-start gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold mt-0.5">
+                  <span className="text-[10px] font-semibold mt-0.5">
                     {c.direction === "would_advance" ? "Would advance" : "Would decline"}
                   </span>
                   <p className="text-xs text-foreground/85 leading-snug flex-1 min-w-[200px]">{c.item}</p>

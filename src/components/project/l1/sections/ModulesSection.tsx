@@ -54,7 +54,7 @@ function ModuleCard({ m }: { m: Module }) {
         <span className={cn("text-[11px] font-semibold", tone)}>{m.verdict_chip}</span>
         <div className="flex-1" />
         {score != null && (
-          <span className={cn("text-lg font-bold tabular-nums shrink-0", tone)}>{score}<span className="text-[10px] text-muted-foreground">/100</span></span>
+          <span className={cn("text-lg font-semibold tabular-nums shrink-0", tone)}>{score}<span className="text-[10px] text-muted-foreground">/100</span></span>
         )}
       </button>
 

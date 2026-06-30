@@ -206,7 +206,7 @@ export function ProjectSidebar({ project, activeTab, onTabChange, moduleScoresDa
         <div className={cn("pb-3", collapsed ? "p-2" : "p-4")}>
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
-              <span className="text-xs font-bold text-background">N</span>
+              <span className="text-xs font-semibold text-background">N</span>
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">

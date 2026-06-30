@@ -66,7 +66,7 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
                 {card.label}
               </p>
               <div className="flex items-baseline gap-0.5 mt-0.5">
-                <span className="text-sm font-bold text-foreground leading-none">
+                <span className="text-sm font-semibold text-foreground leading-none">
                   {(card as { suffix?: string }).suffix === "—"
                     ? "—"
                     : `${card.value}${(card as { suffix?: string }).suffix ?? ""}`}

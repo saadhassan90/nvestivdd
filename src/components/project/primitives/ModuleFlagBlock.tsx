@@ -212,7 +212,7 @@ function QuestionRow({
         {q.priority && (
           <span
             className={cn(
-              "text-[9px] font-bold shrink-0 rounded-full px-1.5 py-0.5",
+              "text-[9px] font-semibold shrink-0 rounded-full px-1.5 py-0.5",
               q.priority === "critical"
                 ? "bg-severity-critical/15 text-severity-critical"
                 : q.priority === "high"
@@ -274,7 +274,7 @@ function AnswerBlock({
     tone === "good" ? "text-score-strong" : "text-severity-critical";
   return (
     <div className={cn("rounded border px-2 py-1.5", toneClass)}>
-      <p className={cn("text-[10px] font-bold mb-0.5", labelClass)}>
+      <p className={cn("text-[10px] font-semibold mb-0.5", labelClass)}>
         {label}
       </p>
       <p className="text-[11px] text-foreground/85 leading-snug">

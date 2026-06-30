@@ -43,7 +43,7 @@ export function ClaimsLedgerSection() {
     >
       <div className="space-y-2">
         {/* Tab selector card */}
-        <div className="rounded-xl border border-border bg-card px-4 py-3 flex flex-wrap items-center gap-3">
+        <div className="rounded-lg border border-border bg-card px-4 py-3 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
             <FilterPill
               active={filters.category === "ALL"}
@@ -79,7 +79,7 @@ export function ClaimsLedgerSection() {
                     <DispositionBadge d={c.disposition} />
                     <span className="text-[10px] text-nvestiv-teal">{c.entity}</span>
                     {c.severity !== "INFO" && (
-                      <span className="text-[10px] font-bold uppercase text-severity-elevated">· {c.severity}</span>
+                      <span className="text-[10px] font-semibold uppercase text-severity-elevated">· {c.severity}</span>
                     )}
                   </div>
                   <span className="font-mono text-[10px] text-muted-foreground">{c.id}</span>

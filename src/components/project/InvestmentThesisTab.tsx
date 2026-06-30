@@ -130,7 +130,7 @@ export function InvestmentThesisTab({
             <ol className="space-y-2.5">
               {takeaways.map((t, i) => (
                 <li key={i} className="flex gap-3 text-xs">
-                  <span className="text-[10px] font-bold text-muted-foreground tabular-nums shrink-0 mt-0.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0 mt-0.5">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div className="min-w-0">
@@ -246,10 +246,10 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-baseline gap-0.5 tabular-nums">
-        <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
+        <span className="text-2xl font-semibold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>

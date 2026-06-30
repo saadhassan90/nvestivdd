@@ -15,7 +15,7 @@ export function ReportMarkdownSection({ content, delay = 0 }: ReportMarkdownSect
 
   return (
     <BlurFade delay={delay}>
-      <div className="rounded-xl border border-border bg-card p-5 sm:p-8">
+      <div className="rounded-lg border border-border bg-card p-5 sm:p-8">
         <MarkdownContent content={content} />
       </div>
     </BlurFade>
