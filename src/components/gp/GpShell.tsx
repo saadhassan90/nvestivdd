@@ -11,6 +11,7 @@ import logoAsset from "@/assets/nvestiv-logomark.svg.asset.json";
 import { cn } from "@/lib/utils";
 import { PageContextSync } from "@/components/iris/PageContextSync";
 import { IrisProposalsBanner } from "@/components/iris/IrisProposalsBanner";
+import SolarFlareBackground from "@/components/ui/SolarFlareBackground";
 
 const RAIL_ITEMS = [
   { to: "/chat", label: "Chat", icon: MessageSquare },
@@ -205,8 +206,11 @@ export function GpShell() {
                   )}
                 </div>
               </aside>
-              <div className="flex-1 min-w-0">
+              <div className="relative flex-1 min-w-0">
                 <ChatSidebar hideHeader />
+                <div className="pointer-events-none absolute inset-0 z-20" style={{ mixBlendMode: 'multiply' }}>
+                  <SolarFlareBackground opacity={0.12} />
+                </div>
               </div>
             </div>
           ) : (
