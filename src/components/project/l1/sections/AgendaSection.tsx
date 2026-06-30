@@ -98,7 +98,7 @@ function AgendaRow({ item }: { item: AgendaItem }) {
   return (
     <li className="px-4 py-3">
       <div className="flex items-start gap-3">
-        <span className="shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background text-[11px] font-bold">
+        <span className="shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background text-[11px] font-semibold">
           {item.order}
         </span>
         <div className="min-w-0 flex-1">
@@ -114,11 +114,11 @@ function AgendaRow({ item }: { item: AgendaItem }) {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
-              <p className="text-[10px] font-bold text-score-strong mb-0.5">Strong answer</p>
+              <p className="text-[10px] font-semibold text-score-strong mb-0.5">Strong answer</p>
               <p className="text-[11px] text-foreground/85 leading-snug">{item.listen_for.strong}</p>
             </div>
             <div className="rounded border border-severity-critical/30 bg-severity-critical/5 px-2 py-1.5">
-              <p className="text-[10px] font-bold text-severity-critical mb-0.5">Weak answer</p>
+              <p className="text-[10px] font-semibold text-severity-critical mb-0.5">Weak answer</p>
               <p className="text-[11px] text-foreground/85 leading-snug">{item.listen_for.weak}</p>
             </div>
           </div>

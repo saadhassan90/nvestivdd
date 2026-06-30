@@ -98,14 +98,14 @@ export function MarketContextStrip({ scope, tiles, benchmarkKey }: MarketContext
                 <div className="flex items-baseline gap-2 mt-1">
                   <p
                     className={cn(
-                      "text-base font-bold tabular-nums",
+                      "text-base font-semibold tabular-nums",
                       filled ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
                     {t.value ?? "─"}
                   </p>
                   {deltaText && (
-                    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums", tr.cls)}>
+                    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-semibold tabular-nums", tr.cls)}>
                       {tr.icon}
                       {deltaText}
                     </span>

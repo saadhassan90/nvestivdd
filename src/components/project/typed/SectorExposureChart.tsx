@@ -51,7 +51,7 @@ export function SectorExposureChart({ slices, denominator }: SectorExposureChart
         overallFlag && (
           <span
             className={cn(
-              "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold",
+              "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold",
               overallFlag.cls,
             )}
           >
@@ -76,12 +76,12 @@ export function SectorExposureChart({ slices, denominator }: SectorExposureChart
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="tabular-nums font-bold text-foreground">
+                    <span className="tabular-nums font-semibold text-foreground">
                       {s.pct.toFixed(1)}%
                     </span>
                     <span
                       className={cn(
-                        "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
+                        "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold",
                         flag.cls,
                       )}
                     >

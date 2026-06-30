@@ -79,7 +79,7 @@ export function ClaimsLedgerSection() {
                     <DispositionBadge d={c.disposition} />
                     <span className="text-[10px] text-nvestiv-teal">{c.entity}</span>
                     {c.severity !== "INFO" && (
-                      <span className="text-[10px] font-bold uppercase text-severity-elevated">· {c.severity}</span>
+                      <span className="text-[10px] font-semibold uppercase text-severity-elevated">· {c.severity}</span>
                     )}
                   </div>
                   <span className="font-mono text-[10px] text-muted-foreground">{c.id}</span>

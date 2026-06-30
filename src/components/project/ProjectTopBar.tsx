@@ -189,7 +189,7 @@ export function ProjectTopBar({
               >
                 <MessagesSquare className="h-4 w-4" />
                 {commentsCount > 0 && (
-                  <span className="absolute top-1 right-1 inline-flex items-center justify-center rounded-full bg-foreground text-background text-[9px] font-bold leading-none min-w-[14px] h-[14px] px-1">
+                  <span className="absolute top-1 right-1 inline-flex items-center justify-center rounded-full bg-foreground text-background text-[9px] font-semibold leading-none min-w-[14px] h-[14px] px-1">
                     {commentsCount > 99 ? "99+" : commentsCount}
                   </span>
                 )}
@@ -245,7 +245,7 @@ export function ProjectTopBar({
         {project && isProcessing && (
           <span
             className={cn(
-              "ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-bold",
+              "ml-2 inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[10px] font-semibold",
               statusColor,
             )}
           >

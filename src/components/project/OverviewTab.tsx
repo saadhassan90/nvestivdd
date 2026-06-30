@@ -150,7 +150,7 @@ export function OverviewTab({
                 <MethodologyModal />
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-bold tabular-nums text-foreground">
+                <span className="text-5xl font-semibold tabular-nums text-foreground">
                   {composite ?? "—"}
                 </span>
                 <span className="text-base text-muted-foreground">/100</span>
@@ -171,7 +171,7 @@ export function OverviewTab({
             <div className="flex flex-col items-start gap-2">
               <p className="text-[10px] text-muted-foreground">Confidence</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold tabular-nums text-foreground">
+                <span className="text-3xl font-semibold tabular-nums text-foreground">
                   {completenessPct != null ? `${completenessPct}` : "—"}
                 </span>
                 <span className="text-xs text-muted-foreground">% complete</span>
@@ -315,7 +315,7 @@ function deriveConfidenceTier(pct: number | null | undefined): "High" | "Medium"
 function ConfidencePill({ tier }: { tier: "High" | "Medium" | "Low" | "Very Low" | null }) {
   if (!tier) {
     return (
-      <span className="inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+      <span className="inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
         Confidence —
       </span>
     );
@@ -327,7 +327,7 @@ function ConfidencePill({ tier }: { tier: "High" | "Medium" | "Low" | "Very Low"
     "Very Low": "border-severity-critical/40 text-severity-critical bg-severity-critical/10",
   } as const;
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", styles[tier])}>
+    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold", styles[tier])}>
       {tier}
     </span>
   );

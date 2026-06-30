@@ -199,7 +199,7 @@ export function ProcessingState({ startedAt, projectId }: ProcessingStateProps) 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DOMAIN_RESEARCH_BLOCKS.map((b) => (
               <div key={b.key} className="rounded-md border border-border p-3">
-                <p className="text-xs font-bold text-foreground mb-2">{b.label}</p>
+                <p className="text-xs font-semibold text-foreground mb-2">{b.label}</p>
                 <ul className="space-y-0.5">
                   {DOMAIN_QUESTIONNAIRE.map((q) => (
                     <li key={q} className="text-[10px] text-muted-foreground flex items-center gap-1.5">

@@ -42,14 +42,14 @@ export function ModuleVerdictHeader({ score10, verdictLine, className }: ModuleV
     <div className={cn("flex flex-col items-end gap-1 min-w-0", className)}>
       <div className="flex items-center gap-2 flex-wrap justify-end">
         <div className="flex items-baseline gap-0.5 tabular-nums">
-          <span className="text-2xl font-bold text-foreground">
+          <span className="text-2xl font-semibold text-foreground">
             {score10 != null ? score10.toFixed(1) : "─"}
           </span>
           <span className="text-xs text-muted-foreground">/10</span>
         </div>
         <span
           className={cn(
-            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold",
+            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold",
             TIER_CLASS[tier],
           )}
         >

@@ -61,10 +61,10 @@ function FieldRow({ f }: { f: FactsheetField }) {
 
 function ProvenanceChip({ p }: { p: FactsheetField["provenance"] }) {
   if (p === "verified") {
-    return <span className="shrink-0 inline-flex items-center rounded border border-score-strong/40 bg-score-strong/10 text-score-strong px-1.5 py-0.5 text-[9px] font-bold">Verified</span>;
+    return <span className="shrink-0 inline-flex items-center rounded border border-score-strong/40 bg-score-strong/10 text-score-strong px-1.5 py-0.5 text-[9px] font-semibold">Verified</span>;
   }
   if (p === "disclosed_only") {
-    return <span className="shrink-0 inline-flex items-center rounded border border-severity-elevated/40 bg-severity-elevated/10 text-severity-elevated px-1.5 py-0.5 text-[9px] font-bold">GP-stated</span>;
+    return <span className="shrink-0 inline-flex items-center rounded border border-severity-elevated/40 bg-severity-elevated/10 text-severity-elevated px-1.5 py-0.5 text-[9px] font-semibold">GP-stated</span>;
   }
-  return <span className="shrink-0 inline-flex items-center rounded border border-dashed border-border bg-muted/30 text-muted-foreground px-1.5 py-0.5 text-[9px] font-bold">Not disclosed</span>;
+  return <span className="shrink-0 inline-flex items-center rounded border border-dashed border-border bg-muted/30 text-muted-foreground px-1.5 py-0.5 text-[9px] font-semibold">Not disclosed</span>;
 }

@@ -60,7 +60,7 @@ const REC_STYLE: Record<NonNullable<Recommendation>, string> = {
 export function TierPill({ tier, className }: { tier: Tier; className?: string }) {
   if (!tier) {
     return (
-      <span className={cn("inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-bold text-muted-foreground", className)}>
+      <span className={cn("inline-flex items-center rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground", className)}>
         Tier —
       </span>
     );
@@ -68,7 +68,7 @@ export function TierPill({ tier, className }: { tier: Tier; className?: string }
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold",
         TIER_STYLE[tier],
         className,
       )}
@@ -81,7 +81,7 @@ export function TierPill({ tier, className }: { tier: Tier; className?: string }
 export function RecommendationBadge({ recommendation, className }: { recommendation: Recommendation; className?: string }) {
   if (!recommendation) {
     return (
-      <span className={cn("inline-flex items-center rounded-md border border-dashed border-border px-2 py-0.5 text-[10px] font-bold text-muted-foreground", className)}>
+      <span className={cn("inline-flex items-center rounded-md border border-dashed border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground", className)}>
         Recommendation —
       </span>
     );
@@ -114,7 +114,7 @@ export function BandBadge({ band }: { band: string | null | undefined }) {
   }
   const style = BAND_STYLE[band] || "bg-muted text-muted-foreground border-border";
   return (
-    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold", style)}>
+    <span className={cn("inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold", style)}>
       {band}
     </span>
   );

@@ -181,13 +181,13 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             <>
               <button
                 onClick={() => setPerDimView((v) => !v)}
-                className="text-[10px] font-bold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1"
+                className="text-[10px] font-semibold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1"
               >
                 {perDimView ? "Flat View" : "Per-Dimension"}
               </button>
               <button
                 onClick={exportAuditCsv}
-                className="text-[10px] font-bold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 inline-flex items-center gap-1"
+                className="text-[10px] font-semibold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 inline-flex items-center gap-1"
               >
                 <Download className="h-3 w-3" /> CSV
               </button>
@@ -200,7 +200,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
                 <button
                   key={p}
                   onClick={() => setPriority(p)}
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                     priority === p ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -240,7 +240,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             }`}
           />
           <p className={`text-[11px] ${noMeetTriggered ? "text-severity-critical" : "text-severity-elevated/90"}`}>
-            <span className="font-bold">No-Meet Threshold:</span>{" "}
+            <span className="font-semibold">No-Meet Threshold:</span>{" "}
             {noMeetTriggered
               ? `TRIGGERED — aggregate critical score ${criticalAggregate}/${criticalMax} below 18 floor. Convert to NO MEET.`
               : `Aggregate CRITICAL score below 18/${criticalMax || 27} → convert to NO MEET. Current: ${criticalAggregate}/${criticalMax || 27}.`}
@@ -264,7 +264,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             <div className="space-y-3">
               {Object.entries(groupedByDim).map(([dim, qs]) => (
                 <Collapsible key={dim} defaultOpen>
-                  <CollapsibleTrigger className="w-full text-left text-xs font-bold text-foreground py-1">
+                  <CollapsibleTrigger className="w-full text-left text-xs font-semibold text-foreground py-1">
                     {CATEGORIES.find((c) => c.key === dim)?.label || dim} ({qs.length})
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -330,7 +330,7 @@ function QuestionsTable({
                 <td className="px-3 py-2 text-muted-foreground italic">{q.rationale || "—"}</td>
                 <td className="px-3 py-2">
                   <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                       q.priority === "critical"
                         ? "bg-severity-critical/15 text-severity-critical"
                         : q.priority === "high"

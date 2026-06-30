@@ -342,7 +342,7 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {processing ? (
-                    <span className="inline-flex items-center justify-center h-8 w-10 rounded-lg border-2 border-border text-xs font-bold text-muted-foreground">
+                    <span className="inline-flex items-center justify-center h-8 w-10 rounded-lg border-2 border-border text-xs font-semibold text-muted-foreground">
                       {project.status === "pending" ? "PREP" : "PEND"}
                     </span>
                   ) : (

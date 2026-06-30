@@ -138,7 +138,7 @@ export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps
                     className="rounded-lg border border-severity-critical/40 border-l-4 border-l-severity-critical bg-severity-critical/5 p-3"
                   >
                     <div className="flex items-baseline justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-mono font-bold text-severity-critical">
+                      <span className="text-[10px] font-mono font-semibold text-severity-critical">
                         CRIT-{f.flag_number ?? i + 1}
                       </span>
                       <div className="flex items-center gap-2">
@@ -160,19 +160,19 @@ export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps
                     <p className="text-sm font-semibold text-foreground">{f.title}</p>
                     {f.issue && (
                       <p className="text-xs text-foreground/80 mt-1.5 leading-relaxed">
-                        <span className="font-bold text-[10px]">Issue: </span>
+                        <span className="font-semibold text-[10px]">Issue: </span>
                         {f.issue}
                       </p>
                     )}
                     {f.implication && (
                       <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                        <span className="font-bold text-[10px]">Implication: </span>
+                        <span className="font-semibold text-[10px]">Implication: </span>
                         {f.implication}
                       </p>
                     )}
                     {f.resolution && (
                       <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                        <span className="font-bold text-[10px]">Resolution: </span>
+                        <span className="font-semibold text-[10px]">Resolution: </span>
                         {f.resolution}
                       </p>
                     )}

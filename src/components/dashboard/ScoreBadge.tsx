@@ -25,7 +25,7 @@ export function ScoreBadge({ score, size = "md", showTier = false }: ScoreBadgeP
 
   const badge = (
     <div
-      className={`inline-flex items-center justify-center rounded-lg border-2 font-bold ${borderCls} ${textCls} ${sizeMap[size]}`}
+      className={`inline-flex items-center justify-center rounded-lg border-2 font-semibold ${borderCls} ${textCls} ${sizeMap[size]}`}
     >
       {tier === "insufficient_data" ? "—" : score}
     </div>

@@ -128,7 +128,7 @@ export function EconomicsTab({
         >
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold tabular-nums text-foreground">
+              <span className="text-4xl font-semibold tabular-nums text-foreground">
                 {score ?? "—"}
                 <span className="text-lg font-medium text-muted-foreground">/10</span>
               </span>

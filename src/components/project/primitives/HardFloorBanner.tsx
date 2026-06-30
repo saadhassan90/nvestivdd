@@ -54,7 +54,7 @@ export function HardFloorBanner({
     <div className="rounded-lg border border-severity-critical/50 bg-severity-critical/10 px-4 py-2.5 flex items-start gap-2.5">
       <AlertOctagon className="h-4 w-4 text-severity-critical shrink-0 mt-0.5" />
       <div className="min-w-0">
-        <p className="text-xs font-bold text-severity-critical">
+        <p className="text-xs font-semibold text-severity-critical">
           {headline}
         </p>
         {reason && (

@@ -94,7 +94,7 @@ export function GeographyMap({ slices, statedMandate }: GeographyMapProps) {
                   </span>
                 )}
               </div>
-              <span className="tabular-nums font-bold text-foreground text-right">
+              <span className="tabular-nums font-semibold text-foreground text-right">
                 {s.pct.toFixed(1)}%
               </span>
             </div>

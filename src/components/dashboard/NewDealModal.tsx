@@ -135,13 +135,13 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
           <X className="h-5 w-5 text-muted-foreground" />
         </button>
 
-        <h2 className="text-lg sm:text-xl font-bold text-foreground pr-8">New Deal Analysis</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground pr-8">New Deal Analysis</h2>
         <p className="mt-1 text-xs sm:text-sm text-muted-foreground">Upload documents and configure deal parameters to start AI extraction.</p>
 
         {/* Step 1: Upload */}
         <div className="mt-5 sm:mt-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">1</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">1</span>
             <span className="text-xs font-semibold text-muted-foreground">Upload Documents</span>
           </div>
           <div
@@ -191,7 +191,7 @@ export function NewDealModal({ open, onClose }: NewDealModalProps) {
         {/* Step 2: Submitted By */}
         <div className="mt-5 sm:mt-6 pt-3 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">2</span>
             <span className="text-xs font-semibold text-muted-foreground">Submitted By</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
