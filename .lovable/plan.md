@@ -1,144 +1,63 @@
+## What "Efferd style" means here
 
-## Goal
-Build an NDA e-signing system that (1) tracks NDA state for every LP in every raise's pipeline, (2) gates data-room access on a signed NDA, and (3) gives GPs a dedicated NDA management page in the sidebar where they can view, download, and export signed and pending NDAs.
+From their free blocks (App Shell 1, Dashboard 1, Hero, etc.), the visual language is:
 
-This is a frontend / mock-data build (consistent with the existing GP raises, which live in `src/mocks/gp/raises.ts`). No backend changes — signatures are simulated and PDFs generated client-side.
+- **Surface**: Warm off-white background (`#fafafa`-ish), pure white cards, thin 1px hairline borders, almost no shadow.
+- **Type**: Heavy geometric display sans for headings (Geist / similar), neutral sans for body. Section labels lowercase muted, not uppercase eyebrows.
+- **Sidebar**: Grouped sections with lowercase "Product / Administration" labels in muted gray. Active item = soft gray pill (`bg-muted`), icon + label, no chevrons.
+- **Topbar**: Inside the framed shell, breadcrumb on the left, icon-only search/bell/support on the right.
+- **KPI row**: Full-bordered rectangle split by vertical dividers, small label top-left, trend chip top-right (mint for positive, soft red for negative), large bold number bottom-left.
+- **Tables**: Borderless rows, subtle muted header row, hover background, dot/pill status indicators.
+- **Buttons**: Solid near-black primary, ghost secondary, generous horizontal padding, `rounded-md`.
+- **Charts**: Monochrome area fills with one accent line, minimal grid.
+
+## Why a phased rollout
+
+The app has 30+ pages (GP shell, raises list + 6 sub-pages × N raises, pipeline Sankey, NDAs, IC memo BlockNote canvas, ODD canvas, LP rail + report L1/L2/L3, chat sidebar, share/NDA modals, etc.). Rebuilding all of them in one turn is impractical and high-risk. The plan ships in 4 phases that each leave the app in a fully working, visually-consistent state.
 
 ---
 
-## 1. NDA states (the workflow)
+## Phase 1 — Foundation (this turn)
 
-Every pipeline LP gets an `ndaStatus` instead of today's single `ndaSignedAt`. States, in funnel order:
+Lay the design tokens + primitive restyle so every existing page picks up the Efferd look automatically.
 
-| State | Meaning | Trigger |
-|---|---|---|
-| `not_required` | NDA gating off for this LP / raise | GP toggle |
-| `not_sent` | LP exists in pipeline, no NDA action taken | default |
-| `requested` | LP requested access; NDA owed to them | LP-initiated (or GP marks) |
-| `sent` | NDA dispatched, awaiting signature | GP clicks "Send NDA" |
-| `viewed` | LP opened the NDA link | sign page load |
-| `signed` | LP completed e-sign | sign submit |
-| `countersigned` | GP signed back (fully executed) | GP action |
-| `expired` | Sent link past expiry without signature | time-based |
-| `declined` | LP declined to sign | LP action |
-| `revoked` | GP revoked access | GP action |
+- `src/index.css` tokens: warm off-white background, pure-white cards, hairline border, mint/soft-red trend tokens, monochrome score scale aligned to grayscale. Keep semantic token names so no component breaks.
+- Install Geist via `@fontsource-variable/geist` + `@fontsource-variable/geist-mono`. Wire into `tailwind.config.ts` as the default `font-sans` / `font-mono`. Heading font remains Geist (same family, bolder weight).
+- Restyle the shadcn primitives that drive 80% of the UI:
+  - `button.tsx` — tighter radius, near-black primary, refined ghost/outline.
+  - `card.tsx` — hairline border, no shadow, tighter header padding.
+  - `input.tsx` / `select.tsx` / `textarea.tsx` — flatter, hairline border, focus ring uses ring token.
+  - `badge.tsx` — add `trend-up`, `trend-down`, `soft` variants that match Efferd chips.
+  - `table.tsx` — borderless rows, muted header, hover row.
+  - `tabs.tsx` — underline tabs (the Efferd style), not pill tabs.
+- Drop a new `EfferdKpiRow` + `EfferdKpiCell` primitive under `src/components/ui/kpi.tsx` that any page can use for the bordered-row KPI pattern.
 
-Data room access is unlocked only at `signed` or `countersigned`. Share modal's existing "Require NDA acceptance" toggle wires into this.
+## Phase 2 — App shell + navigation
 
-## 2. Pipeline UI changes
+- Rebuild `GpShell.tsx` + `GpSidebar.tsx` to the Efferd App Shell 1 pattern: max-width framed container, grouped sidebar with "Product" / "Administration" labels, inline breadcrumb header with right-aligned icon cluster.
+- Rebuild `AppLayout.tsx` + `LpRail.tsx` with the same shell so LP and GP share one visual chassis.
+- Compact chat history panel restyled to Efferd's list-item pattern (muted label, hover fill, active pill).
 
-`src/pages/gp/raise/RaisePipeline.tsx` — replace the current `Consent` column with an `NDA` column that renders a status pill (color-coded by state) and a row-level action menu:
+## Phase 3 — High-traffic pages
 
-- Send NDA / Resend
-- View NDA
-- Download PDF (signed copy)
-- Mark as countersigned
-- Revoke access
+- `RaisesList`, `RaiseOverview` (incl. checklist + fund-specifics card), `Pipeline` (Sankey + table), `RaiseDataroom`, `RaiseDdq`.
+- All KPI strips and stat cards swap to `EfferdKpiRow`.
+- All tables move to the new restyled `table.tsx` with status dots instead of colored pills.
 
-Per-row "Send NDA" opens a small `SendNdaModal` (template picker, expiry, optional note). Status pill is clickable to open the NDA detail drawer (see §5).
+## Phase 4 — Long-tail pages + report surfaces
 
-## 3. NDA template
+- `RaiseReportCard` (L1/L2/L3 side tabs), `RaiseInterview`, `RaiseFeedback`, `RaisePipeline`, `Ndas`, `NdaSignPage`.
+- LP-side `L1OnePager` + section cards + `ProjectChrome` topbar.
+- IC memo + ODD canvas chrome (the BlockNote content typography stays — it's already tuned).
+- Modals: `ShareRaiseModal`, `SendNdaModal`, `NdaPreviewDrawer`, `NewRaiseModal`.
 
-`src/mocks/gp/ndas.ts` (new) seeds one default template ("Nvestiv Standard Mutual NDA v1") with placeholder body. Schema:
+---
 
-```ts
-type NdaTemplate = { id; name; version; bodyMd; createdAt; isDefault };
-```
+## Technical notes
 
-GP can later upload additional templates; for now one default is enough. The actual NDA copy will be provided later — placeholder lorem is fine until then.
+- All restyling stays inside shadcn primitives + `index.css` tokens. No component API breaks — pages keep using `<Button>`, `<Card>`, etc.
+- BlockNote-specific CSS (`ic-memo-canvas.css`, `odd-section-editor.css`) is left alone in phases 1-3; only the surrounding chrome changes.
+- No Efferd paid blocks are pulled. Patterns are replicated from the free previews using standard shadcn + Tailwind.
+- After each phase I'll pause for your review before starting the next — easier to course-correct than to undo a 4-phase mega-diff.
 
-## 4. NDA records
-
-Single source of truth: `src/mocks/gp/ndas.ts` exports an `NDAS` array of records:
-
-```ts
-type NdaRecord = {
-  id;
-  raiseId;
-  lpId;           // links back to L2Lp in raises.ts
-  lpName;
-  lpEmail;
-  templateId;
-  templateVersion;
-  status: NdaStatus;
-  sentAt?; viewedAt?; signedAt?; countersignedAt?; expiresAt?;
-  signerName?; signerTitle?;
-  signatureDataUrl?;   // base64 PNG from canvas
-  ipAddress?;          // mocked
-  auditTrail: { ts; actor; event; meta? }[];
-};
-```
-
-Helpers: `createNda`, `sendNda`, `markViewed`, `signNda`, `countersign`, `revoke`, `getNdasByRaise`, `getNdaByLp`, plus a `subscribeNdas` listener so the pipeline and NDA page re-render.
-
-## 5. NDA detail drawer
-
-Click any NDA pill → side drawer showing: status timeline, signer details, audit trail, embedded document preview, and buttons: Download PDF, Resend, Revoke, Countersign.
-
-## 6. Sign flow (LP side)
-
-New route `/nda/:ndaId` (public-ish, no auth in this mock):
-
-1. Loads NDA + template, marks `viewed`.
-2. Renders the NDA body (markdown) scrollable.
-3. Required fields: full name, title, "I agree" checkbox.
-4. Signature pad (HTML canvas) — captured as data URL.
-5. Submit → status `signed`, timestamps recorded, audit trail appended, success screen with download link.
-
-Component: `src/pages/nda/NdaSignPage.tsx`. Lightweight signature pad implemented inline (no extra dep) — mouse/touch on canvas → toDataURL.
-
-## 7. NDA management page (sidebar)
-
-Add a new sidebar entry in `src/components/gp/GpSidebar.tsx`:
-
-```
-Chat · Raises · Pipeline · NDAs · Contacts · Settings
-```
-
-Icon: `FileSignature` from lucide-react. Route: `/ndas`.
-
-`src/pages/gp/Ndas.tsx` (new) — table view of every NDA across all raises:
-
-Columns: LP · Raise · Template · Status pill · Sent · Signed · Expires · Actions
-Filters: status (multi), raise (select), date range, search (LP name/email)
-Bulk actions: export selected as ZIP (mocked toast), resend pending
-
-Row actions:
-- View — opens NDA detail drawer (same component as §5)
-- Download PDF — generates and downloads via `jsPDF` (already a common dep) or a tiny `pdf-lib`-style helper. If no PDF lib is installed, add `jspdf` via `bun add`. PDF includes NDA body, signer block, signature image, audit trail.
-- Export CSV — top-of-page button exports the filtered list (LP, raise, status, dates, signer).
-
-Summary tiles at top: Total NDAs · Signed · Pending · Expired.
-
-## 8. Share-modal integration
-
-In `src/components/gp/ShareRaiseModal.tsx`, when "Require NDA acceptance" is on and an email is added, on Send we also call `createNda(...)` for each recipient (if a matching LP exists, link it; otherwise create a pending pipeline entry) and the toast becomes "Share link + NDA sent to N recipients".
-
-## 9. Data migration of existing mock
-
-`L2Lp.ndaSignedAt` is replaced by `ndaStatus` + `ndaId`. All existing mocked LPs that had a `ndaSignedAt` date become `status: "countersigned"` with that timestamp, and a corresponding `NdaRecord` is seeded. Pipeline page reads from the new fields.
-
-## 10. Files touched
-
-```text
-NEW  src/mocks/gp/ndas.ts                 (templates + records store)
-NEW  src/components/gp/NdaStatusPill.tsx
-NEW  src/components/gp/SendNdaModal.tsx
-NEW  src/components/gp/NdaDetailDrawer.tsx
-NEW  src/components/gp/SignaturePad.tsx
-NEW  src/pages/nda/NdaSignPage.tsx        (route /nda/:ndaId)
-NEW  src/pages/gp/Ndas.tsx                (route /ndas)
-NEW  src/lib/nda-pdf.ts                   (PDF generator)
-EDIT src/mocks/gp/raises.ts               (L2Lp: ndaStatus + ndaId; seed records)
-EDIT src/components/gp/GpSidebar.tsx      (add "NDAs" entry)
-EDIT src/App.tsx                          (add /ndas and /nda/:ndaId routes)
-EDIT src/pages/gp/raise/RaisePipeline.tsx (NDA column, actions, drawer)
-EDIT src/components/gp/ShareRaiseModal.tsx(wire NDA creation on send)
-ADD  jspdf dependency
-```
-
-## Out of scope (for this build)
-- Real auth on the LP sign page (open link by id, mock only)
-- Server-side audit log / IP capture (mocked)
-- Multi-party / sequential signing (single-party LP, optional GP countersign)
-- Template editor UI (single default template; upload later)
+I'll start phase 1 as soon as you approve.
