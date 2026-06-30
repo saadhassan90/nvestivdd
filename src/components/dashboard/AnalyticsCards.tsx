@@ -1,7 +1,6 @@
-import { MagicCard } from "@/components/magicui/MagicCard";
 import { NumberTicker } from "@/components/magicui/NumberTicker";
 import { BlurFade } from "@/components/magicui/BlurFade";
-import { FolderOpen, CheckCircle2, RefreshCw, AlertCircle, Gauge } from "lucide-react";
+import { KpiRow, KpiCell } from "@/components/ui/kpi";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface AnalyticsCardsProps {
@@ -26,50 +25,37 @@ export function AnalyticsCards({ projects }: AnalyticsCardsProps) {
     : null;
 
   const cards = [
-    { label: "Total Funds", value: total, icon: FolderOpen, iconColor: "text-muted-foreground" },
-    { label: "Completed", value: completed, icon: CheckCircle2, iconColor: "text-score-strong" },
-    { label: "Processing", value: processing, icon: RefreshCw, iconColor: "text-severity-monitor" },
-    { label: "Failed", value: failed, icon: AlertCircle, iconColor: "text-severity-critical" },
+    { label: "Total funds", value: total },
+    { label: "Completed", value: completed },
+    { label: "Processing", value: processing },
+    { label: "Failed", value: failed },
     {
-      label: "Avg Confidence",
+      label: "Avg confidence",
       value: avgCompleteness ?? 0,
       suffix: avgCompleteness == null ? "—" : "%",
-      icon: Gauge,
-      iconColor: "text-severity-monitor",
     },
   ];
 
   return (
     <>
       {/* Desktop */}
-      <div className="hidden sm:grid sm:grid-cols-5 gap-2">
-        {cards.map((card, i) => (
-          <BlurFade key={card.label} delay={i * 0.05}>
-            <MagicCard className="p-3">
-              <div className="flex items-center justify-between gap-2 px-1">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-medium text-muted-foreground truncate">
-                    {card.label}
-                  </p>
-                  <span className="mt-0.5 block text-xl font-bold text-foreground">
-                    {(card as { suffix?: string }).suffix === "—" ? (
-                      "—"
-                    ) : (
-                      <>
-                        <NumberTicker value={card.value} />
-                        {(card as { suffix?: string }).suffix === "%" && (
-                          <span className="text-xs ml-0.5">%</span>
-                        )}
-                      </>
-                    )}
-                  </span>
-                </div>
-                <card.icon className={`h-4 w-4 shrink-0 ${card.iconColor}`} />
-              </div>
-            </MagicCard>
-          </BlurFade>
-        ))}
-      </div>
+      <BlurFade className="hidden sm:block">
+        <KpiRow className="grid-cols-2 sm:grid-cols-5 lg:grid-cols-5">
+          {cards.map((card) => {
+            const suffix = (card as { suffix?: string }).suffix;
+            const value =
+              suffix === "—" ? (
+                "—"
+              ) : (
+                <>
+                  <NumberTicker value={card.value} />
+                  {suffix === "%" && <span className="text-base ml-0.5">%</span>}
+                </>
+              );
+            return <KpiCell key={card.label} label={card.label} value={value} />;
+          })}
+        </KpiRow>
+      </BlurFade>
 
       {/* Mobile: compact 5-col */}
       <BlurFade>
