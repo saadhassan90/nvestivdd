@@ -342,13 +342,13 @@ export default function Pipeline() {
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1.4fr_1.3fr_110px_150px_90px_90px_44px] gap-3 text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
-          <div>LP</div>
-          <div>Raise</div>
-          <div>Type</div>
-          <div>Stage</div>
-          <div>Consent</div>
-          <div>Last activity</div>
+        <div className="grid grid-cols-[1.4fr_1.3fr_110px_150px_90px_90px_44px] gap-3 text-[11px] text-muted-foreground px-4 py-2 border-b border-border">
+          <div>lp</div>
+          <div>raise</div>
+          <div>type</div>
+          <div>stage</div>
+          <div>consent</div>
+          <div>last activity</div>
           <div className="text-center" />
         </div>
         {rows.map((lp) => (

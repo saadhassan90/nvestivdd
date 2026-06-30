@@ -201,7 +201,7 @@ export default function RaiseDataroom() {
         {/* Folder tree side pane */}
         <aside className="border-r border-border pr-2 py-1 overflow-y-auto max-h-[calc(100vh-220px)]">
           <div className="flex items-center justify-between px-1.5 py-1 mb-1">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Folders</p>
+            <p className="text-[11px] text-muted-foreground">folders</p>
             <button
               onClick={() => setNewFolderOpen(true)}
               className="text-muted-foreground hover:text-foreground"
@@ -269,8 +269,8 @@ export default function RaiseDataroom() {
 
           {/* Listing */}
           <div>
-            <div className="grid grid-cols-[1fr_140px_40px] text-[11px] uppercase tracking-wider text-muted-foreground px-2 py-2 border-b border-border">
-              <div>Name</div><div>Modified</div><div />
+            <div className="grid grid-cols-[1fr_140px_40px] text-[11px] text-muted-foreground px-2 py-2 border-b border-border">
+              <div>name</div><div>modified</div><div />
             </div>
             {folders.length === 0 && files.length === 0 && (
               <div className="px-4 py-16 text-center text-sm text-muted-foreground border-b border-border">

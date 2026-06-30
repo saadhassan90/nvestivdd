@@ -3,6 +3,7 @@ import { GpPagePlaceholder } from "@/components/gp/GpPagePlaceholder";
 import { getRaise } from "@/mocks/gp/raises";
 import { EditableText } from "@/components/iris/EditableText";
 import { RaiseSetupChecklist } from "@/components/gp/RaiseSetupChecklist";
+import { KpiRow, KpiCell } from "@/components/ui/kpi";
 
 type FundSpecifics = {
   oneLiner: string;
@@ -192,21 +193,18 @@ export default function RaiseOverview() {
   return (
     <GpPagePlaceholder>
       <RaiseSetupChecklist raise={raise} />
-      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <KpiRow className="mt-4 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-lg border border-border bg-card p-4">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.label}</p>
-            <p className="text-2xl font-semibold text-foreground tabular-nums mt-1">{s.value}</p>
-          </div>
+          <KpiCell key={s.label} label={s.label} value={s.value} />
         ))}
-      </div>
+      </KpiRow>
       {specifics && (
         <div className="mt-4 rounded-lg border border-border bg-card">
           <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-foreground">Fund specifics</p>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Snapshot</span>
+                <span className="text-[11px] text-muted-foreground">snapshot</span>
               </div>
               <h2 className="mt-1 text-base font-semibold text-foreground truncate">{raise.name}</h2>
               <EditableText
@@ -218,14 +216,14 @@ export default function RaiseOverview() {
               />
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Status</p>
+              <p className="text-[11px] text-muted-foreground">status</p>
               <p className="text-sm font-medium text-foreground mt-1">{raise.status}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border">
             {specifics.groups.map((g) => (
               <div key={g.title} className="p-4">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">{g.title}</p>
+                <p className="text-[11px] text-muted-foreground mb-3">{g.title.toLowerCase()}</p>
                 <dl className="space-y-1.5">
                   {g.rows.map((r) => (
                     <div key={r.label} className="flex items-baseline justify-between gap-3 text-xs">
@@ -238,7 +236,7 @@ export default function RaiseOverview() {
             ))}
           </div>
           <div className="border-t border-border px-5 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Sourced from</span>
+            <span className="text-[11px] text-muted-foreground">sourced from</span>
             {specifics.sources.map((s) => (
               <span key={s} className="text-[11px] text-foreground/80 font-mono">{s}</span>
             ))}

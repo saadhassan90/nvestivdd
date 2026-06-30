@@ -63,15 +63,15 @@ export default function RaisesList() {
         </div>
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+            <thead className="text-[11px] text-muted-foreground border-b border-border">
               <tr>
-                <th className="text-left font-medium px-4 py-2.5">Name</th>
-                <th className="text-left font-medium px-4 py-2.5">Status</th>
-                <th className="text-left font-medium px-4 py-2.5">Strategy</th>
-                <th className="text-left font-medium px-4 py-2.5">Target</th>
-                <th className="text-left font-medium px-4 py-2.5 w-[180px]">Completion</th>
-                <th className="text-right font-medium px-4 py-2.5">LPs</th>
-                <th className="text-right font-medium px-4 py-2.5">DDQ</th>
+                <th className="text-left font-normal px-4 py-2.5">name</th>
+                <th className="text-left font-normal px-4 py-2.5">status</th>
+                <th className="text-left font-normal px-4 py-2.5">strategy</th>
+                <th className="text-left font-normal px-4 py-2.5">target</th>
+                <th className="text-left font-normal px-4 py-2.5 w-[180px]">completion</th>
+                <th className="text-right font-normal px-4 py-2.5">lps</th>
+                <th className="text-right font-normal px-4 py-2.5">ddq</th>
                 <th className="w-10 px-2" />
               </tr>
             </thead>
