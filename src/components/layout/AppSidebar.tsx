@@ -26,7 +26,7 @@ export function AppSidebar({ onNewSubmission }: AppSidebarProps) {
           </div>
           <div>
             <p className="text-xs font-semibold text-muted-foreground leading-tight">The Archive</p>
-            <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Institutional Authority</p>
+            <p className="text-[10px] text-muted-foreground/60">Institutional Authority</p>
           </div>
         </div>
       </div>

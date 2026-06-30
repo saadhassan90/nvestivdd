@@ -288,7 +288,7 @@ export const animatedChartBlockSpec = createReactBlockSpec(
             <AnimatedChartRender spec={spec} />
           ) : (
             <div className="not-prose my-3 rounded-xl border border-border bg-card p-3" contentEditable={false}>
-              <div className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <div className="mb-2 text-[10px] text-muted-foreground">
                 Edit chart JSON
               </div>
               <textarea

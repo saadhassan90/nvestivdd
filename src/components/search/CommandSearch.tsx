@@ -248,7 +248,7 @@ export function CommandSearch() {
                     <div key={category}>
                       <div className="px-4 py-2 flex items-center gap-2">
                         <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        <span className="text-[10px] font-semibold text-muted-foreground">
                           {config.label}
                         </span>
                         <span className="text-[10px] text-muted-foreground">({items.length})</span>

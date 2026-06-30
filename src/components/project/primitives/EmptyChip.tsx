@@ -10,7 +10,7 @@ export function EmptyChip({ label = "NOT DISCLOSED AT L1", className }: EmptyChi
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border border-dashed border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground",
+        "inline-flex items-center rounded-md border border-dashed border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground",
         className,
       )}
     >

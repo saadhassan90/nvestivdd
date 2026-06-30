@@ -34,7 +34,7 @@ function SortableHeader({ label, column, sortBy, sortDir, onSort }: {
   const isActive = sortBy === column;
   return (
     <th
-      className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
+      className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors group"
       onClick={() => onSort?.(column)}
     >
       <span className="inline-flex items-center gap-1">
@@ -114,7 +114,7 @@ function PaginationBar({ page, totalPages, totalCount, shownCount, onPageChange 
 function StrategyPill({ strategy }: { strategy: string | null }) {
   if (!strategy) return <span className="text-xs text-muted-foreground">—</span>;
   return (
-    <span className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+    <span className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
       {strategy}
     </span>
   );
@@ -223,12 +223,12 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
             <tr className="border-b border-border">
               <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">GP</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Strategy</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">GP</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Strategy</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Stage</th>
               <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-              <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Verdict</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Status</th>
+              <th className="px-2.5 py-2 text-left text-[10px] font-semibold text-muted-foreground">Verdict</th>
               <th className="px-2.5 py-2 w-10"></th>
             </tr>
           </thead>
@@ -358,7 +358,7 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
                 </div>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                <span className="text-[11px] font-medium text-muted-foreground">
                   {verdictLabel}
                 </span>
                 <span className={`text-xs font-medium ${statusColor}`}>

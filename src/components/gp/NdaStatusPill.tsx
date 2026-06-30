@@ -24,7 +24,7 @@ export function NdaStatusPill({
     <Wrap
       onClick={onClick}
       className={cn(
-        "text-[10px] uppercase tracking-wider border rounded px-1.5 py-0.5 whitespace-nowrap",
+        "text-[10px] border rounded px-1.5 py-0.5 whitespace-nowrap",
         TONE_CLS[meta.tone],
         onClick && "cursor-pointer hover:opacity-80",
         className,

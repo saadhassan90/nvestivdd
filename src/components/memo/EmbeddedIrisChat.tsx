@@ -99,14 +99,14 @@ export function EmbeddedIrisChat({
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">Put Iris to work</span>
-            <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground">
               Memo
             </span>
           </div>
         </div>
         {projectScope && (
           <div className="flex items-center gap-2 px-4 pb-2.5">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+            <span className="text-[10px] text-muted-foreground font-medium">
               Co-authoring
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground">

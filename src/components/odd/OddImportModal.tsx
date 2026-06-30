@@ -118,7 +118,7 @@ export function OddImportModal({ open, onClose, onSubmit, onTestRun, hasExisting
         <div className="p-5 space-y-5">
           {/* Daseti export */}
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">
+            <label className="block text-xs font-medium text-muted-foreground mb-2">
               Daseti Export <span className="text-severity-critical">*</span>
             </label>
             <button
@@ -156,7 +156,7 @@ export function OddImportModal({ open, onClose, onSubmit, onTestRun, hasExisting
 
           {/* Supporting docs */}
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">
+            <label className="block text-xs font-medium text-muted-foreground mb-2">
               Supporting Documents (optional)
             </label>
             <p className="text-xs text-muted-foreground mb-2">

@@ -196,7 +196,7 @@ export function CommentsRail({ projectId, projectName, activeSection, isProcessi
               <header className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-1.5 min-w-0">
                   {c.author_type === "ai" ? (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground border border-border rounded px-1 py-[1px]">
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-foreground border border-border rounded px-1 py-[1px]">
                       <Sparkles className="h-2.5 w-2.5" /> Nvestiv AI
                     </span>
                   ) : (

@@ -107,7 +107,7 @@ function L1PreDataroom({
       <div className="rounded-lg border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Composite</p>
+            <p className="text-[11px] text-muted-foreground">Composite</p>
             <p className="mt-1 text-4xl font-semibold text-foreground tabular-nums">{composite}</p>
             <div className="mt-2 h-2 w-48 rounded-full bg-muted overflow-hidden">
               <div className={"h-full " + scoreColor(composite)} style={{ width: `${composite}%` }} />
@@ -128,7 +128,7 @@ function L1PreDataroom({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((s) => (
           <div key={s.label} className="rounded-lg border border-border bg-card p-4">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.label}</p>
+            <p className="text-[11px] text-muted-foreground">{s.label}</p>
             <p className="text-sm font-semibold text-foreground mt-1">{s.value}</p>
           </div>
         ))}
@@ -206,14 +206,14 @@ function L2Idd({ report }: { report: ReportSection[] }) {
             <p className="text-sm text-foreground leading-relaxed">{r.summary}</p>
             <div className="grid grid-cols-2 gap-3 mt-4">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Strengths</p>
+                <p className="text-[10px] text-muted-foreground mb-1">Strengths</p>
                 <ul className="text-xs text-foreground space-y-1 list-disc list-inside marker:text-muted-foreground">
                   <li>Consistent execution evidenced across prior funds.</li>
                   <li>Aligned incentive structure with GP commit.</li>
                 </ul>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Watch items</p>
+                <p className="text-[10px] text-muted-foreground mb-1">Watch items</p>
                 <ul className="text-xs text-foreground space-y-1 list-disc list-inside marker:text-muted-foreground">
                   <li>Concentration risk in 2022 vintage deals.</li>
                   <li>Bench depth at the principal level.</li>

@@ -393,7 +393,7 @@ function RecoBadge({ label, tone }: { label: string; tone: "good" | "warn" | "ba
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-[9px] px-5 py-3 text-[15px] font-extrabold uppercase tracking-wider",
+        "inline-flex items-center rounded-[9px] px-5 py-3 text-[15px] font-extrabold",
         cls,
       )}
     >
@@ -412,7 +412,7 @@ function TierPill({ tier }: { tier: Verdict["tier"] }) {
   return (
     <span
       className={cn(
-        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider",
+        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold",
         map[tier],
       )}
     >
@@ -430,7 +430,7 @@ function ConfPill({ tier }: { tier: Verdict["confidence_tier"] }) {
   return (
     <span
       className={cn(
-        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider",
+        "mt-3 inline-block rounded-full px-3 py-1 text-[11px] font-bold",
         map[tier],
       )}
     >
@@ -724,13 +724,13 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
             <li key={f.id} className={cn("border-l-2 pl-3", sevAccent)}>
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-[13px] font-semibold text-foreground leading-snug">{f.title}</p>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">
+                <span className="text-[10px] font-bold text-muted-foreground shrink-0">
                   {f.severity}
                 </span>
               </div>
               {f.why && (
                 <div className="mt-1.5">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-0.5">
                     Why it was raised
                   </p>
                   <p className="text-[12.5px] text-foreground/85 leading-snug">{f.why}</p>
@@ -738,7 +738,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
               )}
               {f.implication && (
                 <div className="mt-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-0.5">
                     Implication
                   </p>
                   <p className="text-[12.5px] text-foreground/85 leading-snug">{f.implication}</p>
@@ -746,7 +746,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
               )}
               {f.questions.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-2">
                     Questions to ask ({f.questions.length})
                   </p>
                   <ul className="flex flex-col gap-4">
@@ -755,7 +755,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                         <p className="text-[12.5px] font-medium leading-snug text-foreground">{q.question}</p>
                         {q.rationale && (
                           <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">
-                            <span className="text-[10px] uppercase tracking-wider font-semibold mr-1">
+                            <span className="text-[10px] font-semibold mr-1">
                               Rationale
                             </span>
                             {q.rationale}
@@ -763,7 +763,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                         )}
                         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
-                            <p className="text-[9.5px] uppercase tracking-wider font-bold text-score-strong mb-0.5">
+                            <p className="text-[9.5px] font-bold text-score-strong mb-0.5">
                               Good answer
                             </p>
                             <p className="text-[11.5px] leading-snug text-foreground/85">
@@ -771,7 +771,7 @@ function ModuleFlagsAndQuestions({ items }: { items: ModuleFlagWithQuestions[] }
                             </p>
                           </div>
                           <div className="rounded border border-severity-critical/30 bg-severity-critical/5 px-2 py-1.5">
-                            <p className="text-[9.5px] uppercase tracking-wider font-bold text-severity-critical mb-0.5">
+                            <p className="text-[9.5px] font-bold text-severity-critical mb-0.5">
                               Bad answer
                             </p>
                             <p className="text-[11.5px] leading-snug text-foreground/85">

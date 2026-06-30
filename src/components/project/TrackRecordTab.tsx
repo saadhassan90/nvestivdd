@@ -218,7 +218,7 @@ function FirstTimeFundVariant({
 
             {/* Cross-reference to Team & Manager */}
             <div className="rounded-md border border-border bg-card p-4">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+              <p className="text-[10px] text-muted-foreground font-semibold mb-1.5">
                 Cross-reference
               </p>
               <p className="text-xs text-foreground/90 leading-relaxed">
@@ -279,7 +279,7 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
         <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>
@@ -298,7 +298,7 @@ function VintagePerformanceScaffold({ vintage }: { vintage: string | null }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {cards.map((c) => (
           <div key={c.label} className="rounded-md border border-dashed border-border bg-muted/20 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <p className="text-[10px] text-muted-foreground font-semibold">
               {c.label}
             </p>
             <p className="text-base font-bold text-muted-foreground tabular-nums mt-1">─</p>
@@ -329,7 +329,7 @@ function TrackRecordTable({ metrics }: { metrics: Tables<"performance_metrics">[
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-border/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr className="border-b border-border/60 text-[10px] text-muted-foreground">
             <th className="text-left font-semibold py-2 pr-3">Fund</th>
             <th className="text-right font-semibold py-2 pr-3">As Of</th>
             <th className="text-right font-semibold py-2 pr-3">PIC</th>
@@ -386,7 +386,7 @@ function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
           <span className="text-foreground font-medium truncate">{s.label}</span>
           <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
           <span className="text-right tabular-nums text-muted-foreground">─</span>
-          <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="text-right text-[10px] text-muted-foreground">
             {SCORE_TIER_LABELS["insufficient_data"]}
           </span>
         </div>

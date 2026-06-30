@@ -154,7 +154,7 @@ export function CardCommentThread({
         // ─── POPULATED STATE ────────────────────────────────────────────
         <div className="px-5 py-3">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="text-[10px] font-semibold text-muted-foreground">
               Comments on {cardLabel ?? "section"} · {open.length}
               {resolved.length > 0 && (
                 <span className="ml-1 font-normal normal-case tracking-normal">
@@ -185,7 +185,7 @@ export function CardCommentThread({
                 <div className="flex items-start justify-between gap-2 mb-0.5">
                   <div className="flex items-center gap-1.5 min-w-0">
                     {c.author_type === "ai" ? (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground border border-border rounded px-1 py-[1px]">
+                      <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-foreground border border-border rounded px-1 py-[1px]">
                         <Sparkles className="h-2.5 w-2.5" /> Nvestiv AI
                       </span>
                     ) : (

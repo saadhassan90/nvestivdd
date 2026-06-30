@@ -155,8 +155,8 @@ export function DataRoomTab({
                   <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="text-left">
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-bold uppercase tracking-wider text-foreground">{p.label}</p>
-                        <span className="text-[9px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1 py-[1px]">
+                        <p className="text-xs font-bold text-foreground">{p.label}</p>
+                        <span className="text-[9px] text-muted-foreground border border-border rounded px-1 py-[1px]">
                           {p.tier}
                         </span>
                       </div>
@@ -189,7 +189,7 @@ export function DataRoomTab({
                                   </RouterLink>
                                 )}
                               </div>
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+                              <span className="text-[10px] text-muted-foreground shrink-0">
                                 {it.is_received ? "Received" : "Requested"}
                               </span>
                             </div>

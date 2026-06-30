@@ -298,7 +298,7 @@ export function ShareModal({
         <div className="p-4 space-y-4 min-h-[420px]">
           {/* Copy link */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Report Link</label>
+            <label className="text-xs font-medium text-muted-foreground">Report Link</label>
             <div className="mt-1.5 flex items-center gap-2">
               <div className="flex-1 min-w-0 flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 overflow-hidden">
                 <Link2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -316,7 +316,7 @@ export function ShareModal({
 
           {/* Email sharing */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Share via Email</label>
+            <label className="text-xs font-medium text-muted-foreground">Share via Email</label>
             <div className="mt-1.5 rounded-lg border border-border bg-muted/50 p-2 min-h-[44px]">
               <div className="flex flex-wrap gap-1.5 mb-1">
                 {emails.map((email) => (
@@ -353,7 +353,7 @@ export function ShareModal({
         ) : (
           <div className="p-4 space-y-3 min-h-[420px] flex flex-col">
             <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-xs font-medium text-muted-foreground">
                 Report to export
               </label>
               <div className="mt-1.5 grid grid-cols-2 gap-1.5">
@@ -389,7 +389,7 @@ export function ShareModal({
             </div>
 
             <div className="pt-1">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-xs font-medium text-muted-foreground">
                 Format
               </label>
               <div className="mt-1.5 grid grid-cols-3 gap-1.5">

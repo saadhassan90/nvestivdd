@@ -24,7 +24,7 @@ export function FlagsQuestionsSection() {
         {items.map((f) => <FlagCard key={f.id} flag={f} />)}
         {standalone.length > 0 && (
           <Card className="p-4" commentId="flags-additional-asks" commentLabel="Additional asks">
-            <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">
+            <p className="text-[10px] font-semibold text-nvestiv-teal mb-2">
               Additional asks <span className="tabular-nums">({standalone.length})</span>
             </p>
             <ul className="space-y-2">
@@ -50,13 +50,13 @@ function FlagCard({ flag }: { flag: Flag }) {
       <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
         <div className="flex items-center gap-2 flex-wrap">
           <FlagSeverityBadge s={flag.severity} />
-          <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal">{flag.category}</span>
+          <span className="text-[10px] text-nvestiv-teal">{flag.category}</span>
           <span className="font-mono text-[10px] text-muted-foreground">{flag.id}</span>
         </div>
         {flag.tokens.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {flag.tokens.map((t) => (
-              <span key={t} className="font-mono text-[9px] uppercase tracking-wider bg-muted text-muted-foreground rounded px-1.5 py-0.5">
+              <span key={t} className="font-mono text-[9px] bg-muted text-muted-foreground rounded px-1.5 py-0.5">
                 {t}
               </span>
             ))}
@@ -69,7 +69,7 @@ function FlagCard({ flag }: { flag: Flag }) {
 
       {linked.length > 0 && (
         <div className="mt-3 space-y-2">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal">
+          <p className="text-[10px] font-semibold text-nvestiv-teal">
             Questions to ask <span className="tabular-nums">({linked.length})</span>
           </p>
           {linked.map((q) => (
@@ -79,7 +79,7 @@ function FlagCard({ flag }: { flag: Flag }) {
                 <span className="font-mono text-[10px] text-muted-foreground shrink-0">{q.id}</span>
               </div>
               <p className="text-[11px] text-muted-foreground italic leading-snug">
-                <span className="not-italic uppercase tracking-wider text-[9px] font-semibold mr-1">Why</span>
+                <span className="not-italic text-[9px] font-semibold mr-1">Why</span>
                 {q.why}
               </p>
             </Subcard>

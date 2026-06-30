@@ -24,7 +24,7 @@ export function VariantSwitcher() {
           className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
           aria-label="Switch UI variant"
         >
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">UI</span>
+          <span className="text-[10px] text-muted-foreground">UI</span>
           <span>{current.label}</span>
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </button>

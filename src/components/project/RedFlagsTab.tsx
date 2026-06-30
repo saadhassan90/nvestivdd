@@ -143,14 +143,14 @@ export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps
                       </span>
                       <div className="flex items-center gap-2">
                         {f.timeline && (
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground">
                             {f.timeline.replace(/_/g, " ")}
                           </span>
                         )}
                         {tabSlug && projectId && (
                           <RouterLink
                             to={`/project/${projectId}?tab=${tabSlug}`}
-                            className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                            className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                           >
                             {CAT_LABEL[flagCat]} <ArrowUpRight className="h-2.5 w-2.5" />
                           </RouterLink>
@@ -160,19 +160,19 @@ export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps
                     <p className="text-sm font-semibold text-foreground">{f.title}</p>
                     {f.issue && (
                       <p className="text-xs text-foreground/80 mt-1.5 leading-relaxed">
-                        <span className="font-bold uppercase tracking-wider text-[10px]">Issue: </span>
+                        <span className="font-bold text-[10px]">Issue: </span>
                         {f.issue}
                       </p>
                     )}
                     {f.implication && (
                       <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                        <span className="font-bold uppercase tracking-wider text-[10px]">Implication: </span>
+                        <span className="font-bold text-[10px]">Implication: </span>
                         {f.implication}
                       </p>
                     )}
                     {f.resolution && (
                       <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                        <span className="font-bold uppercase tracking-wider text-[10px]">Resolution: </span>
+                        <span className="font-bold text-[10px]">Resolution: </span>
                         {f.resolution}
                       </p>
                     )}
@@ -227,7 +227,7 @@ export function RedFlagsTab({ redFlags, submissionQuality = [], criticalInfoGaps
                 <li key={g.id} className="rounded-md border border-border p-2.5">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-xs font-semibold text-foreground">{g.category_label}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{g.status?.replace(/_/g, " ")}</span>
+                    <span className="text-[10px] text-muted-foreground">{g.status?.replace(/_/g, " ")}</span>
                   </div>
                 </li>
               ))}

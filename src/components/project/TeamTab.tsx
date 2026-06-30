@@ -117,7 +117,7 @@ export function TeamTab({
           icon={<User className="h-4 w-4" />}
           actions={
             keyPersons > 0 ? (
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground">
                 <span className="font-bold text-foreground">{keyPersons}</span> key-person designate{keyPersons !== 1 ? "s" : ""}
               </span>
             ) : null
@@ -153,7 +153,7 @@ export function TeamTab({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
               {serviceProviders.map((sp) => (
                 <div key={sp.id} className="rounded-md border border-border px-2.5 py-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground">
                     {sp.provider_type.replace(/_/g, " ")}
                   </p>
                   <p className="text-xs font-medium text-foreground mt-0.5 truncate">
@@ -212,7 +212,7 @@ function ScoreHeader({ score10, tier }: { score10: number | null; tier: ScoreTie
         <span className="text-2xl font-bold text-foreground">{score10 != null ? score10.toFixed(1) : "─"}</span>
         <span className="text-xs text-muted-foreground">/10</span>
       </div>
-      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", tierClass)}>
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold", tierClass)}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>
@@ -231,7 +231,7 @@ function TeamGrid({ members }: { members: Tables<"team_members">[] }) {
         return (
           <div key={m.id} className="rounded-lg border border-border p-3 relative">
             {m.is_key_person && (
-              <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-foreground text-background px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">
+              <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-foreground text-background px-1.5 py-0.5 text-[9px] font-bold">
                 Key
               </span>
             )}
@@ -256,7 +256,7 @@ function TeamGrid({ members }: { members: Tables<"team_members">[] }) {
             {departureFlag && (
               <div className="mt-2 flex items-center gap-1.5 rounded border border-severity-critical/30 bg-severity-critical/10 px-2 py-1">
                 <AlertTriangle className="h-3 w-3 text-severity-critical shrink-0" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-severity-critical">
+                <span className="text-[10px] font-semibold text-severity-critical">
                   Departure Flag
                 </span>
               </div>
@@ -279,7 +279,7 @@ function SubScoresPanel({ sectionScore10 }: { sectionScore10: number | null }) {
           <span className="text-foreground font-medium truncate">{s.label}</span>
           <span className="text-right tabular-nums text-muted-foreground">{s.weight}%</span>
           <span className="text-right tabular-nums text-muted-foreground">─</span>
-          <span className="text-right text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="text-right text-[10px] text-muted-foreground">
             {SCORE_TIER_LABELS["insufficient_data"]}
           </span>
         </div>

@@ -305,7 +305,7 @@ function PhaseBadge({ phase }: { phase: "empty" | "filling" | "complete" | "new"
   };
   const { label, cls, Icon } = map[phase];
   return (
-    <span className={cn("inline-flex items-center gap-1 text-[10px] uppercase tracking-wider border rounded px-1.5 py-0.5", cls)}>
+    <span className={cn("inline-flex items-center gap-1 text-[10px] border rounded px-1.5 py-0.5", cls)}>
       <Icon className="h-3 w-3" />
       {label}
     </span>
@@ -344,7 +344,7 @@ function QuestionRow({
             <span className="text-[10px] text-muted-foreground/70">Saved {formatDate(answer!.updatedAt)}</span>
             <button
               onClick={() => { onDraft(answer!.value); setEditing(true); }}
-              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="text-[10px] text-muted-foreground hover:text-foreground"
             >
               Edit
             </button>
@@ -393,10 +393,10 @@ function NewQuestionCard({
   return (
     <div className="rounded-lg border-2 border-destructive/60 bg-destructive/[0.04] p-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider rounded border border-destructive/40 bg-destructive/10 text-destructive px-1.5 py-0.5">
+        <span className="inline-flex items-center gap-1 text-[10px] rounded border border-destructive/40 bg-destructive/10 text-destructive px-1.5 py-0.5">
           <Sparkles className="h-3 w-3" /> New
         </span>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+        <span className="text-[10px] text-muted-foreground border border-border rounded px-1.5 py-0.5">
           {q.section}
         </span>
         <span className="text-[11px] text-muted-foreground ml-auto">

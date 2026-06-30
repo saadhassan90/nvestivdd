@@ -97,7 +97,7 @@ export function EsgValidationCard({
           {band && (
             <span
               className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold",
                 band.cls,
               )}
             >
@@ -110,7 +110,7 @@ export function EsgValidationCard({
       <div className="space-y-5">
         {/* GP claims */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+          <p className="text-[10px] text-muted-foreground font-semibold mb-2">
             GP Claims
           </p>
           {claims.length === 0 ? (
@@ -130,7 +130,7 @@ export function EsgValidationCard({
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                      "shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
                       VALIDATION_STYLE[c.validation],
                     )}
                   >
@@ -144,7 +144,7 @@ export function EsgValidationCard({
 
         {/* Process matrix */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+          <p className="text-[10px] text-muted-foreground font-semibold mb-2">
             Process Matrix
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -156,12 +156,12 @@ export function EsgValidationCard({
                   key={pillar}
                   className="rounded-md border border-border bg-muted/10 p-3"
                 >
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                  <p className="text-[10px] text-muted-foreground font-semibold">
                     {pillar}
                   </p>
                   <span
                     className={cn(
-                      "mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                      "mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-bold",
                       PROCESS_STATUS_STYLE[status],
                     )}
                   >

@@ -181,13 +181,13 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             <>
               <button
                 onClick={() => setPerDimView((v) => !v)}
-                className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1"
+                className="text-[10px] font-bold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1"
               >
                 {perDimView ? "Flat View" : "Per-Dimension"}
               </button>
               <button
                 onClick={exportAuditCsv}
-                className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 inline-flex items-center gap-1"
+                className="text-[10px] font-bold text-muted-foreground hover:text-foreground border border-border rounded-full px-2.5 py-1 inline-flex items-center gap-1"
               >
                 <Download className="h-3 w-3" /> CSV
               </button>
@@ -200,7 +200,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
                 <button
                   key={p}
                   onClick={() => setPriority(p)}
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
                     priority === p ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -240,7 +240,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             }`}
           />
           <p className={`text-[11px] ${noMeetTriggered ? "text-severity-critical" : "text-severity-elevated/90"}`}>
-            <span className="font-bold uppercase tracking-wider">No-Meet Threshold:</span>{" "}
+            <span className="font-bold">No-Meet Threshold:</span>{" "}
             {noMeetTriggered
               ? `TRIGGERED — aggregate critical score ${criticalAggregate}/${criticalMax} below 18 floor. Convert to NO MEET.`
               : `Aggregate CRITICAL score below 18/${criticalMax || 27} → convert to NO MEET. Current: ${criticalAggregate}/${criticalMax || 27}.`}
@@ -264,7 +264,7 @@ export function InterrogatoryTab({ items, projectId = "default" }: Interrogatory
             <div className="space-y-3">
               {Object.entries(groupedByDim).map(([dim, qs]) => (
                 <Collapsible key={dim} defaultOpen>
-                  <CollapsibleTrigger className="w-full text-left text-xs font-bold uppercase tracking-wider text-foreground py-1">
+                  <CollapsibleTrigger className="w-full text-left text-xs font-bold text-foreground py-1">
                     {CATEGORIES.find((c) => c.key === dim)?.label || dim} ({qs.length})
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -308,12 +308,12 @@ function QuestionsTable({
       <table className="w-full text-xs min-w-[700px]">
         <thead className="bg-muted/30">
           <tr>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">#</th>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Question</th>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Rationale</th>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Priority</th>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Origin</th>
-            <th className="text-left px-3 py-2 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">Score</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">#</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">Question</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">Rationale</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">Priority</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">Origin</th>
+            <th className="text-left px-3 py-2 font-semibold text-[10px] text-muted-foreground">Score</th>
           </tr>
         </thead>
         <tbody>
@@ -330,7 +330,7 @@ function QuestionsTable({
                 <td className="px-3 py-2 text-muted-foreground italic">{q.rationale || "—"}</td>
                 <td className="px-3 py-2">
                   <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
                       q.priority === "critical"
                         ? "bg-severity-critical/15 text-severity-critical"
                         : q.priority === "high"
@@ -345,7 +345,7 @@ function QuestionsTable({
                   {tab ? (
                     <RouterLink
                       to={`/project/${projectId}?tab=${tab}`}
-                      className="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                     >
                       {CATEGORIES.find((c) => c.key === cat)?.label}
                       <ArrowUpRight className="h-2.5 w-2.5" />

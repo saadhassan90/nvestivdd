@@ -92,7 +92,7 @@ export function MarketContextStrip({ scope, tiles, benchmarkKey }: MarketContext
                     : "border-dashed border-border bg-muted/20",
                 )}
               >
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold truncate">
+                <p className="text-[10px] text-muted-foreground font-semibold truncate">
                   {t.label}
                 </p>
                 <div className="flex items-baseline gap-2 mt-1">

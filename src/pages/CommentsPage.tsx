@@ -146,7 +146,7 @@ export default function CommentsPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           {c.author_type === "ai" ? (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground border border-border rounded px-1.5 py-[1px]">
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-foreground border border-border rounded px-1.5 py-[1px]">
                               <Sparkles className="h-2.5 w-2.5" /> Nvestiv AI
                             </span>
                           ) : (

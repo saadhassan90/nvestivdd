@@ -24,7 +24,7 @@ export function KpiTile({ label, value, subValue, tone = "default", icon, classN
   return (
     <div className={cn("rounded-lg border border-border bg-card px-3.5 py-3", className)}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground truncate">{label}</p>
+        <p className="text-[10px] font-semibold text-muted-foreground truncate">{label}</p>
         {icon && <span className="text-muted-foreground/60 shrink-0">{icon}</span>}
       </div>
       <div className="mt-1.5">

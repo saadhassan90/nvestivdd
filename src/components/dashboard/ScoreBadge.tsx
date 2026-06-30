@@ -36,7 +36,7 @@ export function ScoreBadge({ score, size = "md", showTier = false }: ScoreBadgeP
   return (
     <div className="inline-flex items-center gap-2">
       {badge}
-      <span className={`text-[11px] font-semibold uppercase tracking-wider ${textCls}`}>
+      <span className={`text-[11px] font-semibold ${textCls}`}>
         {SCORE_TIER_LABELS[tier]}
       </span>
     </div>

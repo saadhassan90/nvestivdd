@@ -23,7 +23,7 @@ export function RecommendationPill({ recommendation }: RecommendationPillProps) 
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider leading-none whitespace-nowrap ${style}`}
+      className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-bold leading-none whitespace-nowrap ${style}`}
     >
       {label}
     </span>

@@ -19,7 +19,7 @@ export function AgendaSection() {
     >
       <div className="space-y-3">
         <Card className="p-4 bg-muted/20" commentId="agenda-objective" commentLabel="Objective">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-1">Objective</p>
+          <p className="text-[10px] font-semibold text-nvestiv-teal mb-1">Objective</p>
           <p className="text-sm text-foreground/90 leading-relaxed">{a.objective}</p>
         </Card>
 
@@ -31,7 +31,7 @@ export function AgendaSection() {
 
         {a.standalone_asks.length > 0 && (
           <Card className="p-4" commentId="agenda-standalone-asks" commentLabel="Standalone asks">
-            <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Standalone asks</p>
+            <p className="text-[10px] font-semibold text-nvestiv-teal mb-2">Standalone asks</p>
             <ul className="space-y-2">
               {a.standalone_asks.map((qid) => {
                 const q = questions.get(qid);
@@ -44,7 +44,7 @@ export function AgendaSection() {
                     </div>
                     {q.why && (
                       <p className="text-[11px] text-muted-foreground italic leading-snug">
-                        <span className="not-italic uppercase tracking-wider text-[9px] font-semibold mr-1">Why</span>
+                        <span className="not-italic text-[9px] font-semibold mr-1">Why</span>
                         {q.why}
                       </p>
                     )}
@@ -57,7 +57,7 @@ export function AgendaSection() {
 
         {a.materials_request.length > 0 && (
           <Card className="p-4" commentId="agenda-materials-request" commentLabel="Materials request">
-            <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-2">Materials request</p>
+            <p className="text-[10px] font-semibold text-nvestiv-teal mb-2">Materials request</p>
             <ul className="space-y-2">
               {a.materials_request.map((m, i) => (
                 <Subcard key={i}>
@@ -86,7 +86,7 @@ export function AgendaSection() {
         )}
 
         <Card className="p-4 border-foreground/30 bg-foreground/5" commentId="agenda-decision-rule" commentLabel="Decision rule">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-nvestiv-teal mb-1">Decision rule</p>
+          <p className="text-[10px] font-semibold text-nvestiv-teal mb-1">Decision rule</p>
           <p className="text-sm text-foreground leading-relaxed">{a.decision_rule}</p>
         </Card>
       </div>
@@ -109,16 +109,16 @@ function AgendaRow({ item }: { item: AgendaItem }) {
             </span>
           </div>
           <p className="text-xs text-foreground/85 leading-snug mb-2">
-            <span className="text-[10px] uppercase tracking-wider text-nvestiv-teal font-semibold mr-1">What to validate</span>
+            <span className="text-[10px] text-nvestiv-teal font-semibold mr-1">What to validate</span>
             {item.what_to_validate}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="rounded border border-score-strong/30 bg-score-strong/5 px-2 py-1.5">
-              <p className="text-[10px] uppercase tracking-wider font-bold text-score-strong mb-0.5">Strong answer</p>
+              <p className="text-[10px] font-bold text-score-strong mb-0.5">Strong answer</p>
               <p className="text-[11px] text-foreground/85 leading-snug">{item.listen_for.strong}</p>
             </div>
             <div className="rounded border border-severity-critical/30 bg-severity-critical/5 px-2 py-1.5">
-              <p className="text-[10px] uppercase tracking-wider font-bold text-severity-critical mb-0.5">Weak answer</p>
+              <p className="text-[10px] font-bold text-severity-critical mb-0.5">Weak answer</p>
               <p className="text-[11px] text-foreground/85 leading-snug">{item.listen_for.weak}</p>
             </div>
           </div>

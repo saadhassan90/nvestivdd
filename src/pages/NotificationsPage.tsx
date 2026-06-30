@@ -127,7 +127,7 @@ export default function NotificationsPage() {
             {Object.entries(grouped).map(([dateLabel, dateItems]) => (
               <BlurFade key={dateLabel}>
                 <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">{dateLabel}</h2>
+                  <h2 className="text-xs font-semibold text-muted-foreground mb-3">{dateLabel}</h2>
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
                     {dateItems.map((item, i) => (
                       <button
@@ -141,7 +141,7 @@ export default function NotificationsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-xs font-semibold text-foreground">{item.title}</p>
-                            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
                               item.type === "complete" ? "bg-score-strong/10 text-score-strong"
                               : item.type === "error" ? "bg-severity-critical/10 text-severity-critical"
                               : item.type === "running" ? "bg-primary/10 text-primary"
