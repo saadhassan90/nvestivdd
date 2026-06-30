@@ -342,7 +342,7 @@ export default function Pipeline() {
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_44px] text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
+        <div className="grid grid-cols-[1.4fr_1.3fr_110px_150px_90px_90px_44px] gap-3 text-[11px] uppercase tracking-wider text-muted-foreground px-4 py-2 border-b border-border bg-muted/30">
           <div>LP</div>
           <div>Raise</div>
           <div>Type</div>
@@ -354,7 +354,7 @@ export default function Pipeline() {
         {rows.map((lp) => (
           <div
             key={`${lp.raiseId}-${lp.id}`}
-            className="grid grid-cols-[1.5fr_1.4fr_110px_110px_100px_100px_44px] items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm"
+            className="grid grid-cols-[1.4fr_1.3fr_110px_150px_90px_90px_44px] gap-3 items-center px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 text-sm"
           >
             <div className="flex items-center gap-2 min-w-0">
               <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-[10px] font-semibold text-foreground">
