@@ -192,16 +192,26 @@ export default function Pipeline() {
       }
     }
 
-    const links: { source: number; target: number; value: number }[] = [];
+    const rawLinks: { source: number; target: number; value: number }[] = [];
     for (let i = 0; i < MAIN_FLOW.length - 1; i++) {
-      // value flowing from i → i+1 = number reaching i+1
       const v = reachedCounts[i + 1];
-      if (v > 0) links.push({ source: i, target: i + 1, value: v });
+      if (v > 0) rawLinks.push({ source: i, target: i + 1, value: v });
     }
     if (declinedCount > 0) {
-      links.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
+      rawLinks.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
     }
-    return { nodes, links };
+    // Drop nodes that participate in no links (e.g. 0-LP terminal stages).
+    const used = new Set<number>();
+    rawLinks.forEach((l) => { used.add(l.source); used.add(l.target); });
+    const keepIdx: number[] = nodes.map((_, i) => i).filter((i) => used.has(i));
+    const remap = new Map<number, number>(keepIdx.map((orig, i) => [orig, i]));
+    const finalNodes = keepIdx.map((i) => nodes[i]);
+    const finalLinks = rawLinks.map((l) => ({
+      source: remap.get(l.source)!,
+      target: remap.get(l.target)!,
+      value: l.value,
+    }));
+    return { nodes: finalNodes, links: finalLinks };
   }, [rows]);
 
   return (
@@ -254,15 +264,15 @@ export default function Pipeline() {
             No LP flow yet.
           </div>
         ) : (
-          <div className="w-full" style={{ height: 320 }}>
+          <div className="w-full" style={{ height: 360 }}>
             <ResponsiveContainer width="100%" height="100%">
               <Sankey
                 data={sankey}
-                nodePadding={18}
-                nodeWidth={12}
+                nodePadding={22}
+                nodeWidth={10}
                 linkCurvature={0.5}
                 iterations={64}
-                margin={{ top: 8, right: 140, bottom: 8, left: 8 }}
+                margin={{ top: 12, right: 24, bottom: 56, left: 24 }}
                 node={<SankeyNode />}
                 link={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.08, fill: "hsl(var(--foreground))", fillOpacity: 0.12 }}
               >
