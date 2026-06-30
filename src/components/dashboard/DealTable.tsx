@@ -215,12 +215,12 @@ export function DealTable({ projects, flagCounts, citationsByProject = {}, total
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <SortableHeader label="Score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
-              <SortableHeader label="Fund Name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="score" column="composite_score" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="fund name" column="fund_name" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">gp</th>
               <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">strategy</th>
               <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">stage</th>
-              <SortableHeader label="Submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
+              <SortableHeader label="submitted" column="created_at" sortBy={sortBy} sortDir={sortDir} onSort={onSort} />
               <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">status</th>
               <th className="px-2.5 py-2 text-left text-[11px] font-normal text-muted-foreground">verdict</th>
               <th className="px-2.5 py-2 w-10"></th>
