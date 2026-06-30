@@ -208,7 +208,7 @@ export function CommandSearch() {
 
       {/* Dropdown results panel */}
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl border border-border bg-card shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
+        <div className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-lg border border-border bg-card shadow-xl animate-in fade-in-0 slide-in-from-top-1 duration-150">
           <div className="max-h-[60vh] overflow-y-auto">
             {query.length < 2 && !results && (
               <div className="px-4 py-6 text-center">
@@ -248,7 +248,7 @@ export function CommandSearch() {
                     <div key={category}>
                       <div className="px-4 py-2 flex items-center gap-2">
                         <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                        <span className="text-[10px] font-semibold text-muted-foreground">
+                        <span className="text-[10px] font-medium text-muted-foreground lowercase">
                           {config.label}
                         </span>
                         <span className="text-[10px] text-muted-foreground">({items.length})</span>
@@ -271,16 +271,12 @@ export function CommandSearch() {
                                   <HighlightedText text={result.title} query={query} />
                                 </p>
                                 {result.score != null && (
-                                  <span className="shrink-0 text-[10px] font-bold text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                                  <span className="shrink-0 text-[10px] font-medium text-muted-foreground border border-border rounded px-1.5 py-0.5 tabular-nums">
                                     {result.score}
                                   </span>
                                 )}
                                 {result.severity && (
-                                  <span className={`shrink-0 text-[10px] font-bold rounded px-1.5 py-0.5 ${
-                                    result.severity === "critical"
-                                      ? "bg-destructive/10 text-destructive"
-                                      : "bg-amber-500/10 text-amber-600"
-                                  }`}>
+                                  <span className="shrink-0 text-[10px] font-medium rounded border border-border px-1.5 py-0.5 text-muted-foreground lowercase">
                                     {result.severity}
                                   </span>
                                 )}

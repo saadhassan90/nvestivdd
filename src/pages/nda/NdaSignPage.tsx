@@ -41,15 +41,15 @@ export default function NdaSignPage() {
   if (isSigned) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-card border border-border rounded-xl p-6 text-center">
-          <CheckCircle2 className="h-10 w-10 mx-auto text-emerald-500" />
+        <div className="max-w-md w-full bg-card border border-border rounded-lg p-6 text-center">
+          <CheckCircle2 className="h-10 w-10 mx-auto text-foreground" />
           <h1 className="mt-3 text-base font-semibold text-foreground">NDA executed</h1>
           <p className="mt-1 text-xs text-muted-foreground">
             Signed by {nda.signerName} on {new Date(nda.signedAt!).toLocaleString()}.
           </p>
           <button
             onClick={() => downloadNdaPdf(nda)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-2 text-xs"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-2 text-xs font-medium"
           >
             <Download className="h-3.5 w-3.5" /> Download signed copy
           </button>
@@ -78,10 +78,10 @@ export default function NdaSignPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-6 space-y-4">
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <div className="rounded-lg border border-border bg-card shadow-sm">
           <div className="border-b border-border px-8 py-5 flex items-center justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Mutual NDA</p>
+              <p className="text-[10px] text-muted-foreground lowercase">mutual nda</p>
               <h2 className="text-base font-semibold text-foreground mt-0.5">{tpl.name}</h2>
             </div>
             <span className="text-[10px] text-muted-foreground">v{tpl.version}</span>
