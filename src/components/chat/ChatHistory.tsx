@@ -31,28 +31,28 @@ export function ChatHistory({ onBack }: { onBack: () => void }) {
         <button onClick={onBack} className="p-1 rounded-md hover:bg-muted transition-colors">
           <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
-        <span className="text-xs font-semibold text-foreground">Back to Chat</span>
+        <span className="text-xs font-medium text-foreground">Back to chat</span>
       </div>
 
       {conversations.length === 0 ? (
         <div className="px-3 py-8 text-center text-xs text-muted-foreground">No conversations yet</div>
       ) : (
-        <div className="py-1">
+        <div className="p-1.5">
           {Object.entries(groups).map(([label, items]) =>
             items.length === 0 ? null : (
               <div key={label}>
-                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+                <p className="px-2 pt-2 pb-1 text-[11px] font-medium text-muted-foreground">{label.toLowerCase()}</p>
                 {items.map((conv: any) => (
                   <div
                     key={conv.id}
-                    className="flex items-center justify-between px-3 py-1.5 hover:bg-muted/50 cursor-pointer transition-colors"
+                    className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-muted/60 cursor-pointer transition-colors"
                     onClick={() => { loadConversation(conv.id); onBack(); }}
                     onMouseEnter={() => setHoveredId(conv.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-foreground truncate">{conv.title}</p>
-                      <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(conv.created_at), { addSuffix: true })}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(conv.created_at), { addSuffix: true })}</p>
                     </div>
                     {hoveredId === conv.id && (
                       <button
