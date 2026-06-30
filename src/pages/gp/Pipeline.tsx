@@ -82,6 +82,46 @@ const STAGE_INDEX: Record<StageId, number> = MAIN_FLOW.reduce(
   { declined: -1 } as Record<StageId, number>,
 );
 
+function SankeyNode(props: any) {
+  const { x, y, width, height, index, payload, containerWidth } = props;
+  const isOut = x + width + 6 > containerWidth - 6;
+  const label = payload?.name ?? "";
+  const value = payload?.value ?? 0;
+  return (
+    <Layer key={`node-${index}`}>
+      <Rectangle
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill="hsl(var(--foreground))"
+        fillOpacity={0.85}
+      />
+      <text
+        x={isOut ? x - 8 : x + width + 8}
+        y={y + height / 2}
+        textAnchor={isOut ? "end" : "start"}
+        dominantBaseline="middle"
+        fontSize={11}
+        className="fill-foreground"
+        fontWeight={500}
+      >
+        {label}
+      </text>
+      <text
+        x={isOut ? x - 8 : x + width + 8}
+        y={y + height / 2 + 13}
+        textAnchor={isOut ? "end" : "start"}
+        dominantBaseline="middle"
+        fontSize={10}
+        className="fill-muted-foreground"
+      >
+        {value} LP{value === 1 ? "" : "s"}
+      </text>
+    </Layer>
+  );
+}
+
 export default function Pipeline() {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [raiseFilter, setRaiseFilter] = useState<string>("all");
