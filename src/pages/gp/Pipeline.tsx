@@ -36,15 +36,21 @@ function deriveStage(raiseId: string, lp: L2Lp): StageId {
   if (lp.stage) return lp.stage;
   if (lp.consent === "withdrawn") return "declined";
   const nda = getNdaByLp(raiseId, lp.id);
+  // Spread LPs across the funnel based on activity (questions) and consent.
+  // Higher activity = further along.
   if (nda) {
     if (nda.status === "signed" || nda.status === "countersigned") {
-      if (lp.questions >= 15) return "ic_ready";
-      if (lp.questions >= 6) return "opened";
-      return "dataroom_sent";
+      if (lp.questions >= 25) return "ready_to_invest";
+      if (lp.questions >= 18) return "ic_ready";
+      if (lp.questions >= 10) return "opened";
+      if (lp.questions >= 4) return "dataroom_sent";
+      return "nda_signed";
     }
     if (nda.status === "sent" || nda.status === "viewed") return "nda_sent";
     if (nda.status === "requested") return "requested_dataroom";
   }
+  // Fallback distribution for LPs with no NDA yet — spread between sent/requested.
+  if (lp.consent === "pending") return "requested_dataroom";
   return "sent";
 }
 
@@ -87,6 +93,31 @@ function SankeyNode(props: any) {
   const label = payload?.name ?? "";
   const value = payload?.value ?? 0;
   const isDeclined = payload?.stageId === "declined";
+  const isDrop = payload?.kind === "drop";
+  if (isDrop) {
+    return (
+      <Layer key={`node-${index}`}>
+        <Rectangle
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill="hsl(var(--muted-foreground))"
+          fillOpacity={0.35}
+        />
+        <text
+          x={x + width + 6}
+          y={y + height / 2}
+          dominantBaseline="middle"
+          textAnchor="start"
+          fontSize={10}
+          className="fill-muted-foreground"
+        >
+          {value} stalled
+        </text>
+      </Layer>
+    );
+  }
   return (
     <Layer key={`node-${index}`}>
       <Rectangle
@@ -170,34 +201,53 @@ export default function Pipeline() {
   // Build Sankey data — cumulative funnel: link[i→i+1] = LPs that reached at least stage i+1.
   // "declined" branches off from ic_ready.
   const sankey = useMemo(() => {
-    const nodes = MAIN_FLOW.map((id) => ({
+    type Node = { name: string; stageId?: StageId; kind?: "drop" };
+    const nodes: Node[] = MAIN_FLOW.map((id) => ({
       name: PIPELINE_STAGE_LABEL[id],
       stageId: id,
     }));
-    const declinedIdx = nodes.length;
-    nodes.push({ name: PIPELINE_STAGE_LABEL.declined, stageId: "declined" as StageId });
 
-    // furthest main-stage reached per LP
-    const reachedCounts = new Array(MAIN_FLOW.length).fill(0);
+    // currentlyAt[i] = LPs whose furthest stage == MAIN_FLOW[i]
+    const currentlyAt = new Array(MAIN_FLOW.length).fill(0);
     let declinedCount = 0;
     for (const r of rows) {
       if (r.stage === "declined") {
         declinedCount += 1;
-        // assume they reached at least ic_ready before declining
-        const upTo = STAGE_INDEX.ic_ready;
-        for (let i = 0; i <= upTo; i++) reachedCounts[i] += 1;
       } else {
         const idx = STAGE_INDEX[r.stage];
-        if (idx >= 0) for (let i = 0; i <= idx; i++) reachedCounts[i] += 1;
+        if (idx >= 0) currentlyAt[idx] += 1;
       }
+    }
+    // reached[i] = LPs whose furthest stage index >= i (declined counted as having reached ic_ready)
+    const reached = new Array(MAIN_FLOW.length).fill(0);
+    for (let i = 0; i < MAIN_FLOW.length; i++) {
+      let s = 0;
+      for (let j = i; j < MAIN_FLOW.length; j++) s += currentlyAt[j];
+      if (i <= STAGE_INDEX.ic_ready) s += declinedCount;
+      reached[i] = s;
     }
 
     const rawLinks: { source: number; target: number; value: number }[] = [];
+    // Main flow links: each i → i+1 carries the LPs that progressed past i.
     for (let i = 0; i < MAIN_FLOW.length - 1; i++) {
-      const v = reachedCounts[i + 1];
+      const v = reached[i + 1];
       if (v > 0) rawLinks.push({ source: i, target: i + 1, value: v });
     }
+    // Per-stage drop-off branches (LPs currently parked at this stage, not progressed).
+    for (let i = 0; i < MAIN_FLOW.length - 1; i++) {
+      // Don't double-count ic_ready stallers — they go to declined branch instead.
+      if (i === STAGE_INDEX.ic_ready && declinedCount > 0) continue;
+      const stalled = currentlyAt[i];
+      if (stalled > 0) {
+        const dropIdx = nodes.length;
+        nodes.push({ name: "", kind: "drop" });
+        rawLinks.push({ source: i, target: dropIdx, value: stalled });
+      }
+    }
+    // Declined branch from ic_ready.
     if (declinedCount > 0) {
+      const declinedIdx = nodes.length;
+      nodes.push({ name: PIPELINE_STAGE_LABEL.declined, stageId: "declined" as StageId });
       rawLinks.push({ source: STAGE_INDEX.ic_ready, target: declinedIdx, value: declinedCount });
     }
     // Drop nodes that participate in no links (e.g. 0-LP terminal stages).
