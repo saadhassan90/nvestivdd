@@ -89,8 +89,8 @@ export default function CommentsPage() {
           </RouterLink>
         </div>
         <div>
-          <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <MessagesSquare className="h-4 w-4" /> Comments
+          <h1 className="text-lg font-semibold text-foreground flex items-center gap-2 lowercase">
+            <MessagesSquare className="h-4 w-4" /> comments
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">{project?.fund_name || "Deal"} · {filtered.length} of {comments.length}</p>
         </div>

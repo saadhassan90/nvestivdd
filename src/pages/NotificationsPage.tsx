@@ -114,7 +114,7 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-        <h1 className="text-2xl font-bold text-foreground mb-4">Activity Log</h1>
+        <h1 className="text-2xl font-semibold text-foreground mb-4">activity log</h1>
         {showLoader ? (
           <NvestivLoader fullscreen size={96} />
         ) : items.length === 0 ? (
@@ -127,8 +127,8 @@ export default function NotificationsPage() {
             {Object.entries(grouped).map(([dateLabel, dateItems]) => (
               <BlurFade key={dateLabel}>
                 <div>
-                  <h2 className="text-xs font-semibold text-muted-foreground mb-3">{dateLabel}</h2>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <h2 className="text-xs font-medium text-muted-foreground mb-3 lowercase">{dateLabel}</h2>
+                  <div className="rounded-lg border border-border bg-card overflow-hidden">
                     {dateItems.map((item, i) => (
                       <button
                         key={item.id}
@@ -140,13 +140,8 @@ export default function NotificationsPage() {
                         <div className="mt-0.5">{getIcon(item.type)}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-xs font-semibold text-foreground">{item.title}</p>
-                            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                              item.type === "complete" ? "bg-score-strong/10 text-score-strong"
-                              : item.type === "error" ? "bg-severity-critical/10 text-severity-critical"
-                              : item.type === "running" ? "bg-primary/10 text-primary"
-                              : "bg-muted text-muted-foreground"
-                            }`}>
+                            <p className="text-xs font-medium text-foreground">{item.title}</p>
+                            <span className="inline-flex items-center rounded border border-border bg-background px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground lowercase">
                               {item.type}
                             </span>
                           </div>

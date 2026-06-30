@@ -137,10 +137,10 @@ export function NotificationsDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[380px] rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-[380px] rounded-lg border border-border bg-card shadow-xl z-50 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+            <h3 className="text-sm font-medium text-foreground lowercase">notifications</h3>
             <button onClick={() => setOpen(false)} className="p-1 rounded-md hover:bg-muted transition-colors">
               <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -171,7 +171,7 @@ export function NotificationsDropdown() {
                     <div className="mt-0.5">{getIcon(item.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-semibold text-foreground truncate">{item.title}</p>
+                        <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
                         <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(item.timestamp)}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate mt-0.5">{item.fundName}</p>
@@ -193,7 +193,7 @@ export function NotificationsDropdown() {
                   setOpen(false);
                   navigate("/notifications");
                 }}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-primary hover:text-foreground transition-colors"
+                className="flex w-full items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 View all activity
                 <ArrowRight className="h-3.5 w-3.5" />
