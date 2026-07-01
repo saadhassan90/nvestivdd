@@ -208,7 +208,7 @@ export function GpShell() {
               </aside>
               <div className="relative flex-1 min-w-0 bg-background">
                 <div className="pointer-events-none absolute inset-0 z-0">
-                  <SolarFlareBackground opacity={0.55} />
+                  <SolarFlareBackground />
                 </div>
                 <div className="relative z-10 h-full">
                   <ChatSidebar hideHeader transparent />
