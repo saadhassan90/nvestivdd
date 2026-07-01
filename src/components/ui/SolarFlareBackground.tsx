@@ -3,186 +3,109 @@
 import { useEffect, useRef } from 'react';
 
 type Props = {
-  speed?: number;
-  translateX?: number;
-  translateY?: number;
-  intensity?: number;
-  spread?: number;
-  pulseRate?: number;
-  shade?: number; // greyscale brightness 0..1
-  opacity?: number;
+  /** Radius of the mouse glow in px */
+  glowRadius?: number;
+  /** Glow color, defaults to a soft neutral */
+  glowColor?: string;
+  /** Dot color */
+  dotColor?: string;
+  /** Background color */
+  bgColor?: string;
+  /** Dot spacing in px */
+  dotSpacing?: number;
+  /** Dot size in px */
+  dotSize?: number;
   className?: string;
 };
 
+/**
+ * Stitch-style background: white canvas with a subtle grey dot grid,
+ * plus a soft glow that follows the mouse pointer.
+ */
 const SolarFlareBackground = ({
-  speed = 0.15,
-  translateX = 0.0,
-  translateY = -0.05,
-  intensity = 1.0,
-  spread = 14.0,
-  pulseRate = 0.6,
-  shade = 1.0,
-  opacity = 1.0,
+  glowRadius = 380,
+  glowColor = 'rgba(120, 120, 120, 0.18)',
+  dotColor = 'rgba(0, 0, 0, 0.14)',
+  bgColor = '#ffffff',
+  dotSpacing = 22,
+  dotSize = 1.2,
   className,
 }: Props) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
-    if (!gl) return;
+    const wrap = wrapRef.current;
+    const glow = glowRef.current;
+    if (!wrap || !glow) return;
 
-    const vsSource = `#version 300 es
-      in vec2 a_position;
-      void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
-    `;
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let cx = -9999;
+    let cy = -9999;
 
-    // Greyscale eclipse: dark disc with a luminous crescent rim and grain.
-    const fsSource = `#version 300 es
-      precision highp float;
-      uniform vec2 r;
-      uniform float t;
-      uniform vec2 u_translate;
-      uniform float u_intensity;
-      uniform float u_spread;
-      uniform float u_pulseRate;
-      uniform float u_shade;
-      out vec4 o;
-
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    const onMove = (e: MouseEvent) => {
+      const rect = wrap.getBoundingClientRect();
+      tx = e.clientX - rect.left;
+      ty = e.clientY - rect.top;
+      if (cx === -9999) {
+        cx = tx;
+        cy = ty;
       }
-
-      void main() {
-        vec2 p = (gl_FragCoord.xy * 2.0 - r) / r.y;
-        vec2 c = u_translate;
-        float d = length(p - c);
-
-        // Disc radius (scaled by intensity for sizing control)
-        float R = 0.85 * u_intensity;
-
-        // Asymmetric corona brightness — brightest on the right limb
-        float ang = atan(p.y - c.y, p.x - c.x);
-        float pulse = 0.85 + 0.15 * sin(t * u_pulseRate);
-        float asym = pow(max(0.0, 0.5 + 0.5 * cos(ang + 0.2 + 0.05 * sin(t * 0.3))), 1.6);
-
-        // Thin bright rim hugging the disc edge
-        float rimWidth = 0.012;
-        float rim = exp(-pow((d - R) / rimWidth, 2.0));
-
-        // Outer corona falloff (only outside the disc)
-        float outside = step(R, d);
-        float corona = exp(-(d - R) * 4.5) * outside;
-
-        // Subtle inner edge bleed
-        float inner = exp(-pow((R - d) / 0.04, 2.0)) * (1.0 - outside) * 0.25;
-
-        // Film grain
-        float grain = (hash(gl_FragCoord.xy + floor(t * 30.0)) - 0.5) * 0.06;
-
-        float g = (rim * 1.4 + corona * 0.9 + inner) * asym * pulse;
-        g += grain * (0.4 + 0.6 * corona); // grain stronger in lit corona
-        g *= u_shade;
-        g = clamp(g, 0.0, 1.0);
-
-        o = vec4(vec3(g), 1.0);
-      }
-    `;
-
-    const createShader = (type: number, source: string) => {
-      const s = gl.createShader(type);
-      if (!s) return null;
-      gl.shaderSource(s, source);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        gl.deleteShader(s);
-        return null;
-      }
-      return s;
+      if (!raf) raf = requestAnimationFrame(tick);
     };
 
-    const program = gl.createProgram();
-    if (!program) return;
-    const vs = createShader(gl.VERTEX_SHADER, vsSource);
-    const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-    if (!vs || !fs) return;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
-
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
-      gl.STATIC_DRAW,
-    );
-    const positionLocation = gl.getAttribLocation(program, 'a_position');
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    const rLoc = gl.getUniformLocation(program, 'r');
-    const tLoc = gl.getUniformLocation(program, 't');
-    const trLoc = gl.getUniformLocation(program, 'u_translate');
-    const inLoc = gl.getUniformLocation(program, 'u_intensity');
-    const spLoc = gl.getUniformLocation(program, 'u_spread');
-    const puLoc = gl.getUniformLocation(program, 'u_pulseRate');
-    const shLoc = gl.getUniformLocation(program, 'u_shade');
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      gl.viewport(0, 0, canvas.width, canvas.height);
+    const tick = () => {
+      cx += (tx - cx) * 0.18;
+      cy += (ty - cy) * 0.18;
+      glow.style.transform = `translate3d(${cx - glowRadius}px, ${cy - glowRadius}px, 0)`;
+      if (Math.abs(tx - cx) > 0.5 || Math.abs(ty - cy) > 0.5) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+      }
     };
-    window.addEventListener('resize', resize);
-    resize();
 
-    const start = performance.now();
-    const render = () => {
-      gl.useProgram(program);
-      gl.uniform2f(rLoc, canvas.width, canvas.height);
-      gl.uniform1f(tLoc, ((performance.now() - start) / 1000) * speed);
-      gl.uniform2f(trLoc, translateX, translateY);
-      gl.uniform1f(inLoc, intensity);
-      gl.uniform1f(spLoc, spread);
-      gl.uniform1f(puLoc, pulseRate);
-      gl.uniform1f(shLoc, shade);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      animationRef.current = requestAnimationFrame(render);
-    };
-    render();
-
+    window.addEventListener('mousemove', onMove);
     return () => {
-      window.removeEventListener('resize', resize);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      gl.deleteProgram(program);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-      gl.deleteBuffer(positionBuffer);
+      window.removeEventListener('mousemove', onMove);
+      if (raf) cancelAnimationFrame(raf);
     };
-  }, [speed, translateX, translateY, intensity, spread, pulseRate, shade]);
+  }, [glowRadius]);
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
+      ref={wrapRef}
       aria-hidden
       className={className}
       style={{
         position: 'absolute',
         inset: 0,
-        width: '100%',
-        height: '100%',
-        opacity,
+        overflow: 'hidden',
         pointerEvents: 'none',
-        filter: 'grayscale(1)',
+        background: bgColor,
+        backgroundImage: `radial-gradient(${dotColor} ${dotSize}px, transparent ${dotSize}px)`,
+        backgroundSize: `${dotSpacing}px ${dotSpacing}px`,
+        backgroundPosition: '0 0',
       }}
-    />
+    >
+      <div
+        ref={glowRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: glowRadius * 2,
+          height: glowRadius * 2,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${glowColor} 0%, transparent 65%)`,
+          transform: `translate3d(-9999px, -9999px, 0)`,
+          filter: 'blur(20px)',
+          willChange: 'transform',
+        }}
+      />
+    </div>
   );
 };
 
